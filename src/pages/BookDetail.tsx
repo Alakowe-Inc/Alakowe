@@ -28,7 +28,7 @@ function BookDetail() {
 
   return (
     <div className="min-h-screen bg-third">
-      <div className="max-w-8xl mx-auto px-4 md:px-12 py-8">
+      <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-8">
 
         {/* Back link */}
         <Link

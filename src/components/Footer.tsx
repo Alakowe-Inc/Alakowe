@@ -34,7 +34,7 @@ const socialLinks = [
 function Footer() {
   return (
     <footer className="bg-main text-white">
-      <div className="max-w-8xl mx-auto px-4 md:px-12 pt-16 pb-10">
+      <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 pt-16 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
 
           {/* Brand */}

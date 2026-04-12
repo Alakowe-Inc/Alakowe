@@ -39,7 +39,7 @@ function Contact() {
 
       {/* Header */}
       <div className="bg-white border-b border-third py-12">
-        <div className="max-w-8xl mx-auto px-4 md:px-12">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
           <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
             Get in touch
           </p>
@@ -47,7 +47,7 @@ function Contact() {
         </div>
       </div>
 
-      <div className="max-w-8xl mx-auto px-4 md:px-12 py-12">
+      <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
           {/* Form */}

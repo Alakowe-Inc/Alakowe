@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, ShoppingBag, MapPin, PackageCheck } from 'lucide-react'
-import { books, blogPosts, bookQuotes } from '../data/mockData'
-import BookCard from '../components/BookCard'
+import { ArrowRight } from 'lucide-react'
+// import { books } from '../data/mockData'
+// import BookCard from '../components/BookCard'
 import heroImage from '../assets/media/images/Tranquil Study with Cactus and Pastel Books.png'
 
-const featuredBooks = books.slice(0, 8)
+// const featuredBooks = books.slice(0, 8)
 
 function Home() {
   return (
@@ -26,11 +26,11 @@ function Home() {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-main/60 to-transparent" />
 
         {/* Content wrapper */}
-        <div className="relative flex-1 flex flex-col max-w-8xl mx-auto px-4 md:px-12 w-full">
+        <div className="relative flex-1 flex flex-col max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full">
 
           {/* Main content — vertically centred */}
-          <div className="flex-1 flex items-center py-28">
-            <div className="max-w-2xl">
+          <div className="flex-1 flex items-end py-18 lg:py-28">
+            <div className="max-w-xl">
 
               <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-6">
                 Nigeria's Used Book Marketplace
@@ -55,7 +55,7 @@ function Home() {
           </div>
 
           {/* Bottom-right info cards */}
-          <div className="flex justify-end gap-3 pb-8">
+          <div className="hidden lg:flex justify-end gap-3 pb-8">
             {[
               { title: 'Fiction & Lit', label: 'Primary Focus', sub: '800+ titles' },
               { title: 'Nationwide', label: 'Market Coverage', sub: '12 cities' },

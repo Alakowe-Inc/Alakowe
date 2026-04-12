@@ -17,7 +17,7 @@ function Blog() {
 
       {/* Header */}
       <div className="bg-main text-white py-16">
-        <div className="max-w-8xl mx-auto px-4 md:px-12 text-center">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 text-center">
           <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-3">
             Our Blog
           </p>
@@ -30,7 +30,7 @@ function Blog() {
         </div>
       </div>
 
-      <div className="max-w-8xl mx-auto px-4 md:px-12 py-12">
+      <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12">
 
         {/* Category filter */}
         <div className="flex gap-2 flex-wrap mb-10">

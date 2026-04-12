@@ -49,7 +49,7 @@ function BrowseBooks() {
 
       {/* Page header */}
       <div className="bg-white border-b border-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-12 py-8">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-8">
           <h1 className="font-heading font-bold text-main text-3xl mb-5">Browse Books</h1>
           <div className="flex items-center bg-third rounded-md overflow-hidden max-w-xl">
             <Search size={15} className="ml-4 text-main/40 shrink-0" />
@@ -73,7 +73,7 @@ function BrowseBooks() {
         </div>
       </div>
 
-      <div className="max-w-8xl mx-auto px-4 md:px-12 py-8">
+      <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-8">
         <div className="flex gap-8">
 
           {/* Desktop sidebar filters */}
