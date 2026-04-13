@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Search, User, Heart, ShoppingBag, Menu, X, Plus } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import logo from '../assets/media/logos/logo.jpg'
+import { useCart } from '../context/CartContext'
 
 const navLinks = [
   { label: 'How it works', to: '/how-it-works' },
@@ -11,13 +12,38 @@ const navLinks = [
 
 const utilityLinks = [
   { label: 'Login', to: '/login' },
-  { label: 'Your Wishlist', to: '/wishlist' },
   { label: 'Customer Service', to: '/customer-service' },
   { label: 'Shipping & Returns', to: '/shipping' },
 ]
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [desktopSearchOpen, setDesktopSearchOpen] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const desktopSearchInputRef = useRef<HTMLInputElement>(null)
+  const focusOnOpenRef = useRef(false)
+  const { count } = useCart()
+
+  useEffect(() => {
+    if (menuOpen && focusOnOpenRef.current) {
+      searchInputRef.current?.focus()
+      focusOnOpenRef.current = false
+    }
+  }, [menuOpen])
+
+  useEffect(() => {
+    if (desktopSearchOpen) {
+      desktopSearchInputRef.current?.focus()
+    }
+  }, [desktopSearchOpen])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDesktopSearchOpen(false)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   return (
     <>
@@ -55,23 +81,58 @@ function Navbar() {
 
           {/* Right — icons */}
           <div className="flex items-center gap-5 ml-auto">
-            <button aria-label="Search" className="text-main hover:text-secondary transition-colors">
+            <button
+              aria-label="Search"
+              className="lg:hidden text-main hover:text-secondary transition-colors"
+              onClick={() => { focusOnOpenRef.current = true; setMenuOpen(true) }}
+            >
+              <Search size={20} />
+            </button>
+            <button
+              aria-label="Search"
+              className="hidden lg:block text-main hover:text-secondary transition-colors"
+              onClick={() => setDesktopSearchOpen(v => !v)}
+            >
               <Search size={20} />
             </button>
             {/* Desktop only */}
-            <button aria-label="Account" className="hidden lg:block text-main hover:text-secondary transition-colors">
+            <Link to="/login" aria-label="Account" className="hidden lg:block text-main hover:text-secondary transition-colors">
               <User size={20} />
-            </button>
-            <button aria-label="Wishlist" className="hidden lg:block text-main hover:text-secondary transition-colors">
-              <Heart size={20} />
-            </button>
-            {/* Cart — mobile shows count, desktop just icon */}
-            <button aria-label="Cart" className="flex items-center gap-1 text-main hover:text-secondary transition-colors">
+            </Link>
+            {/* Cart */}
+            <Link to="/cart" aria-label="Cart" className="relative flex items-center gap-1 text-main hover:text-secondary transition-colors">
               <ShoppingBag size={20} />
-            </button>
+              {count > 0 && (
+                <span className="absolute -top-2 -right-2 bg-secondary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {count > 99 ? '99+' : count}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
       </header>
+
+      {/* Desktop — search dropdown */}
+      {desktopSearchOpen && (
+        <div className="hidden lg:block sticky top-16 z-40 border-b border-third bg-fourth">
+          <div className="max-w-8xl mx-auto px-12 h-14 flex items-center gap-3">
+            <Search size={16} className="text-main/50 shrink-0" />
+            <input
+              ref={desktopSearchInputRef}
+              type="text"
+              placeholder="Search for books, authors, genres…"
+              className="flex-1 text-sm text-main placeholder-main/40 outline-none bg-transparent font-body"
+            />
+            <button
+              aria-label="Close search"
+              onClick={() => setDesktopSearchOpen(false)}
+              className="text-main/50 hover:text-main transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Mobile — full screen overlay */}
       {menuOpen && (
@@ -90,6 +151,7 @@ function Navbar() {
             <div className="flex items-center gap-2 px-4 flex-1">
               <Search size={16} className="text-main/50 shrink-0" />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search"
                 className="flex-1 text-sm text-main placeholder-main/40 outline-none bg-transparent font-body"

@@ -9,7 +9,7 @@ interface BookCardProps {
 function BookCard({ book }: BookCardProps) {
   return (
     <Link to={`/books/${book.id}`} className="group block">
-      <div className="bg-white rounded-2xl overflow-hidden border border-third hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+      <div className="bg-white rounded-lg overflow-hidden border border-third hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
         {/* Cover */}
         <div
           className="relative h-52 flex items-center justify-center"
@@ -17,11 +17,10 @@ function BookCard({ book }: BookCardProps) {
         >
           {book.badge && (
             <span
-              className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${
-                book.badge === 'Best Value'
-                  ? 'bg-secondary/30 text-main'
-                  : 'bg-main text-white'
-              }`}
+              className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${book.badge === 'Best Value'
+                ? 'bg-secondary/30 text-main'
+                : 'bg-main text-white'
+                }`}
             >
               {book.badge}
             </span>
@@ -35,9 +34,9 @@ function BookCard({ book }: BookCardProps) {
         </div>
 
         {/* Info */}
-        <div className="p-4">
+        <div className="p-2 md:px-4">
           <p className="text-xs text-main/50 font-medium mb-1 truncate">{book.author}</p>
-          <h3 className="font-heading font-semibold text-main text-sm leading-snug mb-3 group-hover:text-secondary transition-colors line-clamp-2 min-h-[2.5rem]">
+          <h3 className="font-heading font-semibold text-main text-[.96rem] leading-snug mb-3 group-hover:text-secondary transition-colors line-clamp-2 min-h-[2.5rem]">
             {book.title}
           </h3>
           <div className="flex items-center justify-between">

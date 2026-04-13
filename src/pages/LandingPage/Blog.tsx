@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { blogPosts } from '../data/mockData'
+import { blogPosts } from '../../data/mockData'
 
 const categories = ['All', 'Reading Culture', 'Nigerian Authors', 'Why Used Books']
 
@@ -16,15 +16,15 @@ function Blog() {
     <div className="min-h-screen bg-third">
 
       {/* Header */}
-      <div className="bg-main text-white py-16">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 text-center">
+      <div className="bg-main text-white pt-14 pb-16">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 text-start">
           <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-3">
             Our Blog
           </p>
           <h1 className="font-heading font-bold text-4xl md:text-5xl mb-4">
             Stories &amp; Insights
           </h1>
-          <p className="text-white/55 max-w-lg mx-auto text-sm leading-relaxed">
+          <p className="text-white/55 max-w-lg text-sm leading-relaxed">
             Thoughts on reading, Nigerian literature, and why good books deserve a second life.
           </p>
         </div>
@@ -38,9 +38,9 @@ function Blog() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`text-xs font-semibold px-4 py-2 rounded-full border transition-colors ${activeCategory === cat
-                ? 'bg-main text-white border-main'
-                : 'bg-white text-main border-third hover:border-main'
+              className={`shrink-0 text-xs font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${activeCategory === cat
+                ? 'bg-main text-white'
+                : 'bg-secondary/15 text-main/55 hover:bg-secondary/15 hover:text-main'
                 }`}
             >
               {cat}
@@ -54,10 +54,10 @@ function Blog() {
             <Link
               key={post.id}
               to={`/blog/${post.id}`}
-              className="group bg-white rounded-2xl overflow-hidden border border-third hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+              className="group bg-white rounded-lg overflow-hidden border border-third hover:border-secondary/40 hover:shadow-md transition-all duration-300"
             >
-              <div className="h-48 bg-secondary/15 flex items-center justify-center">
-                <span className="font-heading font-bold text-6xl text-secondary/40 select-none">
+              <div className="h-48 bg-secondary/10 border-b border-third flex items-center justify-center">
+                <span className="font-heading font-bold text-6xl text-secondary/40 group-hover:text-secondary/60 transition-colors select-none">
                   ✦
                 </span>
               </div>

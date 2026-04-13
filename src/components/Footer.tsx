@@ -34,106 +34,112 @@ const socialLinks = [
 function Footer() {
   return (
     <footer className="bg-main text-white">
-      <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 pt-16 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
 
-          {/* Brand */}
-          <div>
-            <img
-              src={logo}
-              alt="Alakowé"
-              className="h-8 w-auto object-contain mb-4 brightness-0 invert"
-            />
-            <p className="text-sm text-white/50 leading-relaxed mb-6">
-              Read it. Love it. Pass it on.
-            </p>
-            <div className="flex items-center gap-4">
-              {socialLinks.map(({ Icon, label }) => (
-                <a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  className="text-white/40 hover:text-secondary transition-colors"
+      {/* ── Main columns ────────────────────────────────────────── */}
+      <div className="border-t border-white/10">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 pt-14 pb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+
+            {/* Brand */}
+            <div>
+              <img
+                src={logo}
+                alt="Alakowé"
+                className="h-8 w-auto object-contain mb-4 mix-blend-multiply"
+              // style={{ filter: 'invert(2) hue-rotate(180deg)' }}
+              />
+              <p className="text-sm text-white/50 leading-relaxed mb-6">
+                Read it. Love it. Pass it on.
+              </p>
+              <div className="flex items-center gap-4">
+                {socialLinks.map(({ Icon, label }) => (
+                  <a
+                    key={label}
+                    href="#"
+                    aria-label={label}
+                    className="text-white/40 hover:text-secondary transition-colors"
+                  >
+                    <Icon />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Explore */}
+            <div>
+              <h4 className="font-heading font-semibold text-xs tracking-[0.2em] uppercase mb-5 text-white/60">
+                Explore
+              </h4>
+              <ul className="space-y-3">
+                {[
+                  { label: 'Browse Books', to: '/browse' },
+                  { label: 'Sell a Book', to: '/sell' },
+                  { label: 'How it Works', to: '/how-it-works' },
+                  { label: 'Blog', to: '/blog' },
+                ].map(({ label, to }) => (
+                  <li key={to}>
+                    <Link to={to} className="text-sm text-white/50 hover:text-secondary transition-colors">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Help */}
+            <div>
+              <h4 className="font-heading font-semibold text-xs tracking-[0.2em] uppercase mb-5 text-white/60">
+                Help
+              </h4>
+              <ul className="space-y-3">
+                {[
+                  { label: 'FAQ', to: '/faq' },
+                  { label: 'Contact Us', to: '/contact' },
+                  { label: 'Terms & Conditions', to: '/terms' },
+                  { label: 'Privacy Policy', to: '/privacy' },
+                ].map(({ label, to }) => (
+                  <li key={to}>
+                    <Link to={to} className="text-sm text-white/50 hover:text-secondary transition-colors">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Newsletter — frosted glass, matches quotes section cards */}
+            <div className="p-6 rounded-lg bg-white/10 backdrop-blur-md border border-white/15">
+              <h4 className="font-heading font-semibold text-xs tracking-[0.2em] uppercase mb-4 text-white/60">
+                Stay in the loop
+              </h4>
+              <p className="text-sm text-white/50 mb-5 leading-relaxed">
+                New arrivals, reading tips, and updates — straight to your inbox.
+              </p>
+              <form onSubmit={e => e.preventDefault()} className="flex flex-col gap-3">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  className="bg-white/8 border border-white/15 rounded-md px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-secondary transition-colors"
+                />
+                <button
+                  type="submit"
+                  className="bg-secondary text-main font-semibold text-sm rounded-md px-4 py-2.5 hover:bg-secondary/80 transition-colors"
                 >
-                  <Icon />
-                </a>
-              ))}
+                  Subscribe
+                </button>
+              </form>
             </div>
           </div>
 
-          {/* Explore */}
-          <div>
-            <h4 className="font-heading font-semibold text-xs tracking-widest uppercase mb-5 text-white/60">
-              Explore
-            </h4>
-            <ul className="space-y-3">
-              {[
-                { label: 'Browse Books', to: '/browse' },
-                { label: 'Sell a Book', to: '/sell' },
-                { label: 'How it Works', to: '/how-it-works' },
-                { label: 'Blog', to: '/blog' },
-              ].map(({ label, to }) => (
-                <li key={to}>
-                  <Link to={to} className="text-sm text-white/50 hover:text-secondary transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Help */}
-          <div>
-            <h4 className="font-heading font-semibold text-xs tracking-widest uppercase mb-5 text-white/60">
-              Help
-            </h4>
-            <ul className="space-y-3">
-              {[
-                { label: 'FAQ', to: '/faq' },
-                { label: 'Contact Us', to: '/contact' },
-                { label: 'Terms & Conditions', to: '/terms' },
-                { label: 'Privacy Policy', to: '/privacy' },
-              ].map(({ label, to }) => (
-                <li key={to}>
-                  <Link to={to} className="text-sm text-white/50 hover:text-secondary transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h4 className="font-heading font-semibold text-xs tracking-widest uppercase mb-5 text-white/60">
-              Stay in the loop
-            </h4>
-            <p className="text-sm text-white/50 mb-4 leading-relaxed">
-              New arrivals, reading tips, and updates — straight to your inbox.
+          <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-white/30">
+              © {new Date().getFullYear()} Alákọ̀wé. All rights reserved.
             </p>
-            <form onSubmit={e => e.preventDefault()} className="flex flex-col gap-3">
-              <input
-                type="email"
-                placeholder="your@email.com"
-                className="bg-white/8 border border-white/15 rounded-lg px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-secondary transition-colors"
-              />
-              <button
-                type="submit"
-                className="bg-secondary text-main font-semibold text-sm rounded-lg px-4 py-2.5 hover:bg-secondary/80 transition-colors"
-              >
-                Subscribe
-              </button>
-            </form>
+            <p className="text-xs text-white/30">Made with love for Nigerian readers.</p>
           </div>
-        </div>
-
-        <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-white/30">
-            © {new Date().getFullYear()} Alákọ̀wé. All rights reserved.
-          </p>
-          <p className="text-xs text-white/30">Made with love for Nigerian readers.</p>
         </div>
       </div>
+
     </footer>
   )
 }

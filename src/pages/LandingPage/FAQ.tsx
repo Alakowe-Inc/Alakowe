@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const faqs = [
@@ -93,78 +93,97 @@ function FAQ() {
   }
 
   return (
-    <div className="min-h-screen bg-third">
+    <div>
 
-      {/* Header */}
-      <div className="bg-white border-b border-third py-12">
-        <div className="max-w-3xl mx-auto px-4 md:px-6 xl:px-0">
-          <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
+      {/* ── Hero ───────────────────────────────────────────────── */}
+      <section className="bg-main py-24">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+          <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
             Help Centre
           </p>
-          <h1 className="font-heading font-bold text-main text-4xl mb-4">
+          <h1 className="font-heading font-bold text-white text-4xl md:text-5xl max-w-md leading-tight mb-4">
             Frequently Asked Questions
           </h1>
-          <p className="text-main/55 text-sm">
+          <p className="text-white/55 text-sm">
             Can't find what you're looking for?{' '}
             <Link to="/contact" className="text-secondary hover:underline font-semibold">
               Contact us
             </Link>
           </p>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-3xl mx-auto px-4 md:px-6 xl:px-0 py-12">
+      {/* ── Content ────────────────────────────────────────────── */}
+      <section className="bg-third py-28">
+        <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-12">
 
-        {/* Section jump links */}
-        <div className="flex flex-wrap gap-2 mb-12">
-          {faqs.map(({ section, id }) => (
-            <a
-              key={id}
-              href={`#${id}`}
-              className="text-xs font-semibold px-4 py-2 rounded-full bg-white border border-third text-main hover:border-main transition-colors"
-            >
-              {section}
-            </a>
+          {/* Section jump links */}
+          <div className="flex flex-wrap gap-2 mb-14">
+            {faqs.map(({ section, id }) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                className="text-xs font-semibold px-4 py-2 rounded-full bg-white border border-third text-main hover:border-secondary/40 hover:shadow-sm transition-all duration-200"
+              >
+                {section}
+              </a>
+            ))}
+          </div>
+
+          {/* Sections */}
+          {faqs.map(({ section, id, questions }) => (
+            <div key={id} id={id} className="mb-14 scroll-mt-24">
+              <div className="mb-6">
+                <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-2">
+                  {section}
+                </p>
+                <h2 className="font-heading font-bold text-main text-2xl">{section} Questions</h2>
+              </div>
+              <div className="flex flex-col gap-3">
+                {questions.map(({ q, a }) => {
+                  const key = `${id}-${q}`
+                  const isOpen = open === key
+                  return (
+                    <div
+                      key={q}
+                      className="bg-white rounded-lg border border-third overflow-hidden hover:border-secondary/40 hover:shadow-md transition-all duration-300"
+                    >
+                      <button
+                        onClick={() => toggle(key)}
+                        className="w-full flex items-center justify-between px-6 py-4 text-left gap-4"
+                      >
+                        <span className="font-semibold text-main text-sm leading-snug">{q}</span>
+                        <ChevronDown
+                          size={17}
+                          className={`text-main/45 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                        />
+                      </button>
+                      {isOpen && (
+                        <div className="px-6 pb-5 border-t border-third pt-4">
+                          <p className="text-sm text-main/65 leading-relaxed">{a}</p>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           ))}
         </div>
+      </section>
 
-        {/* Sections */}
-        {faqs.map(({ section, id, questions }) => (
-          <div key={id} id={id} className="mb-10 scroll-mt-24">
-            <h2 className="font-heading font-bold text-main text-xl mb-4">{section}</h2>
-            <div className="flex flex-col gap-3">
-              {questions.map(({ q, a }) => {
-                const key = `${id}-${q}`
-                const isOpen = open === key
-                return (
-                  <div key={q} className="bg-white rounded-2xl border border-third overflow-hidden">
-                    <button
-                      onClick={() => toggle(key)}
-                      className="w-full flex items-center justify-between px-6 py-4 text-left gap-4"
-                    >
-                      <span className="font-semibold text-main text-sm leading-snug">{q}</span>
-                      <ChevronDown
-                        size={17}
-                        className={`text-main/45 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-                          }`}
-                      />
-                    </button>
-                    {isOpen && (
-                      <div className="px-6 pb-5 border-t border-third pt-4">
-                        <p className="text-sm text-main/65 leading-relaxed">{a}</p>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
+      {/* ── CTA ─────────────────────────────────────────────────── */}
+      <section className="bg-main py-24">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center md:flex-row md:items-end justify-between gap-8">
+          <div className="text-center md:text-start">
+            <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
+              More Resources
+            </p>
+            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl max-w-md leading-tight">
+              Still have questions?
+            </h2>
           </div>
-        ))}
-
-        {/* Policy links */}
-        <div className="bg-main rounded-2xl p-8 mt-4">
-          <h3 className="font-heading font-semibold text-white text-lg mb-5">More Resources</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             {[
               { label: 'Terms & Conditions', to: '/terms' },
               { label: 'Issue Resolution Policy', to: '/resolution' },
@@ -173,14 +192,15 @@ function FAQ() {
               <Link
                 key={to}
                 to={to}
-                className="text-sm text-secondary hover:underline"
+                className="inline-flex items-center gap-2 border-2 border-white/30 text-white font-semibold px-5 py-3 rounded-md hover:border-white hover:bg-white/10 transition-all duration-200 text-sm"
               >
-                {label}
+                {label} <ArrowRight size={14} />
               </Link>
             ))}
           </div>
         </div>
-      </div>
+      </section>
+
     </div>
   )
 }

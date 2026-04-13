@@ -38,12 +38,17 @@ function Contact() {
     <div className="min-h-screen bg-third">
 
       {/* Header */}
-      <div className="bg-white border-b border-third py-12">
+      <div className="bg-main text-white pt-14 pb-16">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
-          <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
+          <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-3">
             Get in touch
           </p>
-          <h1 className="font-heading font-bold text-main text-4xl">Contact Us</h1>
+          <h1 className="font-heading font-bold text-4xl md:text-5xl mb-4">
+            Contact Us
+          </h1>
+          <p className="text-white/55 max-w-lg text-sm leading-relaxed">
+            Have a question, issue, or just want to say hello? We'd love to hear from you.
+          </p>
         </div>
       </div>
 
@@ -51,10 +56,12 @@ function Contact() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
           {/* Form */}
-          <div className="bg-white rounded-2xl border border-third p-8">
+          <div className="bg-white rounded-lg border border-third p-8">
             {submitted ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                <span className="text-4xl mb-4">✉️</span>
+                <div className="w-14 h-14 rounded-lg bg-secondary/15 border border-secondary/20 flex items-center justify-center mb-5">
+                  <Mail size={24} className="text-main" />
+                </div>
                 <h2 className="font-heading font-bold text-main text-2xl mb-2">Message sent!</h2>
                 <p className="text-main/55 text-sm leading-relaxed">
                   Thanks for reaching out. We typically respond within 24–48 hours.
@@ -62,12 +69,15 @@ function Contact() {
               </div>
             ) : (
               <>
-                <h2 className="font-heading font-semibold text-main text-xl mb-6">
-                  Send us a message
+                <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-2">
+                  Send a message
+                </p>
+                <h2 className="font-heading font-bold text-main text-2xl mb-8">
+                  How can we help?
                 </h2>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest text-main/45 mb-2 block">
+                    <label className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-2 block">
                       Name
                     </label>
                     <input
@@ -76,11 +86,11 @@ function Contact() {
                       placeholder="Your full name"
                       value={form.name}
                       onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                      className="w-full bg-third rounded-md px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:ring-2 ring-secondary/50 transition"
+                      className="w-full bg-third border border-third rounded-md px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest text-main/45 mb-2 block">
+                    <label className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-2 block">
                       Email
                     </label>
                     <input
@@ -89,11 +99,11 @@ function Contact() {
                       placeholder="your@email.com"
                       value={form.email}
                       onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                      className="w-full bg-third rounded-md px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:ring-2 ring-secondary/50 transition"
+                      className="w-full bg-third border border-third rounded-md px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest text-main/45 mb-2 block">
+                    <label className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-2 block">
                       Message
                     </label>
                     <textarea
@@ -102,12 +112,12 @@ function Contact() {
                       rows={6}
                       value={form.message}
                       onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                      className="w-full bg-third rounded-md px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:ring-2 ring-secondary/50 transition resize-none"
+                      className="w-full bg-third border border-third rounded-md px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors resize-none"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="bg-main text-white font-semibold py-3 rounded-md hover:bg-main/90 transition-colors text-sm"
+                    className="bg-main text-white font-semibold px-7 py-3.5 rounded-md hover:bg-main/90 transition-colors text-sm"
                   >
                     Send Message
                   </button>
@@ -118,19 +128,23 @@ function Contact() {
 
           {/* Info cards */}
           <div className="flex flex-col gap-5">
-            <div className="bg-white rounded-2xl border border-third p-7">
-              <h3 className="font-heading font-semibold text-main text-lg mb-4">Support Email</h3>
+            <div className="bg-white rounded-lg border border-third p-7">
+              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
+                Support Email
+              </p>
               <a
                 href="mailto:hello@alakowe.com"
                 className="flex items-center gap-3 text-main/65 hover:text-secondary transition-colors"
               >
                 <Mail size={17} />
-                <span className="text-sm">hello@alakowe.com</span>
+                <span className="text-sm font-medium">hello@alakowe.com</span>
               </a>
             </div>
 
-            <div className="bg-white rounded-2xl border border-third p-7">
-              <h3 className="font-heading font-semibold text-main text-lg mb-4">Follow Us</h3>
+            <div className="bg-white rounded-lg border border-third p-7">
+              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
+                Follow Us
+              </p>
               <div className="flex flex-col gap-4">
                 {[
                   { Icon: IconInstagram, label: '@alakowe', href: '#' },
@@ -149,10 +163,10 @@ function Contact() {
               </div>
             </div>
 
-            <div className="bg-secondary/10 border border-secondary/25 rounded-2xl p-7">
-              <h3 className="font-heading font-semibold text-main text-lg mb-3">
+            <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-7">
+              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-3">
                 Response Time
-              </h3>
+              </p>
               <p className="text-sm text-main/65 leading-relaxed">
                 We typically respond within{' '}
                 <strong className="text-main">24–48 hours</strong>. For urgent order

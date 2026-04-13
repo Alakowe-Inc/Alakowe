@@ -1,11 +1,16 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { CartProvider } from './context/CartContext'
 import RootLayout from './layouts/RootLayout'
-import Home from './pages/Home'
-import BrowseBooks from './pages/BrowseBooks'
-import BookDetail from './pages/BookDetail'
-import Blog from './pages/Blog'
-import Contact from './pages/Contact'
-import FAQ from './pages/FAQ'
+import Home from './pages/LandingPage/Home'
+import BrowseBooks from './pages/LandingPage/BrowseBooks'
+import BookDetail from './pages/LandingPage/BookDetail'
+import Blog from './pages/LandingPage/Blog'
+import Contact from './pages/LandingPage/Contact'
+import FAQ from './pages/LandingPage/FAQ'
+import HowItWorks from './pages/LandingPage/HowItWorks'
+import Login from './pages/Auth/Login'
+import Register from './pages/Auth/Register'
+import Cart from './pages/LandingPage/Cart'
 import NotFound from './pages/NotFound'
 
 const router = createBrowserRouter([
@@ -16,11 +21,15 @@ const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: 'browse', element: <BrowseBooks /> },
       { path: 'books/:id', element: <BookDetail /> },
+      { path: 'cart', element: <Cart /> },
       { path: 'blog', element: <Blog /> },
       { path: 'contact', element: <Contact /> },
       { path: 'faq', element: <FAQ /> },
+      { path: 'how-it-works', element: <HowItWorks /> },
     ],
   },
+  { path: 'login', element: <Login /> },
+  { path: 'register', element: <Register /> },
   {
     path: '*',
     element: <NotFound />,
@@ -28,7 +37,11 @@ const router = createBrowserRouter([
 ])
 
 function App() {
-  return <RouterProvider router={router} />
+  return (
+    <CartProvider>
+      <RouterProvider router={router} />
+    </CartProvider>
+  )
 }
 
 export default App
