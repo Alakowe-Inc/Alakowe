@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Search, User, Heart, ShoppingBag, Menu, X, Plus } from 'lucide-react'
+import { Search, User, ShoppingBag, Menu, X, Plus } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import logo from '../assets/media/logos/logo.jpg'
 import { useCart } from '../context/CartContext'
