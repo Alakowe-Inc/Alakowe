@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
-import logo from '../../assets/media/logos/logo.jpg'
+import logo from '../../assets/media/logos/logo white.png'
 
 function Login() {
   const [form, setForm] = useState({ email: '', password: '' })

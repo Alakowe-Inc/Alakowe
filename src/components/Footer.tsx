@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import logo from '../assets/media/logos/logo.jpg'
+import logo from '../assets/media/logos/logo white.png'
 
 function IconInstagram() {
   return (
@@ -42,12 +42,13 @@ function Footer() {
 
             {/* Brand */}
             <div>
-              <img
-                src={logo}
-                alt="Alakowé"
-                className="h-8 w-auto object-contain mb-4 mix-blend-multiply"
-              // style={{ filter: 'invert(2) hue-rotate(180deg)' }}
-              />
+              <Link to="/">
+                <img
+                  src={logo}
+                  alt="Alakowé"
+                  className="h-8 w-auto object-contain mb-4"
+                />
+              </Link>
               <p className="text-sm text-white/50 leading-relaxed mb-6">
                 Read it. Love it. Pass it on.
               </p>
