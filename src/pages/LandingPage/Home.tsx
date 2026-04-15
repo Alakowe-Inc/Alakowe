@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Search, ShoppingCart, Handshake, BookOpen } from 'lucide-react'
 import { blogPosts, bookQuotes, books } from '../../data/mockData'
 import BookCard from '../../components/BookCard'
-import heroImage from '../../assets/media/images/Tranquil Study with Cactus and Pastel Books.png'
-import quoteBg from '../../assets/media/images/Books with Elegant Bookend.png'
+import heroImage from '../../assets/media/images/Website landing page image (white bg).jpg'
+
 
 
 const featuredBooks = books.slice(0, 8)
@@ -47,12 +47,20 @@ function Home() {
                 real readers, one secure marketplace.
               </p>
 
-              <Link
-                to="/browse"
-                className="inline-flex items-center gap-2 border-2 border-white text-white font-semibold px-7 py-3.5 rounded-md hover:bg-white hover:text-main transition-all duration-200 text-sm"
-              >
-                Browse Books <ArrowRight size={15} />
-              </Link>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to="/browse"
+                  className="inline-flex items-center gap-2 border-2 border-white text-white font-semibold px-7 py-3.5 rounded-md hover:bg-white hover:text-main transition-all duration-200 text-sm"
+                >
+                  Browse Books <ArrowRight size={15} />
+                </Link>
+                <Link
+                  to="/list"
+                  className="inline-flex items-center gap-2 bg-secondary text-main font-semibold px-7 py-3.5 rounded-md hover:bg-secondary/90 transition-all duration-200 text-sm"
+                >
+                  List a Book <ArrowRight size={15} />
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -118,18 +126,7 @@ function Home() {
       </section>
 
       {/* ── Book Quotes ─────────────────────────────────────────── */}
-      <section className="relative py-28 overflow-hidden">
-
-        {/* Background image */}
-        <img
-          src={quoteBg}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
-
-        {/* Dark overlay — uniform but slightly lighter than hero */}
-        <div className="absolute inset-0 bg-main/82" />
+      <section className="bg-main py-28 overflow-hidden">
 
         <div className="relative max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
 

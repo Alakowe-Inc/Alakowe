@@ -76,7 +76,7 @@ function Navbar() {
 
           {/* Center — logo */}
           <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-            <img src={logo} alt="Alakowé" className="h-7 md:h-8 w-auto object-contain" />
+            <img src={logo} alt="Alakowé" className="h-5 md:h-6 w-auto object-contain" />
           </Link>
 
           {/* Right — icons */}

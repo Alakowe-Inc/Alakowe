@@ -61,11 +61,14 @@ function BookDetail() {
             </h1>
             <p className="text-main/55 text-base mb-4">by {book.author}</p>
 
-            {/* Condition badge */}
-            <div className="mb-6">
-              <span className="text-xs font-semibold text-main/60 bg-main/8 border border-main/12 px-3 py-1 rounded-full">
-                {book.condition}
-              </span>
+            {/* Condition tags */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-main/40 w-full mb-1">Condition notes</p>
+              {book.condition.split(',').map(issue => (
+                <span key={issue.trim()} className="text-xs font-medium text-main/60 bg-main/8 border border-main/12 px-3 py-1 rounded-full">
+                  {issue.trim()}
+                </span>
+              ))}
             </div>
 
             <p className="text-main/65 text-sm leading-relaxed mb-8">{book.description}</p>
