@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const faqs = [
@@ -96,15 +96,15 @@ function FAQ() {
     <div>
 
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="bg-main py-24">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
-          <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
+      <section className="bg-main text-white min-h-[50vh] flex items-center justify-center py-20">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full text-center">
+          <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-3">
             Help Centre
           </p>
-          <h1 className="font-heading font-bold text-white text-4xl md:text-5xl max-w-md leading-tight mb-4">
+          <h1 className="font-heading font-bold text-4xl md:text-5xl mb-4">
             Frequently Asked Questions
           </h1>
-          <p className="text-white/55 text-sm">
+          <p className="text-white/55 max-w-lg text-sm leading-relaxed mx-auto">
             Can't find what you're looking for?{' '}
             <Link to="/contact" className="text-secondary hover:underline font-semibold">
               Contact us
@@ -114,8 +114,8 @@ function FAQ() {
       </section>
 
       {/* ── Content ────────────────────────────────────────────── */}
-      <section className="bg-third py-28">
-        <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-12">
+      <section className="bg-white py-28">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-12">
 
           {/* Section jump links */}
           <div className="flex flex-wrap gap-2 mb-14">
@@ -123,7 +123,7 @@ function FAQ() {
               <a
                 key={id}
                 href={`#${id}`}
-                className="text-xs font-semibold px-4 py-2 rounded-full bg-white border border-third text-main hover:border-secondary/40 hover:shadow-sm transition-all duration-200"
+                className="text-xs font-semibold px-4 py-2 rounded-full border border-main/20 text-main/60 hover:border-secondary hover:text-secondary transition-all duration-200"
               >
                 {section}
               </a>
@@ -133,39 +133,35 @@ function FAQ() {
           {/* Sections */}
           {faqs.map(({ section, id, questions }) => (
             <div key={id} id={id} className="mb-14 scroll-mt-24">
-              <div className="mb-6">
-                <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-2">
-                  {section}
-                </p>
-                <h2 className="font-heading font-bold text-main text-2xl">{section} Questions</h2>
-              </div>
-              <div className="flex flex-col gap-3">
+              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-6">
+                {section}
+              </p>
+              <div className="flex flex-col">
                 {questions.map(({ q, a }) => {
                   const key = `${id}-${q}`
                   const isOpen = open === key
                   return (
-                    <div
-                      key={q}
-                      className="bg-white rounded-lg border border-third overflow-hidden hover:border-secondary/40 hover:shadow-md transition-all duration-300"
-                    >
+                    <div key={q} className="border-t border-main/15">
                       <button
                         onClick={() => toggle(key)}
-                        className="w-full flex items-center justify-between px-6 py-4 text-left gap-4"
+                        className="w-full flex items-center justify-between py-5 text-left gap-6"
                       >
-                        <span className="font-semibold text-main text-sm leading-snug">{q}</span>
-                        <ChevronDown
-                          size={17}
-                          className={`text-main/45 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                        />
+                        <span className="font-heading font-bold text-main text-sm uppercase tracking-wide leading-snug">
+                          {q}
+                        </span>
+                        <span className={`shrink-0 text-xs font-bold tracking-widest transition-colors duration-200 ${isOpen ? 'text-secondary' : 'text-main/45'}`}>
+                          {isOpen ? 'LESS −' : 'MORE +'}
+                        </span>
                       </button>
                       {isOpen && (
-                        <div className="px-6 pb-5 border-t border-third pt-4">
-                          <p className="text-sm text-main/65 leading-relaxed">{a}</p>
+                        <div className="pb-5">
+                          <p className="text-sm text-main/55 leading-relaxed max-w-3xl">{a}</p>
                         </div>
                       )}
                     </div>
                   )
                 })}
+                <div className="border-t border-main/15" />
               </div>
             </div>
           ))}
@@ -173,30 +169,32 @@ function FAQ() {
       </section>
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section className="bg-main py-24">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center md:flex-row md:items-end justify-between gap-8">
-          <div className="text-center md:text-start">
-            <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
-              More Resources
+      <section className="bg-main py-28">
+        <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center text-center gap-8">
+          <div>
+            <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">
+              Still need help?
             </p>
-            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl max-w-md leading-tight">
-              Still have questions?
+            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-5">
+              We're happy to answer your questions.
             </h2>
+            <p className="text-white/55 text-sm leading-relaxed">
+              Reach out to our team and we'll get back to you as soon as possible — no question is too small.
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            {[
-              { label: 'Terms & Conditions', to: '/terms' },
-              { label: 'Issue Resolution Policy', to: '/resolution' },
-              { label: 'Privacy Policy', to: '/privacy' },
-            ].map(({ label, to }) => (
-              <Link
-                key={to}
-                to={to}
-                className="inline-flex items-center gap-2 border-2 border-white/30 text-white font-semibold px-5 py-3 rounded-md hover:border-white hover:bg-white/10 transition-all duration-200 text-sm"
-              >
-                {label} <ArrowRight size={14} />
-              </Link>
-            ))}
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors"
+            >
+              Contact Us <ArrowRight size={14} />
+            </Link>
+            <Link
+              to="/browse"
+              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors"
+            >
+              Browse Books
+            </Link>
           </div>
         </div>
       </section>

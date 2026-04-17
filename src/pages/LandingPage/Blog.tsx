@@ -16,15 +16,15 @@ function Blog() {
     <div className="min-h-screen bg-third">
 
       {/* Header */}
-      <div className="bg-main text-white pt-14 pb-16">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 text-start">
+      <div className="bg-main text-white min-h-[50vh] flex items-center justify-center py-20">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full text-center">
           <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-3">
             Our Blog
           </p>
           <h1 className="font-heading font-bold text-4xl md:text-5xl mb-4">
             Stories &amp; Insights
           </h1>
-          <p className="text-white/55 max-w-lg text-sm leading-relaxed">
+          <p className="text-white/55 max-w-lg text-sm leading-relaxed mx-auto">
             Thoughts on reading, Nigerian literature, and why good books deserve a second life.
           </p>
         </div>
@@ -49,33 +49,30 @@ function Blog() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filtered.map(post => (
             <Link
               key={post.id}
               to={`/blog/${post.id}`}
-              className="group bg-white rounded-lg overflow-hidden border border-third hover:border-secondary/40 hover:shadow-md transition-all duration-300"
+              className="group flex flex-col"
             >
-              <div className="h-48 bg-secondary/10 border-b border-third flex items-center justify-center">
-                <span className="font-heading font-bold text-6xl text-secondary/40 group-hover:text-secondary/60 transition-colors select-none">
+              <div className="overflow-hidden aspect-video bg-secondary/10 flex items-center justify-center mb-5">
+                <span className="font-heading font-bold text-8xl text-secondary/20 group-hover:text-secondary/35 group-hover:scale-110 transition-all duration-500 select-none">
                   ✦
                 </span>
               </div>
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-xs font-semibold text-secondary bg-secondary/15 px-2.5 py-0.5 rounded-full">
-                    {post.category}
-                  </span>
-                  <span className="text-xs text-main/40">{post.readTime}</span>
-                </div>
-                <h2 className="font-heading font-semibold text-main text-lg leading-snug mb-2 group-hover:text-secondary transition-colors line-clamp-2">
-                  {post.title}
-                </h2>
-                <p className="text-sm text-main/55 line-clamp-3 leading-relaxed mb-4">
-                  {post.excerpt}
-                </p>
-                <p className="text-xs text-main/35">{post.date}</p>
-              </div>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-main/40 mb-3">
+                {post.date}
+              </p>
+              <h3 className="font-heading font-bold text-main text-lg leading-snug mb-3 group-hover:text-secondary transition-colors line-clamp-2">
+                {post.title}
+              </h3>
+              <p className="text-sm text-main/55 leading-relaxed line-clamp-2 flex-1">
+                {post.excerpt}
+              </p>
+              <span className="mt-4 text-sm font-semibold text-main/60 group-hover:text-secondary transition-colors underline underline-offset-4 decoration-main/20 group-hover:decoration-secondary">
+                Read more
+              </span>
             </Link>
           ))}
         </div>

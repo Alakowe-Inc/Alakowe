@@ -38,15 +38,15 @@ function Contact() {
     <div className="min-h-screen bg-third">
 
       {/* Header */}
-      <div className="bg-main text-white pt-14 pb-16">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+      <div className="bg-main text-white min-h-[50vh] flex items-center justify-center py-20">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full text-center">
           <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-3">
             Get in touch
           </p>
           <h1 className="font-heading font-bold text-4xl md:text-5xl mb-4">
             Contact Us
           </h1>
-          <p className="text-white/55 max-w-lg text-sm leading-relaxed">
+          <p className="text-white/55 max-w-lg text-sm leading-relaxed mx-auto">
             Have a question, issue, or just want to say hello? We'd love to hear from you.
           </p>
         </div>

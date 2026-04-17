@@ -1,86 +1,97 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Search, ShoppingCart, Handshake, BookOpen } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { blogPosts, bookQuotes, books } from '../../data/mockData'
 import BookCard from '../../components/BookCard'
-import heroImage from '../../assets/media/images/Website landing page image (white bg).jpg'
+import heroImage1 from '../../assets/media/images/Website landing page image (white bg).jpg'
+import heroImage2 from '../../assets/media/images/Tranquil Study with Cactus and Pastel Books.png'
+import heroImage3 from '../../assets/media/images/Books with Elegant Bookend.png'
 
-
-
+const heroSlides = [heroImage1, heroImage2, heroImage3]
 const featuredBooks = books.slice(0, 8)
 
 function Home() {
+  const [slideIndex, setSlideIndex] = useState(0)
+  const [quoteIndex, setQuoteIndex] = useState(0)
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlideIndex(i => (i + 1) % heroSlides.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setQuoteIndex(i => (i + 1) % bookQuotes.length)
+        setVisible(true)
+      }, 500)
+    }, 6000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <div>
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="relative w-full min-h-[88vh] flex flex-col overflow-hidden">
+      <section className="relative w-full h-screen flex flex-col overflow-hidden">
 
-        {/* Background image */}
-        <img
-          src={heroImage}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
+        {/* Background slides */}
+        {heroSlides.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000"
+            style={{ opacity: i === slideIndex ? 1 : 0 }}
+          />
+        ))}
 
-        {/* Dark overlay — heavier left, fades right */}
-        <div className="absolute inset-0 bg-linear-to-r from-main/92 via-main/70 to-main/25" />
-        {/* Extra bottom fade for cards */}
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-main/60 to-transparent" />
+        {/* Uniform dark overlay */}
+        <div className="absolute inset-0 bg-main/50" />
 
-        {/* Content wrapper */}
-        <div className="relative flex-1 flex flex-col max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full">
+        {/* Centered content */}
+        <div className="relative flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8">
+          <p className="text-white/70 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] mb-4 sm:mb-5">
+            Nigeria's Trusted Used Books Marketplace
+          </p>
 
-          {/* Main content — vertically centred */}
-          <div className="flex-1 flex items-end py-18 lg:py-28">
-            <div className="max-w-xl">
+          <h1 className="font-heading font-bold text-white uppercase leading-none mb-4 sm:mb-5 text-3xl sm:text-5xl md:text-6xl xl:text-7xl max-w-xs sm:max-w-xl md:max-w-3xl">
+            Read it. Love it. Pass it on.
+          </h1>
 
-              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-6">
-                Nigeria's Used Book Marketplace
-              </p>
+          <p className="text-white/65 text-xs sm:text-sm md:text-base leading-relaxed mb-8 sm:mb-10 max-w-xs sm:max-w-sm md:max-w-md">
+            Sometimes, you are just a good book away from a good mood
+          </p>
 
-              <h1 className="font-heading font-bold text-white leading-[1.05] mb-6 text-5xl md:text-6xl xl:text-7xl">
-                Read it. Love it. Pass it on.
-              </h1>
-
-              <p className="text-white/55 text-sm leading-relaxed mb-10">
-                Buy and sell pre-loved books across Nigeria — thousands of titles,
-                real readers, one secure marketplace.
-              </p>
-
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  to="/browse"
-                  className="inline-flex items-center gap-2 border-2 border-white text-white font-semibold px-7 py-3.5 rounded-md hover:bg-white hover:text-main transition-all duration-200 text-sm"
-                >
-                  Browse Books <ArrowRight size={15} />
-                </Link>
-                <Link
-                  to="/list"
-                  className="inline-flex items-center gap-2 bg-secondary text-main font-semibold px-7 py-3.5 rounded-md hover:bg-secondary/90 transition-all duration-200 text-sm"
-                >
-                  List a Book <ArrowRight size={15} />
-                </Link>
-              </div>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+            <Link
+              to="/browse"
+              className="w-full sm:w-auto inline-flex justify-center items-center border border-white text-white font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white hover:text-main transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase"
+            >
+              Browse Books
+            </Link>
+            <Link
+              to="/list"
+              className="w-full sm:w-auto inline-flex justify-center items-center border border-white bg-white text-main font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white/85 transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase"
+            >
+              List a Book
+            </Link>
           </div>
+        </div>
 
-          {/* Bottom-right info cards */}
-          <div className="hidden lg:flex justify-end gap-3 pb-8">
-            {[
-              { title: 'Fiction & Lit', label: 'Primary Focus', sub: '800+ titles' },
-              { title: 'Nationwide', label: 'Market Coverage', sub: '12 cities' },
-              { title: 'End-to-End', label: 'Secure & Delivered', sub: 'Escrow checkout' },
-            ].map(({ title, label, sub }) => (
-              <div
-                key={title}
-                className="bg-white/10 backdrop-blur-md border border-white/15 rounded-md px-5 py-4 min-w-35"
-              >
-                <p className="text-white/45 text-[10px] uppercase tracking-widest font-semibold mb-2">{label}</p>
-                <p className="text-white font-heading font-bold text-[15px] leading-snug">{title}</p>
-                <p className="text-white/45 text-[11px] mt-1">{sub}</p>
-              </div>
-            ))}
-          </div>
+        {/* Dot indicators */}
+        <div className="relative flex items-center justify-center gap-2.5 pb-6 sm:pb-8">
+          {heroSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setSlideIndex(i)}
+              className={`rounded-full transition-all duration-300 ${i === slideIndex ? 'w-2.5 h-2.5 bg-white' : 'w-2 h-2 bg-white/40'}`}
+            />
+          ))}
         </div>
       </section>
 
@@ -95,14 +106,14 @@ function Home() {
                 Discover
               </p>
               <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
-                Featured Books
+                Your Next Read
               </h2>
             </div>
             <Link
               to="/browse"
-              className="hidden md:flex items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+              className="hidden md:flex  underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
-              View all <ArrowRight size={15} />
+              View all
             </Link>
           </div>
 
@@ -117,132 +128,107 @@ function Home() {
           <div className="mt-8 text-center md:hidden">
             <Link
               to="/browse"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+              className="inline-flex  underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
-              View all books <ArrowRight size={15} />
+              View all books
             </Link>
           </div>
         </div>
       </section>
 
       {/* ── Book Quotes ─────────────────────────────────────────── */}
-      <section className="bg-main py-28 overflow-hidden">
-
-        <div className="relative max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
-
-          {/* Header */}
-          <div className="mb-14">
-            <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
-              From the pages
+      <section className="bg-white py-24 border-t border-b border-third">
+        <div className="max-w-3xl mx-auto px-4 md:px-6 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-main/40 mb-12">
+            From the Pages
+          </p>
+          <div
+            className="transition-opacity duration-500"
+            style={{ opacity: visible ? 1 : 0 }}
+          >
+            <p className="font-heading font-bold text-main text-2xl md:text-3xl lg:text-4xl leading-snug">
+              "{bookQuotes[quoteIndex].quote}"
             </p>
-            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl max-w-md leading-tight">
-              Words that stay with you.
-            </h2>
-          </div>
-
-          {/* Quote cards — frosted glass, matching hero info chips */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {bookQuotes.map((q, i) => (
-              <div
-                key={i}
-                className="group relative flex flex-col p-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 hover:border-secondary/30 transition-all duration-300"
-              >
-                {/* Decorative quote mark */}
-                <span className="absolute top-5 right-6 font-heading font-bold text-7xl text-secondary/20 group-hover:text-secondary/35 transition-colors leading-none select-none">
-                  "
-                </span>
-
-                <p className="text-white/75 text-[15px] leading-[1.8] italic flex-1 relative z-10">
-                  {q.quote}
-                </p>
-
-                <div className="mt-6 pt-5 border-t border-white/10 flex items-center gap-2.5">
-                  <span className="h-px w-4 bg-secondary/60" />
-                  <p className="text-secondary text-sm font-semibold">{q.author}</p>
-                </div>
-              </div>
-            ))}
+            <p className="mt-6 text-xs uppercase tracking-widest text-main/40 font-semibold">
+              — {bookQuotes[quoteIndex].author}
+            </p>
           </div>
         </div>
       </section>
 
       {/* ── How it Works ────────────────────────────────────────── */}
-      <section className="py-28 bg-white">
+      <section className="py-20 bg-white border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
 
           {/* Header */}
-          <div className="flex flex-row items-end justify-between mb-14">
-            <div className="">
-              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
                 Simple process
               </p>
-              <h2 className="font-heading font-bold text-main text-4xl md:text-5xl max-w-md leading-tight">
+              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
                 How does it work?
               </h2>
             </div>
-
             <Link
               to="/browse"
-              className="hidden md:flex items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+              className="hidden md:flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
-              Learn more <ArrowRight size={15} />
+              Learn more
             </Link>
           </div>
 
-          {/* Step cards — 4 columns */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-14">
+          {/* Steps */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-8">
             {[
               {
                 step: '01',
                 Icon: Search,
                 title: 'Browse & Find',
-                desc: 'Search thousands of pre-loved books by title, author, or genre. Filter by location and price to find exactly what you need.',
+                desc: 'Search thousands of pre-loved books by title, author, or genre. Filter by location and price.',
               },
               {
                 step: '02',
                 Icon: ShoppingCart,
                 title: 'Add to Cart',
-                desc: 'Add your book and pay securely at checkout. Your money is held in escrow — released only when you confirm delivery.',
+                desc: 'Pay securely at checkout. Your money is held in escrow — released only when you confirm delivery.',
               },
               {
                 step: '03',
                 Icon: Handshake,
                 title: 'We Coordinate',
-                desc: 'We notify the seller, arrange collection from their location, inspect the book, and prepare it for dispatch.',
+                desc: 'We notify the seller, arrange collection, inspect the book, and prepare it for dispatch.',
               },
               {
                 step: '04',
                 Icon: BookOpen,
                 title: 'Start Reading',
-                desc: 'Your book arrives at your door in 3–7 business days. Confirm receipt and the seller gets paid. Happy reading!',
+                desc: 'Your book arrives in 3–7 business days. Confirm receipt and the seller gets paid.',
               },
             ].map(({ step, Icon, title, desc }) => (
-              <div
-                key={step}
-                className="group flex flex-col p-4 md:p-6 rounded-lg border border-third hover:border-secondary/40 hover:shadow-md transition-all duration-300"
-              >
-                {/* Icon + step */}
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-11 h-11 rounded-lg bg-secondary/15 border border-secondary/20 flex items-center justify-center shrink-0">
-                    <Icon size={20} className="text-main" />
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-widest text-secondary">
-                    Step {step}
+              <div key={step} className="flex flex-col">
+                {/* Step number + icon row */}
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="font-heading font-bold text-4xl text-main/10 leading-none select-none">
+                    {step}
                   </span>
+                  <div className="w-9 h-9 rounded-full bg-secondary/15 flex items-center justify-center shrink-0">
+                    <Icon size={16} className="text-main" />
+                  </div>
                 </div>
 
-                <h3 className="font-heading font-bold text-main text-xl mb-3">{title}</h3>
-                <p className="text-main/55 text-sm leading-relaxed">{desc}</p>
+                <h3 className="font-heading font-bold text-main text-lg mb-2">{title}</h3>
+                <p className="text-main/50 text-sm leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-8 text-center md:hidden">
+          <div className="mt-10 text-center md:hidden">
             <Link
-              to="/how-to-works"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+              to="/browse"
+              className="inline-flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
-              Learn more <ArrowRight size={15} />
+              Learn more
             </Link>
           </div>
         </div>
@@ -264,42 +250,46 @@ function Home() {
             </div>
             <Link
               to="/blog"
-              className="hidden md:flex items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+              className="hidden md:flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
-              Read all <ArrowRight size={15} />
+              View all posts
             </Link>
           </div>
 
           {/* Blog cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {blogPosts.slice(0, 3).map(post => (
               <Link
                 key={post.id}
                 to={`/blog/${post.id}`}
-                className="group flex flex-col rounded-lg bg-white border border-third overflow-hidden hover:border-secondary/40 hover:shadow-md transition-all duration-300"
+                className="group flex flex-col"
               >
-                {/* Placeholder header */}
-                <div className="h-40 bg-secondary/10 border-b border-third flex items-center justify-center">
-                  <span className="font-heading font-bold text-6xl text-secondary/40 group-hover:text-secondary/60 transition-colors select-none">
+                {/* Image area */}
+                <div className="overflow-hidden aspect-video bg-secondary/10 flex items-center justify-center mb-5">
+                  <span className="font-heading font-bold text-8xl text-secondary/20 group-hover:text-secondary/35 group-hover:scale-110 transition-all duration-500 select-none">
                     ✦
                   </span>
                 </div>
 
-                <div className="flex flex-col flex-1 p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-[10px] font-semibold text-secondary bg-secondary/15 px-2.5 py-0.5 rounded-full uppercase tracking-wide">
-                      {post.category}
-                    </span>
-                    <span className="text-xs text-main/40">{post.readTime}</span>
-                  </div>
-                  <h3 className="font-heading font-semibold text-main text-base leading-snug mb-2 group-hover:text-secondary transition-colors line-clamp-2">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm text-main/55 line-clamp-2 leading-relaxed flex-1">
-                    {post.excerpt}
-                  </p>
-                  <p className="text-xs text-main/35 mt-4">{post.date}</p>
-                </div>
+                {/* Meta */}
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-main/40 mb-3">
+                  {post.date}
+                </p>
+
+                {/* Title */}
+                <h3 className="font-heading font-bold text-main text-lg leading-snug mb-3 group-hover:text-secondary transition-colors line-clamp-2">
+                  {post.title}
+                </h3>
+
+                {/* Excerpt */}
+                <p className="text-sm text-main/55 leading-relaxed line-clamp-2 flex-1">
+                  {post.excerpt}
+                </p>
+
+                {/* Read more */}
+                <span className="mt-4 text-sm font-semibold text-main/60 group-hover:text-secondary transition-colors underline underline-offset-4 decoration-main/20 group-hover:decoration-secondary">
+                  Read more
+                </span>
               </Link>
             ))}
           </div>
@@ -307,22 +297,33 @@ function Home() {
       </section>
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section className="bg-main py-24">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 md:flex-row lg:px-12 flex flex-col items-center md:items-end justify-between gap-8">
-          <div className='text-center md:text-start'>
-            <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
+      <section className="bg-main py-28">
+        <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center text-center gap-8">
+          <div>
+            <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">
               Start Today
             </p>
-            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl max-w-md leading-tight">
+            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-5">
               Ready to find your next read?
             </h2>
+            <p className="text-white/55 text-sm leading-relaxed">
+              Discover affordable used books from readers across Nigeria — buy, sell, and keep great stories moving.
+            </p>
           </div>
-          <Link
-            to="/browse"
-            className="shrink-0 inline-flex items-center gap-2 border-2 border-white text-white font-semibold px-7 py-3.5 rounded-md hover:bg-white hover:text-main transition-all duration-200 text-sm"
-          >
-            Browse Books <ArrowRight size={15} />
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              to="/browse"
+              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors"
+            >
+              Browse Books <ArrowRight size={14} />
+            </Link>
+            <Link
+              to="/register"
+              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors"
+            >
+              Create Account
+            </Link>
+          </div>
         </div>
       </section>
     </div>

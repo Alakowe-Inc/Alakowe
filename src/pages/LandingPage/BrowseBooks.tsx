@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { books } from '../../data/mockData'
@@ -16,6 +16,14 @@ function BrowseBooks() {
   const [location, setLocation] = useState('All')
   const [sortBy, setSortBy] = useState('default')
   const [showFilters, setShowFilters] = useState(false)
+
+  useEffect(() => {
+    document.body.style.overflow = showFilters ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [showFilters])
+
+  const openFilters = () => setShowFilters(true)
+  const closeFilters = () => setShowFilters(false)
 
   const filtered = useMemo(() => {
     let result = [...books]
@@ -45,11 +53,11 @@ function BrowseBooks() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-third">
 
       {/* ── Page header ─────────────────────────────────────────── */}
-      <div className="bg-main">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 pt-14 pb-16">
+      <div className="bg-main min-h-[50vh] flex items-center justify-center py-20">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full text-center">
           <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
             Marketplace
           </p>
@@ -58,7 +66,7 @@ function BrowseBooks() {
           </h1>
 
           {/* Search bar — frosted glass to match hero/quotes */}
-          <div className="flex items-center bg-white/10 backdrop-blur-md border border-white/15 rounded-md overflow-hidden max-w-xl focus-within:border-secondary transition-colors">
+          <div className="flex items-center bg-white/10 backdrop-blur-md border border-white/15 rounded-md overflow-hidden max-w-xl mx-auto focus-within:border-secondary transition-colors">
             <Search size={15} className="ml-4 text-white/40 shrink-0" />
             <input
               type="text"
@@ -80,181 +88,213 @@ function BrowseBooks() {
         </div>
       </div>
 
-      <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-10">
-        <div className="flex gap-10">
+      <div className="max-w-8xl py-6 mx-auto px-4 md:px-6 lg:px-12">
 
-          {/* Desktop sidebar filters */}
-          <aside className="hidden lg:block w-48 shrink-0">
-            <div className="sticky top-24">
-              <div className="flex items-center justify-between mb-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-main/40">Filters</p>
-                {hasFilters && (
-                  <button
-                    onClick={clearFilters}
-                    className="text-xs text-secondary hover:underline"
-                  >
-                    Clear all
-                  </button>
-                )}
-              </div>
+        {/* ── Toolbar ── */}
+        <div className="flex items-center justify-between py-4 border-b border-main/10">
+          <div className="flex items-center gap-3 md:gap-6">
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="text-xs font-semibold uppercase tracking-[0.15em] text-main bg-transparent outline-none cursor-pointer max-w-30 md:max-w-none truncate"
+            >
+              <option value="default">Featured</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+            </select>
+            <span className="hidden sm:block text-xs font-semibold uppercase tracking-[0.15em] text-main/40">
+              {filtered.length} {filtered.length === 1 ? 'Product' : 'Products'}
+            </span>
+          </div>
 
-              <FilterSection title="Genre">
-                {genres.map(g => (
-                  <FilterOption key={g} label={g} active={genre === g} onClick={() => setGenre(g)} />
-                ))}
-              </FilterSection>
+          <button
+            onClick={openFilters}
+            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-main hover:text-secondary transition-colors"
+          >
+            <SlidersHorizontal size={13} />
+            <span className="hidden sm:inline">Filter and Sort</span>
+            <span className="sm:hidden">Filter</span>
+            {hasFilters && (
+              <span className="w-4 h-4 rounded-full bg-secondary text-white text-[9px] flex items-center justify-center">
+                ✓
+              </span>
+            )}
+          </button>
+        </div>
 
-              <FilterSection title="Condition">
-                {conditions.map(c => (
-                  <FilterOption key={c} label={c} active={condition === c} onClick={() => setCondition(c)} />
-                ))}
-              </FilterSection>
-
-              <FilterSection title="Location" last>
-                {locations.map(l => (
-                  <FilterOption key={l} label={l} active={location === l} onClick={() => setLocation(l)} />
-                ))}
-              </FilterSection>
-            </div>
-          </aside>
-
-          {/* Main content */}
-          <main className="flex-1 min-w-0">
-
-            {/* Top bar */}
-            <div className="mb-6">
-              {/* Count + desktop sort — single row on lg+ */}
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-1">
-                    Results
-                  </p>
-                  <p className="font-heading font-bold text-main text-xl md:text-2xl">
-                    {filtered.length} book{filtered.length !== 1 ? 's' : ''} found
-                  </p>
-                </div>
-                {/* Sort select — desktop only in this row */}
-                <select
-                  value={sortBy}
-                  onChange={e => setSortBy(e.target.value)}
-                  className="hidden lg:block text-sm text-main border border-third bg-white rounded-md px-3 py-2 outline-none cursor-pointer hover:border-main/40 transition-colors"
-                >
-                  <option value="default">Sort: Default</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                </select>
-              </div>
-
-              {/* Mobile controls — full-width row */}
-              <div className="flex gap-2 lg:hidden">
-                <button
-                  className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold text-main border border-third bg-white rounded-md px-4 py-2.5 hover:border-main/40 transition-colors"
-                  onClick={() => setShowFilters(true)}
-                >
-                  <SlidersHorizontal size={15} />
-                  Filters
-                </button>
-                <select
-                  value={sortBy}
-                  onChange={e => setSortBy(e.target.value)}
-                  className="flex-1 text-sm text-main border border-third bg-white rounded-md px-3 py-2.5 outline-none cursor-pointer hover:border-main/40 transition-colors"
-                >
-                  <option value="default">Sort: Default</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Genre pills */}
-            <div className="flex gap-2 overflow-x-auto mb-6 scrollbar-none">
-              {genres.map(g => (
-                <button
-                  key={g}
-                  onClick={() => setGenre(g)}
-                  className={`shrink-0 text-xs font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${genre === g
-                    ? 'bg-main text-white'
-                    : 'bg-third text-main/55 hover:bg-secondary/15 hover:text-main'
-                    }`}
-                >
-                  {g}
-                </button>
+        {/* ── Grid ── */}
+        <div className="py-10">
+          {filtered.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-10">
+              {filtered.map(book => (
+                <BookCard key={book.id} book={book} />
               ))}
             </div>
-
-            {/* Grid */}
-            {filtered.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
-                {filtered.map(book => (
-                  <BookCard key={book.id} book={book} />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-28 border border-third rounded-lg">
-                <span className="font-heading font-bold text-6xl text-secondary/30 mb-6 select-none">✦</span>
-                <p className="font-heading font-semibold text-main text-xl mb-2">No books found</p>
-                <p className="text-main/50 text-sm">Try adjusting your search or filters.</p>
-              </div>
-            )}
-          </main>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-32 text-center">
+              <span className="font-heading font-bold text-8xl text-secondary/20 mb-6 select-none">✦</span>
+              <p className="font-heading font-semibold text-main text-xl mb-2">No books found</p>
+              <p className="text-main/50 text-sm">Try adjusting your search or filters.</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Mobile filters drawer */}
+      {/* Filters drawer */}
       {showFilters && (
         <div
-          className="lg:hidden fixed inset-0 z-50 bg-black/40"
-          onClick={() => setShowFilters(false)}
+          className="fixed inset-0 z-50 bg-main/40 backdrop-blur-sm"
+          onClick={closeFilters}
         >
           <div
-            className="absolute right-0 top-0 h-full w-full sm:w-80 bg-white flex flex-col shadow-2xl"
+            className="absolute right-0 top-0 h-full w-full sm:w-105 bg-white flex flex-col"
             onClick={e => e.stopPropagation()}
           >
-            {/* Sticky header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-third shrink-0">
-              <h3 className="font-heading font-semibold text-main">Filters</h3>
+            {/* Header */}
+            <div className="flex items-center justify-between px-8 pt-6 pb-6 shrink-0">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-1">Marketplace</p>
+                <h3 className="font-heading font-bold text-main text-2xl">Filter &amp; Sort</h3>
+              </div>
               <button
-                onClick={() => setShowFilters(false)}
-                className="text-main/50 hover:text-main transition-colors"
+                onClick={closeFilters}
+                className="w-9 h-9 rounded-full border border-main/10 flex items-center justify-center text-main/40 hover:border-main/30 hover:text-main transition-all"
               >
-                <X size={20} />
+                <X size={15} />
               </button>
             </div>
 
-            {/* Scrollable filter content */}
-            <div className="flex-1 overflow-y-auto px-6 py-6">
-              <FilterSection title="Genre">
-                {genres.map(g => (
-                  <FilterOption key={g} label={g} active={genre === g} onClick={() => setGenre(g)} />
-                ))}
-              </FilterSection>
+            {/* Active filter chips */}
+            {hasFilters && (
+              <div className="px-8 pb-4 flex flex-wrap gap-2 shrink-0">
+                {genre !== 'All' && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-main text-white px-3 py-1.5 rounded-full">
+                    {genre}
+                    <button onClick={() => setGenre('All')} className="hover:opacity-70 transition-opacity"><X size={10} /></button>
+                  </span>
+                )}
+                {condition !== 'All' && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-main text-white px-3 py-1.5 rounded-full">
+                    {condition}
+                    <button onClick={() => setCondition('All')} className="hover:opacity-70 transition-opacity"><X size={10} /></button>
+                  </span>
+                )}
+                {location !== 'All' && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-main text-white px-3 py-1.5 rounded-full">
+                    {location}
+                    <button onClick={() => setLocation('All')} className="hover:opacity-70 transition-opacity"><X size={10} /></button>
+                  </span>
+                )}
+              </div>
+            )}
 
-              <FilterSection title="Condition">
-                {conditions.map(c => (
-                  <FilterOption key={c} label={c} active={condition === c} onClick={() => setCondition(c)} />
-                ))}
-              </FilterSection>
+            <div className="h-px bg-main/8 mx-8 shrink-0" />
 
-              <FilterSection title="Location" last>
-                {locations.map(l => (
-                  <FilterOption key={l} label={l} active={location === l} onClick={() => setLocation(l)} />
-                ))}
-              </FilterSection>
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto px-8 py-8 space-y-10">
+
+              {/* Sort */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Sort By</p>
+                <div className="flex flex-col">
+                  {[
+                    { value: 'default', label: 'Featured' },
+                    { value: 'price-asc', label: 'Price: Low to High' },
+                    { value: 'price-desc', label: 'Price: High to Low' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setSortBy(opt.value)}
+                      className="flex items-center justify-between py-3.5 border-b border-main/6 group"
+                    >
+                      <span className={`text-sm transition-colors ${sortBy === opt.value ? 'font-semibold text-main' : 'text-main/50 group-hover:text-main'}`}>
+                        {opt.label}
+                      </span>
+                      {sortBy === opt.value && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Genre */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Genre</p>
+                <div className="flex flex-col">
+                  {genres.map(g => (
+                    <button
+                      key={g}
+                      onClick={() => setGenre(g)}
+                      className="flex items-center justify-between py-3.5 border-b border-main/6 group"
+                    >
+                      <span className={`text-sm transition-colors ${genre === g ? 'font-semibold text-main' : 'text-main/50 group-hover:text-main'}`}>
+                        {g}
+                      </span>
+                      {genre === g && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Condition */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Condition</p>
+                <div className="flex flex-col">
+                  {conditions.map(c => (
+                    <button
+                      key={c}
+                      onClick={() => setCondition(c)}
+                      className="flex items-center justify-between py-3.5 border-b border-main/6 group"
+                    >
+                      <span className={`text-sm transition-colors ${condition === c ? 'font-semibold text-main' : 'text-main/50 group-hover:text-main'}`}>
+                        {c}
+                      </span>
+                      {condition === c && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Location */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Location</p>
+                <div className="flex flex-col">
+                  {locations.map(l => (
+                    <button
+                      key={l}
+                      onClick={() => setLocation(l)}
+                      className="flex items-center justify-between py-3.5 border-b border-main/6 group"
+                    >
+                      <span className={`text-sm transition-colors ${location === l ? 'font-semibold text-main' : 'text-main/50 group-hover:text-main'}`}>
+                        {l}
+                      </span>
+                      {location === l && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Sticky footer */}
-            <div className="px-6 py-4 border-t gap-x-4 flex items-center border-third shrink-0">
+            {/* Footer */}
+            <div className="px-8 pt-4 pb-6 shrink-0 flex items-center gap-3">
               <button
                 onClick={clearFilters}
-                className="w-full bg-transparent border border-main text-main py-3 rounded-md font-semibold text-sm hover:bg-white/60 transition-colors"
+                className="flex-1 border border-main/15 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-main/50 hover:border-main/40 hover:text-main transition-colors"
               >
-                Clear all
+                Clear All
               </button>
               <button
-                onClick={() => setShowFilters(false)}
-                className="w-full bg-main text-white py-3 rounded-md font-semibold text-sm hover:bg-main/90 transition-colors"
+                onClick={closeFilters}
+                className="flex-1 bg-main text-white py-4 text-xs font-semibold uppercase tracking-[0.2em] hover:bg-main/90 transition-colors"
               >
-                Apply Filters
+                Show {filtered.length} {filtered.length === 1 ? 'Result' : 'Results'}
               </button>
             </div>
           </div>
@@ -264,43 +304,5 @@ function BrowseBooks() {
   )
 }
 
-function FilterSection({
-  title,
-  children,
-  last = false,
-}: {
-  title: string
-  children: React.ReactNode
-  last?: boolean
-}) {
-  return (
-    <div className={last ? '' : 'mb-6 pb-6 border-b border-third'}>
-      <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-secondary mb-3">{title}</p>
-      <div className="flex flex-col gap-0.5">{children}</div>
-    </div>
-  )
-}
-
-function FilterOption({
-  label,
-  active,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`text-sm text-left px-2 py-1.5 rounded-md transition-colors ${active
-        ? 'text-main font-semibold bg-secondary/15'
-        : 'text-main/55 hover:text-main hover:bg-third'
-        }`}
-    >
-      {label}
-    </button>
-  )
-}
 
 export default BrowseBooks
