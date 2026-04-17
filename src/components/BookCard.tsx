@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import type { Book } from '../data/mockData'
+import { useCart } from '../context/CartContext'
 
 interface BookCardProps {
   book: Book
@@ -140,6 +141,7 @@ function QuickViewModal({ book, onClose }: { book: Book; onClose: () => void }) 
 function BookCard({ book }: BookCardProps) {
   const [hovered, setHovered] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const { addToCart } = useCart()
 
   return (
     <>
@@ -177,10 +179,10 @@ function BookCard({ book }: BookCardProps) {
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              setShowModal(true)
+              addToCart(book.id)
             }}
           >
-            Quick View
+            Add to Cart
           </button>
         </div>
 
