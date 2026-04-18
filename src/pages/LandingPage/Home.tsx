@@ -292,64 +292,6 @@ function Home() {
         </div>
       </section>
 
-      {/* ── About ───────────────────────────────────────────────── */}
-      <section className="py-20 bg-third border-t border-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
-
-            {/* Text */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
-                Our Story
-              </p>
-              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl mb-6 leading-tight">
-                Books deserve a second life
-              </h2>
-              <p className="text-main/60 text-sm leading-relaxed mb-5">
-                Alakowe was born from a simple frustration — great books sitting on shelves, and readers across Nigeria who could never afford them new. We built a trusted marketplace where pre-loved books find new homes, and where every transaction is safe, inspected, and guaranteed.
-              </p>
-              <p className="text-main/60 text-sm leading-relaxed mb-8">
-                Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, Alakowe is the community for you.
-              </p>
-              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-main/10">
-                {[
-                  { value: '5,000+', label: 'Books Listed' },
-                  { value: '1,200+', label: 'Happy Readers' },
-                  { value: '24', label: 'States Covered' },
-                ].map(({ value, label }) => (
-                  <div key={label}>
-                    <p className="font-heading font-bold text-main text-2xl md:text-3xl">{value}</p>
-                    <p className="text-main/45 text-xs mt-1 leading-snug">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Visual panel */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-main/5 p-6 flex flex-col gap-3">
-                <div className="w-8 h-8 rounded-full bg-secondary/15 flex items-center justify-center">
-                  <BookOpen size={15} className="text-main" />
-                </div>
-                <h4 className="font-heading font-bold text-main text-base">Inspected Books</h4>
-                <p className="text-main/50 text-xs leading-relaxed">Every book is physically checked before dispatch — condition matches the listing, always.</p>
-              </div>
-              <div className="bg-main p-6 flex flex-col gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <Handshake size={15} className="text-white" />
-                </div>
-                <h4 className="font-heading font-bold text-white text-base">Escrow Protection</h4>
-                <p className="text-white/50 text-xs leading-relaxed">Your payment is held until you confirm receipt. Sellers get paid only when you're satisfied.</p>
-              </div>
-              <div className="bg-secondary/10 p-6 flex flex-col gap-3 col-span-2">
-                <h4 className="font-heading font-bold text-main text-base">Nationwide Delivery</h4>
-                <p className="text-main/50 text-xs leading-relaxed">We coordinate pickup from sellers and delivery to your door across 24 states in Nigeria. Fast, reliable, and tracked.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ── Book Requests ───────────────────────────────────────── */}
       <section className="py-20 bg-third border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
