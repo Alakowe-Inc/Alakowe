@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { BookOpen, Package, Wallet, TrendingUp, AlertCircle, Plus } from 'lucide-react'
+import { BookOpen, Package, Wallet, TrendingUp, AlertCircle, Plus, ArrowRight } from 'lucide-react'
 import { sellerListings, sellerOrders, sellerEarnings } from '../../../data/dashboardMockData'
 
 const fmt = (n: number) => `₦${n.toLocaleString()}`
