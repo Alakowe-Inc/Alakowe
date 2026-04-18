@@ -157,8 +157,8 @@ function BookCard({ book }: BookCardProps) {
           {book.badge && (
             <span
               className={`absolute top-3 left-3 z-10 text-[10px] font-semibold tracking-widest rounded-full uppercase px-2.5 py-1 ${book.badge === 'Best Value'
-                  ? 'bg-secondary/80 text-main'
-                  : 'bg-main text-white'
+                ? 'bg-secondary/80 text-main'
+                : 'bg-main text-white'
                 }`}
             >
               {book.badge}
@@ -195,8 +195,9 @@ function BookCard({ book }: BookCardProps) {
             {book.title}
           </h3>
           <p className="text-[13px] text-main mt-1">₦{book.price.toLocaleString()}</p>
-          <div className="mt-1.5">
-            <StarRating rating={book.sellerRating} />
+          <div className="flex items-center gap-1 mt-1.5 text-main/45">
+            <MapPin size={11} className="shrink-0" />
+            <span className="text-[10px] truncate">{book.location}</span>
           </div>
         </div>
       </Link>

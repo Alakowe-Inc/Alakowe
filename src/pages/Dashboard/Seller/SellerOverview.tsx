@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, BookOpen, Package, Wallet, TrendingUp, AlertCircle, Plus } from 'lucide-react'
+import { BookOpen, Package, Wallet, TrendingUp, AlertCircle, Plus } from 'lucide-react'
 import { sellerListings, sellerOrders, sellerEarnings } from '../../../data/dashboardMockData'
 
 const fmt = (n: number) => `₦${n.toLocaleString()}`
@@ -125,9 +125,9 @@ function SellerOverview() {
           </div>
           <Link
             to="/dashboard/seller/orders"
-            className="text-xs font-semibold text-amber-700 hover:text-amber-900 flex items-center gap-1 transition-colors shrink-0"
+            className="text-xs underline underline-offset-4 font-semibold text-amber-700 hover:text-amber-900 flex items-center gap-1 transition-colors shrink-0"
           >
-            Act now <ArrowRight size={12} />
+            Act now
           </Link>
         </div>
       )}
@@ -168,9 +168,9 @@ function SellerOverview() {
             <h2 className="font-heading font-semibold text-main text-[15px]">My Listings</h2>
             <Link
               to="/dashboard/seller/listings"
-              className="text-xs font-semibold text-secondary hover:text-main transition-colors flex items-center gap-1"
+              className="text-xs underline underline-offset-4 font-semibold text-secondary hover:text-main transition-colors flex items-center gap-1"
             >
-              View all <ArrowRight size={11} />
+              View all
             </Link>
           </div>
 

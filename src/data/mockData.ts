@@ -216,6 +216,24 @@ export const blogPosts: BlogPost[] = [
   },
 ]
 
+export interface BookRequest {
+  id: string
+  title: string
+  author?: string
+  requestCount: number
+  postedBy: string
+  daysAgo: number
+}
+
+export const bookRequests: BookRequest[] = [
+  { id: '1', title: 'Purple Hibiscus', author: 'Chimamanda Ngozi Adichie', requestCount: 14, postedBy: 'Amaka O.', daysAgo: 1 },
+  { id: '2', title: 'Rich Dad Poor Dad', author: 'Robert Kiyosaki', requestCount: 31, postedBy: 'Emeka T.', daysAgo: 2 },
+  { id: '3', title: 'The Alchemist', author: 'Paulo Coelho', requestCount: 22, postedBy: 'Chisom A.', daysAgo: 3 },
+  { id: '4', title: 'Atomic Habits', author: 'James Clear', requestCount: 19, postedBy: 'Bolu F.', daysAgo: 4 },
+  { id: '5', title: 'Half of a Yellow Sun', author: 'Chimamanda Ngozi Adichie', requestCount: 8, postedBy: 'Ngozi K.', daysAgo: 5 },
+  { id: '6', title: 'Why Nations Fail', requestCount: 5, postedBy: 'Hassan M.', daysAgo: 6 },
+]
+
 export const bookQuotes = [
   {
     quote:

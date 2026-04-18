@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Search, ShoppingCart, Handshake, BookOpen } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { blogPosts, bookQuotes, books } from '../../data/mockData'
+import { blogPosts, bookQuotes, bookRequests, books } from '../../data/mockData'
 import BookCard from '../../components/BookCard'
 import heroImage1 from '../../assets/media/images/Website landing page image (white bg).jpg'
 import heroImage2 from '../../assets/media/images/Tranquil Study with Cactus and Pastel Books.png'
@@ -92,6 +92,64 @@ function Home() {
               className={`rounded-full transition-all duration-300 ${i === slideIndex ? 'w-2.5 h-2.5 bg-white' : 'w-2 h-2 bg-white/40'}`}
             />
           ))}
+        </div>
+      </section>
+
+      {/* ── About ───────────────────────────────────────────────── */}
+      <section className="py-20 bg-third border-t border-third">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+
+            {/* Text */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
+                Our Story
+              </p>
+              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl mb-6 leading-tight">
+                Books deserve a second life
+              </h2>
+              <p className="text-main/60 text-sm leading-relaxed mb-5">
+                Alakowe is a Yoruba word used to describe an educated or literate person. Here, anyone who has ever felt connected to a book and wanted someone else to feel it too, is included.
+              </p>
+              {/* <p className="text-main/60 text-sm leading-relaxed mb-8">
+                Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, Alakowe is the community for you.
+              </p> */}
+              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-main/10">
+                {[
+                  { value: '5,000+', label: 'Books Listed' },
+                  { value: '1,200+', label: 'Happy Readers' },
+                  { value: '24', label: 'States Covered' },
+                ].map(({ value, label }) => (
+                  <div key={label}>
+                    <p className="font-heading font-bold text-main text-2xl md:text-3xl">{value}</p>
+                    <p className="text-main/45 text-xs mt-1 leading-snug">{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Visual panel */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-main/5 p-6 flex flex-col gap-3">
+                <div className="w-8 h-8 rounded-full bg-secondary/15 flex items-center justify-center">
+                  <BookOpen size={15} className="text-main" />
+                </div>
+                <h4 className="font-heading font-bold text-main text-base">Inspected Books</h4>
+                <p className="text-main/50 text-xs leading-relaxed">Every book is physically checked before dispatch — condition matches the listing, always.</p>
+              </div>
+              <div className="bg-main p-6 flex flex-col gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <Handshake size={15} className="text-white" />
+                </div>
+                <h4 className="font-heading font-bold text-white text-base">Escrow Protection</h4>
+                <p className="text-white/50 text-xs leading-relaxed">Your payment is held until you confirm receipt. Sellers get paid only when you're satisfied.</p>
+              </div>
+              <div className="bg-secondary/10 p-6 flex flex-col gap-3 col-span-2">
+                <h4 className="font-heading font-bold text-main text-base">Nationwide Delivery</h4>
+                <p className="text-main/50 text-xs leading-relaxed">We coordinate pickup from sellers and delivery to your door across 24 states in Nigeria. Fast, reliable, and tracked.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -229,6 +287,132 @@ function Home() {
               className="inline-flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
               Learn more
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── About ───────────────────────────────────────────────── */}
+      <section className="py-20 bg-third border-t border-third">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+
+            {/* Text */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
+                Our Story
+              </p>
+              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl mb-6 leading-tight">
+                Books deserve a second life
+              </h2>
+              <p className="text-main/60 text-sm leading-relaxed mb-5">
+                Alakowe was born from a simple frustration — great books sitting on shelves, and readers across Nigeria who could never afford them new. We built a trusted marketplace where pre-loved books find new homes, and where every transaction is safe, inspected, and guaranteed.
+              </p>
+              <p className="text-main/60 text-sm leading-relaxed mb-8">
+                Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, Alakowe is the community for you.
+              </p>
+              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-main/10">
+                {[
+                  { value: '5,000+', label: 'Books Listed' },
+                  { value: '1,200+', label: 'Happy Readers' },
+                  { value: '24', label: 'States Covered' },
+                ].map(({ value, label }) => (
+                  <div key={label}>
+                    <p className="font-heading font-bold text-main text-2xl md:text-3xl">{value}</p>
+                    <p className="text-main/45 text-xs mt-1 leading-snug">{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Visual panel */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-main/5 p-6 flex flex-col gap-3">
+                <div className="w-8 h-8 rounded-full bg-secondary/15 flex items-center justify-center">
+                  <BookOpen size={15} className="text-main" />
+                </div>
+                <h4 className="font-heading font-bold text-main text-base">Inspected Books</h4>
+                <p className="text-main/50 text-xs leading-relaxed">Every book is physically checked before dispatch — condition matches the listing, always.</p>
+              </div>
+              <div className="bg-main p-6 flex flex-col gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <Handshake size={15} className="text-white" />
+                </div>
+                <h4 className="font-heading font-bold text-white text-base">Escrow Protection</h4>
+                <p className="text-white/50 text-xs leading-relaxed">Your payment is held until you confirm receipt. Sellers get paid only when you're satisfied.</p>
+              </div>
+              <div className="bg-secondary/10 p-6 flex flex-col gap-3 col-span-2">
+                <h4 className="font-heading font-bold text-main text-base">Nationwide Delivery</h4>
+                <p className="text-main/50 text-xs leading-relaxed">We coordinate pickup from sellers and delivery to your door across 24 states in Nigeria. Fast, reliable, and tracked.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Book Requests ───────────────────────────────────────── */}
+      <section className="py-20 bg-third border-t border-third">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+
+          {/* Header */}
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
+                Community
+              </p>
+              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
+                Book Requests
+              </h2>
+              <p className="text-main/50 text-sm mt-2 max-w-md">
+                Can't find what you're looking for? Post a request — sellers will reach out if they have it.
+              </p>
+            </div>
+            <Link
+              to="/requests"
+              className="hidden md:flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+            >
+              View all requests
+            </Link>
+          </div>
+
+          {/* Request cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {bookRequests.map(req => (
+              <div key={req.id} className="bg-white p-5 flex flex-col gap-4">
+                <div className="flex-1">
+                  <h3 className="font-heading font-bold text-main text-base leading-snug">{req.title}</h3>
+                  {req.author && (
+                    <p className="text-xs text-main/45 mt-0.5">{req.author}</p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3 text-[11px]">
+                  <span className="font-semibold text-secondary">{req.requestCount} {req.requestCount === 1 ? 'person needs this' : 'people need this'}</span>
+                  <span className="text-main/35">{req.daysAgo === 1 ? '1 day ago' : `${req.daysAgo} days ago`}</span>
+                </div>
+
+                <div className="flex items-center gap-3 pt-1 border-t border-third">
+                  <button className="text-[11px] font-semibold tracking-widest uppercase bg-main text-white px-4 py-2 hover:bg-main/85 transition-colors shrink-0">
+                    Join Queue
+                  </button>
+                  <button className="text-[11px] font-semibold text-main/50 hover:text-secondary transition-colors underline underline-offset-2">
+                    I have this
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-between">
+            <p className="text-sm text-main/50">
+              Looking for a specific book? Let the community help you find it.
+            </p>
+            <Link
+              to="/requests/new"
+              className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3 text-[11px] tracking-widest uppercase hover:bg-main/85 transition-colors shrink-0"
+            >
+              Post a Request <ArrowRight size={13} />
             </Link>
           </div>
         </div>
