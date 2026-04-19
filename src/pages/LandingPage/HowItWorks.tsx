@@ -205,63 +205,32 @@ function HowItWorks() {
         </div>
       </section>
 
-      {/* ── FAQ teaser ──────────────────────────────────────────── */}
-      <section className="py-20 bg-white border-t border-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
-              Still have questions?
-            </p>
-            <h2 className="font-heading font-bold text-main text-3xl md:text-4xl mb-3">
-              Check our FAQ
-            </h2>
-            <p className="text-main/50 text-sm leading-relaxed max-w-md">
-              From delivery timelines to payment questions, we've answered the things people ask most.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-            <Link
-              to="/faq"
-              className="inline-flex items-center justify-center gap-2 border border-main text-main font-semibold px-8 py-3 text-xs tracking-widest uppercase hover:bg-main hover:text-white transition-all duration-200 rounded-full"
-            >
-              Read the FAQ
-            </Link>
-            <Link
-              to="/contact"
-              className="inline-flex items-center justify-center gap-2 border border-main/20 text-main font-semibold px-8 py-3 text-xs tracking-widest uppercase hover:border-main transition-all duration-200 rounded-full"
-            >
-              Contact Us
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* ── CTA ─────────────────────────────────────────────────── */}
       <section className="bg-main py-28">
         <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center text-center gap-8">
           <div>
             <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">
-              Ready to start?
+              Still have questions?
             </p>
             <h2 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-5">
-              Join thousands of readers across Nigeria.
+              Check our FAQ
             </h2>
             <p className="text-white/55 text-sm leading-relaxed">
-              Start buying and selling used books today — it's free to join and takes less than a minute.
+              From delivery timelines to payment questions, we've answered the things people ask most.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
-              to="/browse"
+              to="/faq"
               className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-full"
             >
-              Browse Books <ArrowRight size={14} />
+              Read the FAQ <ArrowRight size={14} />
             </Link>
             <Link
-              to="/login"
+              to="/contact"
               className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-full"
             >
-              Create Account
+              Contact Us
             </Link>
           </div>
         </div>
