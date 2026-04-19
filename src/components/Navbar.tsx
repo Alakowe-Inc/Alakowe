@@ -1,28 +1,36 @@
 import { useState, useRef, useEffect } from 'react'
-import { Search, User, ShoppingBag, Menu, X, Plus } from 'lucide-react'
-import { Link, NavLink } from 'react-router-dom'
+import { Search, User, ShoppingBag, Menu, X, ArrowRight, LogOut, Settings, BookOpen, Wallet, Bell } from 'lucide-react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import logo from '../assets/media/logos/logo.png'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 
 const navLinks = [
+  { label: 'Sell', to: '/sell' },
   { label: 'How it works', to: '/how-it-works' },
   { label: 'Blog', to: '/blog' },
   { label: 'Contact', to: '/contact' },
 ]
 
-const utilityLinks = [
-  { label: 'Login', to: '/login' },
-  { label: 'Customer Service', to: '/customer-service' },
-  { label: 'Shipping & Returns', to: '/shipping' },
-]
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [desktopSearchOpen, setDesktopSearchOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const desktopSearchInputRef = useRef<HTMLInputElement>(null)
+  const accountDropdownRef = useRef<HTMLDivElement>(null)
   const focusOnOpenRef = useRef(false)
   const { count } = useCart()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  function handleLogout() {
+    logout()
+    setAccountOpen(false)
+    setMenuOpen(false)
+    navigate('/')
+  }
 
   useEffect(() => {
     if (menuOpen && focusOnOpenRef.current) {
@@ -39,10 +47,20 @@ function Navbar() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setDesktopSearchOpen(false)
+      if (e.key === 'Escape') { setDesktopSearchOpen(false); setAccountOpen(false) }
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (accountDropdownRef.current && !accountDropdownRef.current.contains(e.target as Node)) {
+        setAccountOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   return (
@@ -95,10 +113,73 @@ function Navbar() {
             >
               <Search size={20} />
             </button>
-            {/* Desktop only */}
-            <Link to="/login" aria-label="Account" className="hidden lg:block text-main hover:text-secondary transition-colors">
-              <User size={20} />
-            </Link>
+            {/* Desktop only — account */}
+            <div ref={accountDropdownRef} className="hidden lg:block relative">
+              {user ? (
+                <>
+                  <button
+                    onClick={() => setAccountOpen(v => !v)}
+                    aria-label="Account"
+                    className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white text-xs font-bold uppercase hover:bg-secondary/85 transition-colors"
+                  >
+                    {user.email[0]}
+                  </button>
+                  {accountOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-60 bg-white border border-third rounded-2xl shadow-xl overflow-hidden z-50">
+                      {/* Header */}
+                      <div className="px-4 py-3 bg-third/50">
+                        <p className="text-[11px] text-main/40 font-medium uppercase tracking-wide mb-0.5">Signed in as</p>
+                        <p className="text-sm font-semibold text-main truncate">{user.email}</p>
+                      </div>
+                      {/* Account links */}
+                      <div className="py-1">
+                        <Link
+                          to="/account"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
+                        >
+                          <Settings size={15} className="text-main/40 shrink-0" /> My Profile
+                        </Link>
+                        <Link
+                          to="/my-listings"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
+                        >
+                          <BookOpen size={15} className="text-main/40 shrink-0" /> My Listings
+                        </Link>
+                        <Link
+                          to="/my-earnings"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
+                        >
+                          <Wallet size={15} className="text-main/40 shrink-0" /> My Earnings
+                        </Link>
+                        <Link
+                          to="/my-requests"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
+                        >
+                          <Bell size={15} className="text-main/40 shrink-0" /> My Requests
+                        </Link>
+                      </div>
+                      {/* Sign out — separated */}
+                      <div className="border-t border-third py-1">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors text-left"
+                        >
+                          <LogOut size={15} className="text-main/40 shrink-0" /> Sign out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link to="/login" aria-label="Account" className="text-main hover:text-secondary transition-colors">
+                  <User size={20} />
+                </Link>
+              )}
+            </div>
             {/* Cart */}
             <Link to="/cart" aria-label="Cart" className="relative flex items-center gap-1 text-main hover:text-secondary transition-colors">
               <ShoppingBag size={20} />
@@ -169,23 +250,79 @@ function Navbar() {
                 className="flex items-center justify-between px-5 py-5 border-b border-third text-xs uppercase tracking-widest font-semibold text-main hover:text-secondary transition-colors"
               >
                 {label}
-                <Plus size={16} className="text-main/50 shrink-0" />
+                <ArrowRight size={16} className="text-main/50 shrink-0" />
               </NavLink>
             ))}
           </nav>
 
-          {/* Utility links */}
-          <div className="mt-auto px-5 pb-10 flex flex-col gap-4">
-            {utilityLinks.map(({ label, to }) => (
+          {/* Account / utility section */}
+          <div className="mt-auto border-t border-third">
+            {user ? (
+              <>
+                <div className="px-5 py-3.5 bg-third/50">
+                  <p className="text-[11px] text-main/40 font-medium uppercase tracking-wide mb-0.5">Signed in as</p>
+                  <p className="text-sm font-semibold text-main truncate">{user.email}</p>
+                </div>
+                <NavLink
+                  to="/account"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                >
+                  <Settings size={16} className="text-main/40 shrink-0" /> My Profile
+                </NavLink>
+                <NavLink
+                  to="/my-listings"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                >
+                  <BookOpen size={16} className="text-main/40 shrink-0" /> My Listings
+                </NavLink>
+                <NavLink
+                  to="/my-earnings"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                >
+                  <Wallet size={16} className="text-main/40 shrink-0" /> My Earnings
+                </NavLink>
+                <NavLink
+                  to="/my-requests"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                >
+                  <Bell size={16} className="text-main/40 shrink-0" /> My Requests
+                </NavLink>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors text-left"
+                >
+                  <LogOut size={16} className="text-main/40 shrink-0" /> Sign out
+                </button>
+              </>
+            ) : (
               <NavLink
-                key={to}
-                to={to}
+                to="/login"
                 onClick={() => setMenuOpen(false)}
-                className="text-sm text-main hover:text-secondary transition-colors"
+                className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
               >
-                {label}
+                <User size={16} className="text-main/40 shrink-0" /> Login
               </NavLink>
-            ))}
+            )}
+            <div className="px-5 pt-4 pb-10 flex flex-col gap-3">
+              <NavLink
+                to="/customer-service"
+                onClick={() => setMenuOpen(false)}
+                className="text-sm text-main/50 hover:text-secondary transition-colors"
+              >
+                Customer Service
+              </NavLink>
+              <NavLink
+                to="/shipping"
+                onClick={() => setMenuOpen(false)}
+                className="text-sm text-main/50 hover:text-secondary transition-colors"
+              >
+                Shipping & Returns
+              </NavLink>
+            </div>
           </div>
 
         </div>

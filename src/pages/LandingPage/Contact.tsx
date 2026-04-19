@@ -86,7 +86,7 @@ function Contact() {
                       placeholder="Your full name"
                       value={form.name}
                       onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                      className="w-full bg-third border border-third rounded-md px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
+                      className="w-full bg-third border border-third rounded-full px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
                     />
                   </div>
                   <div>
@@ -99,7 +99,7 @@ function Contact() {
                       placeholder="your@email.com"
                       value={form.email}
                       onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                      className="w-full bg-third border border-third rounded-md px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
+                      className="w-full bg-third border border-third rounded-full px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
                     />
                   </div>
                   <div>
@@ -112,12 +112,12 @@ function Contact() {
                       rows={6}
                       value={form.message}
                       onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                      className="w-full bg-third border border-third rounded-md px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors resize-none"
+                      className="w-full bg-third border border-third rounded-full px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors resize-none"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="bg-main text-white font-semibold px-7 py-3.5 rounded-md hover:bg-main/90 transition-colors text-sm"
+                    className="bg-main text-white font-semibold px-7 py-3.5 rounded-full hover:bg-main/90 transition-colors text-sm"
                   >
                     Send Message
                   </button>

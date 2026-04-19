@@ -1,7 +1,8 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Search, ShoppingCart, Handshake, BookOpen } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { blogPosts, bookQuotes, bookRequests, books } from '../../data/mockData'
+import { useAuth } from '../../context/AuthContext'
 import BookCard from '../../components/BookCard'
 import heroImage1 from '../../assets/media/images/Website landing page image (white bg).jpg'
 import heroImage2 from '../../assets/media/images/Tranquil Study with Cactus and Pastel Books.png'
@@ -11,9 +12,21 @@ const heroSlides = [heroImage1, heroImage2, heroImage3]
 const featuredBooks = books.slice(0, 8)
 
 function Home() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [slideIndex, setSlideIndex] = useState(0)
   const [quoteIndex, setQuoteIndex] = useState(0)
   const [visible, setVisible] = useState(true)
+
+  function handleJoinQueue(title: string, author?: string) {
+    const params = new URLSearchParams({ title })
+    if (author) params.set('author', author)
+    navigate(user ? `/request?${params}` : `/login?redirect=/request?${params}`)
+  }
+
+  function handleIHaveThis() {
+    navigate(user ? '/list' : '/login?redirect=/list')
+  }
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -70,13 +83,13 @@ function Home() {
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <Link
               to="/browse"
-              className="w-full sm:w-auto inline-flex justify-center items-center border border-white text-white font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white hover:text-main transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase"
+              className="w-full sm:w-auto inline-flex justify-center items-center border border-white text-white font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white hover:text-main transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase rounded-full"
             >
               Browse Books
             </Link>
             <Link
               to="/list"
-              className="w-full sm:w-auto inline-flex justify-center items-center border border-white bg-white text-main font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white/85 transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase"
+              className="w-full sm:w-auto inline-flex justify-center items-center border border-white bg-white text-main font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white/85 transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase rounded-full"
             >
               List a Book
             </Link>
@@ -229,7 +242,7 @@ function Home() {
               </h2>
             </div>
             <Link
-              to="/browse"
+              to="/how-it-works"
               className="hidden md:flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
               Learn more
@@ -283,7 +296,7 @@ function Home() {
 
           <div className="mt-10 text-center md:hidden">
             <Link
-              to="/browse"
+              to="/how-it-works"
               className="inline-flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
               Learn more
@@ -334,10 +347,16 @@ function Home() {
                 </div>
 
                 <div className="flex items-center gap-3 pt-1 border-t border-third">
-                  <button className="text-[11px] font-semibold tracking-widest uppercase bg-main text-white px-4 py-2 hover:bg-main/85 transition-colors shrink-0">
+                  <button
+                    onClick={() => handleJoinQueue(req.title, req.author)}
+                    className="text-[11px] font-semibold tracking-widest uppercase bg-main text-white px-4 py-2 hover:bg-main/85 transition-colors shrink-0 rounded-full"
+                  >
                     Join Queue
                   </button>
-                  <button className="text-[11px] font-semibold text-main/50 hover:text-secondary transition-colors underline underline-offset-2">
+                  <button
+                    onClick={handleIHaveThis}
+                    className="text-[11px] font-semibold text-main/50 hover:text-secondary transition-colors underline underline-offset-2"
+                  >
                     I have this
                   </button>
                 </div>
@@ -351,8 +370,8 @@ function Home() {
               Looking for a specific book? Let the community help you find it.
             </p>
             <Link
-              to="/requests/new"
-              className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3 text-[11px] tracking-widest uppercase hover:bg-main/85 transition-colors shrink-0"
+              to="/request"
+              className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3 text-[11px] tracking-widest uppercase hover:bg-main/85 transition-colors shrink-0 rounded-full"
             >
               Post a Request <ArrowRight size={13} />
             </Link>
@@ -439,13 +458,13 @@ function Home() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to="/browse"
-              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-full"
             >
               Browse Books <ArrowRight size={14} />
             </Link>
             <Link
-              to="/register"
-              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors"
+              to="/login"
+              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-full"
             >
               Create Account
             </Link>

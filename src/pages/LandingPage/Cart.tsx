@@ -26,7 +26,7 @@ function Cart() {
           </p>
           <Link
             to="/browse"
-            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-md hover:bg-main/90 transition-colors text-sm"
+            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-full hover:bg-main/90 transition-colors text-sm"
           >
             Browse Books
           </Link>
@@ -69,7 +69,7 @@ function Cart() {
                 {/* Book cover */}
                 <Link to={`/books/${book.id}`} className="shrink-0">
                   <div
-                    className="w-16 h-24 rounded-md shadow-md flex items-end justify-center pb-2"
+                    className="w-16 h-24 rounded-full shadow-md flex items-end justify-center pb-2"
                     style={{ backgroundColor: book.coverColor }}
                   >
                     <div className="w-10 h-px bg-white/40 rounded" />
@@ -105,14 +105,14 @@ function Cart() {
                       <button
                         onClick={() => updateQuantity(book.id, quantity - 1)}
                         disabled={quantity <= 1}
-                        className="w-7 h-7 rounded-md border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="w-7 h-7 rounded-full border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <Minus size={12} />
                       </button>
                       <span className="text-sm font-semibold text-main w-4 text-center">{quantity}</span>
                       <button
                         onClick={() => updateQuantity(book.id, quantity + 1)}
-                        className="w-7 h-7 rounded-md border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors"
+                        className="w-7 h-7 rounded-full border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors"
                       >
                         <Plus size={12} />
                       </button>
@@ -158,9 +158,12 @@ function Cart() {
                 </p>
               </div>
 
-              <button className="w-full bg-main text-white font-semibold py-3.5 rounded-md hover:bg-main/90 transition-colors text-sm mb-3">
+              <Link
+                to="/checkout"
+                className="block w-full bg-main text-white font-semibold py-3.5 rounded-full hover:bg-main/90 transition-colors text-sm mb-3 text-center"
+              >
                 Proceed to Checkout
-              </button>
+              </Link>
 
               <Link
                 to="/browse"

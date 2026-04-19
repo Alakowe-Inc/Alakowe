@@ -118,7 +118,7 @@ function QuickViewModal({ book, onClose }: { book: Book; onClose: () => void }) 
 
           {/* CTA */}
           <button
-            className="mt-5 sm:mt-6 w-full bg-secondary text-white font-semibold py-3 rounded-md text-sm tracking-wide hover:bg-secondary/90 transition-colors"
+            className="mt-5 sm:mt-6 w-full bg-secondary text-white font-semibold py-3 rounded-full text-sm tracking-wide hover:bg-secondary/90 transition-colors"
             onClick={() => navigate(`/books/${book.id}`)}
           >
             Add to Cart

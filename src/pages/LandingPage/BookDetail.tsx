@@ -114,7 +114,7 @@ function BookDetail() {
               </div>
               <button
                 onClick={() => addToCart(book.id)}
-                className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3.5 rounded-md hover:bg-main/90 transition-colors text-sm"
+                className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3.5 rounded-full hover:bg-main/90 transition-colors text-sm"
               >
                 <ShoppingBag size={17} />
                 Add to Cart

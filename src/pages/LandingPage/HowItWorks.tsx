@@ -163,7 +163,7 @@ function HowItWorks() {
               </h2>
             </div>
             <Link
-              to="/register"
+              to="/login"
               className="hidden md:flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors shrink-0"
             >
               Start Selling
@@ -171,7 +171,7 @@ function HowItWorks() {
           </div>
           <StepGrid steps={sellerSteps} />
           <div className="mt-10 text-center md:hidden">
-            <Link to="/register" className="inline-flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors">
+            <Link to="/login" className="inline-flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors">
               Start Selling
             </Link>
           </div>
@@ -222,13 +222,13 @@ function HowItWorks() {
           <div className="flex flex-col sm:flex-row gap-3 shrink-0">
             <Link
               to="/faq"
-              className="inline-flex items-center justify-center gap-2 border border-main text-main font-semibold px-8 py-3 text-xs tracking-widest uppercase hover:bg-main hover:text-white transition-all duration-200"
+              className="inline-flex items-center justify-center gap-2 border border-main text-main font-semibold px-8 py-3 text-xs tracking-widest uppercase hover:bg-main hover:text-white transition-all duration-200 rounded-full"
             >
               Read the FAQ
             </Link>
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center gap-2 border border-main/20 text-main font-semibold px-8 py-3 text-xs tracking-widest uppercase hover:border-main transition-all duration-200"
+              className="inline-flex items-center justify-center gap-2 border border-main/20 text-main font-semibold px-8 py-3 text-xs tracking-widest uppercase hover:border-main transition-all duration-200 rounded-full"
             >
               Contact Us
             </Link>
@@ -253,13 +253,13 @@ function HowItWorks() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to="/browse"
-              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-full"
             >
               Browse Books <ArrowRight size={14} />
             </Link>
             <Link
-              to="/register"
-              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors"
+              to="/login"
+              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-full"
             >
               Create Account
             </Link>

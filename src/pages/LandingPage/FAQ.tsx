@@ -2,66 +2,158 @@ import { useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-const faqs = [
+const faqs: { section: string; id: string; questions: { q: string; a: React.ReactNode }[] }[] = [
   {
-    section: 'Buying',
-    id: 'buying',
+    section: 'For Buyers',
+    id: 'buyers',
     questions: [
       {
-        q: 'How does buying work?',
-        a: "Browse our catalog, add books to your cart, and checkout. Your payment is held securely in escrow until you confirm you've received your book in good condition. Only then is the seller paid.",
+        q: 'How do I buy a book?',
+        a: (
+          <ol className="list-decimal list-inside space-y-1.5">
+            <li>Browse books by title, author, or category</li>
+            <li>Select a book, view conditions and details</li>
+            <li>Add to cart and make payment</li>
+            <li>Seller drops the book at an Alákòwé collection centre closest to them or requests a home pickup</li>
+            <li>We verify, pick up, and process delivery to you</li>
+            <li>You can track your order status anytime</li>
+          </ol>
+        ),
+      },
+      {
+        q: 'How does payment work?',
+        a: (
+          <div className="space-y-2">
+            <p>When you pay for a book:</p>
+            <ul className="list-disc list-inside space-y-1.5">
+              <li>Your payment is held securely by Alákòwé</li>
+              <li>The seller is <strong>not paid immediately</strong></li>
+              <li>Payment is only released after you confirm delivery</li>
+            </ul>
+            <p className="mt-2">This protects you from receiving the wrong or damaged book.</p>
+          </div>
+        ),
       },
       {
         q: 'How long does delivery take?',
-        a: 'Estimated delivery is 3–7 business days. This covers the time for the seller to drop off the book at our collection centre, our team to inspect and process it, and delivery to your address.',
+        a: 'Typically 2–8 working days depending on your location. Home delivery goes directly to your address, and your order comes as ONE delivery even if you buy from multiple sellers.',
       },
       {
-        q: "What if my book doesn't arrive or is in worse condition than described?",
-        a: "You can report an issue after delivery. Our team will investigate and arrange a refund if needed. Your payment is always protected until you confirm satisfaction.",
+        q: 'What if something is wrong with my order?',
+        a: (
+          <div className="space-y-2">
+            <p>If your order is not as expected:</p>
+            <ul className="list-disc list-inside space-y-1.5">
+              <li>Click <strong>"Report Issue"</strong> on your order page within 12 hours to raise a dispute — if the wrong book was delivered, the condition is significantly worse than described, or the edition differs from the listing</li>
+              <li>Upload photos and describe the issue</li>
+              <li>Our team will review and resolve it</li>
+              <li>Or email us at <a href="mailto:thealakowe@gmail.com" className="text-secondary hover:underline">thealakowe@gmail.com</a></li>
+            </ul>
+            <p className="mt-2 text-main/40 text-xs">Note: Disputes will not be upheld if you simply changed your mind, or if the book has minor wear consistent with the listed condition. Please read listings carefully before buying.</p>
+          </div>
+        ),
       },
       {
-        q: 'Do I need an account to buy?',
-        a: "You'll need an account to checkout. However, order status updates are sent via email with secure links — you won't need to log in again to track your order.",
-      },
-    ],
-  },
-  {
-    section: 'Selling',
-    id: 'selling',
-    questions: [
-      {
-        q: 'How does selling work?',
-        a: 'Create an account, list your book with photos and details, and wait for our team to review and approve it (within 24 hours). Once approved, your book goes live on the platform.',
+        q: 'Can I return a book?',
+        a: 'Yes, you can report an issue with your book within 12 hours if the order does not meet the stated conditions on our site. Our team will assist.',
       },
       {
-        q: 'When will I get paid?',
-        a: "Payment is released from escrow once the buyer confirms they've received the book in good condition, or after the dispute window passes. You'll receive a notification when funds are released.",
+        q: 'Are the books new or used?',
+        a: 'Most books are pre-owned but in good condition. Each listing clearly states the condition.',
       },
       {
-        q: 'How do I send the book to the buyer?',
-        a: 'You choose: drop the book at one of our collection centres (free), or request that we pick it up from you (a convenience fee applies, deducted from your payout). We handle the rest.',
-      },
-      {
-        q: 'What happens if my listing is rejected?',
-        a: "We'll tell you exactly why — whether it's pricing, photo quality, or wrong category — and give you the opportunity to edit and resubmit.",
+        q: 'How do I know the book is genuine?',
+        a: 'All books go through a basic verification process before delivery.',
       },
     ],
   },
   {
-    section: 'Payment & Refunds',
-    id: 'payment',
+    section: 'For Sellers',
+    id: 'sellers',
     questions: [
       {
-        q: 'Is my payment secure?',
-        a: 'Yes. All payments are processed through our secure payment gateway and held in escrow. Neither party can access funds until the transaction is complete.',
+        q: 'How do I sell a book?',
+        a: (
+          <ol className="list-decimal list-inside space-y-1.5">
+            <li>Create a listing (title, conditions, price, photos)</li>
+            <li>Submit for review</li>
+            <li>Once approved, your book goes live</li>
+            <li>A buyer places an order</li>
+            <li>You are notified immediately on the next steps</li>
+          </ol>
+        ),
       },
       {
-        q: 'What payment methods are accepted?',
-        a: 'We accept debit cards, bank transfers, and other popular Nigerian payment methods via our payment gateway.',
+        q: 'How does the listing approval process work?',
+        a: (
+          <ul className="list-disc list-inside space-y-1.5">
+            <li>All listings are reviewed before going live</li>
+            <li>This helps maintain quality and trust</li>
+            <li>You will be notified once your book is approved</li>
+          </ul>
+        ),
       },
       {
-        q: 'How long does a refund take?',
-        a: 'Refunds are typically processed within 5–10 business days, depending on your bank.',
+        q: 'What happens when my book sells?',
+        a: (
+          <ul className="list-disc list-inside space-y-1.5">
+            <li>You receive a notification from us in-app and by email</li>
+            <li>You prepare the book for drop-off or pickup</li>
+            <li>The buyer's payment is secured in escrow</li>
+          </ul>
+        ),
+      },
+      {
+        q: 'How do I send the book?',
+        a: (
+          <div className="space-y-3">
+            <div>
+              <p className="font-semibold mb-1">Drop-Off</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Select a nearby drop-off centre</li>
+                <li>Take your book there with your unique drop-off code</li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-semibold mb-1">Pickup Request</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Enter your address and schedule a pickup</li>
+                <li>A logistics partner will collect the book</li>
+                <li>A small convenience fee may apply</li>
+              </ul>
+            </div>
+          </div>
+        ),
+      },
+      {
+        q: 'How do I get paid?',
+        a: (
+          <div className="space-y-2">
+            <ul className="list-disc list-inside space-y-1.5">
+              <li>Payment is held securely when the buyer pays</li>
+              <li>Book is delivered to the buyer</li>
+              <li>Buyer confirms receipt</li>
+              <li>Funds are released to you</li>
+            </ul>
+            <p className="mt-2">Payments are made to your registered bank account.</p>
+          </div>
+        ),
+      },
+      {
+        q: 'Can I edit my listing?',
+        a: 'Yes, you can update your listing before or after it goes live.',
+      },
+      {
+        q: 'What kind of books can I sell?',
+        a: 'Fiction, academic, and non-fiction books in acceptable condition.',
+      },
+      {
+        q: 'What if my book is not approved?',
+        a: 'You will receive feedback on what to adjust.',
+      },
+      {
+        q: 'How fast can my book sell?',
+        a: 'It depends on demand, pricing, and condition.',
       },
     ],
   },
@@ -70,16 +162,24 @@ const faqs = [
     id: 'safety',
     questions: [
       {
-        q: 'How does Alakowe ensure book quality?',
-        a: 'All listings are reviewed by our team before going live. We also physically inspect books when they arrive at our collection centre before dispatching them to buyers.',
+        q: 'Is my money safe?',
+        a: 'Yes. All payments are held securely and only released after delivery is confirmed.',
       },
       {
-        q: 'What do the condition ratings mean?',
-        a: 'Very Good: minimal wear, reads like new. Good: some visible use but fully intact. Average: noticeable wear, all pages present. Below Average: heavy wear but still readable.',
+        q: 'What if a seller doesn\'t send the book?',
+        a: 'If the seller fails to fulfil the order, your payment will not be released and you will be refunded.',
       },
       {
-        q: 'How do I report a problem?',
-        a: "Use the \"There's an issue\" button in your delivery confirmation email, or contact us via the Contact page. Our team reviews all disputes within 48 hours.",
+        q: 'What if the buyer doesn\'t confirm delivery?',
+        a: 'Alákòwé monitors delivery status and ensures fair resolution before releasing funds.',
+      },
+      {
+        q: 'How do you handle disputes?',
+        a: 'We review evidence from both sides and make a fair decision based on our policies.',
+      },
+      {
+        q: 'Can I trust Alákòwé?',
+        a: 'Alákòwé is built to ensure safe transactions through escrow payments, structured logistics, and verified order handling.',
       },
     ],
   },
@@ -185,13 +285,13 @@ function FAQ() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-full"
             >
               Contact Us <ArrowRight size={14} />
             </Link>
             <Link
               to="/browse"
-              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors"
+              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-full"
             >
               Browse Books
             </Link>

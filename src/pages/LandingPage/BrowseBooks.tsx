@@ -286,13 +286,13 @@ function BrowseBooks() {
             <div className="px-8 pt-4 pb-6 shrink-0 flex items-center gap-3">
               <button
                 onClick={clearFilters}
-                className="flex-1 border border-main/15 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-main/50 hover:border-main/40 hover:text-main transition-colors"
+                className="flex-1 border border-main/15 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-main/50 hover:border-main/40 hover:text-main transition-colors rounded-full"
               >
                 Clear All
               </button>
               <button
                 onClick={closeFilters}
-                className="flex-1 bg-main text-white py-4 text-xs font-semibold uppercase tracking-[0.2em] hover:bg-main/90 transition-colors"
+                className="flex-1 bg-main text-white py-4 text-xs font-semibold uppercase tracking-[0.2em] hover:bg-main/90 transition-colors rounded-full"
               >
                 Show {filtered.length} {filtered.length === 1 ? 'Result' : 'Results'}
               </button>
