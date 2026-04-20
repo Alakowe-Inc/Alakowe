@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { User, CreditCard, AlertTriangle, Check } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { savePublicSellerProfile } from '../../data/sellerData'
 
 const NIGERIAN_STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -25,6 +26,7 @@ const PROFILE_KEY = 'alakowe_profile'
 
 interface ProfileData {
   fullName: string
+  username?: string
   phone: string
   city: string
   state: string
@@ -49,9 +51,8 @@ function loadProfile(): ProfileData {
 }
 
 function inputClass(hasError?: boolean) {
-  return `w-full border rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors bg-white ${
-    hasError ? 'border-red-400' : 'border-main/15'
-  }`
+  return `w-full border rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors bg-white ${hasError ? 'border-red-400' : 'border-main/15'
+    }`
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -73,18 +74,24 @@ export default function Profile() {
   const [saved, setSaved] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  useEffect(() => {
-    setSaved(false)
-  }, [profile])
-
   function set(field: keyof ProfileData) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      setSaved(false)
       setProfile(p => ({ ...p, [field]: e.target.value }))
+    }
   }
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile))
+    savePublicSellerProfile({
+      email: user!.email,
+      fullName: profile.fullName,
+      username: profile.username,
+      city: profile.city,
+      state: profile.state,
+      bio: profile.bio,
+    })
     setSaved(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -143,6 +150,17 @@ export default function Profile() {
                     placeholder="e.g. Amaka Okonkwo"
                     value={profile.fullName}
                     onChange={set('fullName')}
+                    className={inputClass()}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-2">
+                <Field label="Username (optional)">
+                  <input
+                    type="text"
+                    placeholder="e.g. amaka_reads"
+                    value={profile.username ?? ''}
+                    onChange={set('username')}
                     className={inputClass()}
                   />
                 </Field>

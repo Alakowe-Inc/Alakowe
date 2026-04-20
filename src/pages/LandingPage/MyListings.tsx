@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { PlusCircle, Pencil, Trash2, BookOpen, TrendingUp, Wallet, ShoppingBag } from 'lucide-react'
+import { PlusCircle, Pencil, Trash2, BookOpen, TrendingUp, Wallet, ShoppingBag, Share2, Check } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import {
   getSellerListings,
@@ -29,6 +29,18 @@ export default function MyListings() {
   const { user } = useAuth()
   const [listings, setListings] = useState<Listing[]>([])
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  const storeUrl = user
+    ? `${window.location.origin}/store/${encodeURIComponent(user.email)}`
+    : ''
+
+  function copyStoreLink() {
+    navigator.clipboard.writeText(storeUrl).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   useEffect(() => {
     if (user) setListings(getSellerListings(user.email))
@@ -68,6 +80,26 @@ export default function MyListings() {
           <StatCard icon={TrendingUp} label="Live" value={live} sub="Visible to buyers" />
           <StatCard icon={ShoppingBag} label="Sold" value={sold} />
           <StatCard icon={Wallet} label="Under Review" value={pending} sub="Within 24hrs" />
+        </div>
+
+        {/* Share My Store */}
+        <div className="bg-white rounded-2xl border border-third p-5 mb-8">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="font-heading font-bold text-main text-sm">My Store</p>
+              <p className="text-xs text-main/50 mt-0.5">Share this link — buyers can browse all your live books</p>
+            </div>
+            <button
+              onClick={copyStoreLink}
+              className="flex items-center gap-2 bg-main text-white font-semibold text-xs px-4 py-2.5 rounded-full hover:bg-main/90 transition-colors shrink-0"
+            >
+              {copied ? <Check size={13} /> : <Share2 size={13} />}
+              {copied ? 'Copied!' : 'Copy Link'}
+            </button>
+          </div>
+          <div className="mt-3 bg-third rounded-xl px-4 py-2.5 text-xs text-main/50 font-mono break-all">
+            {storeUrl}
+          </div>
         </div>
 
         {/* Quick links */}

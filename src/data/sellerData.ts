@@ -56,12 +56,16 @@ export interface Listing {
 export interface SellerOrder {
   id: string
   orderId: string
+  linkedOrderId?: string
   bookTitle: string
   buyerInitials: string
   saleAmount: number
   platformFee: number
   netAmount: number
   status: 'awaiting_seller' | 'dropoff_scheduled' | 'received_by_alakowe' | 'dispatched' | 'delivered' | 'confirmed'
+  dropoffCode?: string
+  dropoffLocation?: string
+  pickupSlot?: string
   createdAt: string
 }
 
@@ -73,6 +77,38 @@ export interface Earning {
   netAmount: number
   status: 'pending' | 'released'
   createdAt: string
+}
+
+/* ── Public seller profile ── */
+
+export interface PublicSellerProfile {
+  email: string
+  fullName: string
+  username?: string
+  city: string
+  state: string
+  bio: string
+}
+
+const SELLER_PROFILES_KEY = 'alakowe_seller_profiles'
+
+export function savePublicSellerProfile(profile: PublicSellerProfile): void {
+  try {
+    const raw = localStorage.getItem(SELLER_PROFILES_KEY)
+    const all = raw ? JSON.parse(raw) : {}
+    all[profile.email] = profile
+    localStorage.setItem(SELLER_PROFILES_KEY, JSON.stringify(all))
+  } catch {}
+}
+
+export function getPublicSellerProfile(email: string): PublicSellerProfile | null {
+  try {
+    const raw = localStorage.getItem(SELLER_PROFILES_KEY)
+    const all = raw ? JSON.parse(raw) : {}
+    return all[email] ?? null
+  } catch {
+    return null
+  }
 }
 
 /* ── localStorage helpers ── */
@@ -123,12 +159,59 @@ export function generateListingId(): string {
   )
 }
 
+/* ── Seller order localStorage helpers ── */
+
+const SELLER_ORDERS_KEY = 'alakowe_seller_orders'
+
+export function saveSellerOrder(order: SellerOrder): void {
+  const all = getAllSellerOrders()
+  all[order.id] = order
+  localStorage.setItem(SELLER_ORDERS_KEY, JSON.stringify(all))
+}
+
+export function getSellerOrder(id: string): SellerOrder | null {
+  return getAllSellerOrders()[id] ?? null
+}
+
+export function getAllSellerOrders(): Record<string, SellerOrder> {
+  try {
+    const raw = localStorage.getItem(SELLER_ORDERS_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+export function updateSellerOrderStatus(
+  id: string,
+  status: SellerOrder['status'],
+  extra?: Partial<SellerOrder>,
+): void {
+  const order = getSellerOrder(id)
+  if (order) saveSellerOrder({ ...order, status, ...extra })
+}
+
+export function generateDropoffCode(): string {
+  return (
+    'DO-' +
+    Date.now().toString(36).toUpperCase().slice(-3) +
+    Math.random().toString(36).substring(2, 5).toUpperCase()
+  )
+}
+
+export function seedSellerOrders(): void {
+  const existing = getAllSellerOrders()
+  if (Object.keys(existing).length > 0) return
+  MOCK_SELLER_ORDERS.forEach(o => saveSellerOrder(o))
+}
+
 /* ── Demo data shown on seller orders & earnings pages ── */
 
 export const MOCK_SELLER_ORDERS: SellerOrder[] = [
   {
     id: 'so-1',
     orderId: 'ORD-DEMO01',
+    linkedOrderId: 'ORD-DEMO01',
     bookTitle: 'Things Fall Apart',
     buyerInitials: 'AO',
     saleAmount: 2500,

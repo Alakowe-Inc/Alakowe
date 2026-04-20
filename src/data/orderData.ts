@@ -105,3 +105,32 @@ export function generateOrderId(): string {
     Math.random().toString(36).substring(2, 5).toUpperCase()
   )
 }
+
+export function seedDemoOrder(): void {
+  if (getOrder('ORD-DEMO01')) return
+  const demo: Order = {
+    id: 'ORD-DEMO01',
+    items: [
+      {
+        bookId: 'demo-1',
+        title: 'Things Fall Apart',
+        author: 'Chinua Achebe',
+        coverColor: '#C8A97E',
+        price: 2500,
+        quantity: 1,
+        condition: 'Very Good',
+        sellerName: 'Seller A',
+      },
+    ],
+    subtotal: 2500,
+    deliveryFee: 1500,
+    total: 4000,
+    status: 'awaiting_seller',
+    customerName: 'Amaka Okonkwo',
+    customerEmail: 'amaka@example.com',
+    customerPhone: '08012345678',
+    deliveryAddress: { street: '12 Broad Street', city: 'Lagos', state: 'Lagos' },
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  }
+  saveOrder(demo)
+}

@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Clock, CheckCircle, Truck, Package, AlertCircle } from 'lucide-react'
-import { MOCK_SELLER_ORDERS } from '../../data/sellerData'
+import { getAllSellerOrders, seedSellerOrders } from '../../data/sellerData'
+import { seedDemoOrder } from '../../data/orderData'
 import type { SellerOrder } from '../../data/sellerData'
 
 const STATUS_CONFIG: Record<SellerOrder['status'], { label: string; class: string; icon: React.ElementType }> = {
@@ -46,7 +48,15 @@ function timeAgo(iso: string): string {
 }
 
 export default function SellerOrders() {
-  const orders = MOCK_SELLER_ORDERS
+  const [orders, setOrders] = useState<SellerOrder[]>([])
+
+  useEffect(() => {
+    seedDemoOrder()
+    seedSellerOrders()
+    setOrders(Object.values(getAllSellerOrders()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    ))
+  }, [])
 
   return (
     <div className="bg-third min-h-screen">
@@ -122,7 +132,7 @@ export default function SellerOrders() {
                     {order.status === 'awaiting_seller' && (
                       <div className="ml-auto">
                         <Link
-                          to="/account"
+                          to={`/my-sales/${order.id}/dropoff`}
                           className="bg-main text-white font-semibold text-xs px-4 py-2 rounded-full hover:bg-main/90 transition-colors"
                         >
                           Schedule Drop-off

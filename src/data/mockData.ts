@@ -13,6 +13,7 @@ export interface Book {
   coverColor: string
   description: string
   sellerName: string
+  sellerUsername?: string
   sellerRating: number
   loveNote: string
 }

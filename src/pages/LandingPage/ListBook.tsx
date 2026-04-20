@@ -211,12 +211,26 @@ export default function ListBook() {
               </Field>
             </div>
             {form.price && !errors.price && (
-              <p className="text-xs text-main/45 mt-3">
-                Alakowe takes a 10% fee. Your estimated payout:{' '}
-                <span className="font-semibold text-main">
-                  ₦{Math.floor(parseFloat(form.price || '0') * 0.9).toLocaleString()}
-                </span>
-              </p>
+              <div className="mt-3 bg-third rounded-xl px-4 py-3 flex flex-col gap-1.5">
+                <div className="flex justify-between text-xs">
+                  <span className="text-main/50">Listed price (what buyer pays)</span>
+                  <span className="font-semibold text-main">
+                    ₦{Math.round(parseFloat(form.price || '0') * 1.1).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-main/50">Alakowe fee (10%)</span>
+                  <span className="font-semibold text-main/50">
+                    −₦{Math.floor(parseFloat(form.price || '0') * 0.1).toLocaleString()}
+                  </span>
+                </div>
+                <div className="border-t border-main/10 pt-1.5 flex justify-between text-xs">
+                  <span className="font-semibold text-main">Your payout</span>
+                  <span className="font-semibold text-main">
+                    ₦{Math.floor(parseFloat(form.price || '0') * 0.9).toLocaleString()}
+                  </span>
+                </div>
+              </div>
             )}
           </div>
 

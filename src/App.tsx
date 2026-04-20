@@ -24,7 +24,10 @@ import ListingSubmitted from './pages/LandingPage/ListingSubmitted'
 import MyListings from './pages/LandingPage/MyListings'
 import EditListing from './pages/LandingPage/EditListing'
 import SellerOrders from './pages/LandingPage/SellerOrders'
+import SellerDropoff from './pages/LandingPage/SellerDropoff'
+import MyPurchases from './pages/LandingPage/MyPurchases'
 import SellerEarnings from './pages/LandingPage/SellerEarnings'
+import SellerStorefront from './pages/LandingPage/SellerStorefront'
 import RequestBook from './pages/LandingPage/RequestBook'
 import MyRequests from './pages/LandingPage/MyRequests'
 import AllRequests from './pages/LandingPage/AllRequests'
@@ -55,10 +58,13 @@ const router = createBrowserRouter([
       { path: 'my-listings', element: <ProtectedRoute><MyListings /></ProtectedRoute> },
       { path: 'my-listings/:id/edit', element: <ProtectedRoute><EditListing /></ProtectedRoute> },
       { path: 'my-sales', element: <ProtectedRoute><SellerOrders /></ProtectedRoute> },
+      { path: 'my-sales/:id/dropoff', element: <ProtectedRoute><SellerDropoff /></ProtectedRoute> },
       { path: 'my-earnings', element: <ProtectedRoute><SellerEarnings /></ProtectedRoute> },
       { path: 'request', element: <ProtectedRoute><RequestBook /></ProtectedRoute> },
+      { path: 'my-purchases', element: <ProtectedRoute><MyPurchases /></ProtectedRoute> },
       { path: 'my-requests', element: <ProtectedRoute><MyRequests /></ProtectedRoute> },
       { path: 'requests', element: <AllRequests /> },
+      { path: 'store/:email', element: <SellerStorefront /> },
       { path: 'customer-service', element: <CustomerService /> },
       { path: 'shipping', element: <ShippingReturns /> },
       { path: 'privacy', element: <PrivacyPolicy /> },

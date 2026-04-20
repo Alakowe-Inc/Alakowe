@@ -80,10 +80,10 @@ function BookDetail() {
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center font-heading font-bold text-main text-sm shrink-0">
-                  {book.sellerName[0]}
+                  {(book.sellerUsername ?? book.sellerName)[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-main text-sm">{book.sellerName}</p>
+                  <p className="font-semibold text-main text-sm">{book.sellerUsername ?? book.sellerName}</p>
                   <div className="flex items-center gap-1 mt-0.5">
                     <Star size={11} className="text-yellow-400 fill-yellow-400" />
                     <span className="text-xs text-main/55">{book.sellerRating} rating</span>
