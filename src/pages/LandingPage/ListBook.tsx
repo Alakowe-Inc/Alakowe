@@ -16,6 +16,9 @@ type FormState = {
   author: string
   genre: string
   condition: string
+  quantity: string
+  format: string
+  conditionNotes: string
   description: string
   price: string
   discount: string
@@ -23,8 +26,17 @@ type FormState = {
 }
 
 const empty: FormState = {
-  title: '', author: '', genre: '', condition: '',
-  description: '', price: '', discount: '0', loveNote: '',
+  title: '',
+  author: '',
+  genre: '',
+  condition: '',
+  quantity: '1',
+  format: '',
+  conditionNotes: '',
+  description: '',
+  price: '',
+  discount: '0',
+  loveNote: '',
 }
 
 const inputClass = (err?: boolean) =>
@@ -92,11 +104,18 @@ export default function ListBook() {
       title: form.title.trim(),
       author: form.author.trim(),
       genre: form.genre,
+
       condition: form.condition as ConditionGrade,
+      conditionNotes: form.conditionNotes.trim(),
+
+      quantity: Number(form.quantity),
+      format: form.format,
+
       description: form.description.trim(),
       price: parseFloat(form.price),
       discount: parseFloat(form.discount) || 0,
       loveNote: form.loveNote.trim(),
+
       coverColor: assignCoverColor(id),
       status: 'pending_review',
       createdAt: new Date().toISOString(),
@@ -123,7 +142,7 @@ export default function ListBook() {
         <div className="mb-8">
           <h1 className="font-heading font-bold text-main text-3xl">List a Book</h1>
           <p className="text-main/50 text-sm mt-1">
-            Fill in the details below. Your listing will go live once our team reviews it — usually within 24 hours.
+            Fill in the details below. Your listing will go live once our team reviews it. Usually within 24 hours.
           </p>
         </div>
 
@@ -132,7 +151,7 @@ export default function ListBook() {
           {/* ── Book Details ── */}
           <div className="bg-white rounded-2xl border border-third p-6">
             <h2 className="font-heading font-bold text-main text-base mb-5">Book Details</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="sm:col-span-2">
                 <Field label="Book Title" required error={errors.title}>
                   <input type="text" placeholder="e.g. Things Fall Apart" value={form.title}
@@ -143,32 +162,70 @@ export default function ListBook() {
                 <input type="text" placeholder="e.g. Chinua Achebe" value={form.author}
                   onChange={set('author')} className={inputClass(!!errors.author)} />
               </Field>
-              <Field label="Genre" required error={errors.genre}>
+              <Field label="Category" required error={errors.genre}>
                 <select value={form.genre} onChange={set('genre')}
                   className={`${inputClass(!!errors.genre)} ${!form.genre ? 'text-main/30' : 'text-main'}`}>
-                  <option value="" disabled>Select genre</option>
+                  <option value="" disabled>Select category</option>
                   {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
               </Field>
-              <div className="sm:col-span-2">
-                <Field label="Condition" required error={errors.condition}>
-                  <select value={form.condition} onChange={set('condition')}
-                    className={`${inputClass(!!errors.condition)} ${!form.condition ? 'text-main/30' : 'text-main'}`}>
-                    <option value="" disabled>Select condition</option>
-                    {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </Field>
-              </div>
+              <Field label="Condition" required error={errors.condition}>
+                <select
+                  value={form.condition}
+                  onChange={set('condition')}
+                  className={`${inputClass(!!errors.condition)} ${!form.condition ? 'text-main/30' : 'text-main'}`}
+                >
+                  <option value="" disabled>Select condition</option>
+                  {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
+
+              <Field label="Quantity" required>
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="e.g. 2"
+                  value={form.quantity}
+                  onChange={set('quantity')}
+                  className={inputClass()}
+                />
+              </Field>
+
+              <Field label="Format" required>
+                <select
+                  value={form.format}
+                  onChange={set('format')}
+                  className={`${inputClass()} ${!form.format ? 'text-main/30' : 'text-main'}`}
+                >
+                  <option value="" disabled>Select format</option>
+                  <option value="Hardcover">Hardcover</option>
+                  <option value="Paperback">Paperback</option>
+                </select>
+              </Field>
             </div>
           </div>
 
           {/* ── Description ── */}
           <div className="bg-white rounded-2xl border border-third p-6">
-            <h2 className="font-heading font-bold text-main text-base mb-1">About this Book</h2>
-            <p className="text-xs text-main/45 mb-4">Describe the book briefly. Be honest about its condition and any marks.</p>
+            <h2 className="font-heading font-bold text-main text-base mb-1">Declare Book Condition</h2>
+            <p className="text-xs text-main/45 mb-4">Be honest about its condition and any marks or damages.</p>
+            <Field label="Condition" required error={errors.description}>
+              <textarea
+                placeholder="e.g. There's a small crease on the spine and a few pencil marks in chapter 3. Pages are clean overall."
+                value={form.conditionNotes}
+                onChange={set('conditionNotes')}
+                rows={5}
+                className="w-full border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors resize-none bg-white"
+              />
+            </Field>
+          </div>
+
+
+          <div className="bg-white rounded-2xl border border-third p-6">
+            <h2 className="font-heading font-bold text-main text-base mb-1">Book Overview</h2>
+            <p className="text-xs text-main/45 mb-4">Provide a brief overview of the book.</p>
             <Field label="Description" required error={errors.description}>
               <textarea
-                placeholder="e.g. A classic novel in good condition. There's a small crease on the spine and a few pencil marks in chapter 3. Pages are clean overall."
                 value={form.description}
                 onChange={set('description')}
                 rows={5}
@@ -237,9 +294,9 @@ export default function ListBook() {
           {/* ── Photos ── */}
           <div className="bg-white rounded-2xl border border-third p-6">
             <h2 className="font-heading font-bold text-main text-base mb-1">
-              Photos <span className="text-main/35 font-normal text-sm">(optional)</span>
+              Photos <span className="text-main/35 font-normal text-sm"></span>
             </h2>
-            <p className="text-xs text-main/45 mb-4">Upload up to 5 photos — front cover, back cover, and any marks.</p>
+            <p className="text-xs text-main/45 mb-4">Upload up to 5 photos: front cover, back cover, and any marks.</p>
             <label className="flex flex-col items-center justify-center border-2 border-dashed border-main/15 rounded-xl py-8 cursor-pointer hover:border-secondary/40 transition-colors">
               <Upload size={24} className="text-main/30 mb-2" />
               <span className="text-sm text-main/50 font-medium">Click to upload photos</span>

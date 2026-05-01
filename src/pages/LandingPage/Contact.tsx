@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Mail } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 function IconInstagram() {
   return (
@@ -86,7 +87,7 @@ function Contact() {
                       placeholder="Your full name"
                       value={form.name}
                       onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                      className="w-full bg-third border border-third rounded-full px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
+                      className="w-full bg-third border border-third rounded-xl px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
                     />
                   </div>
                   <div>
@@ -99,7 +100,7 @@ function Contact() {
                       placeholder="your@email.com"
                       value={form.email}
                       onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                      className="w-full bg-third border border-third rounded-full px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
+                      className="w-full bg-third border border-third rounded-xl px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
                     />
                   </div>
                   <div>
@@ -112,7 +113,7 @@ function Contact() {
                       rows={6}
                       value={form.message}
                       onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                      className="w-full bg-third border border-third rounded-full px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors resize-none"
+                      className="w-full bg-third border border-third rounded-xl px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors resize-none"
                     />
                   </div>
                   <button
@@ -128,18 +129,17 @@ function Contact() {
 
           {/* Info cards */}
           <div className="flex flex-col gap-5">
-            <div className="bg-white rounded-lg border border-third p-7">
+            <Link
+              to="/customer-service"
+              className="block bg-main text-white rounded-lg p-7 hover:scale-[1.02] hover:shadow-xl transition-all duration-300 cursor-pointer"
+            >
               <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
-                Support Email
+                Customer Service
               </p>
-              <a
-                href="mailto:hello@alakowe.com"
-                className="flex items-center gap-3 text-main/65 hover:text-secondary transition-colors"
-              >
-                <Mail size={17} />
-                <span className="text-sm font-medium">hello@alakowe.com</span>
-              </a>
-            </div>
+              <p className="text-white/70 text-sm leading-relaxed mb-4">
+                Need help with your order, delivery, or account? Our support team is available to assist you.
+              </p>
+            </Link>
 
             <div className="bg-white rounded-lg border border-third p-7">
               <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">

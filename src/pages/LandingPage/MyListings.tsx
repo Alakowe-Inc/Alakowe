@@ -86,8 +86,8 @@ export default function MyListings() {
         <div className="bg-white rounded-2xl border border-third p-5 mb-8">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <p className="font-heading font-bold text-main text-sm">My Store</p>
-              <p className="text-xs text-main/50 mt-0.5">Share this link — buyers can browse all your live books</p>
+              <p className="font-heading font-bold text-main text-sm">My Bookstore</p>
+              <p className="text-xs text-main/50 mt-0.5">Share this link with buyers (WhatsApp, Instagram, Facebook, etc.) so they can browse all your live books</p>
             </div>
             <button
               onClick={copyStoreLink}
@@ -100,22 +100,6 @@ export default function MyListings() {
           <div className="mt-3 bg-third rounded-xl px-4 py-2.5 text-xs text-main/50 font-mono break-all">
             {storeUrl}
           </div>
-        </div>
-
-        {/* Quick links */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          <Link
-            to="/my-sales"
-            className="flex items-center gap-2 bg-white border border-third text-main font-semibold text-xs px-4 py-2.5 rounded-full hover:border-secondary/40 transition-colors"
-          >
-            <ShoppingBag size={13} className="text-secondary" /> My Sales
-          </Link>
-          <Link
-            to="/my-earnings"
-            className="flex items-center gap-2 bg-white border border-third text-main font-semibold text-xs px-4 py-2.5 rounded-full hover:border-secondary/40 transition-colors"
-          >
-            <Wallet size={13} className="text-secondary" /> My Earnings
-          </Link>
         </div>
 
         {/* Listings */}

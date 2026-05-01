@@ -9,6 +9,7 @@ const navLinks = [
   { label: 'Sell', to: '/sell' },
   { label: 'How it works', to: '/how-it-works' },
   { label: 'Blog', to: '/blog' },
+
   { label: 'Contact', to: '/contact' },
 ]
 
@@ -162,6 +163,13 @@ function Navbar() {
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
                         >
                           <BookOpen size={15} className="text-main/40 shrink-0" /> My Listings
+                        </Link>
+
+                        <Link
+                          to="/my-sales"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
+                        >
+                          <ShoppingBag size={13} className="text-secondary" /> My Sales
                         </Link>
                         <Link
                           to="/my-earnings"

@@ -1,13 +1,23 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, Search, ShoppingCart, Handshake, BookOpen } from 'lucide-react'
+import { 
+  ArrowRight, 
+  Search, 
+  ShoppingCart, 
+  Handshake, 
+  BookOpen,
+  BookPlus,
+  BellRing,
+  MapPin,
+  Wallet
+} from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { blogPosts, bookQuotes, bookRequests, books } from '../../data/mockData'
 import { useAuth } from '../../context/AuthContext'
 import BookCard from '../../components/BookCard'
-import heroImage1 from '../../assets/media/images/Website landing page image (white bg).jpg'
-import heroImage2 from '../../assets/media/images/Tranquil Study with Cactus and Pastel Books.png'
-import heroImage3 from '../../assets/media/images/Books with Elegant Bookend.png'
-
+import heroImage1 from '../../assets/media/images/banny4.png'
+import heroImage2 from '../../assets/media/images/banny2.png'
+import heroImage3 from '../../assets/media/images/banny3.png'
+//ALÁKÒWÉ,
 const heroSlides = [heroImage1, heroImage2, heroImage3]
 const featuredBooks = books.slice(0, 8)
 
@@ -18,10 +28,122 @@ function Home() {
   const [quoteIndex, setQuoteIndex] = useState(0)
   const [visible, setVisible] = useState(true)
 
-  function handleJoinQueue(title: string, author?: string) {
-    const params = new URLSearchParams({ title })
-    if (author) params.set('author', author)
-    navigate(user ? `/request?${params}` : `/login?redirect=/request?${params}`)
+
+  const [joined, setJoined] = useState<Record<string, boolean>>({})
+  const [counts, setCounts] = useState<Record<string, number>>({})
+  const [timestamps, setTimestamps] = useState<Record<string, number>>({})
+  const [showModal, setShowModal] = useState(false)
+  const [activeTitle, setActiveTitle] = useState("")
+
+  function handleJoinQueue(title: string) {
+    if (joined[title]) return
+
+    const newJoined = { ...joined, [title]: true }
+    setJoined(newJoined)
+
+    const newCounts = {
+      ...counts,
+      [title]:
+        (counts[title] ||
+          bookRequests.find(b => b.title === title)?.requestCount ||
+          0) + 1,
+    }
+
+    setCounts(newCounts)
+
+    const newTimestamps = {
+      ...timestamps,
+      [title]: Date.now(),
+    }
+
+    setTimestamps(newTimestamps)
+
+    // SAVE TO LOCAL STORAGE
+    localStorage.setItem("queueJoined", JSON.stringify(newJoined))
+    localStorage.setItem("queueCounts", JSON.stringify(newCounts))
+    localStorage.setItem("queueTime", JSON.stringify(newTimestamps))
+
+    setActiveTitle(title)
+    setShowModal(true)
+
+    setTimeout(() => {
+      setShowModal(false)
+    }, 2000)
+  }
+
+  useEffect(() => {
+    const savedJoined = localStorage.getItem("queueJoined")
+    const savedCounts = localStorage.getItem("queueCounts")
+    const savedTime = localStorage.getItem("queueTime")
+
+    if (savedJoined) setJoined(JSON.parse(savedJoined))
+    if (savedCounts) setCounts(JSON.parse(savedCounts))
+    if (savedTime) setTimestamps(JSON.parse(savedTime))
+  }, [])
+
+  function formatTime(timestamp?: number, fallbackDays?: number) {
+    if (!timestamp) {
+      return fallbackDays === 1
+        ? "1 day ago"
+        : `${fallbackDays} days ago`
+    }
+
+    const diff = Date.now() - timestamp
+
+    const seconds = Math.floor(diff / 1000)
+    const minutes = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    const days = Math.floor(diff / 86400000)
+
+    // Just now
+    if (seconds < 10) return "Just now"
+
+    // Seconds
+    if (seconds < 60) return `${seconds}s ago`
+
+    // Minutes
+    if (minutes < 60) {
+      return minutes === 1
+        ? "1 minute ago"
+        : `${minutes} minutes ago`
+    }
+
+    // Hours + minutes (example: 1hr 30min ago)
+    if (hours < 24) {
+      const remainingMinutes = minutes % 60
+
+      if (remainingMinutes === 0) {
+        return hours === 1
+          ? "1hr ago"
+          : `${hours}hr ago`
+      }
+
+      return `${hours}hr ${remainingMinutes}min ago`
+    }
+
+    // Days
+    if (days < 7) {
+      return days === 1
+        ? "1 day ago"
+        : `${days} days ago`
+    }
+
+    const weeks = Math.floor(days / 7)
+    if (weeks < 4) {
+      return weeks === 1
+        ? "1 week ago"
+        : `${weeks} weeks ago`
+    }
+
+    const months = Math.floor(days / 30)
+    if (months < 12) {
+      return months === 1
+        ? "1 month ago"
+        : `${months} months ago`
+    }
+
+    const years = Math.floor(days / 365)
+    return years === 1 ? "1 year ago" : `${years} years ago`
   }
 
   function handleIHaveThis() {
@@ -37,12 +159,20 @@ function Home() {
 
   useEffect(() => {
     const interval = setInterval(() => {
+      setTimestamps(prev => ({ ...prev }))
+    }, 60000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
       setVisible(false)
       setTimeout(() => {
         setQuoteIndex(i => (i + 1) % bookQuotes.length)
         setVisible(true)
       }, 500)
-    }, 6000)
+    }, 60000)
     return () => clearInterval(interval)
   }, [])
 
@@ -73,12 +203,8 @@ function Home() {
           </p>
 
           <h1 className="font-heading font-bold text-white uppercase leading-none mb-4 sm:mb-5 text-3xl sm:text-5xl md:text-6xl xl:text-7xl max-w-xs sm:max-w-xl md:max-w-3xl">
-            Read it. Love it. Pass it on.
-          </h1>
-
-          <p className="text-white/65 text-xs sm:text-sm md:text-base leading-relaxed mb-8 sm:mb-10 max-w-xs sm:max-w-sm md:max-w-md">
-            Sometimes, you are just a good book away from a good mood
-          </p>
+            Buy, Sell & Request Used Books
+          </h1> 
 
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <Link
@@ -119,19 +245,23 @@ function Home() {
                 Our Story
               </p>
               <h2 className="font-heading font-bold text-main text-3xl md:text-4xl mb-6 leading-tight">
-                Books deserve a second life
+                Welcome to ALÁKÒWÉ
               </h2>
               <p className="text-main/60 text-sm leading-relaxed mb-5">
-                Alakowe is a Yoruba word used to describe an educated or literate person. Here, anyone who has ever felt connected to a book and wanted someone else to feel it too, is included.
+                ALÁKÒWÉ is a Yoruba word used to describe an educated or literate person. Here, anyone who has ever felt connected to a book and wanted someone else to feel it too, is included.
               </p>
+
+              <p className="text-main/60 text-sm leading-relaxed mb-5">
+                ALÁKÒWÉ, A New Way to Read
+              </p> 
               {/* <p className="text-main/60 text-sm leading-relaxed mb-8">
-                Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, Alakowe is the community for you.
+                Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, ALÁKÒWÉ is the community for you.
               </p> */}
               <div className="grid grid-cols-3 gap-6 pt-8 border-t border-main/10">
                 {[
                   { value: '5,000+', label: 'Books Listed' },
                   { value: '1,200+', label: 'Happy Readers' },
-                  { value: '24', label: 'States Covered' },
+                  { value: 'All', label: 'States Covered' },
                 ].map(({ value, label }) => (
                   <div key={label}>
                     <p className="font-heading font-bold text-main text-2xl md:text-3xl">{value}</p>
@@ -148,7 +278,7 @@ function Home() {
                   <BookOpen size={15} className="text-main" />
                 </div>
                 <h4 className="font-heading font-bold text-main text-base">Inspected Books</h4>
-                <p className="text-main/50 text-xs leading-relaxed">Every book is physically checked before dispatch — condition matches the listing, always.</p>
+                <p className="text-main/50 text-xs leading-relaxed">Every book is physically checked before dispatch to ensure it matches the listing, always.</p>
               </div>
               <div className="bg-main p-6 flex flex-col gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
@@ -159,7 +289,7 @@ function Home() {
               </div>
               <div className="bg-secondary/10 p-6 flex flex-col gap-3 col-span-2">
                 <h4 className="font-heading font-bold text-main text-base">Nationwide Delivery</h4>
-                <p className="text-main/50 text-xs leading-relaxed">We coordinate pickup from sellers and delivery to your door across 24 states in Nigeria. Fast, reliable, and tracked.</p>
+                <p className="text-main/50 text-xs leading-relaxed">We coordinate pickup from sellers and delivery to your door across every state in Nigeria. Fast, reliable, and tracked.</p>
               </div>
             </div>
           </div>
@@ -184,7 +314,7 @@ function Home() {
               to="/browse"
               className="hidden md:flex  underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
-              View all
+              View all 
             </Link>
           </div>
 
@@ -238,7 +368,7 @@ function Home() {
                 Simple process
               </p>
               <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
-                How does it work?
+                How does it works for buyers?
               </h2>
             </div>
             <Link
@@ -262,7 +392,7 @@ function Home() {
                 step: '02',
                 Icon: ShoppingCart,
                 title: 'Add to Cart',
-                desc: 'Pay securely at checkout. Your money is held in escrow — released only when you confirm delivery.',
+                desc: 'Pay securely at checkout. Your money is held in escrow, released only when you confirm delivery.',
               },
               {
                 step: '03',
@@ -305,6 +435,83 @@ function Home() {
         </div>
       </section>
 
+
+
+      <section className="py-5 bg-white border-t border-third">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+
+          {/* Header */}
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
+                How does it works for sellers?
+              </h2>
+            </div>
+            <Link
+              to="/how-it-works"
+              className="hidden md:flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+            >
+              Learn more
+            </Link>
+          </div>
+
+          {/* Steps */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-8">
+            {[
+              {
+                step: '01',
+                Icon: BookPlus,
+                title: 'List Your Books',
+                desc: 'Create a listing in minutes. Set your price, upload photos, and share details about your book’s condition and edition.',
+              },
+              {
+                step: '02',
+                Icon: BellRing,
+                title: 'Get Notified',
+                desc: 'When your book sells, we send you a notification with the book details and instructions for the next steps.',
+              },
+              {
+                step: '03',
+                Icon: MapPin,
+                title: 'We Coordinate',
+                desc: 'You drop off the book at a nearby location or we arrange a pickup. We inspect the book to ensure it matches your listing before dispatch.',
+              },
+              {
+                step: '04',
+                Icon: Wallet,
+                title: 'Get Paid',
+                desc: 'Once the buyer confirms receipt, we release your payment. It’s that simple.',
+              },
+            ].map(({ step, Icon, title, desc }) => (
+              <div key={step} className="flex flex-col">
+                {/* Step number + icon row */}
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="font-heading font-bold text-4xl text-main/10 leading-none select-none">
+                    {step}
+                  </span>
+                  <div className="w-9 h-9 rounded-full bg-secondary/15 flex items-center justify-center shrink-0">
+                    <Icon size={16} className="text-main" />
+                  </div>
+                </div>
+
+                <h3 className="font-heading font-bold text-main text-lg mb-2">{title}</h3>
+                <p className="text-main/50 text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center md:hidden">
+            <Link
+              to="/how-it-works"
+              className="inline-flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+            >
+              Learn more
+            </Link>
+          </div>
+        </div>
+      </section>
+
+
       {/* ── Book Requests ───────────────────────────────────────── */}
       <section className="py-20 bg-third border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
@@ -319,15 +526,9 @@ function Home() {
                 Book Requests
               </h2>
               <p className="text-main/50 text-sm mt-2 max-w-md">
-                Can't find what you're looking for? Post a request — sellers will reach out if they have it.
+                Can't find what you're looking for? Post a request and we will notify you when we have it.
               </p>
             </div>
-            <Link
-              to="/requests"
-              className="hidden md:flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
-            >
-              View all requests
-            </Link>
           </div>
 
           {/* Request cards */}
@@ -342,16 +543,27 @@ function Home() {
                 </div>
 
                 <div className="flex items-center gap-3 text-[11px]">
-                  <span className="font-semibold text-secondary">{req.requestCount} {req.requestCount === 1 ? 'person needs this' : 'people need this'}</span>
-                  <span className="text-main/35">{req.daysAgo === 1 ? '1 day ago' : `${req.daysAgo} days ago`}</span>
+                  <span className="font-semibold text-secondary">
+                    {(counts[req.title] ?? req.requestCount)} 
+                    {(counts[req.title] ?? req.requestCount) === 1 
+                      ? ' person needs this' 
+                      : ' people need this'}
+                  </span>
+                  <span className="text-main/35">
+                    {formatTime(timestamps[req.title], req.daysAgo)}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-3 pt-1 border-t border-third">
                   <button
-                    onClick={() => handleJoinQueue(req.title, req.author)}
-                    className="text-[11px] font-semibold tracking-widest uppercase bg-main text-white px-4 py-2 hover:bg-main/85 transition-colors shrink-0 rounded-full"
+                    disabled={joined[req.title]}
+                    onClick={() => handleJoinQueue(req.title)}
+                    className={`text-[11px] font-semibold tracking-widest uppercase px-4 py-2 transition-colors shrink-0 rounded-full
+                    ${joined[req.title] 
+                      ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                      : 'bg-main text-white hover:bg-main/85'}`}
                   >
-                    Join Queue
+                    {joined[req.title] ? "Joined" : "Join Queue"}
                   </button>
                   <button
                     onClick={handleIHaveThis}
@@ -369,11 +581,12 @@ function Home() {
             <p className="text-sm text-main/50">
               Looking for a specific book? Let the community help you find it.
             </p>
+
             <Link
-              to="/request"
+              to="/requests"
               className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3 text-[11px] tracking-widest uppercase hover:bg-main/85 transition-colors shrink-0 rounded-full"
             >
-              Post a Request <ArrowRight size={13} />
+              View all requests <ArrowRight size={13} />
             </Link>
           </div>
         </div>
@@ -452,7 +665,7 @@ function Home() {
               Ready to find your next read?
             </h2>
             <p className="text-white/55 text-sm leading-relaxed">
-              Discover affordable used books from readers across Nigeria — buy, sell, and keep great stories moving.
+              Discover affordable used books from readers across Nigeria. Buy, sell, and keep great stories moving.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -471,6 +684,30 @@ function Home() {
           </div>
         </div>
       </section>
+
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-[90%] text-center 
+            animate-[modalIn_.45s_cubic-bezier(.34,1.56,.64,1)]">
+            
+            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 
+              flex items-center justify-center
+              animate-[modalIn_.55s_cubic-bezier(.34,1.56,.64,1)]">
+                ✓
+            </div>
+
+            <h3 className="font-heading font-bold text-lg text-main mb-2">
+              Added to Queue
+            </h3>
+
+            <p className="text-sm text-main/60">
+              You'll be notified when this book becomes available.
+            </p>
+
+          </div>
+        </div>
+      )}
     </div>
   )
 }

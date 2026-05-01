@@ -22,7 +22,7 @@ const buyerSteps = [
     step: '03',
     icon: Truck,
     title: 'We Coordinate Delivery',
-    desc: 'We notify the seller, collect the book, inspect it, and dispatch it to you — no stress on your end.',
+    desc: 'We notify the seller, collect the book, inspect it, and dispatch it to you, no stress on your end.',
   },
   {
     step: '04',
@@ -37,7 +37,7 @@ const sellerSteps = [
     step: '01',
     icon: PlusCircle,
     title: 'List Your Book',
-    desc: "Create a listing in minutes — add title, condition, price, and a short note. Goes live immediately.",
+    desc: "Create a listing in minutes, add title, condition, price, and a short note. Goes live immediately.",
   },
   {
     step: '02',
@@ -49,13 +49,13 @@ const sellerSteps = [
     step: '03',
     icon: PackageCheck,
     title: 'We Collect',
-    desc: "An Alakowé agent comes to your location to collect and inspect the book. No packaging or shipping needed.",
+    desc: "An ALÁKÒWÉ agent comes to your location to collect and inspect the book. No packaging or shipping needed.",
   },
   {
     step: '04',
     icon: Wallet,
     title: 'Get Paid',
-    desc: 'Once the buyer confirms delivery, your payment is released directly to your account — fast and transparent.',
+    desc: 'Once the buyer confirms delivery, your payment is released directly to your account, fast and transparent.',
   },
 ]
 
@@ -68,7 +68,7 @@ const trustPoints = [
   {
     icon: Banknote,
     title: 'Fair Pricing',
-    desc: 'Sellers set their own prices. Buyers always know the full cost upfront — no hidden fees.',
+    desc: 'Sellers set their own prices. Buyers always know the full cost upfront, no hidden fees.',
   },
   {
     icon: HeadphonesIcon,
@@ -114,10 +114,10 @@ function HowItWorks() {
             Simple process
           </p>
           <h1 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-4 max-w-lg mx-auto">
-            How Alakowé works
+            How ALÁKÒWÉ works
           </h1>
           <p className="text-white/50 max-w-lg text-sm leading-relaxed mx-auto">
-            Whether you're looking for your next read or clearing your shelf, Alakowé makes the whole process easy, safe, and rewarding.
+            Whether you're looking for your next read or clearing your shelf, ALÁKÒWÉ makes the whole process easy, safe, and rewarding.
           </p>
         </div>
       </section>
@@ -202,6 +202,45 @@ function HowItWorks() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Shipping & Returns ───────────────────────────────── */}
+      <section className="py-16 bg-white border-t border-third">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-12">
+
+          <Link
+            to="/shipping"
+            className="group block border border-third rounded-3xl p-6 md:p-8 hover:shadow-md hover:-translate-y-1 transition-all duration-300 hover:border-main/20"
+          >
+
+            <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+
+              {/* Left Content */}
+              <div className="max-w-xl">
+                <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
+                  Shipping & Returns
+                </p>
+
+                <h2 className="font-heading font-bold text-main text-2xl md:text-3xl leading-tight mb-2">
+                  Delivery, pickup, and returns — handled for you
+                </h2>
+
+                <p className="text-main/50 text-sm leading-relaxed">
+                  From seller pickup to doorstep delivery, ALÁKÒWÉ manages the entire process. If anything isn’t right, returns and refunds are handled smoothly with full support.
+                </p>
+              </div>
+
+              {/* Right Action */}
+              <div className="flex items-center gap-2 text-main font-semibold text-sm md:ml-auto group-hover:gap-3 transition-all">
+                Learn more
+                <ArrowRight size={16} />
+              </div>
+
+            </div>
+
+          </Link>
+
         </div>
       </section>
 
