@@ -10,7 +10,7 @@ import {
   MapPin,
   Wallet
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { blogPosts, bookQuotes, bookRequests, books } from '../../data/mockData'
 import { useAuth } from '../../context/AuthContext'
 import BookCard from '../../components/BookCard'
@@ -34,6 +34,14 @@ function Home() {
   const [timestamps, setTimestamps] = useState<Record<string, number>>({})
   const [showModal, setShowModal] = useState(false)
   const [activeTitle, setActiveTitle] = useState("")
+
+  // ── Stats animation state ─────────────────────────────────────
+  const statsRef = useRef<HTMLDivElement | null>(null)
+  const [startCount, setStartCount] = useState(false)
+  const [booksCount, setBooksCount] = useState(0)
+  const [readersCount, setReadersCount] = useState(0)
+  const [statesText, setStatesText] = useState("")
+  const [countingDone, setCountingDone] = useState(false)
 
   function handleJoinQueue(title: string) {
     if (joined[title]) return
@@ -176,6 +184,73 @@ function Home() {
     return () => clearInterval(interval)
   }, [])
 
+  // ── Scroll trigger for stats (one-time) ───────────────────────
+  useEffect(() => {
+    const node = statsRef.current
+    if (!node) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setStartCount(true)
+            observer.disconnect()
+          }
+        })
+      },
+      { threshold: 0.3 }
+    )
+
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  // ── Animated counters + typing effect ─────────────────────────
+  useEffect(() => {
+    if (!startCount) return
+
+    const duration = 1800
+    const startTime = performance.now()
+    const booksTarget = 5000
+    const readersTarget = 1200
+
+    let rafId: number
+    const tick = (now: number) => {
+      const elapsed = now - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      // easeOutCubic
+      const eased = 1 - Math.pow(1 - progress, 3)
+
+      setBooksCount(Math.floor(eased * booksTarget))
+      setReadersCount(Math.floor(eased * readersTarget))
+
+      if (progress < 1) {
+        rafId = requestAnimationFrame(tick)
+      } else {
+        setBooksCount(booksTarget)
+        setReadersCount(readersTarget)
+        setCountingDone(true)
+      }
+    }
+
+    rafId = requestAnimationFrame(tick)
+
+    // Typing effect for "All"
+    const word = "All"
+    let i = 0
+    setStatesText("")
+    const typeInterval = setInterval(() => {
+      i += 1
+      setStatesText(word.slice(0, i))
+      if (i >= word.length) clearInterval(typeInterval)
+    }, 80)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      clearInterval(typeInterval)
+    }
+  }, [startCount])
+
   return (
     <div>
       {/* ── Hero ───────────────────────────────────────────────── */}
@@ -257,11 +332,23 @@ function Home() {
               {/* <p className="text-main/60 text-sm leading-relaxed mb-8">
                 Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, ALÁKÒWÉ is the community for you.
               </p> */}
-              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-main/10">
+              <div
+                ref={statsRef}
+                className="grid grid-cols-3 gap-6 pt-8 border-t border-main/10"
+              >
                 {[
-                  { value: '5,000+', label: 'Books Listed' },
-                  { value: '1,200+', label: 'Happy Readers' },
-                  { value: 'All', label: 'States Covered' },
+                  {
+                    value: `${booksCount.toLocaleString()}${countingDone ? '+' : ''}`,
+                    label: 'Books Listed',
+                  },
+                  {
+                    value: `${readersCount.toLocaleString()}${countingDone ? '+' : ''}`,
+                    label: 'Happy Readers',
+                  },
+                  {
+                    value: statesText,
+                    label: 'States Covered',
+                  },
                 ].map(({ value, label }) => (
                   <div key={label}>
                     <p className="font-heading font-bold text-main text-2xl md:text-3xl">{value}</p>

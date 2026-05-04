@@ -8,7 +8,6 @@ import {
   Tag,
   Layers,
   Package,
-  Clock,
   ShieldCheck,
 } from 'lucide-react'
 import { books } from '../../data/mockData'
@@ -56,71 +55,43 @@ function BookDetail() {
           <ArrowLeft size={15} /> Back to Browse
         </Link>
 
+        {/*
+          Grid is flattened so order-* can interleave on mobile.
+          Mobile order: 1) Image, 2) Summary panel, 3) Product details.
+          Desktop: image (col-span-7) + product details (col-span-7) on left,
+          summary panel (col-span-5, row-span-2, sticky) on right.
+        */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-start">
-          {/* LEFT COLUMN */}
-          <div className="lg:col-span-7 flex flex-col gap-6 reveal lg:col-span-7 flex flex-col gap-6 reveal">
-            {/* COVER */}
-            <div className="order-1 lg:order-none group relative rounded-3xl h-80 md:h-[32rem] flex items-center justify-center border border-third/60 overflow-hidden transition-all duration-500 hover:shadow-2xl"
-              style={{
-                background: `radial-gradient(circle at 30% 20%, ${book.coverColor}28, ${book.coverColor}10 55%, transparent 80%), linear-gradient(135deg, #ffffff 0%, ${book.coverColor}10 100%)`,
-              }}
+          {/* COVER — order-1 on mobile, top-left on desktop */}
+          <div
+            className="order-1 lg:order-none lg:col-span-7 reveal group relative rounded-3xl h-80 md:h-[32rem] flex items-center justify-center border border-third/60 overflow-hidden transition-all duration-500 hover:shadow-2xl"
+            style={{
+              background: `radial-gradient(circle at 30% 20%, ${book.coverColor}28, ${book.coverColor}10 55%, transparent 80%), linear-gradient(135deg, #ffffff 0%, ${book.coverColor}10 100%)`,
+            }}
+          >
+            {/* soft glow */}
+            <div
+              className="absolute -inset-20 blur-3xl opacity-40 transition-opacity duration-700 group-hover:opacity-60"
+              style={{ background: `radial-gradient(circle, ${book.coverColor}55, transparent 60%)` }}
+            />
+            <div
+              className="relative w-40 h-60 md:w-52 md:h-[19rem] rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.45)] flex items-end justify-center pb-5 transition-transform duration-700 ease-out group-hover:scale-105 group-hover:-rotate-1"
+              style={{ backgroundColor: book.coverColor }}
             >
-              {/* soft glow */}
-              <div
-                className="absolute -inset-20 blur-3xl opacity-40 transition-opacity duration-700 group-hover:opacity-60"
-                style={{ background: `radial-gradient(circle, ${book.coverColor}55, transparent 60%)` }}
-              />
-              <div
-                className="relative w-40 h-60 md:w-52 md:h-[19rem] rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.45)] flex items-end justify-center pb-5 transition-transform duration-700 ease-out group-hover:scale-105 group-hover:-rotate-1"
-                style={{ backgroundColor: book.coverColor }}
-              >
-                <div className="w-28 h-px bg-white/40 rounded" />
-              </div>
-
-              {hasDiscount && (
-                <div className="absolute top-4 left-4 bg-secondary text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg tracking-wide">
-                  {book.discount}% OFF
-                </div>
-              )}
+              <div className="w-28 h-px bg-white/40 rounded" />
             </div>
 
-            {/* PRODUCT DETAILS */}
-            <div className="order-3 lg:order-none bg-white border border-third/70 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="font-heading font-bold text-main text-lg">Product Details</h3>
-                <div className="hidden md:flex items-center gap-1.5 text-xs text-main/50">
-                  <ShieldCheck size={14} className="text-secondary" />
-                  Verified Listing
-                </div>
+            {hasDiscount && (
+              <div className="absolute top-4 left-4 bg-secondary text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg tracking-wide">
+                {book.discount}% OFF
               </div>
-
-              <div className="divide-y divide-third/70 text-sm">
-                {[
-                  { icon: Tag, label: 'Category', value: book.genre },
-                  { icon: BookOpen, label: 'Format', value: book.format },
-                  { icon: Layers, label: 'Condition', value: book.condition },
-                  { icon: Package, label: 'Available', value: book.quantity },
-                  { icon: MapPin, label: 'Ships From', value: book.location },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div
-                    key={label}
-                    className="flex items-center justify-between py-3.5 px-1 rounded-lg hover:bg-third/40 transition-colors duration-200"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-third/60 flex items-center justify-center">
-                        <Icon size={14} className="text-main/65" />
-                      </div>
-                      <span className="text-main/60">{label}</span>
-                    </div>
-                    <span className="font-semibold text-main">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* RIGHT COLUMN — STICKY PURCHASE PANEL */}
-          <div className="lg:col-span-5 reveal order-2 lg:order-none">
+          {/* RIGHT COLUMN — STICKY PURCHASE PANEL.
+              order-2 on mobile (between image and details).
+              On desktop: col-span-5, spans both rows so it sits beside image + details. */}
+          <div className="order-2 lg:order-none lg:col-span-5 lg:row-span-2 reveal">
             <div className="lg:sticky lg:top-[120px] flex flex-col">
               {/* Genre */}
               <p className="text-secondary text-[11px] font-bold uppercase tracking-[0.25em] mb-3">
@@ -148,8 +119,6 @@ function BookDetail() {
               )}
 
               {/* DESCRIPTION */}
-              
-
               <div className="mb-6">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-main/40 mb-2">
                   Book Description
@@ -241,6 +210,40 @@ function BookDetail() {
                   Secure checkout · Buyer protection included
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* PRODUCT DETAILS — order-3 on mobile, sits under image on desktop */}
+          <div className="order-3 lg:order-none lg:col-span-7 reveal bg-white border border-third/70 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-heading font-bold text-main text-lg">Product Details</h3>
+              <div className="hidden md:flex items-center gap-1.5 text-xs text-main/50">
+                <ShieldCheck size={14} className="text-secondary" />
+                Verified Listing
+              </div>
+            </div>
+
+            <div className="divide-y divide-third/70 text-sm">
+              {[
+                { icon: Tag, label: 'Category', value: book.genre },
+                { icon: BookOpen, label: 'Format', value: book.format },
+                { icon: Layers, label: 'Condition', value: book.condition },
+                { icon: Package, label: 'Available', value: book.quantity },
+                { icon: MapPin, label: 'Ships From', value: book.location },
+              ].map(({ icon: Icon, label, value }) => (
+                <div
+                  key={label}
+                  className="flex items-center justify-between py-3.5 px-1 rounded-lg hover:bg-third/40 transition-colors duration-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-third/60 flex items-center justify-center">
+                      <Icon size={14} className="text-main/65" />
+                    </div>
+                    <span className="text-main/60">{label}</span>
+                  </div>
+                  <span className="font-semibold text-main">{value}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
