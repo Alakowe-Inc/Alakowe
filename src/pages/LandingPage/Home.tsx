@@ -127,7 +127,7 @@ function Home() {
               {/* <p className="text-main/60 text-sm leading-relaxed mb-8">
                 Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, Alakowe is the community for you.
               </p> */}
-              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-main/10">
+              <div className="grid grid-cols-3 gap-4 sm:gap-6 pt-8 border-t border-main/10">
                 {[
                   { value: '5,000+', label: 'Books Listed' },
                   { value: '1,200+', label: 'Happy Readers' },
@@ -389,7 +389,7 @@ function Home() {
               <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
                 Our Blog
               </p>
-              <h2 className="font-heading font-bold text-main text-4xl md:text-5xl max-w-md leading-tight">
+              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl lg:text-5xl max-w-md leading-tight">
                 Stories &amp; Insights
               </h2>
             </div>
@@ -448,7 +448,7 @@ function Home() {
             <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">
               Start Today
             </p>
-            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-5">
+            <h2 className="font-heading font-bold text-white text-3xl md:text-4xl lg:text-5xl leading-tight mb-5">
               Ready to find your next read?
             </h2>
             <p className="text-white/55 text-sm leading-relaxed">

@@ -113,7 +113,7 @@ function HowItWorks() {
           <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-3">
             Simple process
           </p>
-          <h1 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-4 max-w-lg mx-auto">
+          <h1 className="font-heading font-bold text-white text-3xl md:text-4xl lg:text-5xl leading-tight mb-4 max-w-lg mx-auto">
             How Alakowé works
           </h1>
           <p className="text-white/50 max-w-lg text-sm leading-relaxed mx-auto">
@@ -212,7 +212,7 @@ function HowItWorks() {
             <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">
               Still have questions?
             </p>
-            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-5">
+            <h2 className="font-heading font-bold text-white text-3xl md:text-4xl lg:text-5xl leading-tight mb-5">
               Check our FAQ
             </h2>
             <p className="text-white/55 text-sm leading-relaxed">

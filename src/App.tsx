@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -36,6 +36,31 @@ import ShippingReturns from './pages/LandingPage/ShippingReturns'
 import PrivacyPolicy from './pages/LandingPage/PrivacyPolicy'
 import TermsConditions from './pages/LandingPage/TermsConditions'
 import NotFound from './pages/NotFound'
+import AdminLogin from './pages/admin/pages/AdminLogin'
+import { AdminAuthGuard } from './pages/admin/AdminAuth'
+import { AdminLayout } from './components/admin/AdminLayout'
+import Dashboard from './pages/admin/pages/Dashboard'
+import Users from './pages/admin/pages/Users'
+import Sellers from './pages/admin/pages/Sellers'
+import Orders from './pages/admin/pages/Orders'
+import Listings from './pages/admin/pages/Listings'
+import Payments from './pages/admin/pages/Payments'
+import Pickups from './pages/admin/pages/Pickups'
+import DropOffs from './pages/admin/pages/DropOffs'
+import Inventory from './pages/admin/pages/Inventory'
+import Analytics from './pages/admin/pages/Analytics'
+import Insights from './pages/admin/pages/Insights'
+import Reports from './pages/admin/pages/Reports'
+import Settings from './pages/admin/pages/Settings'
+import AdminNotFound from './pages/admin/pages/NotFound'
+
+function adminRoute(page: React.ReactNode) {
+  return (
+    <AdminAuthGuard>
+      <AdminLayout>{page}</AdminLayout>
+    </AdminAuthGuard>
+  )
+}
 
 const router = createBrowserRouter([
   {
@@ -76,6 +101,22 @@ const router = createBrowserRouter([
     ],
   },
   { path: 'login', element: <Login /> },
+  { path: 'admin/login', element: <AdminLogin /> },
+  { path: 'admin', element: <AdminAuthGuard><Navigate to="/admin/dashboard" replace /></AdminAuthGuard> },
+  { path: 'admin/dashboard', element: adminRoute(<Dashboard />) },
+  { path: 'admin/users', element: adminRoute(<Users />) },
+  { path: 'admin/sellers', element: adminRoute(<Sellers />) },
+  { path: 'admin/orders', element: adminRoute(<Orders />) },
+  { path: 'admin/listings', element: adminRoute(<Listings />) },
+  { path: 'admin/payments', element: adminRoute(<Payments />) },
+  { path: 'admin/pickups', element: adminRoute(<Pickups />) },
+  { path: 'admin/drop-offs', element: adminRoute(<DropOffs />) },
+  { path: 'admin/inventory', element: adminRoute(<Inventory />) },
+  { path: 'admin/analytics', element: adminRoute(<Analytics />) },
+  { path: 'admin/insights', element: adminRoute(<Insights />) },
+  { path: 'admin/reports', element: adminRoute(<Reports />) },
+  { path: 'admin/settings', element: adminRoute(<Settings />) },
+  { path: 'admin/*', element: <AdminNotFound /> },
   {
     path: '*',
     element: <NotFound />,

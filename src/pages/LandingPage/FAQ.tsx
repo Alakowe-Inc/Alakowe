@@ -201,7 +201,7 @@ function FAQ() {
           <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-3">
             Help Centre
           </p>
-          <h1 className="font-heading font-bold text-4xl md:text-5xl mb-4">
+          <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl mb-4">
             Frequently Asked Questions
           </h1>
           <p className="text-white/55 max-w-lg text-sm leading-relaxed mx-auto">
@@ -275,7 +275,7 @@ function FAQ() {
             <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">
               Still need help?
             </p>
-            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-5">
+            <h2 className="font-heading font-bold text-white text-3xl md:text-4xl lg:text-5xl leading-tight mb-5">
               We're happy to answer your questions.
             </h2>
             <p className="text-white/55 text-sm leading-relaxed">

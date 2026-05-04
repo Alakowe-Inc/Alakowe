@@ -43,7 +43,7 @@ function Contact() {
           <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-3">
             Get in touch
           </p>
-          <h1 className="font-heading font-bold text-4xl md:text-5xl mb-4">
+          <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl mb-4">
             Contact Us
           </h1>
           <p className="text-white/55 max-w-lg text-sm leading-relaxed mx-auto">
@@ -112,7 +112,7 @@ function Contact() {
                       rows={6}
                       value={form.message}
                       onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                      className="w-full bg-third border border-third rounded-full px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors resize-none"
+                      className="w-full bg-third border border-third rounded-2xl px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors resize-none"
                     />
                   </div>
                   <button

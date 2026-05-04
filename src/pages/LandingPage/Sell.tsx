@@ -50,7 +50,7 @@ export default function Sell() {
             <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-4">
               Sell on Alakowe
             </p>
-            <h1 className="font-heading font-bold text-4xl md:text-5xl leading-tight mb-6">
+            <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl leading-tight mb-6">
               Your bookshelf is worth more than you think.
             </h1>
             <p className="text-white/60 text-base md:text-lg leading-relaxed mb-10 max-w-xl">

@@ -61,7 +61,7 @@ function BrowseBooks() {
           <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
             Marketplace
           </p>
-          <h1 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-8">
+          <h1 className="font-heading font-bold text-white text-3xl md:text-4xl lg:text-5xl leading-tight mb-8">
             Find your next read.
           </h1>
 

@@ -105,7 +105,7 @@ function BookDetail() {
             </div>
 
             {/* Price + CTA */}
-            <div className="flex items-center justify-between mt-auto">
+            <div className="flex flex-wrap items-center justify-between gap-4 mt-auto">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-1">Price</p>
                 <p className="font-heading font-bold text-main text-3xl">

@@ -116,24 +116,26 @@ export default function SellerOrders() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-6 text-sm border-t border-third pt-4">
-                    <div>
-                      <p className="text-xs text-main/40 mb-0.5">Sale Price</p>
-                      <p className="font-semibold text-main">₦{order.saleAmount.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-main/40 mb-0.5">Platform Fee</p>
-                      <p className="font-semibold text-main/55">−₦{order.platformFee.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-main/40 mb-0.5">Your Payout</p>
-                      <p className="font-heading font-bold text-main">₦{order.netAmount.toLocaleString()}</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm border-t border-third pt-4">
+                    <div className="flex items-center gap-6">
+                      <div>
+                        <p className="text-xs text-main/40 mb-0.5">Sale Price</p>
+                        <p className="font-semibold text-main">₦{order.saleAmount.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-main/40 mb-0.5">Platform Fee</p>
+                        <p className="font-semibold text-main/55">−₦{order.platformFee.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-main/40 mb-0.5">Your Payout</p>
+                        <p className="font-heading font-bold text-main">₦{order.netAmount.toLocaleString()}</p>
+                      </div>
                     </div>
                     {order.status === 'awaiting_seller' && (
-                      <div className="ml-auto">
+                      <div className="sm:ml-auto">
                         <Link
                           to={`/my-sales/${order.id}/dropoff`}
-                          className="bg-main text-white font-semibold text-xs px-4 py-2 rounded-full hover:bg-main/90 transition-colors"
+                          className="inline-flex bg-main text-white font-semibold text-xs px-4 py-2 rounded-full hover:bg-main/90 transition-colors"
                         >
                           Schedule Drop-off
                         </Link>

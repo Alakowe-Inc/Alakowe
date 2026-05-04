@@ -30,7 +30,7 @@ export default function AllRequests() {
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-10">
 
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 mb-8">
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">Community</p>
             <h1 className="font-heading font-bold text-main text-3xl">Book Requests</h1>

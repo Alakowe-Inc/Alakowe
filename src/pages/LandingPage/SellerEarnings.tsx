@@ -115,7 +115,7 @@ export default function SellerEarnings() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-6 text-sm border-t border-third pt-4">
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm border-t border-third pt-4">
                     <div>
                       <p className="text-xs text-main/40 mb-0.5">Sale Price</p>
                       <p className="font-semibold text-main">₦{earning.saleAmount.toLocaleString()}</p>

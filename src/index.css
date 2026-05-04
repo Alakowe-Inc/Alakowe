@@ -25,25 +25,112 @@
 }
 
 @theme {
+  /* ── Project palette (landing pages) ── */
   --color-main: #172131;
-  --color-secondary: #6B6FFF;
   --color-third: #f5f4f9;
   --color-fourth: #ffffff;
 
+  /* ── Core semantic tokens (admin + ui components) ── */
+  --color-primary: #172131;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #6B6FFF;
+  --color-secondary-foreground: #ffffff;
+
+  --color-background: #f5f4f9;
+  --color-foreground: #172131;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #172131;
+
+  --color-muted: #eeecf9;
+  --color-muted-foreground: #6b7a8d;
+
+  --color-accent: #eeecf9;
+  --color-accent-foreground: #172131;
+
+  --color-border: #dddcee;
+  --color-input: #dddcee;
+  --color-ring: #6B6FFF;
+
+  --color-popover: #ffffff;
+  --color-popover-foreground: #172131;
+
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+  --color-success: #22c55e;
+  --color-success-foreground: #ffffff;
+
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #ffffff;
+
+  --color-info: #3b82f6;
+  --color-info-foreground: #ffffff;
+
+  /* ── Sidebar ── */
+  --color-sidebar: #172131;
+  --color-sidebar-foreground: #dde2f0;
+  --color-sidebar-border: #243044;
+  --color-sidebar-accent: #1e2d40;
+
+  /* ── Fonts ── */
   --font-heading: 'Poppins', sans-serif;
   --font-body: 'Inter', sans-serif;
+  --font-display: 'Poppins', sans-serif;
+
+  /* ── Shadows ── */
+  --shadow-elegant: 0 4px 24px -2px rgba(23, 33, 49, 0.14), 0 2px 8px -2px rgba(23, 33, 49, 0.08);
+  --shadow-soft:    0 2px 12px rgba(23, 33, 49, 0.08);
+  --shadow-glow:    0 0 20px rgba(107, 111, 255, 0.35);
+
+  /* ── Animations ── */
+  --animate-fade-in:       fade-in 0.25s ease-out both;
+  --animate-slide-in-left: slide-in-left 0.3s ease-out both;
+}
+
+/* ── HSL variables for recharts inline styles (hsl(var(--X))) ── */
+:root {
+  --primary:     213 36% 14%;
+  --secondary:   238 100% 71%;
+  --background:  248 27% 97%;
+  --foreground:  213 36% 14%;
+  --card:        0 0% 100%;
+  --border:      248 22% 87%;
+  --muted:       248 25% 95%;
+  --muted-foreground: 210 12% 48%;
+  --success:     142 71% 45%;
+  --warning:     38 92% 50%;
+  --info:        217 91% 60%;
+}
+
+/* ── Gradient utilities ── */
+@utility bg-gradient-primary {
+  background: linear-gradient(135deg, #6B6FFF 0%, #172131 100%);
+}
+
+@utility bg-gradient-glow {
+  background: radial-gradient(ellipse at top, rgba(107, 111, 255, 0.18) 0%, transparent 65%);
+}
+
+/* ── Scrollbar utility ── */
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-secondary) var(--color-muted);
 }
 
 body {
   margin: 0;
   font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
-/* Scrollbar */
+/* ── Scrollbar (global) ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -67,9 +154,20 @@ h1, h2, h3, h4, h5, h6 {
   scrollbar-color: var(--color-secondary) var(--color-third);
 }
 
+/* ── Keyframes ── */
 @keyframes marquee {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 .animate-marquee {
