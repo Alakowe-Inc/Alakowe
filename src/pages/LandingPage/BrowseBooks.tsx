@@ -1,8 +1,10 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
-import { books } from '../../data/mockData'
+import { books as mockBooks, type Book } from '../../data/mockData'
 import BookCard from '../../components/BookCard'
+import { isMockMode } from '@/lib/utils'
+import { getListings } from '@/services/listings.service'
 
 const genres = ['All', 'African Fiction', 'Foreign Fiction', 'Romance', 'Thriller', 'Fantasy', 'Children', 'Academic', 'Self Help']
 const conditions = ['All', 'Very Good', 'Good', 'Average', 'Below Average']
@@ -16,11 +18,43 @@ function BrowseBooks() {
   const [location, setLocation] = useState('All')
   const [sortBy, setSortBy] = useState('default')
   const [showFilters, setShowFilters] = useState(false)
+  const [books, setBooks] = useState<Book[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     document.body.style.overflow = showFilters ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [showFilters])
+
+  useEffect(() => {
+    if (isMockMode()) {
+      setBooks(mockBooks)
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    getListings({ Title: query || undefined })
+      .then(result => {
+        setBooks(result.result?.map(l => ({
+          id: String(l.id),
+          title: l.title || '',
+          author: l.author || '',
+          genre: l.categoryName || '',
+          condition: l.bookCondition,
+          price: l.price,
+          location: '',
+          badge: null,
+          coverColor: '#C8A97E',
+          description: l.description || '',
+          sellerName: l.createdBy || '',
+          sellerRating: 0,
+          loveNote: l.loveNote || '',
+        })) || [])
+      })
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [])
 
   const openFilters = () => setShowFilters(true)
   const closeFilters = () => setShowFilters(false)
@@ -42,7 +76,7 @@ function BrowseBooks() {
     if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price)
     if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price)
     return result
-  }, [query, genre, condition, location, sortBy])
+  }, [query, genre, condition, location, sortBy, books])
 
   const hasFilters = genre !== 'All' || condition !== 'All' || location !== 'All'
 
@@ -52,10 +86,31 @@ function BrowseBooks() {
     setLocation('All')
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-third flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-main/50">Loading books…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-third flex items-center justify-center">
+        <div className="text-center">
+          <p className="font-heading font-bold text-main text-xl mb-2">Something went wrong</p>
+          <p className="text-sm text-main/50">{error}</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-third">
 
-      {/* ── Page header ─────────────────────────────────────────── */}
       <div className="bg-main min-h-[50vh] flex items-center justify-center py-20">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full text-center">
           <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
@@ -65,7 +120,6 @@ function BrowseBooks() {
             Find your next read.
           </h1>
 
-          {/* Search bar — frosted glass to match hero/quotes */}
           <div className="flex items-center bg-white/10 backdrop-blur-md border border-white/15 rounded-md overflow-hidden max-w-xl mx-auto focus-within:border-secondary transition-colors">
             <Search size={15} className="ml-4 text-white/40 shrink-0" />
             <input
@@ -90,7 +144,6 @@ function BrowseBooks() {
 
       <div className="max-w-8xl py-6 mx-auto px-4 md:px-6 lg:px-12">
 
-        {/* ── Toolbar ── */}
         <div className="flex items-center justify-between py-4 border-b border-main/10">
           <div className="flex items-center gap-3 md:gap-6">
             <select
@@ -122,7 +175,6 @@ function BrowseBooks() {
           </button>
         </div>
 
-        {/* ── Grid ── */}
         <div className="py-10">
           {filtered.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-10">
@@ -140,7 +192,6 @@ function BrowseBooks() {
         </div>
       </div>
 
-      {/* Filters drawer */}
       {showFilters && (
         <div
           className="fixed inset-0 z-50 bg-main/40 backdrop-blur-sm"
@@ -150,7 +201,6 @@ function BrowseBooks() {
             className="absolute right-0 top-0 h-full w-full sm:w-105 bg-white flex flex-col"
             onClick={e => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="flex items-center justify-between px-8 pt-6 pb-6 shrink-0">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-1">Marketplace</p>
@@ -164,7 +214,6 @@ function BrowseBooks() {
               </button>
             </div>
 
-            {/* Active filter chips */}
             {hasFilters && (
               <div className="px-8 pb-4 flex flex-wrap gap-2 shrink-0">
                 {genre !== 'All' && (
@@ -190,10 +239,8 @@ function BrowseBooks() {
 
             <div className="h-px bg-main/8 mx-8 shrink-0" />
 
-            {/* Content */}
             <div className="flex-1 overflow-y-auto px-8 py-8 space-y-10">
 
-              {/* Sort */}
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Sort By</p>
                 <div className="flex flex-col">
@@ -218,7 +265,6 @@ function BrowseBooks() {
                 </div>
               </div>
 
-              {/* Genre */}
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Genre</p>
                 <div className="flex flex-col">
@@ -239,7 +285,6 @@ function BrowseBooks() {
                 </div>
               </div>
 
-              {/* Condition */}
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Condition</p>
                 <div className="flex flex-col">
@@ -260,7 +305,6 @@ function BrowseBooks() {
                 </div>
               </div>
 
-              {/* Location */}
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Location</p>
                 <div className="flex flex-col">
@@ -270,7 +314,7 @@ function BrowseBooks() {
                       onClick={() => setLocation(l)}
                       className="flex items-center justify-between py-3.5 border-b border-main/6 group"
                     >
-                      <span className={`text-sm transition-colors ${location === l ? 'font-semibold text-main' : 'text-main/50 group-hover:text-main'}`}>
+                      <span className={"text-sm transition-colors " + (location === l ? "font-semibold text-main" : "text-main/50 group-hover:text-main")}>
                         {l}
                       </span>
                       {location === l && (
@@ -282,7 +326,6 @@ function BrowseBooks() {
               </div>
             </div>
 
-            {/* Footer */}
             <div className="px-8 pt-4 pb-6 shrink-0 flex items-center gap-3">
               <button
                 onClick={clearFilters}

@@ -1,18 +1,81 @@
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, MapPin, Star, ShoppingBag } from 'lucide-react'
-import { books } from '../../data/mockData'
+import { ArrowLeft, ShoppingBag } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
+import { getListingById } from '@/services/listings.service'
+import { isMockMode } from '@/lib/utils'
+import { books as mockBooks } from '../../data/mockData'
+import type { ListingResponse } from '@/lib/api-types'
 
 function BookDetail() {
   const { id } = useParams()
-  const book = books.find(b => b.id === id)
   const { addToCart } = useCart()
 
-  if (!book) {
+  const [listing, setListing] = useState<ListingResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!id) return
+    if (isMockMode()) {
+      const book = mockBooks.find(b => b.id === id)
+      if (book) {
+        setListing({
+          id: Number(book.id),
+          title: book.title,
+          isbn: null,
+          description: book.description,
+          loveNote: book.loveNote,
+          price: book.price,
+          quantity: 1,
+          bookCondition: 'Good' as const,
+          coverImageFileName: null,
+          imageFileNames: null,
+          author: book.author,
+          categoryId: 0,
+          isPublished: true,
+          isSoldOut: false,
+          status: 'Published',
+          categoryName: book.genre,
+          createdBy: book.sellerName,
+          dateCreated: null,
+          dateModified: null,
+          cartItemCount: 0,
+          wishlistItemCount: 0,
+        })
+      }
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    getListingById(Number(id))
+      .then(setListing)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [id])
+
+  const onChangeQuantity = (delta: number) => {
+    if (!listing) return
+    const q = Math.max(1, listing.quantity + delta)
+    setListing({ ...listing, quantity: q })
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-third flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (error || !listing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-third">
         <div className="text-center">
-          <p className="font-heading font-bold text-main text-2xl mb-3">Book not found</p>
+          <p className="font-heading font-bold text-main text-2xl mb-3">
+            {error ? 'Something went wrong' : 'Book not found'}
+          </p>
+          <p className="text-sm text-main/50 mb-4">{error}</p>
           <Link to="/browse" className="text-sm text-secondary hover:underline font-semibold">
             Back to Browse
           </Link>
@@ -25,7 +88,6 @@ function BookDetail() {
     <div className="bg-third min-h-screen">
       <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-10">
 
-        {/* Back link */}
         <Link
           to="/browse"
           className="inline-flex items-center gap-2 text-sm text-main/55 hover:text-main mb-10 transition-colors font-medium"
@@ -35,90 +97,73 @@ function BookDetail() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-16">
 
-          {/* Left — book cover */}
-          <div
-            className="rounded-lg h-72 md:h-120 flex items-center justify-center border border-third"
-            style={{ backgroundColor: book.coverColor + '18' }}
-          >
-            <div
-              className="w-36 h-52 md:w-44 md:h-64 rounded-lg shadow-2xl flex items-end justify-center pb-4"
-              style={{ backgroundColor: book.coverColor }}
-            >
+          <div className="rounded-lg h-72 md:h-120 bg-secondary/10 flex items-center justify-center border border-third">
+            <div className="w-36 h-52 md:w-44 md:h-64 rounded-lg shadow-2xl bg-secondary/20 flex items-end justify-center pb-4">
               <div className="w-28 h-px bg-white/40 rounded" />
             </div>
           </div>
 
-          {/* Right — details */}
           <div className="flex flex-col">
 
-            {/* Eyebrow */}
             <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
-              {book.genre}
+              {listing.categoryName || 'General'}
             </p>
 
             <h1 className="font-heading font-bold text-main text-3xl md:text-4xl leading-tight mb-2">
-              {book.title}
+              {listing.title}
             </h1>
-            <p className="text-main/55 text-base mb-4">by {book.author}</p>
+            <p className="text-main/55 text-base mb-4">by {listing.author}</p>
 
-            {/* Condition tags */}
             <div className="flex flex-wrap gap-2 mb-6">
-              <p className="text-xs font-semibold uppercase tracking-widest text-main/40 w-full mb-1">Condition notes</p>
-              {book.condition.split(',').map(issue => (
-                <span key={issue.trim()} className="text-xs font-medium text-main/60 bg-main/8 border border-main/12 px-3 py-1 rounded-full">
-                  {issue.trim()}
-                </span>
-              ))}
+              <p className="text-xs font-semibold uppercase tracking-widest text-main/40 w-full mb-1">Condition</p>
+              <span className="text-xs font-medium text-main/60 bg-main/8 border border-main/12 px-3 py-1 rounded-full">
+                {listing.bookCondition}
+              </span>
             </div>
 
-            <p className="text-main/65 text-sm leading-relaxed mb-8">{book.description}</p>
+            <p className="text-main/65 text-sm leading-relaxed mb-8">{listing.description}</p>
 
-            {/* Seller card */}
-            <div className="bg-white rounded-lg border border-third p-5 mb-4">
-              <p className="text-xs uppercase tracking-widest font-semibold text-secondary mb-3">
-                Sold by
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center font-heading font-bold text-main text-sm shrink-0">
-                  {(book.sellerUsername ?? book.sellerName)[0]}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-main text-sm">{book.sellerUsername ?? book.sellerName}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <Star size={11} className="text-yellow-400 fill-yellow-400" />
-                    <span className="text-xs text-main/55">{book.sellerRating} rating</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-main/45 shrink-0">
-                  <MapPin size={13} />
-                  <span className="text-xs">{book.location}</span>
-                </div>
+            {listing.loveNote && (
+              <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-5 mb-8">
+                <p className="text-xs uppercase tracking-widest font-semibold text-secondary mb-2">
+                  A note from the seller
+                </p>
+                <p className="text-main/65 text-sm italic leading-relaxed">"{listing.loveNote}"</p>
               </div>
-            </div>
+            )}
 
-            {/* Love note */}
-            <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-5 mb-8">
-              <p className="text-xs uppercase tracking-widest font-semibold text-secondary mb-2">
-                A note from the seller
-              </p>
-              <p className="text-main/65 text-sm italic leading-relaxed">"{book.loveNote}"</p>
-            </div>
-
-            {/* Price + CTA */}
             <div className="flex flex-wrap items-center justify-between gap-4 mt-auto">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-1">Price</p>
                 <p className="font-heading font-bold text-main text-3xl">
-                  ₦{book.price.toLocaleString()}
+                  ₦{listing.price.toLocaleString()}
                 </p>
               </div>
-              <button
-                onClick={() => addToCart(book.id)}
-                className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3.5 rounded-full hover:bg-main/90 transition-colors text-sm"
-              >
-                <ShoppingBag size={17} />
-                Add to Cart
-              </button>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => onChangeQuantity(-1)}
+                    disabled={listing.quantity <= 1}
+                    className="w-8 h-8 rounded-full border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors disabled:opacity-30"
+                  >
+                    -
+                  </button>
+                  <span className="text-sm font-semibold w-6 text-center">{listing.quantity}</span>
+                  <button
+                    onClick={() => onChangeQuantity(1)}
+                    className="w-8 h-8 rounded-full border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors"
+                  >
+                    +
+                  </button>
+                </div>
+                <button
+                  onClick={() => addToCart(listing.id, listing.quantity)}
+                  className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3.5 rounded-full hover:bg-main/90 transition-colors text-sm"
+                >
+                  <ShoppingBag size={17} />
+                  Add to Cart
+                </button>
+              </div>
             </div>
           </div>
         </div>

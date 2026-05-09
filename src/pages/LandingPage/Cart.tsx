@@ -1,19 +1,21 @@
 import { Link } from 'react-router-dom'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
-import { books } from '../../data/mockData'
+
+function LoadingSpinner() {
+  return (
+    <div className="bg-third min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+}
 
 function Cart() {
-  const { items, removeFromCart, updateQuantity, clearCart } = useCart()
+  const { items, count, totalAmount, loading, removeFromCart, updateQuantity, clearCart } = useCart()
 
-  const cartBooks = items.map(item => ({
-    ...item,
-    book: books.find(b => b.id === item.bookId)!,
-  })).filter(item => item.book)
+  if (loading && items.length === 0) return <LoadingSpinner />
 
-  const subtotal = cartBooks.reduce((sum, { book, quantity }) => sum + book.price * quantity, 0)
-
-  if (cartBooks.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="bg-third min-h-screen flex items-center justify-center px-4">
         <div className="text-center max-w-sm">
@@ -39,7 +41,6 @@ function Cart() {
     <div className="bg-third min-h-screen">
       <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-10">
 
-        {/* Header */}
         <Link
           to="/browse"
           className="inline-flex items-center gap-2 text-sm text-main/55 hover:text-main mb-8 transition-colors font-medium"
@@ -48,10 +49,11 @@ function Cart() {
         </Link>
 
         <div className="flex items-center justify-between mb-8">
-          <h1 className="font-heading font-bold text-main text-3xl">Your Cart</h1>
+          <h1 className="font-heading font-bold text-main text-3xl">Your Cart ({count})</h1>
           <button
             onClick={clearCart}
-            className="text-xs text-main/45 hover:text-main/70 transition-colors font-medium underline underline-offset-2"
+            disabled={loading}
+            className="text-xs text-main/45 hover:text-main/70 transition-colors font-medium underline underline-offset-2 disabled:opacity-40"
           >
             Clear all
           </button>
@@ -59,68 +61,60 @@ function Cart() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* Cart items */}
           <div className="lg:col-span-2 flex flex-col gap-4">
-            {cartBooks.map(({ book, quantity }) => (
+            {items.map(item => (
               <div
-                key={book.id}
+                key={item.listingId}
                 className="bg-white rounded-lg border border-third p-5 flex gap-5"
               >
-                {/* Book cover */}
-                <Link to={`/books/${book.id}`} className="shrink-0">
-                  <div
-                    className="w-16 h-24 rounded-full shadow-md flex items-end justify-center pb-2"
-                    style={{ backgroundColor: book.coverColor }}
-                  >
+                <Link to={`/books/${item.listingId}`} className="shrink-0">
+                  <div className="w-16 h-24 bg-secondary/20 rounded-lg shadow-md flex items-end justify-center pb-2">
                     <div className="w-10 h-px bg-white/40 rounded" />
                   </div>
                 </Link>
 
-                {/* Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-3 mb-1">
-                    <Link to={`/books/${book.id}`} className="hover:underline">
+                    <Link to={`/books/${item.listingId}`} className="hover:underline">
                       <p className="font-heading font-bold text-main text-base leading-snug">
-                        {book.title}
+                        {item.title}
                       </p>
                     </Link>
                     <button
-                      onClick={() => removeFromCart(book.id)}
+                      onClick={() => removeFromCart(item.listingId)}
+                      disabled={loading}
                       aria-label="Remove"
-                      className="text-main cursor-pointer hover:text-red-600 transition-colors shrink-0 mt-0.5"
+                      className="text-main hover:text-red-600 transition-colors shrink-0 mt-0.5 disabled:opacity-40"
                     >
                       <Trash2 size={15} />
                     </button>
                   </div>
 
-                  <p className="text-main/50 text-sm mb-1">by {book.author}</p>
-
-                  <span className="text-xs font-medium text-main/50 bg-main/6 border border-main/10 px-2 py-0.5 rounded-full">
-                    {book.condition}
-                  </span>
+                  {item.author && (
+                    <p className="text-main/50 text-sm mb-1">by {item.author}</p>
+                  )}
 
                   <div className="flex items-center justify-between mt-4">
-                    {/* Quantity control */}
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => updateQuantity(book.id, quantity - 1)}
-                        disabled={quantity <= 1}
+                        onClick={() => updateQuantity(item.listingId, item.quantity - 1)}
+                        disabled={item.quantity <= 1 || loading}
                         className="w-7 h-7 rounded-full border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <Minus size={12} />
                       </button>
-                      <span className="text-sm font-semibold text-main w-4 text-center">{quantity}</span>
+                      <span className="text-sm font-semibold text-main w-4 text-center">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(book.id, quantity + 1)}
+                        onClick={() => updateQuantity(item.listingId, item.quantity + 1)}
+                        disabled={loading}
                         className="w-7 h-7 rounded-full border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors"
                       >
                         <Plus size={12} />
                       </button>
                     </div>
 
-                    {/* Line total */}
                     <p className="font-heading font-bold text-main text-lg">
-                      ₦{(book.price * quantity).toLocaleString()}
+                      ₦{(item.unitPrice * item.quantity).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -128,19 +122,18 @@ function Cart() {
             ))}
           </div>
 
-          {/* Order summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg border border-third p-6 sticky top-24">
               <h2 className="font-heading font-bold text-main text-lg mb-6">Order Summary</h2>
 
               <div className="flex flex-col gap-3 mb-6">
-                {cartBooks.map(({ book, quantity }) => (
-                  <div key={book.id} className="flex items-center justify-between text-sm">
+                {items.map(item => (
+                  <div key={item.listingId} className="flex items-center justify-between text-sm">
                     <span className="text-main/60 truncate pr-2">
-                      {book.title} {quantity > 1 && <span className="text-main/40">×{quantity}</span>}
+                      {item.title} {item.quantity > 1 && <span className="text-main/40">×{item.quantity}</span>}
                     </span>
                     <span className="text-main font-medium shrink-0">
-                      ₦{(book.price * quantity).toLocaleString()}
+                      ₦{(item.unitPrice * item.quantity).toLocaleString()}
                     </span>
                   </div>
                 ))}
@@ -150,7 +143,7 @@ function Cart() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-main/60 uppercase tracking-wider">Subtotal</span>
                   <span className="font-heading font-bold text-main text-xl">
-                    ₦{subtotal.toLocaleString()}
+                    ₦{totalAmount.toLocaleString()}
                   </span>
                 </div>
                 <p className="text-xs text-main/40 mt-2">

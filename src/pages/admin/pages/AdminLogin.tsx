@@ -4,7 +4,8 @@ import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ADMIN_CREDENTIALS, setAdminAuthed } from "@/pages/admin/AdminAuth";
+import { setAdminAuthed } from "@/pages/admin/AdminAuth";
+import { adminLogin } from "@/services/admin.service";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -14,23 +15,24 @@ export default function AdminLogin() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    setTimeout(() => {
-      if (
-        email.trim().toLowerCase() === ADMIN_CREDENTIALS.email &&
-        password === ADMIN_CREDENTIALS.password
-      ) {
+    try {
+      const result = await adminLogin({ emailAddress: email, password });
+      if (result.roleName === 'Admin') {
         setAdminAuthed(true);
         navigate("/admin", { replace: true });
       } else {
         setError("Invalid admin credentials");
-        setLoading(false);
       }
-    }, 350);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid admin credentials");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -112,8 +114,8 @@ export default function AdminLogin() {
           </div>
 
           <div className="mt-6 rounded-lg bg-muted px-3 py-2 text-[11px] text-muted-foreground">
-            Demo credentials: <strong>{ADMIN_CREDENTIALS.email}</strong> /{" "}
-            <strong>{ADMIN_CREDENTIALS.password}</strong>
+            Demo credentials: <strong>admin@alakowe.com</strong> /{" "}
+            <strong>admin123</strong>
           </div>
         </div>
       </div>

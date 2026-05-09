@@ -1,4 +1,6 @@
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { setNavigateFn } from '@/lib/navigate'
 import { CartProvider } from './context/CartContext'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -65,7 +67,7 @@ function adminRoute(page: React.ReactNode) {
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <RootLayout />,
+    element: <><NavigateSetter /><RootLayout /></>,
     children: [
       { index: true, element: <Home /> },
       { path: 'browse', element: <BrowseBooks /> },
@@ -123,11 +125,17 @@ const router = createBrowserRouter([
   },
 ])
 
+function NavigateSetter() {
+  const navigate = useNavigate()
+  useEffect(() => { setNavigateFn(navigate) }, [navigate])
+  return null
+}
+
 function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <RouterProvider router={router} />
+        <RouterProvider router={router} fallbackElement={null} />
       </CartProvider>
     </AuthProvider>
   )

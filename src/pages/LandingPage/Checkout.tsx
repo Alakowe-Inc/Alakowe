@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Package, Shield, Clock } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
-import { books } from '../../data/mockData'
 import { saveOrder, generateOrderId } from '../../data/orderData'
 import type { Order, OrderItem } from '../../data/orderData'
 
@@ -49,7 +48,7 @@ const inputClass = (hasError?: boolean) =>
   }`
 
 function Checkout() {
-  const { items, clearCart } = useCart()
+  const { items, clearCart, totalAmount } = useCart()
   const navigate = useNavigate()
 
   const [form, setForm] = useState<FormState>({
@@ -63,15 +62,10 @@ function Checkout() {
   const [errors, setErrors] = useState<Partial<FormState>>({})
   const [loading, setLoading] = useState(false)
 
-  const cartBooks = items
-    .map(item => ({ ...item, book: books.find(b => b.id === item.bookId)! }))
-    .filter(item => item.book)
-
-  const subtotal = cartBooks.reduce((sum, { book, quantity }) => sum + book.price * quantity, 0)
   const deliveryFee = 1500
-  const total = subtotal + deliveryFee
+  const total = totalAmount + deliveryFee
 
-  if (cartBooks.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="bg-third min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
@@ -112,21 +106,21 @@ function Checkout() {
     setErrors({})
     setLoading(true)
 
-    const orderItems: OrderItem[] = cartBooks.map(({ book, quantity }) => ({
-      bookId: book.id,
-      title: book.title,
-      author: book.author,
-      coverColor: book.coverColor,
-      price: book.price,
-      quantity,
-      condition: book.condition,
-      sellerName: book.sellerName,
+    const orderItems: OrderItem[] = items.map(item => ({
+      bookId: String(item.listingId),
+      title: item.title || '',
+      author: item.author || '',
+      coverColor: '#C8A97E',
+      price: item.unitPrice,
+      quantity: item.quantity,
+      condition: '',
+      sellerName: '',
     }))
 
     const order: Order = {
       id: generateOrderId(),
       items: orderItems,
-      subtotal,
+      subtotal: totalAmount,
       deliveryFee,
       total,
       status: 'payment_received',
@@ -160,10 +154,8 @@ function Checkout() {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            {/* ── Left: form fields ── */}
             <div className="lg:col-span-2 flex flex-col gap-6">
 
-              {/* Delivery details */}
               <div className="bg-white rounded-2xl border border-third p-6">
                 <h2 className="font-heading font-bold text-main text-lg mb-5">Delivery Details</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -231,7 +223,6 @@ function Checkout() {
                 </div>
               </div>
 
-              {/* How delivery works */}
               <div className="bg-white rounded-2xl border border-third p-6">
                 <h2 className="font-heading font-bold text-main text-lg mb-5">How Delivery Works</h2>
                 <div className="flex flex-col gap-5">
@@ -265,7 +256,6 @@ function Checkout() {
                 </div>
               </div>
 
-              {/* Payment method */}
               <div className="bg-white rounded-2xl border border-third p-6">
                 <h2 className="font-heading font-bold text-main text-lg mb-5">Payment Method</h2>
                 <div className="flex items-center gap-3 border border-secondary/40 bg-secondary/5 rounded-xl px-4 py-3.5">
@@ -282,26 +272,22 @@ function Checkout() {
 
             </div>
 
-            {/* ── Right: order summary ── */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-2xl border border-third p-6 lg:sticky lg:top-24">
                 <h2 className="font-heading font-bold text-main text-lg mb-5">Order Summary</h2>
 
                 <div className="flex flex-col gap-3 mb-5">
-                  {cartBooks.map(({ book, quantity }) => (
-                    <div key={book.id} className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-12 rounded-full shrink-0 shadow-sm"
-                        style={{ backgroundColor: book.coverColor }}
-                      />
+                  {items.map(item => (
+                    <div key={item.listingId} className="flex items-center gap-3">
+                      <div className="w-8 h-12 bg-secondary/20 rounded-lg shrink-0 shadow-sm" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-main truncate leading-snug">{book.title}</p>
+                        <p className="text-sm font-semibold text-main truncate leading-snug">{item.title}</p>
                         <p className="text-xs text-main/45">
-                          {book.author}{quantity > 1 && ` ×${quantity}`}
+                          {item.author}{item.quantity > 1 && ` ×${item.quantity}`}
                         </p>
                       </div>
                       <span className="text-sm font-semibold text-main shrink-0">
-                        ₦{(book.price * quantity).toLocaleString()}
+                        ₦{(item.unitPrice * item.quantity).toLocaleString()}
                       </span>
                     </div>
                   ))}
@@ -310,7 +296,7 @@ function Checkout() {
                 <div className="border-t border-third pt-4 flex flex-col gap-2.5 mb-6">
                   <div className="flex justify-between text-sm">
                     <span className="text-main/55">Subtotal</span>
-                    <span className="font-medium text-main">₦{subtotal.toLocaleString()}</span>
+                    <span className="font-medium text-main">₦{totalAmount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-main/55">Delivery</span>

@@ -179,7 +179,7 @@ function BookCard({ book }: BookCardProps) {
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              addToCart(book.id)
+              addToCart(Number(book.id))
             }}
           >
             Add to Cart
