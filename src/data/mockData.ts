@@ -6,15 +6,25 @@ export interface Book {
   title: string
   author: string
   genre: string
-  condition: BookCondition
+
+  condition: string
+  conditionNotes: string
+
+  quantity: number
+  format: string
+
   price: number
+  discount?: number   // ← ADD THIS
+
   location: string
   badge: BookBadge
   coverColor: string
+
   description: string
   sellerName: string
   sellerUsername?: string
   sellerRating: number
+
   loveNote: string
 }
 
@@ -24,13 +34,21 @@ export const books: Book[] = [
     title: 'Things Fall Apart',
     author: 'Chinua Achebe',
     genre: 'African Fiction',
-    condition: 'Minor cover scuff, pages slightly yellowed',
+
+    condition: 'Good',
+    conditionNotes: 'Minor cover scuff, pages slightly yellowed',
+
+    quantity: 1,
+    format: 'Paperback',
+
     price: 2500,
     location: 'Lagos Island',
     badge: 'Best Value',
     coverColor: '#C8A97E',
+
     description:
       'A novel about pre-colonial life in the southeastern part of Nigeria and the arrival of Europeans during the late nineteenth century. One of the most widely read books in modern African literature.',
+
     sellerName: 'Chidi O.',
     sellerRating: 4.8,
     loveNote:
@@ -41,7 +59,13 @@ export const books: Book[] = [
     title: 'Purple Hibiscus',
     author: 'Chimamanda Ngozi Adichie',
     genre: 'African Fiction',
-    condition: 'Small crease on spine, light pencil marks inside',
+
+    condition: 'Good',
+    conditionNotes: 'Small crease on spine, light pencil marks inside',
+
+    quantity: 1,
+    format: 'Paperback',
+
     price: 3000,
     location: 'Ibadan',
     badge: 'Recently Added',
@@ -58,7 +82,13 @@ export const books: Book[] = [
     title: 'Half of a Yellow Sun',
     author: 'Chimamanda Ngozi Adichie',
     genre: 'African Fiction',
-    condition: 'Faded spine, minor corner wear',
+
+    condition: 'Fair',
+    conditionNotes: 'Faded spine, minor corner wear',
+
+    quantity: 1,
+    format: 'Paperback',
+
     price: 3500,
     location: 'Abuja',
     badge: null,
@@ -74,8 +104,15 @@ export const books: Book[] = [
     title: 'Americanah',
     author: 'Chimamanda Ngozi Adichie',
     genre: 'African Fiction',
-    condition: 'Clean pages, small sticker residue on back cover',
+
+    condition: 'Good',
+    conditionNotes: 'Clean pages, small sticker residue on back cover',
+
+    quantity: 1,
+    format: 'Paperback',
+
     price: 4000,
+    discount: 5, // ← add this
     location: 'Victoria Island, Lagos',
     badge: 'Best Value',
     coverColor: '#2D6A4F',
@@ -90,7 +127,13 @@ export const books: Book[] = [
     title: 'The Famished Road',
     author: 'Ben Okri',
     genre: 'African Fiction',
-    condition: 'Torn back cover corner, water stain on first 10 pages, heavy underlining',
+
+    condition: 'Fair',
+    conditionNotes: 'Torn back cover corner, water stain on first 10 pages, heavy underlining',
+
+    quantity: 1,
+    format: 'Paperback',
+
     price: 2000,
     location: 'Port Harcourt',
     badge: 'Best Value',
@@ -106,7 +149,13 @@ export const books: Book[] = [
     title: 'Stay With Me',
     author: 'Ayobami Adeyemi',
     genre: 'African Fiction',
-    condition: 'Like new, no visible wear',
+
+    condition: 'Like New',
+    conditionNotes: 'Like new, no visible wear',
+
+    quantity: 1,
+    format: 'Paperback',
+
     price: 3200,
     location: 'Lagos',
     badge: 'Recently Added',
@@ -118,13 +167,21 @@ export const books: Book[] = [
     loveNote: 'I read this in two days. It will haunt you in the best way.',
   },
   {
-    id: '7',
+  id: '7',
     title: 'Atomic Habits',
     author: 'James Clear',
     genre: 'Self Help',
-    condition: 'Slight yellowing on edges, pen underlines in two chapters',
+
+    condition: 'Good',
+    conditionNotes: 'Slight yellowing on edges',
+
+    quantity: 1,
+    format: 'Paperback',
+
     price: 4500,
-    location: 'Ikeja, Lagos',
+    discount: 10, // ← add this
+
+    location: 'Ikeja Lagos',
     badge: null,
     coverColor: '#1D3557',
     description:
@@ -138,7 +195,13 @@ export const books: Book[] = [
     title: 'The Alchemist',
     author: 'Paulo Coelho',
     genre: 'Foreign Fiction',
-    condition: 'Minor spine crease, small ink mark on page 34',
+
+    condition: 'Good',
+    conditionNotes: 'Minor spine crease, small ink mark on page 34',
+
+    quantity: 1,
+    format: 'Paperback',
+
     price: 2800,
     location: 'Lekki, Lagos',
     badge: 'Best Value',

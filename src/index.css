@@ -1,5 +1,8 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Brand fonts */
 @font-face {
   font-family: 'Poppins';
   src: url('./assets/fonts/Poppins-SemiBold.ttf') format('truetype');
@@ -7,7 +10,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: 'Poppins';
   src: url('./assets/fonts/Poppins-Bold.ttf') format('truetype');
@@ -15,7 +17,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: 'Inter';
   src: url('./assets/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
@@ -24,152 +25,233 @@
   font-display: swap;
 }
 
-@theme {
-  /* ── Project palette (landing pages) ── */
-  --color-main: #172131;
-  --color-third: #f5f4f9;
-  --color-fourth: #ffffff;
+/* ALÁKÒWÉ Admin — Design System
+   Brand: #172131 navy, #babfff lavender, #f5f4f9 light bg, #ffffff
+   All colors HSL.
+*/
 
-  /* ── Core semantic tokens (admin + ui components) ── */
-  --color-primary: #172131;
-  --color-primary-foreground: #ffffff;
+@layer base {
+  :root {
+    /* Surfaces */
+    --background: 240 19% 97%;          /* #f5f4f9 */
+    --foreground: 217 36% 14%;          /* #172131 */
 
-  --color-secondary: #6B6FFF;
-  --color-secondary-foreground: #ffffff;
+    --card: 0 0% 100%;
+    --card-foreground: 217 36% 14%;
 
-  --color-background: #f5f4f9;
-  --color-foreground: #172131;
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 36% 14%;
 
-  --color-card: #ffffff;
-  --color-card-foreground: #172131;
+    /* Brand */
+    --primary: 217 36% 14%;             /* #172131 navy */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 217 36% 22%;
 
-  --color-muted: #eeecf9;
-  --color-muted-foreground: #6b7a8d;
+    --secondary: 238 100% 71%;          /* #6B6FFF brand */
+    --secondary-foreground: 0 0% 100%;
 
-  --color-accent: #eeecf9;
-  --color-accent-foreground: #172131;
+    --accent: 236 100% 86%;
+    --accent-foreground: 217 36% 14%;
 
-  --color-border: #dddcee;
-  --color-input: #dddcee;
-  --color-ring: #6B6FFF;
+    --muted: 240 19% 94%;
+    --muted-foreground: 217 14% 42%;
 
-  --color-popover: #ffffff;
-  --color-popover-foreground: #172131;
+    --destructive: 0 78% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
+    --success: 152 60% 42%;
+    --success-foreground: 0 0% 100%;
 
-  --color-success: #22c55e;
-  --color-success-foreground: #ffffff;
+    --warning: 38 95% 56%;
+    --warning-foreground: 217 36% 14%;
 
-  --color-warning: #f59e0b;
-  --color-warning-foreground: #ffffff;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
 
-  --color-info: #3b82f6;
-  --color-info-foreground: #ffffff;
+    --border: 240 14% 90%;
+    --input: 240 14% 90%;
+    --ring: 236 80% 70%;
 
-  /* ── Sidebar ── */
-  --color-sidebar: #172131;
-  --color-sidebar-foreground: #dde2f0;
-  --color-sidebar-border: #243044;
-  --color-sidebar-accent: #1e2d40;
+    --radius: 0.875rem;
 
-  /* ── Fonts ── */
-  --font-heading: 'Poppins', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-display: 'Poppins', sans-serif;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 36% 14%), hsl(217 36% 24%));
+    --gradient-secondary: linear-gradient(135deg, hsl(236 100% 86%), hsl(236 100% 78%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(240 19% 98%));
+    --gradient-glow: radial-gradient(circle at top right, hsl(236 100% 86% / 0.35), transparent 60%);
 
-  /* ── Shadows ── */
-  --shadow-elegant: 0 4px 24px -2px rgba(23, 33, 49, 0.14), 0 2px 8px -2px rgba(23, 33, 49, 0.08);
-  --shadow-soft:    0 2px 12px rgba(23, 33, 49, 0.08);
-  --shadow-glow:    0 0 20px rgba(107, 111, 255, 0.35);
+    /* Shadows */
+    --shadow-sm: 0 1px 2px hsl(217 36% 14% / 0.04);
+    --shadow-soft: 0 4px 16px -4px hsl(217 36% 14% / 0.08);
+    --shadow-elegant: 0 10px 40px -12px hsl(217 36% 14% / 0.18);
+    --shadow-glow: 0 0 40px hsl(236 100% 86% / 0.45);
 
-  /* ── Animations ── */
-  --animate-fade-in:       fade-in 0.25s ease-out both;
-  --animate-slide-in-left: slide-in-left 0.3s ease-out both;
+    /* Sidebar (dark navy) */
+    --sidebar-background: 217 36% 14%;
+    --sidebar-foreground: 240 19% 90%;
+    --sidebar-primary: 236 100% 86%;
+    --sidebar-primary-foreground: 217 36% 14%;
+    --sidebar-accent: 217 36% 19%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217 30% 22%;
+    --sidebar-ring: 236 100% 86%;
+
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .dark {
+    --background: 217 36% 8%;
+    --foreground: 240 19% 95%;
+    --card: 217 36% 12%;
+    --card-foreground: 240 19% 95%;
+    --popover: 217 36% 12%;
+    --popover-foreground: 240 19% 95%;
+    --primary: 236 100% 86%;
+    --primary-foreground: 217 36% 14%;
+    --secondary: 217 30% 18%;
+    --secondary-foreground: 240 19% 95%;
+    --muted: 217 30% 16%;
+    --muted-foreground: 240 14% 65%;
+    --accent: 217 30% 18%;
+    --accent-foreground: 240 19% 95%;
+    --border: 217 30% 20%;
+    --input: 217 30% 20%;
+    --ring: 236 100% 86%;
+  }
 }
 
-/* ── HSL variables for recharts inline styles (hsl(var(--X))) ── */
-:root {
-  --primary:     213 36% 14%;
-  --secondary:   238 100% 71%;
-  --background:  248 27% 97%;
-  --foreground:  213 36% 14%;
-  --card:        0 0% 100%;
-  --border:      248 22% 87%;
-  --muted:       248 25% 95%;
-  --muted-foreground: 210 12% 48%;
-  --success:     142 71% 45%;
-  --warning:     38 92% 50%;
-  --info:        217 91% 60%;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html, body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', system-ui, sans-serif;
+    @apply tracking-tight;
+  }
 }
 
-/* ── Gradient utilities ── */
-@utility bg-gradient-primary {
-  background: linear-gradient(135deg, #6B6FFF 0%, #172131 100%);
+@layer utilities {
+  .font-display {
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .bg-gradient-card {
+    background: var(--gradient-card);
+  }
+  .bg-gradient-glow {
+    background: var(--gradient-glow);
+  }
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  .glass {
+    background: hsl(0 0% 100% / 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .hover-lift {
+    transition: var(--transition-smooth);
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elegant);
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 999px;
+  }
 }
 
-@utility bg-gradient-glow {
-  background: radial-gradient(ellipse at top, rgba(107, 111, 255, 0.18) 0%, transparent 65%);
-}
+/* PREMIUM GLOBAL SCROLLBAR */
 
-/* ── Scrollbar utility ── */
-@utility scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-secondary) var(--color-muted);
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-body);
-  background-color: var(--color-background);
-  color: var(--color-foreground);
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-}
-
-/* ── Scrollbar (global) ── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-third);
+  background: #ffffff;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-secondary);
+  background: linear-gradient(
+    to bottom,
+    #7c3aed,
+    #4f46e5,
+    #2563eb
+  );
   border-radius: 999px;
+  border: 1px solid #0f172a;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-main);
+  background: linear-gradient(
+    to bottom,
+    #8b5cf6,
+    #6366f1,
+    #3b82f6
+  );
 }
 
+
+
+/* PREMIUM PURPLE SCROLLBAR */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4ff;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    #6c63ff,
+    #5b54f5,
+    #4f46e5
+  );
+  border-radius: 999px;
+  border: 2px solid #f3f4ff;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    #7c73ff,
+    #675fff,
+    #5b54f5
+  );
+}
+
+/* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-secondary) var(--color-third);
-}
-
-/* ── Keyframes ── */
-@keyframes marquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-in-left {
-  from { opacity: 0; transform: translateX(-12px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-.animate-marquee {
-  animation: marquee 28s linear infinite;
+  scrollbar-color: #5b54f5 #f3f4ff;
 }
