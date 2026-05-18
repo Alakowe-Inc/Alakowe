@@ -41,11 +41,18 @@ export interface Listing {
   title: string
   author: string
   genre: string
+
   condition: ConditionGrade
+  conditionNotes: string
+
+  quantity: number
+  format: string
+
   description: string
   price: number
   discount: number
   loveNote: string
+
   coverColor: string
   status: ListingStatus
   rejectionReason?: string
