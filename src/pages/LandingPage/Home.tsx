@@ -44,6 +44,13 @@ function Home() {
   const [countingDone, setCountingDone] = useState(false)
 
   function handleJoinQueue(title: string) {
+    // If user is not logged in
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent('/')}`)
+      return
+    }
+
+    // Prevent double joining
     if (joined[title]) return
 
     const newJoined = { ...joined, [title]: true }

@@ -17,6 +17,7 @@ import Contact from "./pages/LandingPage/Contact";
 import FAQ from "./pages/LandingPage/FAQ";
 import HowItWorks from "./pages/LandingPage/HowItWorks";
 import Login from "./pages/Auth/Login";
+import Signup from "./pages/Auth/Signup";
 import Cart from "./pages/LandingPage/Cart";
 import Checkout from "./pages/LandingPage/Checkout";
 import PaymentSuccess from "./pages/LandingPage/PaymentSuccess";
@@ -64,6 +65,7 @@ import Settings from "@/admin/pages/Settings";
 import OrderDetail from "@/admin/pages/OrderDetail";
 import ListingDetail from "@/admin/pages/ListingDetail";
 import PickupDetail from "@/admin/pages/PickupDetail";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +83,7 @@ const App = () => (
       <AuthProvider>
         <CartProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               {/* Customer site */}
               <Route path="/" element={<RootLayout />}>
@@ -117,6 +120,7 @@ const App = () => (
                 <Route path="how-it-works" element={<HowItWorks />} />
               </Route>
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
 
               {/* Admin */}
               <Route path="/admin" element={<AdminLogin />} />
