@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  BookOpen, ShoppingBag, DollarSign, MailQuestion, ArrowUpRight, Eye,
+  BookOpen, ShoppingBag, MailQuestion, ArrowUpRight, Eye,
 } from "lucide-react";
 import { PageCard } from "@/admin/components/PageCard";
 import { StatusBadge } from "@/admin/components/StatusBadge";
@@ -24,7 +24,15 @@ export default function Dashboard() {
   const tiles = [
     { key: "listings", label: "Pending Listings", value: pendingListings, sub: "awaiting review", icon: BookOpen, tone: "warning", to: "/admin/listings?status=Pending" },
     { key: "orders", label: "Pending Orders", value: pendingOrders, sub: "need fulfilment", icon: ShoppingBag, tone: "info", to: "/admin/orders?filter=waiting" },
-    { key: "payouts", label: "Pending Payouts", value: pendingPayouts, sub: "ready for release", icon: DollarSign, tone: "primary", to: "/admin/payments" },
+    { 
+      key: "payouts",
+      label: "Pending Payouts",
+      value: pendingPayouts,
+      sub: "ready for release",
+      icon: "₦",
+      tone: "primary",
+      to: "/admin/payments"
+    },
     { key: "requests", label: "Unmatched Requests", value: unmatched, sub: "open book requests", icon: MailQuestion, tone: "success", to: "/admin/insights?filter=open" },
   ] as const;
 
@@ -53,7 +61,11 @@ export default function Dashboard() {
           >
             <div className="flex items-start justify-between">
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${toneClass(t.tone)}`}>
-                <t.icon className="h-5 w-5" />
+                {typeof t.icon === "string" ? (
+                  <span className="text-lg font-bold">₦</span>
+                ) : (
+                  <t.icon className="h-5 w-5" />
+                )}
               </div>
               <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
             </div>

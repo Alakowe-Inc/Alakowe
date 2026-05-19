@@ -16,6 +16,14 @@ export default function AllRequests() {
   const [activeTitle, setActiveTitle] = useState("")
 
   function handleJoinQueue(title: string) {
+
+    // ✅ If user is not logged in
+    if (!user) {
+      navigate(`/login?redirect=/requests`)
+      return
+    }
+
+    // ✅ Prevent double joining
     if (joined[title]) return
 
     const newJoined = { ...joined, [title]: true }
@@ -42,7 +50,6 @@ export default function AllRequests() {
     localStorage.setItem("queueCounts", JSON.stringify(newCounts))
     localStorage.setItem("queueTime", JSON.stringify(newTimestamps))
 
-    // 👉 ADD THIS PART
     setActiveTitle(title)
     setShowModal(true)
 

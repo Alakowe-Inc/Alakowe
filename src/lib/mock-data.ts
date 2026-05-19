@@ -7,8 +7,7 @@ export const statCards = [
   { key: "listings", label: "Active Listings", value: 18203, delta: 4.6, icon: "BookOpen" },
   { key: "orders", label: "Orders Today", value: 487, delta: 22.3, icon: "ShoppingBag" },
   { key: "pending", label: "Pending Approvals", value: 64, delta: -3.2, icon: "Clock" },
-  { key: "revenue", label: "Revenue", value: 128450, delta: 18.9, icon: "DollarSign", currency: true },
-  { key: "flagged", label: "Flagged Accounts", value: 17, delta: -8.4, icon: "Flag" },
+  { key: "revenue", label: "Revenue", value: 128450, delta: 18.9, icon: "Banknote", currency: true },  { key: "flagged", label: "Flagged Accounts", value: 17, delta: -8.4, icon: "Flag" },
   { key: "traffic", label: "Active Traffic", value: 1284, delta: 6.8, icon: "Activity" },
 ];
 

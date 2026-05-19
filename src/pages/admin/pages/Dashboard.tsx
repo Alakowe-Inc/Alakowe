@@ -1,4 +1,4 @@
-import { Users, Store, BookOpen, ShoppingBag, Clock, DollarSign, Flag, Activity, ArrowRight, MoreHorizontal, TrendingUp } from "lucide-react";
+import { Users, Store, BookOpen, ShoppingBag, Clock, Banknote, Flag, Activity, ArrowRight, MoreHorizontal, TrendingUp } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
 import { PageCard } from "@/components/admin/PageCard";
 import { StatusBadge } from "@/components/admin/StatusBadge";
@@ -10,7 +10,7 @@ import {
   Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar,
 } from "recharts";
 
-const iconMap = { Users, Store, BookOpen, ShoppingBag, Clock, DollarSign, Flag, Activity } as const;
+const iconMap = { Users, Store, BookOpen, ShoppingBag, Clock, Banknote, Flag, Activity } as const;
 const accents: Array<"primary" | "secondary" | "success" | "warning"> = ["secondary", "primary", "success", "secondary", "warning", "success", "warning", "primary"];
 
 export default function Dashboard() {
