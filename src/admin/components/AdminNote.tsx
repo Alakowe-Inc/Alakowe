@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { StickyNote, Save, Check } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const KEY = "alakowe.admin.notes";
 
@@ -34,7 +34,7 @@ export function AdminNote({ entityId, title = "Admin Note", description = "Inter
     map[entityId] = value;
     writeAll(map);
     setSaved(true);
-    toast({ title: "Note saved", description: entityId });
+    toast("Note saved");
     setTimeout(() => setSaved(false), 1500);
   };
 

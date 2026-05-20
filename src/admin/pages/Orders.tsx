@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { TimeRangeFilter, defaultRange, type RangeValue } from "@/admin/components/TimeRangeFilter";
 import { Paginator, usePaginated } from "@/admin/components/Paginator";
 import { useAdminStore } from "@/admin/store/adminStore";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const STATUSES = ["All", "Pending", "Confirmed", "Processing", "Dispatched", "Delivered", "Cancelled"] as const;
 const PAGE_SIZE = 8;
@@ -57,7 +57,7 @@ export default function Orders() {
     const csv = rows.map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `orders-${Date.now()}.csv`; a.click();
-    toast({ title: "Export ready", description: `${data.length} orders` });
+    toast("Export ready");
   };
 
   return (

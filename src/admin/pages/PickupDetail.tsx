@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAdminStore } from "@/admin/store/adminStore";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 export default function PickupDetail() {
   const { id } = useParams();
@@ -31,7 +31,7 @@ export default function PickupDetail() {
     );
   }
 
-  const copyCode = () => { navigator.clipboard?.writeText(pickup.code); toast({ title: "Pickup code copied", description: pickup.code }); };
+  const copyCode = () => { navigator.clipboard?.writeText(pickup.code); toast("Pickup code copied"); };
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -41,12 +41,12 @@ export default function PickupDetail() {
         </Button>
         <div className="flex flex-wrap gap-2">
           {pickup.status === "Requested" && (
-            <Button size="sm" onClick={() => { approve(pickup.id); toast({ title: "Pickup approved" }); }}>
+            <Button size="sm" onClick={() => { approve(pickup.id); toast("Pickup approved"); }}>
               <Check className="mr-1.5 h-4 w-4" /> Approve
             </Button>
           )}
           {pickup.status !== "Picked Up" && pickup.status !== "Cancelled" && pickup.status !== "Completed" && (
-            <Button size="sm" variant="outline" onClick={() => { markPicked(pickup.id); toast({ title: "Marked as picked up" }); }}>
+            <Button size="sm" variant="outline" onClick={() => { markPicked(pickup.id); toast("Marked as picked up"); }}>
               <Truck className="mr-1.5 h-4 w-4" /> Picked Up
             </Button>
           )}
@@ -55,7 +55,7 @@ export default function PickupDetail() {
               <Button size="sm" variant="outline" onClick={() => setReschedule(true)}>
                 <RotateCcw className="mr-1.5 h-4 w-4" /> Reschedule
               </Button>
-              <Button size="sm" variant="destructive" onClick={() => { cancel(pickup.id); toast({ title: "Pickup cancelled" }); }}>
+              <Button size="sm" variant="destructive" onClick={() => { cancel(pickup.id); toast("Pickup cancelled"); }}>
                 <X className="mr-1.5 h-4 w-4" /> Cancel
               </Button>
             </>
@@ -139,7 +139,7 @@ export default function PickupDetail() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setReschedule(false)}>Cancel</Button>
-            <Button onClick={() => { setReschedule(false); toast({ title: "Pickup rescheduled", description: newDate || "Date updated" }); }}>Save</Button>
+            <Button onClick={() => { setReschedule(false); toast("Pickup rescheduled"); }}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

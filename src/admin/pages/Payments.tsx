@@ -9,7 +9,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAdminStore } from "@/admin/store/adminStore";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 export default function Payments() {
   const navigate = useNavigate();
@@ -79,9 +79,9 @@ export default function Payments() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => navigate(`/admin/payments/${p.id}`)}><Eye className="mr-2 h-4 w-4" /> View</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { markPaid(p.id); toast({ title: "Payment marked as paid" }); }}>Payment Made</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { markUnsuccessful(p.id); toast({ title: "Payment unsuccessful" }); }}>Payment Unsuccessful</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { notifySeller(p.seller); toast({ title: `Notified ${p.seller}` }); }}>Notify Seller</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => { markPaid(p.id); toast("Payment marked as paid"); }}>Payment Made</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => { markUnsuccessful(p.id); toast("Payment unsuccessful"); }}>Payment Unsuccessful</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => { notifySeller(p.seller); toast(`Notified ${p.seller}`); }}>Notify Seller</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>

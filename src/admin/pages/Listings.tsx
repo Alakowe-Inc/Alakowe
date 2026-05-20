@@ -13,7 +13,7 @@ import { Paginator } from "@/admin/components/Paginator";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const FILTERS = ["All", "Pending", "Approved", "Rejected", "Flagged", "Needs Correction", "Suspended"] as const;
 const PAGE_SIZE = 8;
@@ -112,8 +112,8 @@ export default function Listings() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => navigate(`/admin/listings/${l.id}`)}><Eye className="mr-2 h-4 w-4" /> View</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { approve(l.id); toast({ title: "Approved", description: l.title }); }}><Check className="mr-2 h-4 w-4" /> Approve</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { flag(l.id, "Manual flag"); toast({ title: "Flagged" }); }}><Flag className="mr-2 h-4 w-4" /> Flag</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => { approve(l.id); toast("Approved"); }}><Check className="mr-2 h-4 w-4" /> Approve</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => { flag(l.id, "Manual flag"); toast("Flagged"); }}><Flag className="mr-2 h-4 w-4" /> Flag</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate(`/admin/listings/${l.id}`)}><Pencil className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

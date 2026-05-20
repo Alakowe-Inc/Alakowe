@@ -238,7 +238,7 @@ export default function ListBook() {
           <div className="bg-white rounded-2xl border border-third p-6">
             <h2 className="font-heading font-bold text-main text-base mb-1">Pricing</h2>
             <p className="text-xs text-main/45 mb-4">Set a fair price. Listings priced too high may be flagged during review.</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Price (₦)" required error={errors.price}>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-medium">₦</span>

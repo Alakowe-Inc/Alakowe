@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAdminStore } from "@/admin/store/adminStore";
 import type { DropoffCentre } from "@/lib/mock-data";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const empty: Omit<DropoffCentre, "id"> = {
   name: "", address: "", phone: "", hours: "", contactPerson: "", active: true,
@@ -36,14 +36,14 @@ export default function DropoffCentres() {
   const startEdit = (c: DropoffCentre) => { setForm(c); setEditing(c); };
 
   const submit = () => {
-    if (!form.name.trim()) { toast({ title: "Name required" }); return; }
+    if (!form.name.trim()) { toast("Name required"); return; }
     if (editing) {
       updateCentre(editing.id, form);
-      toast({ title: "Centre updated", description: form.name });
+      toast("Centre updated");
       setEditing(null);
     } else {
       addCentre(form);
-      toast({ title: "Centre added", description: form.name });
+      toast("Centre added");
       setCreating(false);
     }
   };
@@ -78,7 +78,7 @@ export default function DropoffCentres() {
             </ul>
             <div className="mt-4 flex flex-wrap gap-1.5">
               <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => startEdit(c)}><Edit className="h-3.5 w-3.5" /> Edit</Button>
-              <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => { toggleHidden(c.id); toast({ title: c.hidden ? "Centre shown" : "Centre hidden" }); }}>
+              <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => { toggleHidden(c.id); toast(c.hidden ? "Centre shown" : "Centre hidden"); }}>
                 {c.hidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                 {c.hidden ? "Show" : "Hide"}
               </Button>
@@ -96,7 +96,7 @@ export default function DropoffCentres() {
           <div className="space-y-3">
             <div><Label>Centre name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
             <div><Label>Address</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
               <div><Label>Operating hours</Label><Input value={form.hours} onChange={(e) => setForm({ ...form, hours: e.target.value })} /></div>
             </div>
@@ -121,7 +121,7 @@ export default function DropoffCentres() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { if (confirmDelete) { deleteCentre(confirmDelete.id); toast({ title: "Centre deleted" }); setConfirmDelete(null); } }}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={() => { if (confirmDelete) { deleteCentre(confirmDelete.id); toast("Centre deleted"); setConfirmDelete(null); } }}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

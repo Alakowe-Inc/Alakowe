@@ -706,7 +706,7 @@ function Home() {
             {blogPosts.slice(0, 3).map(post => (
               <Link
                 key={post.id}
-                to={`/blog/${post.id}`}
+                to={`/blog/${post.slug}`}
                 className="group flex flex-col"
               >
                 {/* Image area */}

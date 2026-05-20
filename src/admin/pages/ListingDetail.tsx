@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAdminStore } from "@/admin/store/adminStore";
 import { COVER_IMAGES } from "@/lib/covers";
 import { useState } from "react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 import { AdminNote } from "@/admin/components/AdminNote";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
@@ -45,13 +45,13 @@ export default function ListingDetail() {
           <ArrowLeft className="h-4 w-4" /> Back to Listings
         </Button>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast({ title: "Notification sent", description: `Seller ${listing.seller} notified.` })}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast("Notification sent")}>
             <Bell className="h-3.5 w-3.5" /> Notify seller
           </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast({ title: "Edit mode", description: "Editor opened." })}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast("Edit mode")}>
             <Edit className="h-3.5 w-3.5" /> Edit
           </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { suspend(listing.id); toast({ title: "Listing suspended" }); }}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { suspend(listing.id); toast("Listing suspended"); }}>
             <Ban className="h-3.5 w-3.5" /> Suspend
           </Button>
           {!locked && (
@@ -62,7 +62,7 @@ export default function ListingDetail() {
               <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setRejecting(true)}>
                 <X className="h-3.5 w-3.5" /> Reject
               </Button>
-              <Button size="sm" className="gap-1.5" onClick={() => { approve(listing.id); toast({ title: "Approved", description: listing.title }); }}>
+              <Button size="sm" className="gap-1.5" onClick={() => { approve(listing.id); toast("Approved"); }}>
                 <Check className="h-3.5 w-3.5" /> Approve
               </Button>
             </>
@@ -87,7 +87,7 @@ export default function ListingDetail() {
               <p className="mb-3 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 <Receipt className="h-3 w-3" /> Price breakdown
               </p>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="rounded-xl border-2 border-primary bg-primary/5 p-4 shadow-glow">
                   <p className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
                     <Wallet className="h-3 w-3" /> Seller Price
@@ -153,7 +153,7 @@ export default function ListingDetail() {
           <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Explain to the seller why…" rows={4} />
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejecting(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => { reject(listing.id, reason || "Did not meet quality standards"); toast({ title: "Rejected" }); setRejecting(false); setReason(""); }}>Reject</Button>
+            <Button variant="destructive" onClick={() => { reject(listing.id, reason || "Did not meet quality standards"); toast("Rejected"); setRejecting(false); setReason(""); }}>Reject</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -164,7 +164,7 @@ export default function ListingDetail() {
           <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="What should the seller fix?" rows={4} />
           <DialogFooter>
             <Button variant="outline" onClick={() => setCorrecting(false)}>Cancel</Button>
-            <Button onClick={() => { correct(listing.id, reason || "Please update listing details."); toast({ title: "Correction requested" }); setCorrecting(false); setReason(""); }}>Send</Button>
+            <Button onClick={() => { correct(listing.id, reason || "Please update listing details."); toast("Correction requested"); setCorrecting(false); setReason(""); }}>Send</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

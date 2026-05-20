@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Paginator, usePaginated } from "@/admin/components/Paginator";
 import { useAdminStore } from "@/admin/store/adminStore";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const FILTERS = ["All", "Requested", "Approved", "Picked Up", "Cancelled", "Scheduled", "Completed"] as const;
 const PAGE_SIZE = 8;
@@ -30,7 +30,7 @@ export default function Pickups() {
 
   const copyCode = (code: string) => {
     navigator.clipboard?.writeText(code);
-    toast({ title: "Pickup code copied", description: code });
+    toast("Pickup code copied");
   };
 
   return (

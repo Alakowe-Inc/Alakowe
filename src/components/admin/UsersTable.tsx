@@ -14,7 +14,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 type ConfirmAction = "flag" | "suspend" | "ban" | null;
 
@@ -56,10 +56,7 @@ export function UsersTable({ roleFilter, title, description }: Props) {
   const runConfirm = () => {
     if (!confirm.action || !confirm.user) return;
     const map = { flag: "flagged", suspend: "suspended", ban: "banned" } as const;
-    toast({
-      title: `User ${map[confirm.action]}`,
-      description: `${confirm.user.name} has been ${map[confirm.action]}.`,
-    });
+    toast(`User ${map[confirm.action]}`);
     setConfirm({ action: null, user: null });
   };
 
@@ -164,16 +161,16 @@ export function UsersTable({ roleFilter, title, description }: Props) {
                         <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem onClick={() => toast({ title: "Opening profile", description: u.name })}>
+                        <DropdownMenuItem onClick={() => toast("Opening profile")}>
                           <Eye className="mr-2 h-4 w-4" /> View profile
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => toast({ title: "Marked verified", description: u.name })}>
+                        <DropdownMenuItem onClick={() => toast("Marked verified")}>
                           <ShieldCheck className="mr-2 h-4 w-4" /> Mark verified
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setConfirm({ action: "flag", user: u })}>
                           <Flag className="mr-2 h-4 w-4" /> Flag user
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => toast({ title: "Warning sent", description: `${u.name} was notified.` })}>
+                        <DropdownMenuItem onClick={() => toast("Warning sent")}>
                           <AlertTriangle className="mr-2 h-4 w-4" /> Send warning
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />

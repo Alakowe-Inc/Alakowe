@@ -13,7 +13,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger,
   DropdownMenuRadioGroup, DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 interface Props { title: string; description: string; }
 
@@ -87,7 +87,7 @@ export function UsersTable({ title, description }: Props) {
           </DropdownMenu>
         </div>
 
-        <Button variant="outline" size="sm" className="h-10 gap-1.5 rounded-xl" onClick={() => toast({ title: "Export queued", description: `${data.length} rows` })}>
+        <Button variant="outline" size="sm" className="h-10 gap-1.5 rounded-xl" onClick={() => toast("Export queued")}>
           <Download className="h-4 w-4" /> Export
         </Button>
       </div>

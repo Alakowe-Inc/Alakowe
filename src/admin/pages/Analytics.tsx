@@ -12,7 +12,7 @@ import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart,
   Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const RANGES = [
   { key: "7d", label: "Last 7 Days", count: 1 },
@@ -56,7 +56,7 @@ export default function Analytics() {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" size="sm" className="h-10 gap-1.5 rounded-xl" onClick={() => toast({ title: "Export queued", description: cfg.label })}>
+          <Button variant="outline" size="sm" className="h-10 gap-1.5 rounded-xl" onClick={() => toast("Export queued")}>
             <Download className="h-4 w-4" /> Export
           </Button>
         </div>

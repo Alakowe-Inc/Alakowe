@@ -53,7 +53,7 @@ function Blog() {
           {filtered.map(post => (
             <Link
               key={post.id}
-              to={`/blog/${post.id}`}
+              to={`/blog/${post.slug}`}
               className="group flex flex-col"
             >
               <div className="overflow-hidden aspect-video bg-secondary/10 flex items-center justify-center mb-5">
