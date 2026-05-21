@@ -7,7 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const items = [
   { label: "Dashboard", to: "/admin/dashboard", icon: LayoutDashboard },
@@ -134,7 +134,7 @@ export function AdminSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }:
           </a>
 
           <button
-            onClick={() => toast({ title: "Logged out", description: "You have been signed out." })}
+            onClick={() => toast("Logged out")}
             className={cn(
               "group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all hover:bg-destructive/15 hover:text-white",
               collapsed && "justify-center px-0"

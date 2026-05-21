@@ -6,7 +6,7 @@ import { AdminNotes } from "@/admin/components/AdminNotes";
 import { Button } from "@/components/ui/button";
 import { useAdminStore } from "@/admin/store/adminStore";
 import { COVER_IMAGES } from "@/lib/covers";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const STAGES = ["Pending Verification", "Verified", "In Transit", "Delivered"] as const;
 
@@ -40,10 +40,10 @@ export default function DropoffDetail() {
         <div className="flex flex-wrap gap-2">
           {drop.status === "Pending Verification" && (
             <>
-              <Button size="sm" onClick={() => { verify(drop.id); toast({ title: "Drop-off verified" }); }}>
+              <Button size="sm" onClick={() => { verify(drop.id); toast("Drop-off verified"); }}>
                 <Check className="mr-1.5 h-4 w-4" /> Verify
               </Button>
-              <Button size="sm" variant="destructive" onClick={() => { reject(drop.id); toast({ title: "Drop-off rejected" }); }}>
+              <Button size="sm" variant="destructive" onClick={() => { reject(drop.id); toast("Drop-off rejected"); }}>
                 <X className="mr-1.5 h-4 w-4" /> Reject
               </Button>
             </>

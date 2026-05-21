@@ -75,7 +75,7 @@ export default function MyListings() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <StatCard icon={BookOpen} label="Total" value={listings.length} />
           <StatCard icon={TrendingUp} label="Live" value={live} sub="Visible to buyers" />
           <StatCard icon={ShoppingBag} label="Sold" value={sold} />

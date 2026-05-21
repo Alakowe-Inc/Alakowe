@@ -4,7 +4,7 @@ import { Lock, Mail, ShieldCheck, Loader2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 import logo from "@/assets/media/logos/favicon.png";
 import { Link } from 'react-router-dom';
 
@@ -29,14 +29,14 @@ export default function AdminLogin() {
 
     if (email.trim().toLowerCase() !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
       setError("Invalid admin credentials. Please try again.");
-      toast({ title: "Authentication failed", description: "Invalid email or password.", variant: "destructive" });
+      toast.error("Authentication failed: Invalid email or password.");
       return;
     }
 
     setLoading(true);
     setTimeout(() => {
       sessionStorage.setItem("alakowe_admin_authed", "1");
-      toast({ title: "Welcome back", description: "Authentication successful." });
+      toast.success("Welcome back");
       navigate("/admin/dashboard", { replace: true });
     }, 3000);
   };

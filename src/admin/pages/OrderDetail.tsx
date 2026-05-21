@@ -16,7 +16,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 import type { Order } from "@/lib/mock-data";
 
 const STATUSES: Order["status"][] = ["Pending", "Confirmed", "Paid", "Processing", "Dispatched", "In Transit", "Shipped", "Delivered", "Cancelled"];
@@ -69,7 +69,7 @@ export default function OrderDetail() {
   const apply = (force: boolean) => {
     if (!next) return;
     (force ? forceUpdate : setStatus)(order.id, next);
-    toast({ title: force ? "Order force-updated" : "Order updated", description: `${order.id} → ${next}` });
+    toast(force ? "Order force-updated" : "Order updated");
     setNext("");
   };
 
@@ -94,11 +94,11 @@ export default function OrderDetail() {
               <DropdownMenuItem onClick={() => apply(true)} disabled={!next}>
                 <Zap className="mr-2 h-4 w-4" /> Force Update
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toast({ title: "Invoice resent" })}>Resend Invoice</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toast({ title: "Buyer notified" })}>Contact Buyer</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toast({ title: "Seller notified" })}>Contact Seller</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast("Invoice resent")}>Resend Invoice</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast("Buyer notified")}>Contact Buyer</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast("Seller notified")}>Contact Seller</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={() => { setStatus(order.id, "Cancelled"); toast({ title: "Order cancelled" }); }}>
+              <DropdownMenuItem className="text-destructive" onClick={() => { setStatus(order.id, "Cancelled"); toast("Order cancelled"); }}>
                 Cancel Order
               </DropdownMenuItem>
             </DropdownMenuContent>

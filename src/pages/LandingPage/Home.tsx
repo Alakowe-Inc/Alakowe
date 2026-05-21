@@ -44,13 +44,6 @@ function Home() {
   const [countingDone, setCountingDone] = useState(false)
 
   function handleJoinQueue(title: string) {
-    // If user is not logged in
-    if (!user) {
-      navigate(`/login?redirect=${encodeURIComponent('/')}`)
-      return
-    }
-
-    // Prevent double joining
     if (joined[title]) return
 
     const newJoined = { ...joined, [title]: true }
@@ -713,7 +706,7 @@ function Home() {
             {blogPosts.slice(0, 3).map(post => (
               <Link
                 key={post.id}
-                to={`/blog/${post.id}`}
+                to={`/blog/${post.slug}`}
                 className="group flex flex-col"
               >
                 {/* Image area */}

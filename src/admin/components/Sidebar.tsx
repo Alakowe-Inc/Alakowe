@@ -7,7 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const items = [
   { label: "Dashboard", to: "/admin/dashboard", icon: LayoutDashboard },
@@ -137,10 +137,7 @@ export function AdminSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }:
               sessionStorage.removeItem("alakowe_admin_authed");
               sessionStorage.setItem("alakowe_admin_logged_out", "1");
 
-              toast({
-                title: "Logged out",
-                description: "You have been signed out.",
-              });
+              toast("Logged out");
 
               window.location.href = "/admin/login";
             }}

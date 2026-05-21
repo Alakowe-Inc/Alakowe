@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Customer-facing
@@ -13,11 +13,11 @@ import Home from "./pages/LandingPage/Home";
 import BrowseBooks from "./pages/LandingPage/BrowseBooks";
 import BookDetail from "./pages/LandingPage/BookDetail";
 import Blog from "./pages/LandingPage/Blog";
+import BlogPost from "./pages/LandingPage/BlogPost";
 import Contact from "./pages/LandingPage/Contact";
 import FAQ from "./pages/LandingPage/FAQ";
 import HowItWorks from "./pages/LandingPage/HowItWorks";
 import Login from "./pages/Auth/Login";
-import Signup from "./pages/Auth/Signup";
 import Cart from "./pages/LandingPage/Cart";
 import Checkout from "./pages/LandingPage/Checkout";
 import PaymentSuccess from "./pages/LandingPage/PaymentSuccess";
@@ -65,7 +65,6 @@ import Settings from "@/admin/pages/Settings";
 import OrderDetail from "@/admin/pages/OrderDetail";
 import ListingDetail from "@/admin/pages/ListingDetail";
 import PickupDetail from "@/admin/pages/PickupDetail";
-import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -78,12 +77,10 @@ const adminWrap = (el: React.ReactNode) => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
+      <ToastContainer position="top-right" autoClose={3000} />
       <AuthProvider>
         <CartProvider>
           <BrowserRouter>
-            <ScrollToTop />
             <Routes>
               {/* Customer site */}
               <Route path="/" element={<RootLayout />}>
@@ -115,12 +112,12 @@ const App = () => (
                 <Route path="privacy" element={<PrivacyPolicy />} />
                 <Route path="terms" element={<TermsConditions />} />
                 <Route path="blog" element={<Blog />} />
+                <Route path="blog/:slug" element={<BlogPost />} />
                 <Route path="contact" element={<Contact />} />
                 <Route path="faq" element={<FAQ />} />
                 <Route path="how-it-works" element={<HowItWorks />} />
               </Route>
               <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
 
               {/* Admin */}
               <Route path="/admin" element={<AdminLogin />} />

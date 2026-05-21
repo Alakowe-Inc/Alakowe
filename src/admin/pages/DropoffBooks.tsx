@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Paginator, usePaginated } from "@/admin/components/Paginator";
 import { useAdminStore } from "@/admin/store/adminStore";
 import { COVER_IMAGES } from "@/lib/covers";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const FILTERS = ["All", "Pending Verification", "Verified", "In Transit", "Delivered", "Rejected"] as const;
 
@@ -89,10 +89,10 @@ export default function DropoffBooks() {
                       <div className="flex justify-end gap-1.5">
                         {b.status === "Pending Verification" && (
                           <>
-                            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => { verify(b.id); toast({ title: "Verified", description: b.book }); }}>
+                            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => { verify(b.id); toast("Verified"); }}>
                               <Check className="h-3.5 w-3.5" /> Verify
                             </Button>
-                            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => { reject(b.id); toast({ title: "Rejected", description: b.book }); }}>
+                            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => { reject(b.id); toast("Rejected"); }}>
                               <X className="h-3.5 w-3.5" /> Reject
                             </Button>
                           </>

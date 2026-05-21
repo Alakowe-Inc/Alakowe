@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { StickyNote, Send, Trash2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const KEY = "alakowe.admin.notes.multi";
 
@@ -52,7 +52,7 @@ export function AdminNotes({
     };
     persist([entry, ...notes]);
     setDraft("");
-    toast({ title: "Note added" });
+    toast("Note added");
   };
 
   const remove = (id: string) => persist(notes.filter((n) => n.id !== id));

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAdminStore } from "@/admin/store/adminStore";
 import type { AdminMember } from "@/lib/mock-data";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 const ROLES: AdminMember["role"][] = ["Super Admin", "Admin", "Moderator", "Support"];
 const empty = { name: "", email: "", avatar: "", role: "Admin" as AdminMember["role"], permissions: [] as string[], active: true };
@@ -71,10 +71,10 @@ function AdminsPanel() {
     setEditing(a);
   };
   const submit = () => {
-    if (!form.name.trim() || !form.email.trim()) { toast({ title: "Name and email required" }); return; }
+    if (!form.name.trim() || !form.email.trim()) { toast("Name and email required"); return; }
     const avatar = form.avatar || form.name.split(" ").map((n) => n[0]).join("").slice(0, 2);
-    if (editing) { updateAdmin(editing.id, { ...form, avatar }); toast({ title: "Admin updated" }); setEditing(null); }
-    else { addAdmin({ ...form, avatar }); toast({ title: "Admin added" }); setCreating(false); }
+    if (editing) { updateAdmin(editing.id, { ...form, avatar }); toast("Admin updated"); setEditing(null); }
+    else { addAdmin({ ...form, avatar }); toast("Admin added"); setCreating(false); }
   };
 
   return (
@@ -128,7 +128,7 @@ function AdminsPanel() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => startEdit(a)}><Edit className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { toggleActive(a.id); toast({ title: a.active ? "Deactivated" : "Activated" }); }}>
+                        <DropdownMenuItem onClick={() => { toggleActive(a.id); toast(a.active ? "Deactivated" : "Activated"); }}>
                           <Check className="mr-2 h-4 w-4" /> {a.active ? "Deactivate" : "Activate"}
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive" onClick={() => setConfirm(a)}><Trash2 className="mr-2 h-4 w-4" /> Remove</DropdownMenuItem>
@@ -176,7 +176,7 @@ function AdminsPanel() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { if (confirm) { removeAdmin(confirm.id); toast({ title: "Admin removed" }); setConfirm(null); } }}>Remove</AlertDialogAction>
+            <AlertDialogAction onClick={() => { if (confirm) { removeAdmin(confirm.id); toast("Admin removed"); setConfirm(null); } }}>Remove</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -221,11 +221,11 @@ function CollectionsPanel() {
     setProductSearch("");
   };
   const submit = () => {
-    if (!form.title.trim()) { toast({ title: "Title required" }); return; }
-    if (editing) { setItems(items.map((i) => i.id === editing.id ? { ...editing, ...form } : i)); toast({ title: "Collection updated" }); setEditing(null); }
-    else { setItems([...items, { ...form, id: `C-${Date.now()}` }]); toast({ title: "Collection created" }); setCreating(false); }
+    if (!form.title.trim()) { toast("Title required"); return; }
+    if (editing) { setItems(items.map((i) => i.id === editing.id ? { ...editing, ...form } : i)); toast("Collection updated"); setEditing(null); }
+    else { setItems([...items, { ...form, id: `C-${Date.now()}` }]); toast("Collection created"); setCreating(false); }
   };
-  const remove = (id: string) => { setItems(items.filter((i) => i.id !== id)); toast({ title: "Collection deleted" }); };
+  const remove = (id: string) => { setItems(items.filter((i) => i.id !== id)); toast("Collection deleted"); };
   const toggle = (id: string) => setItems(items.map((i) => i.id === id ? { ...i, visible: !i.visible } : i));
   const toggleProduct = (pid: string) => setForm({ ...form, products: form.products.includes(pid) ? form.products.filter((x) => x !== pid) : [...form.products, pid] });
 
@@ -368,7 +368,7 @@ function ChargesPanel() {
   const [c, setC] = useState<Charges>(() => {
     try { return { ...defaultCharges, ...JSON.parse(localStorage.getItem(CHG_KEY) || "{}") }; } catch { return defaultCharges; }
   });
-  const save = () => { try { localStorage.setItem(CHG_KEY, JSON.stringify(c)); } catch { /* noop */ } toast({ title: "Charges saved" }); };
+  const save = () => { try { localStorage.setItem(CHG_KEY, JSON.stringify(c)); } catch { /* noop */ } toast("Charges saved"); };
 
   const fields: { key: keyof Charges; label: string; help: string; suffix: string }[] = [
     { key: "listingMarkup", label: "Listing Markup Fee", help: "Added on top of seller's price to compute the listing price.", suffix: "%" },

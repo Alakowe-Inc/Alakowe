@@ -4,7 +4,7 @@ import { PageCard } from "@/admin/components/PageCard";
 import { StatusBadge } from "@/admin/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { useAdminStore } from "@/admin/store/adminStore";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 export default function PaymentDetail() {
   const { id } = useParams();
@@ -30,13 +30,13 @@ export default function PaymentDetail() {
           <ArrowLeft className="h-4 w-4" /> Back to Payments
         </Button>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { notifySeller(payout.seller); toast({ title: `Notified ${payout.seller}` }); }}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { notifySeller(payout.seller); toast(`Notified ${payout.seller}`); }}>
             <Bell className="h-3.5 w-3.5" /> Notify Seller
           </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { markUnsuccessful(payout.id); toast({ title: "Marked unsuccessful" }); }}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { markUnsuccessful(payout.id); toast("Marked unsuccessful"); }}>
             <X className="h-3.5 w-3.5" /> Payment Unsuccessful
           </Button>
-          <Button size="sm" className="gap-1.5" onClick={() => { markPaid(payout.id); toast({ title: "Payment confirmed" }); }}>
+          <Button size="sm" className="gap-1.5" onClick={() => { markPaid(payout.id); toast("Payment confirmed"); }}>
             <Check className="h-3.5 w-3.5" /> Payment Made
           </Button>
         </div>

@@ -20,7 +20,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 
 export default function UserProfile() {
   const { id = "" } = useParams();
@@ -84,11 +84,11 @@ export default function UserProfile() {
           </div>
           <div className="flex flex-wrap gap-2">
             {!user.verified && (
-              <Button variant="outline" size="sm" onClick={() => { verifyUser(user.id); toast({ title: "Verified", description: user.name }); }}>
+              <Button variant="outline" size="sm" onClick={() => { verifyUser(user.id); toast("Verified"); }}>
                 <ShieldCheck className="mr-1.5 h-4 w-4" /> Verify
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => { flagUser(user.id); toast({ title: "Flagged", description: user.name }); }}>
+            <Button variant="outline" size="sm" onClick={() => { flagUser(user.id); toast("Flagged"); }}>
               <Flag className="mr-1.5 h-4 w-4" /> Flag
             </Button>
             <Button variant="outline" size="sm" onClick={() => setWarnOpen(true)}>
@@ -225,7 +225,7 @@ export default function UserProfile() {
             <Button variant="outline" onClick={() => setWarnOpen(false)}>Cancel</Button>
             <Button onClick={() => {
               warnUser(user.id, warnText || "Policy reminder");
-              toast({ title: "Warning sent", description: user.name });
+              toast("Warning sent");
               setWarnOpen(false); setWarnText("");
             }}>Send warning</Button>
           </DialogFooter>
@@ -253,7 +253,7 @@ export default function UserProfile() {
             <Button variant="outline" onClick={() => setSuspendOpen(false)}>Cancel</Button>
             <Button variant="destructive" onClick={() => {
               suspendUser(user.id, suspendReason || "Policy violation", suspendDays);
-              toast({ title: "Suspended", description: `${user.name} for ${suspendDays}d` });
+              toast("Suspended");
               setSuspendOpen(false); setSuspendReason("");
             }}>Suspend</Button>
           </DialogFooter>
@@ -271,7 +271,7 @@ export default function UserProfile() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => { banUser(user.id); toast({ title: "Banned", description: user.name }); setBanOpen(false); }}
+              onClick={() => { banUser(user.id); toast("Banned"); setBanOpen(false); }}
             >Ban user</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
