@@ -2,9 +2,12 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import logo from '../../assets/media/logos/logo.png'
 import { useAuth } from '../../context/AuthContext'
+import { useSignup, useVerifyEmail } from '../../lib/api/auth/auth.hooks'
 
 function SignUp() {
   const { login } = useAuth()
+  const signupMutation = useSignup()
+  const verifyEmailMutation = useVerifyEmail()
   const navigate = useNavigate()
 
   const [step, setStep] = useState<'register' | 'verify'>('register')
@@ -16,18 +19,37 @@ function SignUp() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [code, setCode] = useState('')
+  const [error, setError] = useState('')
 
-  function handleRegisterSubmit(e: React.SyntheticEvent) {
+  async function handleRegisterSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
-    // submit registration — backend sends verification code
-    setStep('verify')
+    setError('')
+    try {
+      await signupMutation.mutateAsync({
+        firstName,
+        lastName,
+        nickname: nickname || undefined,
+        email,
+        phoneNumber,
+        password,
+        confirmPassword,
+      })
+      setStep('verify')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed')
+    }
   }
 
-  function handleVerifySubmit(e: React.SyntheticEvent) {
+  async function handleVerifySubmit(e: React.SyntheticEvent) {
     e.preventDefault()
-    // verify code and confirm account
-    login(email)
-    navigate('/', { replace: true })
+    setError('')
+    try {
+      await verifyEmailMutation.mutateAsync({ email, otp: code })
+      await login(email, password)
+      navigate('/', { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Verification failed')
+    }
   }
 
   if (step === 'verify') {
@@ -55,11 +77,13 @@ function SignUp() {
                 onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 className="w-full border border-gray-900 rounded-full px-4 py-3 text-[.9rem] tracking-widest font-bold placeholder:font-normal text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors text-center"
               />
+              {error && <p className="text-red-500 text-sm text-center">{error}</p>}
               <button
                 type="submit"
-                className="w-full bg-secondary hover:bg-secondary/90 text-white font-semibold py-3.5 rounded-full transition-colors text-sm"
+                disabled={verifyEmailMutation.isPending}
+                className="w-full bg-secondary hover:bg-secondary/90 disabled:bg-secondary/50 text-white font-semibold py-3.5 rounded-full transition-colors text-sm"
               >
-                Verify account
+                {verifyEmailMutation.isPending ? 'Verifying…' : 'Verify account'}
               </button>
             </form>
 
@@ -156,11 +180,13 @@ function SignUp() {
               onChange={e => setConfirmPassword(e.target.value)}
               className="w-full border border-gray-200 rounded-full px-4 py-3 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
             />
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             <button
               type="submit"
-              className="w-full bg-secondary hover:bg-secondary/90 text-white font-semibold py-3.5 rounded-full transition-colors text-sm"
+              disabled={signupMutation.isPending}
+              className="w-full bg-secondary hover:bg-secondary/90 disabled:bg-secondary/50 text-white font-semibold py-3.5 rounded-full transition-colors text-sm"
             >
-              Create account
+              {signupMutation.isPending ? 'Creating account…' : 'Create account'}
             </button>
             <p className="text-xs text-gray-400 text-center mt-1">
               By continuing, you agree to our{' '}

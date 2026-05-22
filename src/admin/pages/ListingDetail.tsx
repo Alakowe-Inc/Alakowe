@@ -1,10 +1,11 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Check, X, Wrench, Ban, Edit, Bell, MapPin, User, Calendar, Tag, Heart, FileText, BookOpen, Hash, TrendingUp, Wallet, Receipt } from "lucide-react";
+import { ArrowLeft, Check, X, Ban, Edit, Bell, User, Calendar, Tag, Heart, FileText, BookOpen, Hash, TrendingUp, Wallet, Receipt } from "lucide-react";
 import { PageCard } from "@/admin/components/PageCard";
 import { StatusBadge } from "@/admin/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { useAdminStore } from "@/admin/store/adminStore";
 import { COVER_IMAGES } from "@/lib/covers";
+import { useAdminListing, useApproveListing, useDeclineListing } from "@/lib/api/admin/admin.hooks";
+import { toAdminListing } from "@/lib/api/admin/admin-adapter";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { AdminNote } from "@/admin/components/AdminNote";
@@ -16,15 +17,15 @@ import { Textarea } from "@/components/ui/textarea";
 export default function ListingDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const listing = useAdminStore((s) => s.listings.find((l) => l.id === id));
-  const approve = useAdminStore((s) => s.approveListing);
-  const reject = useAdminStore((s) => s.rejectListing);
-  const correct = useAdminStore((s) => s.requestCorrection);
-  const suspend = useAdminStore((s) => s.suspendListing);
+  const { data: listingResponse } = useAdminListing(Number(id));
+  const listing = listingResponse ? toAdminListing(listingResponse) : null;
+  const approve = useApproveListing();
+  const decline = useDeclineListing();
 
   const [rejecting, setRejecting] = useState(false);
-  const [correcting, setCorrecting] = useState(false);
   const [reason, setReason] = useState("");
+
+  const isMock = import.meta.env.VITE_USE_MOCK === "true";
 
   if (!listing) {
     return (
@@ -36,7 +37,27 @@ export default function ListingDetail() {
   }
 
   const cover = COVER_IMAGES[listing.title];
-  const locked = listing.status !== "Pending" && listing.status !== "Needs Correction";
+  const locked = listing.status !== "Pending";
+
+  async function handleApprove() {
+    try {
+      await approve.mutateAsync(Number(id));
+      toast.success("Listing approved");
+    } catch {
+      toast.error("Failed to approve listing");
+    }
+  }
+
+  async function handleReject() {
+    try {
+      await decline.mutateAsync(Number(id));
+      toast.success("Listing declined");
+      setRejecting(false);
+      setReason("");
+    } catch {
+      toast.error("Failed to decline listing");
+    }
+  }
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -48,24 +69,25 @@ export default function ListingDetail() {
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast("Notification sent")}>
             <Bell className="h-3.5 w-3.5" /> Notify seller
           </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast("Edit mode")}>
-            <Edit className="h-3.5 w-3.5" /> Edit
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { suspend(listing.id); toast("Listing suspended"); }}>
-            <Ban className="h-3.5 w-3.5" /> Suspend
-          </Button>
+          {!isMock && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast("Edit mode")} disabled>
+              <Edit className="h-3.5 w-3.5" /> Edit
+            </Button>
+          )}
           {!locked && (
             <>
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setCorrecting(true)}>
-                <Wrench className="h-3.5 w-3.5" /> Correct
-              </Button>
               <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setRejecting(true)}>
                 <X className="h-3.5 w-3.5" /> Reject
               </Button>
-              <Button size="sm" className="gap-1.5" onClick={() => { approve(listing.id); toast("Approved"); }}>
-                <Check className="h-3.5 w-3.5" /> Approve
+              <Button size="sm" className="gap-1.5" onClick={handleApprove} disabled={approve.isPending}>
+                <Check className="h-3.5 w-3.5" /> {approve.isPending ? "Approving…" : "Approve"}
               </Button>
             </>
+          )}
+          {!isMock && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast("Listing suspended")} disabled>
+              <Ban className="h-3.5 w-3.5" /> Suspend
+            </Button>
           )}
         </div>
       </div>
@@ -82,7 +104,6 @@ export default function ListingDetail() {
           </div>
 
           <div className="space-y-5">
-            {/* Price Breakdown */}
             <div className="rounded-2xl border border-border bg-gradient-to-br from-card to-muted/30 p-5 shadow-soft">
               <p className="mb-3 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 <Receipt className="h-3 w-3" /> Price breakdown
@@ -115,32 +136,22 @@ export default function ListingDetail() {
             <div className="grid gap-4 sm:grid-cols-2">
               <Field icon={User} label="Author">{listing.author}</Field>
               <Field icon={Tag} label="Category">{listing.category}</Field>
-              <Field icon={BookOpen} label="Format">{listing.format ?? "Paperback"}</Field>
-              <Field icon={Hash} label="Quantity">{listing.quantity ?? 1}</Field>
+              <Field icon={Hash} label="Quantity">{listing.quantity}</Field>
               <Field icon={Tag} label="Condition">{listing.condition}</Field>
-              <Field icon={MapPin} label="Location">{listing.location}</Field>
-              <Field icon={MapPin} label="Pickup / Drop-off">{listing.pickupChoice}</Field>
-              <Field icon={Calendar} label="Submitted">{listing.date}</Field>
+              <Field icon={Calendar} label="Submitted">{listing.date.slice(0, 10)}</Field>
             </div>
 
-            <Field icon={FileText} label="Condition note" full>{listing.conditionNote}</Field>
-            <Field icon={Heart} label="Love note" full>{listing.loveNote}</Field>
+            {listing.description && (
+              <Field icon={FileText} label="Condition note" full>{listing.description}</Field>
+            )}
+            {listing.loveNote && (
+              <Field icon={Heart} label="Love note" full>{listing.loveNote}</Field>
+            )}
 
             <div className="rounded-xl border border-border/60 bg-card p-4">
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Seller</p>
-              <Link to="/admin/users" className="block font-semibold text-foreground hover:text-primary">{listing.seller}</Link>
-              <p className="text-xs text-muted-foreground">Trusted seller · Lagos hub</p>
+              <p className="font-semibold text-foreground">{listing.seller}</p>
             </div>
-
-            {(listing.reviewedBy || listing.rejectionReason || listing.correctionNote || listing.flagReason) && (
-              <div className="rounded-xl border border-border/60 bg-muted/40 p-4">
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Review history</p>
-                {listing.reviewedBy && <p className="text-sm">Reviewed by <strong>{listing.reviewedBy}</strong> on {listing.reviewedAt?.slice(0, 10)}</p>}
-                {listing.rejectionReason && <p className="mt-1 text-sm text-destructive">Reason: {listing.rejectionReason}</p>}
-                {listing.correctionNote && <p className="mt-1 text-sm text-warning">Correction: {listing.correctionNote}</p>}
-                {listing.flagReason && <p className="mt-1 text-sm text-warning">Flag: {listing.flagReason}</p>}
-              </div>
-            )}
           </div>
         </div>
       </PageCard>
@@ -153,18 +164,9 @@ export default function ListingDetail() {
           <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Explain to the seller why…" rows={4} />
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejecting(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => { reject(listing.id, reason || "Did not meet quality standards"); toast("Rejected"); setRejecting(false); setReason(""); }}>Reject</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={correcting} onOpenChange={setCorrecting}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Request correction</DialogTitle></DialogHeader>
-          <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="What should the seller fix?" rows={4} />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCorrecting(false)}>Cancel</Button>
-            <Button onClick={() => { correct(listing.id, reason || "Please update listing details."); toast("Correction requested"); setCorrecting(false); setReason(""); }}>Send</Button>
+            <Button variant="destructive" onClick={handleReject} disabled={decline.isPending}>
+              {decline.isPending ? "Rejecting…" : "Reject"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

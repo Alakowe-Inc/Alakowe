@@ -4,18 +4,24 @@ import logo from '../../assets/media/logos/logo.png'
 import { useAuth } from '../../context/AuthContext'
 
 function Login() {
-  const { login } = useAuth()
+  const { login, isLoading } = useAuth()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const redirect = params.get('redirect') ?? '/'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
-  function handleSubmit(e: React.SyntheticEvent) {
+  async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
-    login(email)
-    navigate(redirect, { replace: true })
+    setError('')
+    try {
+      await login(email, password)
+      navigate(redirect, { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed')
+    }
   }
 
   return (
@@ -50,11 +56,13 @@ function Login() {
               onChange={e => setPassword(e.target.value)}
               className="w-full border border-gray-200 rounded-full px-4 py-3 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
             />
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             <button
               type="submit"
-              className="w-full bg-secondary hover:bg-secondary/90 text-white font-semibold py-3.5 rounded-full transition-colors text-sm"
+              disabled={isLoading}
+              className="w-full bg-secondary hover:bg-secondary/90 disabled:bg-secondary/50 text-white font-semibold py-3.5 rounded-full transition-colors text-sm"
             >
-              Sign in
+              {isLoading ? 'Signing in…' : 'Sign in'}
             </button>
             <p className="text-xs text-gray-400 text-center mt-1">
               By continuing, you agree to our{' '}

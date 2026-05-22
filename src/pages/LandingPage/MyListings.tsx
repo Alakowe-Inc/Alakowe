@@ -1,14 +1,8 @@
-import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { PlusCircle, Pencil, Trash2, BookOpen, TrendingUp, Wallet, ShoppingBag, Share2, Check } from 'lucide-react'
+import { PlusCircle, Pencil, BookOpen, TrendingUp, ShoppingBag, Wallet, Share2, Check } from 'lucide-react'
+import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import {
-  getSellerListings,
-  deleteListing,
-  LISTING_STATUS_LABEL,
-  LISTING_STATUS_CLASS,
-} from '../../data/sellerData'
-import type { Listing } from '../../data/sellerData'
+import { useListings } from '../../lib/api/listings/listings.hooks'
 
 function StatCard({ icon: Icon, label, value, sub }: {
   icon: React.ElementType; label: string; value: string | number; sub?: string
@@ -27,8 +21,8 @@ function StatCard({ icon: Icon, label, value, sub }: {
 
 export default function MyListings() {
   const { user } = useAuth()
-  const [listings, setListings] = useState<Listing[]>([])
-  const [deleting, setDeleting] = useState<string | null>(null)
+  const { data: pagedResult } = useListings()
+  const listings = pagedResult?.result ?? []
   const [copied, setCopied] = useState(false)
 
   const storeUrl = user
@@ -42,19 +36,9 @@ export default function MyListings() {
     })
   }
 
-  useEffect(() => {
-    if (user) setListings(getSellerListings(user.email))
-  }, [user])
-
-  function handleDelete(id: string) {
-    deleteListing(id)
-    setListings(prev => prev.filter(l => l.id !== id))
-    setDeleting(null)
-  }
-
-  const live = listings.filter(l => l.status === 'live').length
-  const pending = listings.filter(l => l.status === 'pending_review').length
-  const sold = listings.filter(l => l.status === 'sold').length
+  const live = listings.filter(l => l.isPublished).length
+  const pending = listings.filter(l => l.status === 'PendingApproval').length
+  const sold = listings.filter(l => l.status === 'Sold').length
 
   return (
     <div className="bg-third min-h-screen">
@@ -66,8 +50,7 @@ export default function MyListings() {
             <h1 className="font-heading font-bold text-main text-3xl">My Listings</h1>
             <p className="text-main/50 text-sm mt-1">Books you've listed on Alakowe</p>
           </div>
-          <Link
-            to="/list"
+          <Link to="/list"
             className="flex items-center gap-2 bg-main text-white font-semibold px-5 py-2.5 rounded-full hover:bg-main/90 transition-colors text-sm"
           >
             <PlusCircle size={15} /> List a Book
@@ -87,10 +70,9 @@ export default function MyListings() {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <p className="font-heading font-bold text-main text-sm">My Bookstore</p>
-              <p className="text-xs text-main/50 mt-0.5">Share this link with buyers (WhatsApp, Instagram, Facebook, etc.) so they can browse all your live books</p>
+              <p className="text-xs text-main/50 mt-0.5">Share this link with buyers so they can browse all your live books</p>
             </div>
-            <button
-              onClick={copyStoreLink}
+            <button onClick={copyStoreLink}
               className="flex items-center gap-2 bg-main text-white font-semibold text-xs px-4 py-2.5 rounded-full hover:bg-main/90 transition-colors shrink-0"
             >
               {copied ? <Check size={13} /> : <Share2 size={13} />}
@@ -112,8 +94,7 @@ export default function MyListings() {
             <p className="text-main/50 text-sm mb-6">
               You haven't listed any books yet. Start turning your shelf into earnings.
             </p>
-            <Link
-              to="/list"
+            <Link to="/list"
               className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-full text-sm hover:bg-main/90 transition-colors"
             >
               <PlusCircle size={15} /> List Your First Book
@@ -122,15 +103,9 @@ export default function MyListings() {
         ) : (
           <div className="flex flex-col gap-4">
             {listings.map(listing => (
-              <div
-                key={listing.id}
-                className="bg-white rounded-2xl border border-third p-5 flex items-start gap-4"
-              >
+              <div key={listing.id} className="bg-white rounded-2xl border border-third p-5 flex items-start gap-4">
                 {/* Cover */}
-                <div
-                  className="w-12 h-[72px] rounded-xl shrink-0 shadow-sm"
-                  style={{ backgroundColor: listing.coverColor }}
-                />
+                <div className="w-12 h-[72px] rounded-xl shrink-0 shadow-sm bg-main/10" />
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
@@ -141,61 +116,30 @@ export default function MyListings() {
                       </p>
                       <p className="text-main/50 text-sm">by {listing.author}</p>
                     </div>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${LISTING_STATUS_CLASS[listing.status]}`}>
-                      {LISTING_STATUS_LABEL[listing.status]}
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
+                      listing.status === 'Published' ? 'bg-green-100 text-green-700' :
+                      listing.status === 'PendingApproval' ? 'bg-amber-100 text-amber-700' :
+                      listing.status === 'Sold' ? 'bg-blue-100 text-blue-700' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {listing.status ?? 'Unknown'}
                     </span>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-main/45">
-                    <span className="font-semibold text-main text-sm">₦{listing.price.toLocaleString()}</span>
-                    {listing.discount > 0 && (
-                      <span className="text-secondary font-medium">{listing.discount}% off</span>
-                    )}
-                    <span>{listing.genre}</span>
-                    <span>{listing.condition}</span>
-                    <span>{listing.views} views</span>
+                    <span className="font-semibold text-main text-sm">₦{(listing.price ?? 0).toLocaleString()}</span>
+                    <span>{listing.categoryName}</span>
+                    <span>{listing.bookCondition}</span>
                   </div>
-
-                  {listing.status === 'rejected' && listing.rejectionReason && (
-                    <p className="text-xs text-red-600 mt-2 bg-red-50 border border-red-100 rounded-lg px-3 py-1.5">
-                      Reason: {listing.rejectionReason}
-                    </p>
-                  )}
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 shrink-0">
-                  {deleting === listing.id ? (
-                    <>
-                      <button
-                        onClick={() => handleDelete(listing.id)}
-                        className="text-xs font-semibold text-red-600 hover:text-red-800 transition-colors px-2 py-1"
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        onClick={() => setDeleting(null)}
-                        className="text-xs font-semibold text-main/45 hover:text-main transition-colors px-2 py-1"
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        to={`/my-listings/${listing.id}/edit`}
-                        className="w-8 h-8 rounded-full border border-main/15 flex items-center justify-center text-main/50 hover:border-secondary hover:text-secondary transition-colors"
-                      >
-                        <Pencil size={13} />
-                      </Link>
-                      <button
-                        onClick={() => setDeleting(listing.id)}
-                        className="w-8 h-8 rounded-full border border-main/15 flex items-center justify-center text-main/50 hover:border-red-300 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </>
-                  )}
+                  <Link to={`/my-listings/${listing.id}/edit`}
+                    className="w-8 h-8 rounded-full border border-main/15 flex items-center justify-center text-main/50 hover:border-secondary hover:text-secondary transition-colors"
+                  >
+                    <Pencil size={13} />
+                  </Link>
                 </div>
               </div>
             ))}

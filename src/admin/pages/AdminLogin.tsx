@@ -1,12 +1,13 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, Mail, ShieldCheck, Loader2, BookOpen } from "lucide-react";
+import { Link } from 'react-router-dom';
+import { Lock, Mail, ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 import logo from "@/assets/media/logos/favicon.png";
-import { Link } from 'react-router-dom';
+import { useAdminLogin } from "../../lib/api/admin/admin.hooks";
 
 const ADMIN_EMAIL = "admin@alakowe.app";
 const ADMIN_PASSWORD = "alakowe2026";
@@ -15,7 +16,6 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
@@ -23,22 +23,37 @@ export default function AdminLogin() {
   const [cancelRedirect, setCancelRedirect] = useState(false);
   const [hidePopup, setHidePopup] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const adminLogin = useAdminLogin();
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (email.trim().toLowerCase() !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    const isMock = import.meta.env.VITE_USE_MOCK === "true";
+    if (isMock && (email.trim().toLowerCase() !== ADMIN_EMAIL || password !== ADMIN_PASSWORD)) {
       setError("Invalid admin credentials. Please try again.");
       toast.error("Authentication failed: Invalid email or password.");
       return;
     }
 
-    setLoading(true);
-    setTimeout(() => {
+    try {
+      const result = await adminLogin.mutateAsync({
+        emailAddress: email.trim(),
+        password: password,
+      });
       sessionStorage.setItem("alakowe_admin_authed", "1");
+      if (result?.token) {
+        sessionStorage.setItem("alakowe_admin_token", result.token);
+      }
+      if (result?.roleName) {
+        sessionStorage.setItem("alakowe_admin_role", result.roleName);
+      }
       toast.success("Welcome back");
       navigate("/admin/dashboard", { replace: true });
-    }, 3000);
+    } catch {
+      setError("Authentication failed. Please check your credentials.");
+      toast.error("Authentication failed: Invalid email or password.");
+    }
   };
 
   useEffect(() => {
@@ -94,7 +109,7 @@ export default function AdminLogin() {
       />
 
       {/* Premium loading overlay */}
-      {loading && (
+      {adminLogin.isPending && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-sidebar/95 backdrop-blur-xl animate-fade-in">
           <div className="relative flex h-28 w-28 items-center justify-center">
             <div className="absolute inset-0 rounded-full border-2 border-secondary/20" />
@@ -229,10 +244,10 @@ export default function AdminLogin() {
 
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={adminLogin.isPending}
                 className="group h-11 w-full bg-secondary font-semibold text-primary shadow-glow transition-all hover:bg-secondary/90 hover:shadow-elegant"
               >
-                {loading ? (
+                {adminLogin.isPending ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Authenticating…</>
                 ) : (
                   <>Sign in to Admin <span className="ml-1.5 transition-transform group-hover:translate-x-0.5">→</span></>

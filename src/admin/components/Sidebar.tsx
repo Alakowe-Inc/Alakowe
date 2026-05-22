@@ -135,6 +135,8 @@ export function AdminSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }:
           <button
             onClick={() => {
               sessionStorage.removeItem("alakowe_admin_authed");
+              sessionStorage.removeItem("alakowe_admin_token");
+              sessionStorage.removeItem("alakowe_admin_role");
               sessionStorage.setItem("alakowe_admin_logged_out", "1");
 
               toast("Logged out");

@@ -1,21 +1,24 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
-import { books } from '../../data/mockData'
+import { useListings } from '../../lib/api/listings/listings.hooks'
+import { listingToBookDisplay } from '../../lib/api/adapters'
 import BookCard from '../../components/BookCard'
 
 const genres = ['All', 'African Fiction', 'Foreign Fiction', 'Romance', 'Thriller', 'Fantasy', 'Children', 'Academic', 'Self Help']
-const conditions = ['All', 'Very Good', 'Good', 'Average', 'Below Average']
-const locations = ['All', 'Lagos', 'Ibadan', 'Abuja', 'Port Harcourt']
+const conditions = ['All', 'New', 'LikeNew', 'Excellent', 'Good', 'Fair', 'Poor']
 
 function BrowseBooks() {
   const [searchParams] = useSearchParams()
   const [query, setQuery] = useState(searchParams.get('q') ?? '')
   const [genre, setGenre] = useState('All')
   const [condition, setCondition] = useState('All')
-  const [location, setLocation] = useState('All')
   const [sortBy, setSortBy] = useState('default')
   const [showFilters, setShowFilters] = useState(false)
+
+  const { data: pagedResult, isLoading } = useListings()
+
+  const books = useMemo(() => (pagedResult?.result ?? []).map(listingToBookDisplay), [pagedResult])
 
   useEffect(() => {
     document.body.style.overflow = showFilters ? 'hidden' : ''
@@ -32,24 +35,21 @@ function BrowseBooks() {
       result = result.filter(
         b =>
           b.title.toLowerCase().includes(q) ||
-          b.author.toLowerCase().includes(q) ||
-          b.location.toLowerCase().includes(q),
+          b.author.toLowerCase().includes(q),
       )
     }
     if (genre !== 'All') result = result.filter(b => b.genre === genre)
     if (condition !== 'All') result = result.filter(b => b.condition === condition)
-    if (location !== 'All') result = result.filter(b => b.location.includes(location))
     if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price)
     if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price)
     return result
-  }, [query, genre, condition, location, sortBy])
+  }, [query, genre, condition, sortBy, books])
 
-  const hasFilters = genre !== 'All' || condition !== 'All' || location !== 'All'
+  const hasFilters = genre !== 'All' || condition !== 'All'
 
   function clearFilters() {
     setGenre('All')
     setCondition('All')
-    setLocation('All')
   }
 
   return (
@@ -65,14 +65,14 @@ function BrowseBooks() {
             Find your next read.
           </h1>
 
-          {/* Search bar — frosted glass to match hero/quotes */}
+          {/* Search bar */}
           <div className="flex items-center bg-white/10 backdrop-blur-md border border-white/15 rounded-md overflow-hidden max-w-xl mx-auto focus-within:border-secondary transition-colors">
             <Search size={15} className="ml-4 text-white/40 shrink-0" />
             <input
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder="Search by title, author, or location…"
+              placeholder="Search by title, author…"
               className="flex-1 px-4 py-3.5 text-sm text-white placeholder-white/30 outline-none bg-transparent font-body"
             />
             {query && (
@@ -124,10 +124,15 @@ function BrowseBooks() {
 
         {/* ── Grid ── */}
         <div className="py-10">
-          {filtered.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-32">
+              <p className="text-main/50 text-sm">Loading…</p>
+            </div>
+          ) : filtered.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-10">
               {filtered.map(book => (
-                <BookCard key={book.id} book={book} />
+                /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                <BookCard key={book.id} book={book as any} />
               ))}
             </div>
           ) : (
@@ -177,12 +182,6 @@ function BrowseBooks() {
                   <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-main text-white px-3 py-1.5 rounded-full">
                     {condition}
                     <button onClick={() => setCondition('All')} className="hover:opacity-70 transition-opacity"><X size={10} /></button>
-                  </span>
-                )}
-                {location !== 'All' && (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-main text-white px-3 py-1.5 rounded-full">
-                    {location}
-                    <button onClick={() => setLocation('All')} className="hover:opacity-70 transition-opacity"><X size={10} /></button>
                   </span>
                 )}
               </div>
@@ -259,27 +258,6 @@ function BrowseBooks() {
                   ))}
                 </div>
               </div>
-
-              {/* Location */}
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Location</p>
-                <div className="flex flex-col">
-                  {locations.map(l => (
-                    <button
-                      key={l}
-                      onClick={() => setLocation(l)}
-                      className="flex items-center justify-between py-3.5 border-b border-main/6 group"
-                    >
-                      <span className={`text-sm transition-colors ${location === l ? 'font-semibold text-main' : 'text-main/50 group-hover:text-main'}`}>
-                        {l}
-                      </span>
-                      {location === l && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Footer */}
@@ -303,6 +281,5 @@ function BrowseBooks() {
     </div>
   )
 }
-
 
 export default BrowseBooks
