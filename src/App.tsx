@@ -18,6 +18,7 @@ import Contact from "./pages/LandingPage/Contact";
 import FAQ from "./pages/LandingPage/FAQ";
 import HowItWorks from "./pages/LandingPage/HowItWorks";
 import Login from "./pages/Auth/Login";
+import SignUp from "./pages/Auth/SignUp";
 import Cart from "./pages/LandingPage/Cart";
 import Checkout from "./pages/LandingPage/Checkout";
 import PaymentSuccess from "./pages/LandingPage/PaymentSuccess";
@@ -118,6 +119,7 @@ const App = () => (
                 <Route path="how-it-works" element={<HowItWorks />} />
               </Route>
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
 
               {/* Admin */}
               <Route path="/admin" element={<AdminLogin />} />
