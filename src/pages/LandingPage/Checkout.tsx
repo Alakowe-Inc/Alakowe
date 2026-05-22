@@ -2,9 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Package, Shield, Clock } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
-import { books } from '../../data/mockData'
-import { saveOrder, generateOrderId } from '../../data/orderData'
-import type { Order, OrderItem } from '../../data/orderData'
+import { useStartCheckout, useCompleteCheckout } from '../../lib/api/checkout/checkout.hooks'
 
 const NIGERIAN_STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -49,7 +47,9 @@ const inputClass = (hasError?: boolean) =>
   }`
 
 function Checkout() {
-  const { items, clearCart } = useCart()
+  const { items } = useCart()
+  const startCheckout = useStartCheckout()
+  const completeCheckout = useCompleteCheckout()
   const navigate = useNavigate()
 
   const [form, setForm] = useState<FormState>({
@@ -63,15 +63,11 @@ function Checkout() {
   const [errors, setErrors] = useState<Partial<FormState>>({})
   const [loading, setLoading] = useState(false)
 
-  const cartBooks = items
-    .map(item => ({ ...item, book: books.find(b => b.id === item.bookId)! }))
-    .filter(item => item.book)
-
-  const subtotal = cartBooks.reduce((sum, { book, quantity }) => sum + book.price * quantity, 0)
+  const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
   const deliveryFee = 1500
   const total = subtotal + deliveryFee
 
-  if (cartBooks.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="bg-third min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
@@ -102,7 +98,7 @@ function Checkout() {
     return e
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) {
@@ -112,36 +108,13 @@ function Checkout() {
     setErrors({})
     setLoading(true)
 
-    const orderItems: OrderItem[] = cartBooks.map(({ book, quantity }) => ({
-      bookId: book.id,
-      title: book.title,
-      author: book.author,
-      coverColor: book.coverColor,
-      price: book.price,
-      quantity,
-      condition: book.condition,
-      sellerName: book.sellerName,
-    }))
-
-    const order: Order = {
-      id: generateOrderId(),
-      items: orderItems,
-      subtotal,
-      deliveryFee,
-      total,
-      status: 'payment_received',
-      customerName: form.fullName,
-      customerEmail: form.email,
-      customerPhone: form.phone,
-      deliveryAddress: { street: form.street, city: form.city, state: form.state },
-      createdAt: new Date().toISOString(),
+    try {
+      const session = await startCheckout.mutateAsync()
+      const order = await completeCheckout.mutateAsync(session.sessionId ?? '')
+      navigate(`/payment/success?orderId=${order.orderId}`)
+    } catch {
+      navigate('/payment/error')
     }
-
-    setTimeout(() => {
-      saveOrder(order)
-      clearCart()
-      navigate(`/payment/success?orderId=${order.id}`)
-    }, 1800)
   }
 
   return (
@@ -160,7 +133,7 @@ function Checkout() {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            {/* ── Left: form fields ── */}
+            {/* Left: form fields */}
             <div className="lg:col-span-2 flex flex-col gap-6">
 
               {/* Delivery details */}
@@ -169,59 +142,31 @@ function Checkout() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <Field label="Full Name" error={errors.fullName}>
-                      <input
-                        type="text"
-                        placeholder="e.g. Amaka Okonkwo"
-                        value={form.fullName}
-                        onChange={set('fullName')}
-                        className={inputClass(!!errors.fullName)}
-                      />
+                      <input type="text" placeholder="e.g. Amaka Okonkwo" value={form.fullName}
+                        onChange={set('fullName')} className={inputClass(!!errors.fullName)} />
                     </Field>
                   </div>
                   <Field label="Email Address" error={errors.email}>
-                    <input
-                      type="email"
-                      placeholder="you@example.com"
-                      value={form.email}
-                      onChange={set('email')}
-                      className={inputClass(!!errors.email)}
-                    />
+                    <input type="email" placeholder="you@example.com" value={form.email}
+                      onChange={set('email')} className={inputClass(!!errors.email)} />
                   </Field>
                   <Field label="Phone Number" error={errors.phone}>
-                    <input
-                      type="tel"
-                      placeholder="080XXXXXXXX"
-                      value={form.phone}
-                      onChange={set('phone')}
-                      className={inputClass(!!errors.phone)}
-                    />
+                    <input type="tel" placeholder="080XXXXXXXX" value={form.phone}
+                      onChange={set('phone')} className={inputClass(!!errors.phone)} />
                   </Field>
                   <div className="sm:col-span-2">
                     <Field label="Street Address" error={errors.street}>
-                      <input
-                        type="text"
-                        placeholder="e.g. 12 Broad Street, Flat 3"
-                        value={form.street}
-                        onChange={set('street')}
-                        className={inputClass(!!errors.street)}
-                      />
+                      <input type="text" placeholder="e.g. 12 Broad Street, Flat 3" value={form.street}
+                        onChange={set('street')} className={inputClass(!!errors.street)} />
                     </Field>
                   </div>
                   <Field label="City" error={errors.city}>
-                    <input
-                      type="text"
-                      placeholder="e.g. Lagos"
-                      value={form.city}
-                      onChange={set('city')}
-                      className={inputClass(!!errors.city)}
-                    />
+                    <input type="text" placeholder="e.g. Lagos" value={form.city}
+                      onChange={set('city')} className={inputClass(!!errors.city)} />
                   </Field>
                   <Field label="State" error={errors.state}>
-                    <select
-                      value={form.state}
-                      onChange={set('state')}
-                      className={`${inputClass(!!errors.state)} ${!form.state ? 'text-main/30' : 'text-main'}`}
-                    >
+                    <select value={form.state} onChange={set('state')}
+                      className={`${inputClass(!!errors.state)} ${!form.state ? 'text-main/30' : 'text-main'}`}>
                       <option value="" disabled>Select state</option>
                       {NIGERIAN_STATES.map(s => (
                         <option key={s} value={s}>{s}</option>
@@ -236,21 +181,9 @@ function Checkout() {
                 <h2 className="font-heading font-bold text-main text-lg mb-5">How Delivery Works</h2>
                 <div className="flex flex-col gap-5">
                   {([
-                    {
-                      Icon: Package,
-                      label: 'Seller drops off',
-                      desc: 'The seller brings your book to our nearest collection centre within 48 hours.',
-                    },
-                    {
-                      Icon: Shield,
-                      label: 'We inspect & process',
-                      desc: 'Our team checks the book quality and prepares your order for dispatch.',
-                    },
-                    {
-                      Icon: Clock,
-                      label: 'We deliver to you',
-                      desc: 'Your book is on its way. Estimated delivery: 3–7 business days.',
-                    },
+                    { Icon: Package, label: 'Seller drops off', desc: 'The seller brings your book to our nearest collection centre within 48 hours.' },
+                    { Icon: Shield, label: 'We inspect & process', desc: 'Our team checks the book quality and prepares your order for dispatch.' },
+                    { Icon: Clock, label: 'We deliver to you', desc: 'Your book is on its way. Estimated delivery: 3–7 business days.' },
                   ] as const).map(({ Icon, label, desc }) => (
                     <div key={label} className="flex items-start gap-4">
                       <div className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
@@ -282,26 +215,24 @@ function Checkout() {
 
             </div>
 
-            {/* ── Right: order summary ── */}
+            {/* Right: order summary */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-2xl border border-third p-6 lg:sticky lg:top-24">
                 <h2 className="font-heading font-bold text-main text-lg mb-5">Order Summary</h2>
 
                 <div className="flex flex-col gap-3 mb-5">
-                  {cartBooks.map(({ book, quantity }) => (
-                    <div key={book.id} className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-12 rounded-full shrink-0 shadow-sm"
-                        style={{ backgroundColor: book.coverColor }}
-                      />
+                  {items.map((item) => (
+                    <div key={item.listingId} className="flex items-center gap-3">
+                      <div className="w-8 h-12 rounded-full shrink-0 shadow-sm"
+                        style={{ backgroundColor: item.coverColor }} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-main truncate leading-snug">{book.title}</p>
+                        <p className="text-sm font-semibold text-main truncate leading-snug">{item.title}</p>
                         <p className="text-xs text-main/45">
-                          {book.author}{quantity > 1 && ` ×${quantity}`}
+                          {item.author}{item.quantity > 1 && ` ×${item.quantity}`}
                         </p>
                       </div>
                       <span className="text-sm font-semibold text-main shrink-0">
-                        ₦{(book.price * quantity).toLocaleString()}
+                        ₦{(item.unitPrice * item.quantity).toLocaleString()}
                       </span>
                     </div>
                   ))}
@@ -327,7 +258,7 @@ function Checkout() {
                   disabled={loading}
                   className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Securing your payment…' : `Place Order · ₦${total.toLocaleString()}`}
+                  {loading ? 'Processing…' : `Place Order · ₦${total.toLocaleString()}`}
                 </button>
 
                 <p className="text-xs text-main/35 text-center mt-3 leading-relaxed">

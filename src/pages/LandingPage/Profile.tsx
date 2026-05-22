@@ -177,7 +177,7 @@ export default function Profile() {
               <Field label="City">
                 <input
                   type="text"
-                  placeholder="e.g. Lagos"
+                  placeholder="e.g. Ikeja Lagos"
                   value={profile.city}
                   onChange={set('city')}
                   className={inputClass()}

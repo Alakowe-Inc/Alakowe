@@ -38,7 +38,7 @@ function Footer() {
       {/* ── Main columns ────────────────────────────────────────── */}
       <div className="border-t border-white/10">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 pt-14 pb-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
 
             {/* Brand */}
             <div>
@@ -120,7 +120,7 @@ function Footer() {
                 <input
                   type="email"
                   placeholder="your@email.com"
-                  className="bg-white/8 border border-white/15 rounded-full px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-secondary transition-colors"
+                  className="bg-white/10 border border-white/15 rounded-full px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-secondary transition-colors"
                 />
                 <button
                   type="submit"

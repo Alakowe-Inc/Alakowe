@@ -9,6 +9,7 @@ const navLinks = [
   { label: 'Sell', to: '/sell' },
   { label: 'How it works', to: '/how-it-works' },
   { label: 'Blog', to: '/blog' },
+
   { label: 'Contact', to: '/contact' },
 ]
 
@@ -163,6 +164,13 @@ function Navbar() {
                         >
                           <BookOpen size={15} className="text-main/40 shrink-0" /> My Listings
                         </Link>
+
+                        <Link
+                          to="/my-sales"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
+                        >
+                          <ShoppingBag size={13} className="text-secondary" /> My Sales
+                        </Link>
                         <Link
                           to="/my-earnings"
                           onClick={() => setAccountOpen(false)}
@@ -231,127 +239,128 @@ function Navbar() {
         </div>
       )}
 
-      {/* Mobile — full screen overlay (always mounted, slides in/out) */}
-      <div
-        aria-hidden={!menuOpen}
-        className={`lg:hidden fixed inset-0 z-100 bg-fourth flex flex-col transition-transform duration-300 ease-in-out will-change-transform ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}
-      >
-        {/* Top bar */}
-        <div className="flex items-center h-14 border-b border-third shrink-0">
-          <button
-            aria-label="Close menu"
-            onClick={() => setMenuOpen(false)}
-            className="w-14 h-full flex items-center justify-center text-main shrink-0"
-          >
-            <X size={22} />
-          </button>
-          <div className="border-l border-third h-full" />
-          <div className="flex items-center gap-2 px-4 flex-1">
-            <Search size={16} className="text-main/50 shrink-0" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search"
-              className="flex-1 text-sm text-main placeholder-main/40 outline-none bg-transparent font-body"
-            />
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-[100] bg-fourth flex flex-col animate-in slide-in-from-left duration-300"
+        >
+          {/* Top bar */}
+          <div className="flex items-center h-14 border-b border-third shrink-0">
+            <button
+              aria-label="Close menu"
+              onClick={() => setMenuOpen(false)}
+              className="w-14 h-full flex items-center justify-center text-main shrink-0"
+            >
+              <X size={22} />
+            </button>
+            <div className="border-l border-third h-full" />
+            <div className="flex items-center gap-2 px-4 flex-1">
+              <Search size={16} className="text-main/50 shrink-0" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search"
+                className="flex-1 text-sm text-main placeholder-main/40 outline-none bg-transparent font-body"
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto overscroll-contain">
-          {/* Nav links */}
-          <nav className="flex flex-col">
-            {navLinks.map(({ label, to }) => (
-              <NavLink
-                key={to}
-                to={to}
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-between px-5 py-5 border-b border-third text-xs uppercase tracking-widest font-semibold text-main hover:text-secondary transition-colors"
-              >
-                {label}
-                <ArrowRight size={16} className="text-main/50 shrink-0" />
-              </NavLink>
-            ))}
-          </nav>
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto overscroll-contain">
+            {/* Nav links */}
+            <nav className="flex flex-col">
+              {navLinks.map(({ label, to }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-between px-5 py-5 border-b border-third text-xs uppercase tracking-widest font-semibold text-main hover:text-secondary transition-colors"
+                >
+                  {label}
+                  <ArrowRight size={16} className="text-main/50 shrink-0" />
+                </NavLink>
+              ))}
+            </nav>
 
-          {/* Account / utility section */}
-          <div className="border-t border-third mt-4">
-            {user ? (
-              <>
-                <div className="px-5 py-3.5 bg-third/50">
-                  <p className="text-[11px] text-main/40 font-medium uppercase tracking-wide mb-0.5">Signed in as</p>
-                  <p className="text-sm font-semibold text-main truncate">{user.email}</p>
-                </div>
+            {/* Account / utility section */}
+            <div className="border-t border-third mt-4">
+              {user ? (
+                <>
+                  <div className="px-5 py-3.5 bg-third/50">
+                    <p className="text-[11px] text-main/40 font-medium uppercase tracking-wide mb-0.5">Signed in as</p>
+                    <p className="text-sm font-semibold text-main truncate">{user.email}</p>
+                  </div>
+                  <NavLink
+                    to="/account"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                  >
+                    <Settings size={16} className="text-main/40 shrink-0" /> My Profile
+                  </NavLink>
+                  <NavLink
+                    to="/my-purchases"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                  >
+                    <Package size={16} className="text-main/40 shrink-0" /> My Purchases
+                  </NavLink>
+                  <NavLink
+                    to="/my-listings"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                  >
+                    <BookOpen size={16} className="text-main/40 shrink-0" /> My Listings
+                  </NavLink>
+                  <NavLink
+                    to="/my-earnings"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                  >
+                    <Wallet size={16} className="text-main/40 shrink-0" /> My Earnings
+                  </NavLink>
+                  <NavLink
+                    to="/my-requests"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                  >
+                    <Bell size={16} className="text-main/40 shrink-0" /> My Requests
+                  </NavLink>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors text-left"
+                  >
+                    <LogOut size={16} className="text-main/40 shrink-0" /> Sign out
+                  </button>
+                </>
+              ) : (
                 <NavLink
-                  to="/account"
+                  to="/login"
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
                 >
-                  <Settings size={16} className="text-main/40 shrink-0" /> My Profile
+                  <User size={16} className="text-main/40 shrink-0" /> Login
+                </NavLink>
+              )}
+              <div className="px-5 pt-4 pb-[max(2.5rem,env(safe-area-inset-bottom))] flex flex-col gap-3">
+                <NavLink
+                  to="/customer-service"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-sm text-main/50 hover:text-secondary transition-colors"
+                >
+                  Customer Service
                 </NavLink>
                 <NavLink
-                  to="/my-purchases"
+                  to="/shipping"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                  className="text-sm text-main/50 hover:text-secondary transition-colors"
                 >
-                  <Package size={16} className="text-main/40 shrink-0" /> My Purchases
+                  Shipping & Returns
                 </NavLink>
-                <NavLink
-                  to="/my-listings"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
-                >
-                  <BookOpen size={16} className="text-main/40 shrink-0" /> My Listings
-                </NavLink>
-                <NavLink
-                  to="/my-earnings"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
-                >
-                  <Wallet size={16} className="text-main/40 shrink-0" /> My Earnings
-                </NavLink>
-                <NavLink
-                  to="/my-requests"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
-                >
-                  <Bell size={16} className="text-main/40 shrink-0" /> My Requests
-                </NavLink>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors text-left"
-                >
-                  <LogOut size={16} className="text-main/40 shrink-0" /> Sign out
-                </button>
-              </>
-            ) : (
-              <NavLink
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
-              >
-                <User size={16} className="text-main/40 shrink-0" /> Login
-              </NavLink>
-            )}
-            <div className="px-5 pt-4 pb-[max(2.5rem,env(safe-area-inset-bottom))] flex flex-col gap-3">
-              <NavLink
-                to="/customer-service"
-                onClick={() => setMenuOpen(false)}
-                className="text-sm text-main/50 hover:text-secondary transition-colors"
-              >
-                Customer Service
-              </NavLink>
-              <NavLink
-                to="/shipping"
-                onClick={() => setMenuOpen(false)}
-                className="text-sm text-main/50 hover:text-secondary transition-colors"
-              >
-                Shipping & Returns
-              </NavLink>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   )
 }

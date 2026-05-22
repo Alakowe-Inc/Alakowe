@@ -1,17 +1,35 @@
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, MapPin, Star, ShoppingBag } from 'lucide-react'
-import { books } from '../../data/mockData'
+import {
+  ArrowLeft,
+  MapPin,
+  ShoppingBag,
+  BookOpen,
+  Tag,
+  Layers,
+  Package,
+  ShieldCheck,
+} from 'lucide-react'
+import { useListing } from '../../lib/api/listings/listings.hooks'
+import { listingToBookDisplay } from '../../lib/api/adapters'
 import { useCart } from '../../context/CartContext'
 
 function BookDetail() {
   const { id } = useParams()
-  const book = books.find(b => b.id === id)
+  const { data: listing, isLoading } = useListing(Number(id))
   const { addToCart } = useCart()
 
-  if (!book) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-third">
-        <div className="text-center">
+        <p className="text-main/50 text-sm">Loading…</p>
+      </div>
+    )
+  }
+
+  if (!listing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-third">
+        <div className="text-center animate-[fadeIn_0.5s_ease-out]">
           <p className="font-heading font-bold text-main text-2xl mb-3">Book not found</p>
           <Link to="/browse" className="text-sm text-secondary hover:underline font-semibold">
             Back to Browse
@@ -21,104 +39,132 @@ function BookDetail() {
     )
   }
 
-  return (
-    <div className="bg-third min-h-screen">
-      <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-10">
+  const book = listingToBookDisplay(listing)
 
-        {/* Back link */}
+  return (
+    <div className="bg-third min-h-screen animate-[fadeIn_0.6s_ease-out]">
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: translateY(0);} }
+        @keyframes floatIn { from { opacity: 0; transform: translateY(16px);} to { opacity: 1; transform: translateY(0);} }
+        .reveal { animation: floatIn 0.6s ease-out both; }
+      `}</style>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-12 py-8 md:py-12">
+        {/* Breadcrumb / Back */}
         <Link
           to="/browse"
-          className="inline-flex items-center gap-2 text-sm text-main/55 hover:text-main mb-10 transition-colors font-medium"
+          className="inline-flex items-center gap-2 text-sm text-main/55 hover:text-main mb-8 md:mb-10 transition-all duration-200 font-medium hover:-translate-x-0.5"
         >
           <ArrowLeft size={15} /> Back to Browse
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-16">
-
-          {/* Left — book cover */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-start">
+          {/* COVER */}
           <div
-            className="rounded-lg h-72 md:h-120 flex items-center justify-center border border-third"
-            style={{ backgroundColor: book.coverColor + '18' }}
+            className="order-1 lg:order-none lg:col-span-7 reveal group relative rounded-3xl h-80 md:h-[32rem] flex items-center justify-center border border-third/60 overflow-hidden transition-all duration-500 hover:shadow-2xl"
+            style={{
+              background: `radial-gradient(circle at 30% 20%, ${book.coverColor}28, ${book.coverColor}10 55%, transparent 80%), linear-gradient(135deg, #ffffff 0%, ${book.coverColor}10 100%)`,
+            }}
           >
             <div
-              className="w-36 h-52 md:w-44 md:h-64 rounded-lg shadow-2xl flex items-end justify-center pb-4"
+              className="absolute -inset-20 blur-3xl opacity-40 transition-opacity duration-700 group-hover:opacity-60"
+              style={{ background: `radial-gradient(circle, ${book.coverColor}55, transparent 60%)` }}
+            />
+            <div
+              className="relative w-40 h-60 md:w-52 md:h-[19rem] rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.45)] flex items-end justify-center pb-5 transition-transform duration-700 ease-out group-hover:scale-105 group-hover:-rotate-1"
               style={{ backgroundColor: book.coverColor }}
             >
               <div className="w-28 h-px bg-white/40 rounded" />
             </div>
           </div>
 
-          {/* Right — details */}
-          <div className="flex flex-col">
-
-            {/* Eyebrow */}
-            <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
-              {book.genre}
-            </p>
-
-            <h1 className="font-heading font-bold text-main text-3xl md:text-4xl leading-tight mb-2">
-              {book.title}
-            </h1>
-            <p className="text-main/55 text-base mb-4">by {book.author}</p>
-
-            {/* Condition tags */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              <p className="text-xs font-semibold uppercase tracking-widest text-main/40 w-full mb-1">Condition notes</p>
-              {book.condition.split(',').map(issue => (
-                <span key={issue.trim()} className="text-xs font-medium text-main/60 bg-main/8 border border-main/12 px-3 py-1 rounded-full">
-                  {issue.trim()}
-                </span>
-              ))}
-            </div>
-
-            <p className="text-main/65 text-sm leading-relaxed mb-8">{book.description}</p>
-
-            {/* Seller card */}
-            <div className="bg-white rounded-lg border border-third p-5 mb-4">
-              <p className="text-xs uppercase tracking-widest font-semibold text-secondary mb-3">
-                Sold by
+          {/* RIGHT COLUMN */}
+          <div className="order-2 lg:order-none lg:col-span-5 lg:row-span-2 reveal">
+            <div className="lg:sticky lg:top-[120px] flex flex-col">
+              <p className="text-secondary text-[11px] font-bold uppercase tracking-[0.25em] mb-3">
+                {book.genre}
               </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center font-heading font-bold text-main text-sm shrink-0">
-                  {(book.sellerUsername ?? book.sellerName)[0]}
+
+              <h1 className="font-heading font-bold text-main text-3xl md:text-4xl xl:text-5xl leading-[1.1] tracking-tight mb-3">
+                {book.title}
+              </h1>
+
+              <p className="text-main/55 text-base mb-5">
+                by <span className="text-main/80 font-medium">{book.author}</span>
+              </p>
+
+              {book.loveNote && (
+                <div className="relative bg-secondary/10 border-l-4 border-secondary rounded-r-2xl rounded-l-md p-5 mb-7">
+                  <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-secondary mb-2">
+                    A note from the seller
+                  </p>
+                  <p className="text-main/75 text-sm italic leading-relaxed">
+                    "{book.loveNote}"
+                  </p>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-main text-sm">{book.sellerUsername ?? book.sellerName}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <Star size={11} className="text-yellow-400 fill-yellow-400" />
-                    <span className="text-xs text-main/55">{book.sellerRating} rating</span>
+              )}
+
+              {/* PRICE + CTA */}
+              <div className="bg-white border border-third/70 rounded-2xl p-5 md:p-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-secondary mb-1.5">
+                      Price
+                    </p>
+                    <div className="flex items-baseline gap-2.5 flex-wrap">
+                      <p className="font-heading font-bold text-main text-4xl md:text-[2.5rem] leading-none">
+                        ₦{book.price.toLocaleString()}
+                      </p>
+                    </div>
                   </div>
+
+                  <button
+                    onClick={() => addToCart(Number(id))}
+                    className="group inline-flex items-center justify-center gap-2 bg-main text-white font-semibold px-7 py-4 rounded-full hover:bg-main/90 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] transition-all duration-200 text-sm w-full sm:w-auto"
+                  >
+                    <ShoppingBag size={17} className="transition-transform duration-300 group-hover:rotate-[-8deg]" />
+                    Add to Cart
+                  </button>
                 </div>
-                <div className="flex items-center gap-1 text-main/45 shrink-0">
-                  <MapPin size={13} />
-                  <span className="text-xs">{book.location}</span>
+
+                <div className="mt-4 pt-4 border-t border-third/70 flex items-center gap-2 text-xs text-main/55">
+                  <ShieldCheck size={14} className="text-secondary" />
+                  Secure checkout · Buyer protection included
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Love note */}
-            <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-5 mb-8">
-              <p className="text-xs uppercase tracking-widest font-semibold text-secondary mb-2">
-                A note from the seller
-              </p>
-              <p className="text-main/65 text-sm italic leading-relaxed">"{book.loveNote}"</p>
+          {/* PRODUCT DETAILS */}
+          <div className="order-3 lg:order-none lg:col-span-7 reveal bg-white border border-third/70 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-heading font-bold text-main text-lg">Product Details</h3>
+              <div className="hidden md:flex items-center gap-1.5 text-xs text-main/50">
+                <ShieldCheck size={14} className="text-secondary" />
+                Verified Listing
+              </div>
             </div>
 
-            {/* Price + CTA */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mt-auto">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-1">Price</p>
-                <p className="font-heading font-bold text-main text-3xl">
-                  ₦{book.price.toLocaleString()}
-                </p>
-              </div>
-              <button
-                onClick={() => addToCart(book.id)}
-                className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3.5 rounded-full hover:bg-main/90 transition-colors text-sm"
-              >
-                <ShoppingBag size={17} />
-                Add to Cart
-              </button>
+            <div className="divide-y divide-third/70 text-sm">
+              {[
+                { icon: Tag, label: 'Category', value: book.genre },
+                { icon: BookOpen, label: 'Format', value: 'Paperback' },
+                { icon: Layers, label: 'Condition', value: book.condition },
+                { icon: Package, label: 'Available', value: String(book.quantity) },
+              ].map(({ icon: Icon, label, value }) => (
+                <div
+                  key={label}
+                  className="flex items-center justify-between py-3.5 px-1 rounded-lg hover:bg-third/40 transition-colors duration-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-third/60 flex items-center justify-center">
+                      <Icon size={14} className="text-main/65" />
+                    </div>
+                    <span className="text-main/60">{label}</span>
+                  </div>
+                  <span className="font-semibold text-main">{value}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

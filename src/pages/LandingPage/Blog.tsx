@@ -21,7 +21,7 @@ function Blog() {
           <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-3">
             Our Blog
           </p>
-          <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl mb-4">
+          <h1 className="font-heading font-bold text-4xl md:text-5xl mb-4">
             Stories &amp; Insights
           </h1>
           <p className="text-white/55 max-w-lg text-sm leading-relaxed mx-auto">
@@ -53,7 +53,7 @@ function Blog() {
           {filtered.map(post => (
             <Link
               key={post.id}
-              to={`/blog/${post.id}`}
+              to={`/blog/${post.slug}`}
               className="group flex flex-col"
             >
               <div className="overflow-hidden aspect-video bg-secondary/10 flex items-center justify-center mb-5">

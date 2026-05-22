@@ -1,52 +1,43 @@
-import { createContext, useContext, useState } from 'react'
-import type { ReactNode } from 'react'
-
-export interface CartItem {
-  bookId: string
-  quantity: number
-}
+import { createContext, useContext } from "react"
+import type { ReactNode } from "react"
+import { useCart as useCartQuery, useAddToCart, useRemoveFromCart } from "../lib/api/cart/cart.hooks"
+import { cartItemToDisplay, type CartItemDisplay } from "../lib/api/adapters"
 
 interface CartContextValue {
-  items: CartItem[]
+  items: CartItemDisplay[]
   count: number
-  addToCart: (bookId: string) => void
-  removeFromCart: (bookId: string) => void
-  updateQuantity: (bookId: string, quantity: number) => void
+  addToCart: (bookId: string | number) => void
+  removeFromCart: (listingId: number) => void
   clearCart: () => void
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([])
+  const { data: cart } = useCartQuery()
+  const addMutation = useAddToCart()
+  const removeMutation = useRemoveFromCart()
 
-  const count = items.reduce((sum, item) => sum + item.quantity, 0)
+  const items: CartItemDisplay[] = cart ? (cart.items ?? []).map(cartItemToDisplay) : []
+  const count = items.reduce((s, i) => s + i.quantity, 0)
 
-  function addToCart(bookId: string) {
-    setItems(prev => {
-      const existing = prev.find(i => i.bookId === bookId)
-      if (existing) {
-        return prev.map(i => i.bookId === bookId ? { ...i, quantity: i.quantity + 1 } : i)
-      }
-      return [...prev, { bookId, quantity: 1 }]
-    })
+  function addToCart(bookId: string | number) {
+    const listingId = typeof bookId === "number" ? bookId : (parseInt(bookId.replace(/\D/g, ""), 10) || 1)
+    addMutation.mutate({ listingId, quantity: 1 })
   }
 
-  function removeFromCart(bookId: string) {
-    setItems(prev => prev.filter(i => i.bookId !== bookId))
-  }
-
-  function updateQuantity(bookId: string, quantity: number) {
-    if (quantity < 1) return
-    setItems(prev => prev.map(i => i.bookId === bookId ? { ...i, quantity } : i))
+  function removeFromCart(listingId: number) {
+    removeMutation.mutate(listingId)
   }
 
   function clearCart() {
-    setItems([])
+    for (const item of items) {
+      removeMutation.mutate(item.listingId)
+    }
   }
 
   return (
-    <CartContext.Provider value={{ items, count, addToCart, removeFromCart, updateQuantity, clearCart }}>
+    <CartContext.Provider value={{ items, count, addToCart, removeFromCart, clearCart }}>
       {children}
     </CartContext.Provider>
   )
@@ -54,6 +45,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   const ctx = useContext(CartContext)
-  if (!ctx) throw new Error('useCart must be used within CartProvider')
+  if (!ctx) throw new Error("useCart must be used within CartProvider")
   return ctx
 }
