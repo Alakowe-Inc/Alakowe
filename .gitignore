@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 swagger.json
 api-setup.md
+.env
