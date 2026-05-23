@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { COVER_IMAGES } from "@/lib/covers";
 import { useAdminListings, useApproveListing, useDeclineListing } from "@/lib/api/admin/admin.hooks";
 import { toAdminListing, type AdminListingDisplay } from "@/lib/api/admin/admin-adapter";
+import type { ListingStatus } from "@/lib/api/types";
 import { TimeRangeFilter, defaultRange, type RangeValue } from "@/admin/components/TimeRangeFilter";
 import { Paginator } from "@/admin/components/Paginator";
 import {
@@ -16,6 +17,15 @@ import {
 import { toast } from "react-toastify";
 
 const FILTERS = ["All", "Pending", "Approved", "Rejected", "Suspended"] as const;
+
+const STATUS_FILTER_MAP: Record<(typeof FILTERS)[number], ListingStatus | undefined> = {
+  All: undefined,
+  Pending: "PendingApproval",
+  Approved: "Approved",
+  Rejected: "Rejected",
+  Suspended: "Unpublished",
+}
+
 const PAGE_SIZE = 8;
 
 function Cover({ listing }: { listing: AdminListingDisplay }) {
@@ -26,18 +36,20 @@ function Cover({ listing }: { listing: AdminListingDisplay }) {
 
 export default function Listings() {
   const navigate = useNavigate();
-  const { data: pagedResult } = useAdminListings();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initial = searchParams.get("status") as typeof FILTERS[number] | null;
+  const [filter, setFilter] = useState<typeof FILTERS[number]>(
+    initial && (FILTERS as readonly string[]).includes(initial) ? initial : "Pending"
+  );
+
+  const { data: pagedResult } = useAdminListings(
+    STATUS_FILTER_MAP[filter] ? { Status: STATUS_FILTER_MAP[filter] } : undefined
+  );
   const approve = useApproveListing();
   const decline = useDeclineListing();
 
   const [view, setView] = useState<"grid" | "table">("table");
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const initial = searchParams.get("status") as typeof FILTERS[number] | null;
-
-  const [filter, setFilter] = useState<typeof FILTERS[number]>(
-    initial && (FILTERS as readonly string[]).includes(initial) ? initial : "Pending"
-  );
   const [query, setQuery] = useState("");
   const [range, setRange] = useState<RangeValue>(defaultRange());
   const [page, setPage] = useState(1);
@@ -62,10 +74,9 @@ export default function Listings() {
   );
 
   const data = useMemo(() => allListings.filter((l) => {
-    if (filter !== "All" && l.status !== filter) return false;
     if (query && !`${l.title} ${l.seller} ${l.id}`.toLowerCase().includes(query.toLowerCase())) return false;
     return true;
-  }), [allListings, query, filter]);
+  }), [allListings, query]);
 
   const paged = data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
