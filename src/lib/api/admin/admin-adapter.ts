@@ -30,7 +30,7 @@ export function toAdminListing(l: ListingResponse): AdminListingDisplay {
     title: l.title ?? "",
     author: l.author ?? "",
     seller: l.createdBy ?? "",
-    price: l.price ?? 0,
+    price: Math.round((l.price ?? 0) / 100),
     category: l.categoryName ?? "",
     status: statusMap[l.status ?? ""] ?? l.status ?? "",
     condition: l.bookCondition ?? "",

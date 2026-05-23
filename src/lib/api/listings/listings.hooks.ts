@@ -22,7 +22,7 @@ const mockListing: ListingResponse = {
   title: "Mock Book",
   isbn: "123-4567890123",
   description: "A mock book description",
-  price: 2500,
+  price: 250000,
   quantity: 1,
   bookCondition: "Good",
   author: "Mock Author",

@@ -197,7 +197,7 @@ export default function ListBook() {
         categoryId: Number(form.genre),
         bookCondition: form.condition as BookCondition,
         description: form.description.trim(),
-        price: parseFloat(form.price),
+        price: Math.round(parseFloat(form.price) * 100),
         quantity: Number(form.quantity),
         loveNote: form.loveNote.trim() || undefined,
         isbn: undefined,

@@ -31,7 +31,7 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     genre: listing.categoryName ?? "General",
     condition: listing.bookCondition ?? "Good",
     quantity: listing.quantity ?? 1,
-    price: listing.price ?? 0,
+    price: Math.round((listing.price ?? 0) / 100),
     coverColor: pickColor(listing.id),
     description: listing.description ?? "",
     loveNote: listing.loveNote ?? undefined,
@@ -57,7 +57,7 @@ export function cartItemToDisplay(item: CartItemResponse): CartItemDisplay {
     title: item.title ?? "",
     author: item.author ?? "",
     coverColor: pickColor(item.listingId),
-    unitPrice: item.unitPrice ?? 0,
+    unitPrice: Math.round((item.unitPrice ?? 0) / 100),
     quantity: item.quantity ?? 1,
     isbn: item.isbn ?? undefined,
   }
