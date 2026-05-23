@@ -25,3 +25,5 @@ dist-ssr
 swagger.json
 api-setup.md
 .env
+/.env
+/.vs
