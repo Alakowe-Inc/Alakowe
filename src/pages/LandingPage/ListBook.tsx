@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Upload, Heart, CheckCircle, X, Loader2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useSubmitListing } from '../../lib/api/listings/listings.hooks'
-import { CONDITIONS, GENRES } from '../../data/sellerData'
+import { CONDITIONS } from '../../data/sellerData'
 import type { BookCondition } from '../../lib/api/types'
 import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
+import { useCategories } from '../../lib/api/categories/categories.hooks'
 
 type PhotoEntry = {
   file: File
@@ -61,6 +62,7 @@ function Field({ label, required, error, children }: {
 export default function ListBook() {
   const { user } = useAuth()
   const submitListing = useSubmitListing()
+  const { data: categories } = useCategories()
   const navigate = useNavigate()
   const [form, setForm] = useState<FormState>(empty)
   const [errors, setErrors] = useState<Partial<FormState>>({})
@@ -192,7 +194,7 @@ export default function ListBook() {
       const result = await submitListing.mutateAsync({
         title: form.title.trim(),
         author: form.author.trim(),
-        categoryId: GENRES.indexOf(form.genre) + 1,
+        categoryId: Number(form.genre),
         bookCondition: form.condition as BookCondition,
         description: form.description.trim(),
         price: parseFloat(form.price),
@@ -249,7 +251,7 @@ export default function ListBook() {
                 <select value={form.genre} onChange={set('genre')}
                   className={`${inputClass(!!errors.genre)} ${!form.genre ? 'text-main/30' : 'text-main'}`}>
                   <option value="" disabled>Select category</option>
-                  {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+                  {categories?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </Field>
               <Field label="Condition" required error={errors.condition}>
