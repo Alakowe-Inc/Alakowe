@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { 
-  ArrowRight, 
-  Search, 
-  ShoppingCart, 
-  Handshake, 
+import {
+  ArrowRight,
+  Search,
+  ShoppingCart,
+  Handshake,
   BookOpen,
   BookPlus,
   BellRing,
@@ -17,6 +17,23 @@ import BookCard from '../../components/BookCard'
 import heroImage1 from '../../assets/media/images/banny4.png'
 import heroImage2 from '../../assets/media/images/banny2.png'
 import heroImage3 from '../../assets/media/images/banny3.png'
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/pagination";
+
+type Note = {
+  id: number;
+  quote: string;
+  author: string;
+  book: string;
+  bgColor: string;
+  tapeColor: string;
+  borderColor: string;
+  rotate?: string;
+};
+
 //ALÁKÒWÉ,
 const heroSlides = [heroImage1, heroImage2, heroImage3]
 const featuredBooks = books.slice(0, 8)
@@ -279,7 +296,7 @@ function Home() {
 
           <h1 className="font-heading font-bold text-white uppercase leading-none mb-4 sm:mb-5 text-3xl sm:text-5xl md:text-6xl xl:text-7xl max-w-xs sm:max-w-xl md:max-w-3xl">
             Buy, Sell & Request Used Books
-          </h1> 
+          </h1>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <Link
@@ -328,7 +345,7 @@ function Home() {
 
               <p className="text-main/60 text-sm leading-relaxed mb-5">
                 ALÁKÒWÉ, A New Way to Read
-              </p> 
+              </p>
               {/* <p className="text-main/60 text-sm leading-relaxed mb-8">
                 Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, ALÁKÒWÉ is the community for you.
               </p> */}
@@ -401,7 +418,7 @@ function Home() {
               to="/browse"
               className="hidden md:flex  underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
-              View all 
+              View all
             </Link>
           </div>
 
@@ -423,6 +440,367 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {/* DISCOVER BOOKS */}
+      <div className='bg-white'>
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6" id="discover-books">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-text-main">Discover books</h1>
+            <a href="#" className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
+              View more
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </div>
+          <div className="gap-4 pb-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-[24px]">
+            {
+              [
+                {
+                  title: "Atomic Habits",
+                  author: "James Clear",
+                  price: "₦5,000",
+                  location: "Lekki, Lagos",
+                  image:
+                    "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1535115320i/40121378.jpg",
+                },
+                {
+                  title: "It Ends With Us",
+                  author: "Colleen Hoover",
+                  price: "₦4,500",
+                  location: "Yaba, Lagos",
+                  image:
+                    "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1688011813i/27362503.jpg",
+                },
+                {
+                  title: "The Midnight Library",
+                  author: "Matt Haig",
+                  price: "₦5,500",
+                  location: "Lekki, Lagos",
+                  image:
+                    "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1602190253i/52578297.jpg",
+                },
+                {
+                  title: "The Psychology of Money",
+                  author: "Morgan Housel",
+                  price: "₦4,800",
+                  location: "Ikeja, Lagos",
+                  image:
+                    "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1581527774i/41881472.jpg",
+                },
+                {
+                  title: "The 48 Laws of Power",
+                  author: "Robert Greene",
+                  price: "₦6,000",
+                  location: "Surulere, Lagos",
+                  image:
+                    "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1535115320i/40121378.jpg",
+                },
+                {
+                  title: "Verity",
+                  author: "Colleen Hoover",
+                  price: "₦4,000",
+                  location: "Lekki, Lagos",
+                  image:
+                    "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1634158558i/59344312.jpg",
+                },
+              ].map((book, index) => (
+                <div className="min-w-[160px] snap-start flex-shrink-0 lg:min-w-0 rounded-[8px] border-[1px] border-[#E1E7EF] bg-[#FAFBFC] overflow-hidden">
+                  <img
+                    src={book.image}
+                    alt={book.title}
+                    className="w-full h-[245px] bg-cover"
+                    loading="lazy"
+                  />
+
+                  <div className="p-4">
+                    <h3 className="text-sm font-semibold text-text-main truncate">
+                      {book.title}
+                    </h3>
+                    <p className="text-xs text-text-secondary truncate">{book.author}</p>
+
+                    <div className="flex items-center justify-between mt-2">
+                      <div>
+                        <p className="text-sm font-bold text-text-main">{book.price}</p>
+                        <p className="text-xs text-text-muted flex items-center gap-1">
+                          <svg
+                            className="w-3 h-3 text-accent"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                          </svg>
+                          {book.location}
+                        </p>
+                      </div>
+
+                      <button className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-dark transition">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+      </div>
+
+      {/* CATEGORY ROWS */}
+      <div className='bg-white'>
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2" id="categories">
+          <div className="flex items-center justify-between py-4 border-t border-border-light">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">🏷️</span>
+              <span className="text-sm font-semibold text-text-main">Books under ₦6,000</span>
+            </div>
+            <a href="#" className="text-[#172131] text-sm font-medium hover:underline flex items-center gap-1">
+              View more
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </div>
+          <div className="flex items-center justify-between py-4 border-t border-border-light">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">💜</span>
+              <span className="text-sm font-semibold text-text-main">BookTok favourites</span>
+            </div>
+            <a href="#" className="text-[#172131] text-sm font-medium hover:underline flex items-center gap-1">
+              View more
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </div>
+          <div className="flex items-center justify-between py-4 border-t border-border-light">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">👤</span>
+              <span className="text-sm font-semibold text-text-main">Nigerian authors</span>
+            </div>
+            <a href="#" className="text-[#172131] text-sm font-medium hover:underline flex items-center gap-1">
+              View more
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </div>
+          <div className="flex items-center justify-between py-4 border-t border-border-light border-b">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">⭐</span>
+              <span className="text-sm font-semibold text-text-main">Recently added</span>
+            </div>
+            <a href="#" className="text-[#172131] text-sm font-medium hover:underline flex items-center gap-1">
+              View more
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </div>
+        </section>
+      </div>
+
+      {/* NOTES SECTION */}
+      <div className='bg-white'>
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="notes">
+          <h2 className="mb-8 text-2xl font-bold text-text-main sm:text-3xl">
+            Notes from the pages
+          </h2>
+
+          <Swiper
+            modules={[Autoplay, Pagination]}
+            loop
+            spaceBetween={12}
+            // autoplay={{
+            //   delay: 3000,
+            //   disableOnInteraction: false,
+            // }}
+            pagination={{
+              clickable: true,
+            }}
+            breakpoints={{
+              0: {
+                slidesPerView: 1.2,
+              },
+              420: {
+                slidesPerView: 1.8,
+              },
+              520: {
+                slidesPerView: 2,
+              },
+              640: {
+                slidesPerView: 3,
+              },
+            }}
+            className="pb-12 max-w-[900px] mx-auto"
+          >
+            <SwiperSlide>
+              <div className="min-w-[240px] max-w-[260px] snap-start flex-shrink-0">
+                <div className="bg-yellow-note rounded-2xl p-6 shadow-sm rotate-[-2deg] relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-6 bg-yellow-200/60 rounded-sm" />
+                  <p className="font-handwriting text-[14px] leading-relaxed text-gray-800 mb-6">
+                    "I didn't expect this book to hit me like this..."
+                  </p>
+                  <div className="border-t border-yellow-300/50 pt-3">
+                    <p className="text-sm font-semibold text-text-main">Tolu</p>
+                    <p className="text-xs text-text-secondary">The Midnight Library</p>
+                  </div>
+                </div>
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="min-w-[240px] max-w-[260px] snap-start flex-shrink-0">
+                <div className="bg-pink-note rounded-2xl p-6 shadow-sm rotate-[1deg] relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-6 bg-pink-200/60 rounded-sm" />
+                  <p className="font-handwriting text-[14px] leading-relaxed text-gray-800 mb-6">
+                    "This one healed a part of me I didn't know was hurting."
+                  </p>
+                  <div className="border-t border-pink-300/50 pt-3">
+                    <p className="text-sm font-semibold text-text-main">Feyi</p>
+                    <p className="text-xs text-text-secondary">Homegoing</p>
+                  </div>
+                </div>
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="min-w-[240px] max-w-[260px] snap-start flex-shrink-0">
+                <div className="bg-blue-note rounded-2xl p-6 shadow-sm rotate-[-1deg] relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-6 bg-blue-200/60 rounded-sm" />
+                  <p className="font-handwriting text-[14px] leading-relaxed text-gray-800 mb-6">
+                    "Couldn't put it down. Read it in one sitting!"
+                  </p>
+                  <div className="border-t border-blue-300/50 pt-3">
+                    <p className="text-sm font-semibold text-text-main">David</p>
+                    <p className="text-xs text-text-secondary">The Alchemist</p>
+                  </div>
+                </div>
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="min-w-[240px] max-w-[260px] snap-start flex-shrink-0">
+                <div className="bg-yellow-note rounded-2xl p-6 shadow-sm rotate-[-2deg] relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-6 bg-yellow-200/60 rounded-sm" />
+                  <p className="font-handwriting text-[14px] leading-relaxed text-gray-800 mb-6">
+                    "I didn't expect this book to hit me like this..."
+                  </p>
+                  <div className="border-t border-yellow-300/50 pt-3">
+                    <p className="text-sm font-semibold text-text-main">Tolu</p>
+                    <p className="text-xs text-text-secondary">The Midnight Library</p>
+                  </div>
+                </div>
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="min-w-[240px] max-w-[260px] snap-start flex-shrink-0">
+                <div className="bg-pink-note rounded-2xl p-6 shadow-sm rotate-[1deg] relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-6 bg-pink-200/60 rounded-sm" />
+                  <p className="font-handwriting text-[14px] leading-relaxed text-gray-800 mb-6">
+                    "This one healed a part of me I didn't know was hurting."
+                  </p>
+                  <div className="border-t border-pink-300/50 pt-3">
+                    <p className="text-sm font-semibold text-text-main">Feyi</p>
+                    <p className="text-xs text-text-secondary">Homegoing</p>
+                  </div>
+                </div>
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="min-w-[240px] max-w-[260px] snap-start flex-shrink-0">
+                <div className="bg-blue-note rounded-2xl p-6 shadow-sm rotate-[-1deg] relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-6 bg-blue-200/60 rounded-sm" />
+                  <p className="font-handwriting text-[14px] leading-relaxed text-gray-800 mb-6">
+                    "Couldn't put it down. Read it in one sitting!"
+                  </p>
+                  <div className="border-t border-blue-300/50 pt-3">
+                    <p className="text-sm font-semibold text-text-main">David</p>
+                    <p className="text-xs text-text-secondary">The Alchemist</p>
+                  </div>
+                </div>
+              </div>
+            </SwiperSlide>
+          </Swiper>
+        </section>
+      </div>
+
+      {/* LOOKING FOR SOMETHING */}
+      <div className='bg-white'>
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="requests">
+          <div className="flex items-start sm:items-center justify-between mb-2">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-main">Looking for something?</h2>
+              <p className="text-sm text-text-secondary mt-1">Join others waiting for books that are not yet listed.</p>
+            </div>
+            <a href="#" className="text-primary text-sm font-medium hover:underline flex items-center gap-1 mt-1 sm:mt-0 whitespace-nowrap">
+              View more
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </div>
+          <div className="gap-4 pb-4 pt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="min-w-[200px] snap-start flex-shrink-0 lg:min-w-0 border border-border-light rounded-xl p-4 hover:shadow-md transition">
+              <h3 className="text-sm font-bold text-text-main leading-tight">Fourth Wing</h3>
+              <p className="text-xs text-text-secondary mt-0.5">Rebecca Yarros</p>
+              <div className="flex items-center gap-1 mt-3 text-xs text-text-secondary">
+                <svg className="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>
+                25 readers waiting
+              </div>
+              <div className="flex items-center gap-1 mt-2">
+                <span className="inline-flex items-center gap-1 text-xs text-accent-red font-medium">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.88 10.07 9.29 13.12C9.34 13.22 9.39 13.32 9.39 13.44C9.39 13.66 9.22 13.85 9.01 13.92C8.77 14.01 8.53 13.92 8.36 13.74C8.32 13.69 8.28 13.64 8.24 13.58C7.15 12.08 6.98 10.04 7.68 8.36C5.82 10.04 4.91 12.64 5.12 15.04C5.16 15.44 5.21 15.84 5.33 16.22C5.42 16.71 5.58 17.18 5.79 17.63C6.58 19.22 8.14 20.42 9.87 20.81C11.73 21.24 13.76 20.98 15.34 19.87C17.1 18.64 18.11 16.42 17.97 14.3C17.94 13.83 17.84 13.37 17.66 12.93L17.66 11.2Z" /></svg>
+                  High demand
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                <button className="px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary-dark transition">Join waitlist</button>
+                <button className="px-3 py-1.5 border border-border-light text-text-main text-xs font-medium rounded-lg hover:bg-surface-alt transition">List this book</button>
+              </div>
+            </div>
+            <div className="min-w-[200px] snap-start flex-shrink-0 lg:min-w-0 border border-border-light rounded-xl p-4 hover:shadow-md transition">
+              <h3 className="text-sm font-bold text-text-main leading-tight">A Court of Thorns and Roses</h3>
+              <p className="text-xs text-text-secondary mt-0.5">Sarah J. Maas</p>
+              <div className="flex items-center gap-1 mt-3 text-xs text-text-secondary">
+                <svg className="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>
+                18 readers waiting
+              </div>
+              <div className="flex items-center gap-1 mt-2">
+                <span className="inline-flex items-center gap-1 text-xs text-accent-red font-medium">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.88 10.07 9.29 13.12C9.34 13.22 9.39 13.32 9.39 13.44C9.39 13.66 9.22 13.85 9.01 13.92C8.77 14.01 8.53 13.92 8.36 13.74C8.32 13.69 8.28 13.64 8.24 13.58C7.15 12.08 6.98 10.04 7.68 8.36C5.82 10.04 4.91 12.64 5.12 15.04C5.16 15.44 5.21 15.84 5.33 16.22C5.42 16.71 5.58 17.18 5.79 17.63C6.58 19.22 8.14 20.42 9.87 20.81C11.73 21.24 13.76 20.98 15.34 19.87C17.1 18.64 18.11 16.42 17.97 14.3C17.94 13.83 17.84 13.37 17.66 12.93L17.66 11.2Z" /></svg>
+                  High demand
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                <button className="px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary-dark transition">Join waitlist</button>
+                <button className="px-3 py-1.5 border border-border-light text-text-main text-xs font-medium rounded-lg hover:bg-surface-alt transition">List this book</button>
+              </div>
+            </div>
+            <div className="min-w-[200px] snap-start flex-shrink-0 lg:min-w-0 border border-border-light rounded-xl p-4 hover:shadow-md transition">
+              <h3 className="text-sm font-bold text-text-main leading-tight">The Song of Achilles</h3>
+              <p className="text-xs text-text-secondary mt-0.5">Madeline Miller</p>
+              <div className="flex items-center gap-1 mt-3 text-xs text-text-secondary">
+                <svg className="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>
+                12 readers waiting
+              </div>
+              <div className="flex items-center gap-2 mt-4 pt-2">
+                <button className="px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary-dark transition">Join waitlist</button>
+                <button className="px-3 py-1.5 border border-border-light text-text-main text-xs font-medium rounded-lg hover:bg-surface-alt transition">List this book</button>
+              </div>
+            </div>
+            <div className="min-w-[200px] snap-start flex-shrink-0 lg:min-w-0 border border-border-light rounded-xl p-4 hover:shadow-md transition">
+              <h3 className="text-sm font-bold text-text-main leading-tight">Things Fall Apart</h3>
+              <p className="text-xs text-text-secondary mt-0.5">Chinua Achebe</p>
+              <div className="flex items-center gap-1 mt-3 text-xs text-text-secondary">
+                <svg className="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>
+                9 readers waiting
+              </div>
+              <div className="flex items-center gap-2 mt-4 pt-2">
+                <button className="px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary-dark transition">Join waitlist</button>
+                <button className="px-3 py-1.5 border border-border-light text-text-main text-xs font-medium rounded-lg hover:bg-surface-alt transition">List this book</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
 
       {/* ── Book Quotes ─────────────────────────────────────────── */}
       <section className="bg-white py-24 border-t border-b border-third">
@@ -521,7 +899,6 @@ function Home() {
           </div>
         </div>
       </section>
-
 
 
       <section className="py-5 bg-white border-t border-third">
@@ -631,9 +1008,9 @@ function Home() {
 
                 <div className="flex items-center gap-3 text-[11px]">
                   <span className="font-semibold text-secondary">
-                    {(counts[req.title] ?? req.requestCount)} 
-                    {(counts[req.title] ?? req.requestCount) === 1 
-                      ? ' person needs this' 
+                    {(counts[req.title] ?? req.requestCount)}
+                    {(counts[req.title] ?? req.requestCount) === 1
+                      ? ' person needs this'
                       : ' people need this'}
                   </span>
                   <span className="text-main/35">
@@ -646,9 +1023,9 @@ function Home() {
                     disabled={joined[req.title]}
                     onClick={() => handleJoinQueue(req.title)}
                     className={`text-[11px] font-semibold tracking-widest uppercase px-4 py-2 transition-colors shrink-0 rounded-full
-                    ${joined[req.title] 
-                      ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                      : 'bg-main text-white hover:bg-main/85'}`}
+                    ${joined[req.title]
+                        ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                        : 'bg-main text-white hover:bg-main/85'}`}
                   >
                     {joined[req.title] ? "Joined" : "Join Queue"}
                   </button>
@@ -777,11 +1154,11 @@ function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-[90%] text-center 
             animate-[modalIn_.45s_cubic-bezier(.34,1.56,.64,1)]">
-            
+
             <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 
               flex items-center justify-center
               animate-[modalIn_.55s_cubic-bezier(.34,1.56,.64,1)]">
-                ✓
+              ✓
             </div>
 
             <h3 className="font-heading font-bold text-lg text-main mb-2">
