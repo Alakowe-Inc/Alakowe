@@ -14,7 +14,6 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         display: ['Poppins', 'system-ui', 'sans-serif'],
-        handwriting: ['Caveat', 'cursive'],
       },
       colors: {
         main: "#172131",
@@ -25,12 +24,6 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        'yellow-note': '#FFF9C4',
-        'pink-note': '#FCE4EC',
-        'blue-note': '#E3F2FD',
-        'green-note': '#E8F5E9',
-        'border-light': '#E5E7EB',
-        'accent-red': '#E53935',
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
