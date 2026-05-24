@@ -127,7 +127,7 @@ export default function MyListings() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-main/45">
-                    <span className="font-semibold text-main text-sm">₦{(listing.price ?? 0).toLocaleString()}</span>
+                    <span className="font-semibold text-main text-sm">₦{Math.round((listing.price ?? 0) / 100).toLocaleString()}</span>
                     <span>{listing.categoryName}</span>
                     <span>{listing.bookCondition}</span>
                   </div>

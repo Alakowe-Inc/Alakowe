@@ -46,7 +46,7 @@ export default function EditListing() {
         genre: listing.categoryName ?? '',
         condition: listing.bookCondition ?? '',
         description: listing.description ?? '',
-        price: String(listing.price ?? ''),
+        price: String(Math.round((listing.price ?? 0) / 100)),
         discount: '0',
         loveNote: listing.loveNote ?? '',
       })
@@ -90,7 +90,7 @@ export default function EditListing() {
         categoryId: GENRES.indexOf(form.genre) + 1 || 1,
         bookCondition: form.condition as BookCondition,
         description: form.description.trim(),
-        price: parseFloat(form.price),
+        price: Math.round(parseFloat(form.price) * 100),
         quantity: 1,
         loveNote: form.loveNote.trim() || undefined,
       })

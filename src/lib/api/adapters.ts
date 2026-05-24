@@ -12,10 +12,14 @@ export interface BookDisplay {
   author: string
   genre: string
   condition: string
+  conditionDetail?: string
+  format?: string
   quantity: number
   price: number
   discount?: number
   coverColor: string
+  coverImageUrl?: string
+  imageUrls?: string[]
   description: string
   loveNote?: string
   sellerName: string
@@ -31,8 +35,12 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     genre: listing.categoryName ?? "General",
     condition: listing.bookCondition ?? "Good",
     quantity: listing.quantity ?? 1,
-    price: listing.price ?? 0,
+    price: Math.round((listing.price ?? 0) / 100),
     coverColor: pickColor(listing.id),
+    coverImageUrl: listing.coverImageFileName ?? undefined,
+    imageUrls: listing.imageFileNames ?? undefined,
+    conditionDetail: listing.conditionDetail ?? undefined,
+    format: listing.format ?? undefined,
     description: listing.description ?? "",
     loveNote: listing.loveNote ?? undefined,
     sellerName: listing.createdBy ?? "Seller",
@@ -57,7 +65,7 @@ export function cartItemToDisplay(item: CartItemResponse): CartItemDisplay {
     title: item.title ?? "",
     author: item.author ?? "",
     coverColor: pickColor(item.listingId),
-    unitPrice: item.unitPrice ?? 0,
+    unitPrice: Math.round((item.unitPrice ?? 0) / 100),
     quantity: item.quantity ?? 1,
     isbn: item.isbn ?? undefined,
   }

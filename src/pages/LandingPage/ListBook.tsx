@@ -1,10 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Upload, Heart } from 'lucide-react'
+import { ArrowLeft, Upload, Heart, CheckCircle, X, Loader2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useSubmitListing } from '../../lib/api/listings/listings.hooks'
-import { CONDITIONS, GENRES } from '../../data/sellerData'
+import { CONDITIONS } from '../../data/sellerData'
 import type { BookCondition } from '../../lib/api/types'
+import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
+import { useCategories } from '../../lib/api/categories/categories.hooks'
+
+type PhotoEntry = {
+  file: File
+  preview: string
+  isCover: boolean
+}
 
 type FormState = {
   title: string
@@ -54,10 +62,20 @@ function Field({ label, required, error, children }: {
 export default function ListBook() {
   const { user } = useAuth()
   const submitListing = useSubmitListing()
+  const { data: categories } = useCategories()
   const navigate = useNavigate()
   const [form, setForm] = useState<FormState>(empty)
   const [errors, setErrors] = useState<Partial<FormState>>({})
-  const [photos, setPhotos] = useState<File[]>([])
+  const [photos, setPhotos] = useState<PhotoEntry[]>([])
+  const [photoError, setPhotoError] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState('')
+  const previewUrls = useRef<string[]>([])
+
+  useEffect(() => {
+    const urls = previewUrls.current
+    return () => urls.forEach(u => URL.revokeObjectURL(u))
+  }, [])
 
   function set(field: keyof FormState) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -65,7 +83,60 @@ export default function ListBook() {
   }
 
   function handlePhotos(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) setPhotos(Array.from(e.target.files).slice(0, 5))
+    setPhotoError('')
+    const files = e.target.files
+    if (!files) return
+    const newFiles = Array.from(files)
+    const totalCount = photos.length + newFiles.length
+    if (totalCount > 5) {
+      setPhotoError(`You can upload a maximum of 5 photos (${totalCount} selected)`)
+      e.target.value = ''
+      return
+    }
+    for (const f of newFiles) {
+      if (!isImageTypeAllowed(f)) {
+        setPhotoError(`"${f.name}" is not a supported format. Use JPG, JPEG or PNG only.`)
+        e.target.value = ''
+        return
+      }
+      if (f.size > 5 * 1024 * 1024) {
+        setPhotoError(`"${f.name}" exceeds the 5 MB limit`)
+        e.target.value = ''
+        return
+      }
+    }
+    const newPreviews = newFiles.map(f => URL.createObjectURL(f))
+    previewUrls.current.push(...newPreviews)
+    setPhotos(prev => {
+      const entries: PhotoEntry[] = newFiles.map((f, i) => ({
+        file: f,
+        preview: newPreviews[i],
+        isCover: false,
+      }))
+      const updated = [...prev, ...entries]
+      if (updated.length > 0 && !updated.some(p => p.isCover)) {
+        updated[0].isCover = true
+      }
+      return updated
+    })
+    e.target.value = ''
+  }
+
+  function removePhoto(index: number) {
+    const removed = photos[index]
+    URL.revokeObjectURL(removed.preview)
+    setPhotos(prev => {
+      const updated = prev.filter((_, i) => i !== index)
+      if (removed.isCover && updated.length > 0) {
+        updated[0].isCover = true
+      }
+      return updated
+    })
+    setPhotoError('')
+  }
+
+  function setCover(index: number) {
+    setPhotos(prev => prev.map((p, i) => ({ ...p, isCover: i === index })))
   }
 
   function validate(): Partial<FormState> {
@@ -85,29 +156,62 @@ export default function ListBook() {
     return e
   }
 
+  function validatePhotos(): string | null {
+    if (photos.length < 3) return 'At least 3 photos are required'
+    if (photos.length > 5) return 'Maximum of 5 photos allowed'
+    for (const p of photos) {
+      if (p.file.size > 5 * 1024 * 1024) return `"${p.file.name}" exceeds the 5 MB limit`
+    }
+    return null
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const errs = validate()
-    if (Object.keys(errs).length > 0) { setErrors(errs); return }
+    const photoErr = validatePhotos()
+    if (photoErr) setPhotoError(photoErr)
+    if (Object.keys(errs).length > 0 || photoErr) { setErrors(errs); return }
     setErrors({})
+    setPhotoError('')
+
+    setUploading(true)
+    setUploadProgress('Compressing images…')
 
     try {
+      const compressed = await Promise.all(
+        photos.map(p => compressImage(p.file))
+      )
+
+      setUploadProgress('Uploading images…')
+
+      const filenames = await Promise.all(
+        compressed.map((blob, i) => uploadToCloudinary(blob, photos[i].file.name))
+      )
+
+      const cover = photos.findIndex(p => p.isCover)
+      const coverFile = filenames[cover] ?? filenames[0]
+
       const result = await submitListing.mutateAsync({
         title: form.title.trim(),
         author: form.author.trim(),
-        categoryId: GENRES.indexOf(form.genre) + 1,
+        categoryId: Number(form.genre),
         bookCondition: form.condition as BookCondition,
+        conditionDetail: form.conditionNotes.trim() || undefined,
+        format: form.format || undefined,
         description: form.description.trim(),
-        price: parseFloat(form.price),
+        price: Math.round(parseFloat(form.price) * 100),
         quantity: Number(form.quantity),
         loveNote: form.loveNote.trim() || undefined,
         isbn: undefined,
-        coverImageFileName: undefined,
-        imageFileNames: photos.length > 0 ? photos.map(f => f.name) : undefined,
+        coverImageFileName: coverFile,
+        imageFileNames: filenames,
       })
       navigate(`/listing-submitted?id=${result.id}`)
     } catch {
       setErrors({ title: 'Failed to submit listing. Please try again.' })
+    } finally {
+      setUploading(false)
+      setUploadProgress('')
     }
   }
 
@@ -149,7 +253,7 @@ export default function ListBook() {
                 <select value={form.genre} onChange={set('genre')}
                   className={`${inputClass(!!errors.genre)} ${!form.genre ? 'text-main/30' : 'text-main'}`}>
                   <option value="" disabled>Select category</option>
-                  {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+                  {categories?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </Field>
               <Field label="Condition" required error={errors.condition}>
@@ -219,18 +323,45 @@ export default function ListBook() {
           {/* Photos */}
           <div className="bg-white rounded-2xl border border-third p-6">
             <h2 className="font-heading font-bold text-main text-base mb-1">Photos</h2>
-            <p className="text-xs text-main/45 mb-4">Upload up to 5 photos.</p>
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-main/15 rounded-xl py-8 cursor-pointer hover:border-secondary/40 transition-colors">
-              <Upload size={24} className="text-main/30 mb-2" />
-              <span className="text-sm text-main/50 font-medium">Click to upload photos</span>
-              <span className="text-xs text-main/30 mt-1">PNG, JPG up to 5MB each</span>
-              <input type="file" multiple accept="image/*" className="sr-only" onChange={handlePhotos} />
-            </label>
+            <p className="text-xs text-main/45 mb-4">Upload 3–5 photos. Tap a thumbnail to set it as the cover.</p>
+            {photoError && <p className="text-xs text-red-500 mb-3">{photoError}</p>}
+            {photos.length < 5 && (
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-main/15 rounded-xl py-8 cursor-pointer hover:border-secondary/40 transition-colors">
+                <Upload size={24} className="text-main/30 mb-2" />
+                <span className="text-sm text-main/50 font-medium">Click to upload photos</span>
+                <span className="text-xs text-main/30 mt-1">PNG, JPG up to 5MB each</span>
+                <input type="file" multiple accept=".jpg,.jpeg,.png" className="sr-only" onChange={handlePhotos} disabled={uploading} />
+              </label>
+            )}
             {photos.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {photos.map(f => (
-                  <span key={f.name} className="text-xs bg-secondary/10 text-secondary font-medium px-3 py-1 rounded-full">{f.name}</span>
+              <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                {photos.map((p, i) => (
+                  <div key={p.preview} className="relative group aspect-[3/4] rounded-xl overflow-hidden border border-main/10">
+                    <img src={p.preview} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => removePhoto(i)}
+                      className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      disabled={uploading}>
+                      <X size={14} />
+                    </button>
+                    {p.isCover ? (
+                      <span className="absolute bottom-1 left-1 bg-secondary text-white text-[10px] font-semibold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                        <CheckCircle size={10} /> Cover
+                      </span>
+                    ) : (
+                      <button type="button" onClick={() => setCover(i)}
+                        className="absolute bottom-1 left-1 bg-black/40 text-white text-[10px] font-medium px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                        disabled={uploading}>
+                        Make Cover
+                      </button>
+                    )}
+                  </div>
                 ))}
+              </div>
+            )}
+            {uploading && (
+              <div className="mt-4 flex items-center gap-2 text-sm text-secondary font-medium">
+                <Loader2 size={16} className="animate-spin" />
+                {uploadProgress}
               </div>
             )}
           </div>
@@ -249,10 +380,10 @@ export default function ListBook() {
               className="w-full border border-secondary/25 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors resize-none bg-white" />
           </div>
 
-          <button type="submit" disabled={submitListing.isPending}
+          <button type="submit" disabled={submitListing.isPending || uploading}
             className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {submitListing.isPending ? 'Submitting…' : 'Submit Listing for Review'}
+            {uploading ? 'Uploading…' : submitListing.isPending ? 'Submitting…' : 'Submit Listing for Review'}
           </button>
 
           <p className="text-xs text-main/35 text-center">

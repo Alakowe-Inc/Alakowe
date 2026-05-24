@@ -70,7 +70,11 @@ function QuickViewModal({ book, onClose }: { book: Book; onClose: () => void }) 
       >
         {/* Top / Left — book cover */}
         <div className="bg-[#f5f5f3] flex items-center justify-center sm:w-2/5 sm:shrink-0 p-6 sm:p-8 py-8 sm:py-12">
-          <BookCover color={book.coverColor} scale={1.9} />
+          {'coverImageUrl' in book && book.coverImageUrl ? (
+            <img src={book.coverImageUrl} alt={book.title} className="w-full h-full object-contain max-h-64" />
+          ) : (
+            <BookCover color={book.coverColor} scale={1.9} />
+          )}
         </div>
 
         {/* Bottom / Right — details */}
@@ -167,9 +171,17 @@ function BookCard({ book }: BookCardProps) {
 
           {/* Book cover visual */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="transition-transform duration-500 group-hover:scale-105">
-              <BookCover color={book.coverColor} />
-            </div>
+            {'coverImageUrl' in book && book.coverImageUrl ? (
+              <img
+                src={book.coverImageUrl}
+                alt={book.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="transition-transform duration-500 group-hover:scale-105">
+                <BookCover color={book.coverColor} />
+              </div>
+            )}
           </div>
 
           {/* Quick View overlay */}

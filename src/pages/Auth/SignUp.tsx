@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import logo from '../../assets/media/logos/logo.png'
 import { useAuth } from '../../context/AuthContext'
-import { useSignup, useVerifyEmail } from '../../lib/api/auth/auth.hooks'
+import { useSignup, useVerifyEmail, useResendOtp } from '../../lib/api/auth/auth.hooks'
 
 function SignUp() {
   const { login } = useAuth()
   const signupMutation = useSignup()
   const verifyEmailMutation = useVerifyEmail()
   const navigate = useNavigate()
+  const resendOtpMutation = useResendOtp()
 
   const [step, setStep] = useState<'register' | 'verify'>('register')
   const [firstName, setFirstName] = useState('')
@@ -20,6 +21,39 @@ function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
+  const [countdown, setCountdown] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setInterval>>()
+
+  function startCountdown() {
+    setCountdown(120)
+    clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
+  useEffect(() => {
+    if (step === 'verify') startCountdown()
+    return () => clearInterval(timerRef.current)
+  }, [step])
+
+  async function handleResend() {
+    try {
+      await resendOtpMutation.mutateAsync({ email })
+      startCountdown()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to resend code')
+    }
+  }
+
+  const minutes = Math.floor(countdown / 60)
+  const seconds = countdown % 60
 
   async function handleRegisterSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
@@ -87,7 +121,22 @@ function SignUp() {
               </button>
             </form>
 
-            <p className="text-sm text-gray-500 mt-8">
+            {countdown > 0 ? (
+              <p className="text-sm text-gray-400 mt-4">
+                Resend code in {minutes}:{seconds.toString().padStart(2, '0')}
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resendOtpMutation.isPending}
+                className="text-sm text-secondary font-semibold hover:underline mt-4 disabled:opacity-50"
+              >
+                {resendOtpMutation.isPending ? 'Sending…' : 'Resend code'}
+              </button>
+            )}
+
+            <p className="text-sm text-gray-500 mt-4">
               Already have an account?{' '}
               <Link to="/login" className="text-secondary font-semibold hover:underline">
                 Sign in

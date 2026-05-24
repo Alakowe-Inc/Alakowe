@@ -1,7 +1,7 @@
+import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
   ArrowLeft,
-  MapPin,
   ShoppingBag,
   BookOpen,
   Tag,
@@ -17,6 +17,13 @@ function BookDetail() {
   const { id } = useParams()
   const { data: listing, isLoading } = useListing(Number(id))
   const { addToCart } = useCart()
+  const [selectedImage, setSelectedImage] = useState(0)
+
+  const book = useMemo(() => listing ? listingToBookDisplay(listing) : null, [listing])
+  const allImages = useMemo(() => {
+    if (!book?.coverImageUrl) return []
+    return [book.coverImageUrl, ...(book.imageUrls ?? [])]
+  }, [book])
 
   if (isLoading) {
     return (
@@ -26,7 +33,7 @@ function BookDetail() {
     )
   }
 
-  if (!listing) {
+  if (!listing || !book) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-third">
         <div className="text-center animate-[fadeIn_0.5s_ease-out]">
@@ -38,8 +45,6 @@ function BookDetail() {
       </div>
     )
   }
-
-  const book = listingToBookDisplay(listing)
 
   return (
     <div className="bg-third min-h-screen animate-[fadeIn_0.6s_ease-out]">
@@ -59,23 +64,48 @@ function BookDetail() {
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-start">
-          {/* COVER */}
-          <div
-            className="order-1 lg:order-none lg:col-span-7 reveal group relative rounded-3xl h-80 md:h-[32rem] flex items-center justify-center border border-third/60 overflow-hidden transition-all duration-500 hover:shadow-2xl"
-            style={{
-              background: `radial-gradient(circle at 30% 20%, ${book.coverColor}28, ${book.coverColor}10 55%, transparent 80%), linear-gradient(135deg, #ffffff 0%, ${book.coverColor}10 100%)`,
-            }}
-          >
-            <div
-              className="absolute -inset-20 blur-3xl opacity-40 transition-opacity duration-700 group-hover:opacity-60"
-              style={{ background: `radial-gradient(circle, ${book.coverColor}55, transparent 60%)` }}
-            />
-            <div
-              className="relative w-40 h-60 md:w-52 md:h-[19rem] rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.45)] flex items-end justify-center pb-5 transition-transform duration-700 ease-out group-hover:scale-105 group-hover:-rotate-1"
-              style={{ backgroundColor: book.coverColor }}
-            >
-              <div className="w-28 h-px bg-white/40 rounded" />
+          {/* COVER + GALLERY */}
+          <div className="order-1 lg:order-none lg:col-span-7 space-y-4">
+            <div className="reveal relative rounded-3xl overflow-hidden bg-white border border-third/60">
+              {allImages.length > 0 ? (
+                <img
+                  src={allImages[selectedImage]}
+                  alt={book.title}
+                  className="w-full h-80 md:h-[32rem] object-contain p-4"
+                />
+              ) : (
+                <div
+                  className="w-full h-80 md:h-[32rem] flex items-center justify-center"
+                  style={{
+                    background: `radial-gradient(circle at 30% 20%, ${book.coverColor}28, ${book.coverColor}10 55%, transparent 80%), linear-gradient(135deg, #ffffff 0%, ${book.coverColor}10 100%)`,
+                  }}
+                >
+                  <div
+                    className="w-40 h-60 md:w-52 md:h-[19rem] rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.45)] flex items-end justify-center pb-5"
+                    style={{ backgroundColor: book.coverColor }}
+                  >
+                    <div className="w-28 h-px bg-white/40 rounded" />
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Thumbnail gallery */}
+            {allImages.length > 1 && (
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {allImages.map((url, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImage(i)}
+                    className={`shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors ${
+                      i === selectedImage ? 'border-secondary' : 'border-transparent hover:border-main/20'
+                    }`}
+                  >
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* RIGHT COLUMN */}
@@ -148,7 +178,7 @@ function BookDetail() {
             <div className="divide-y divide-third/70 text-sm">
               {[
                 { icon: Tag, label: 'Category', value: book.genre },
-                { icon: BookOpen, label: 'Format', value: 'Paperback' },
+                { icon: BookOpen, label: 'Format', value: book.format || 'Paperback' },
                 { icon: Layers, label: 'Condition', value: book.condition },
                 { icon: Package, label: 'Available', value: String(book.quantity) },
               ].map(({ icon: Icon, label, value }) => (
@@ -166,6 +196,15 @@ function BookDetail() {
                 </div>
               ))}
             </div>
+
+            {book.conditionDetail && (
+              <div className="mt-4 pt-4 border-t border-third/70">
+                <p className="text-xs font-semibold text-main/50 uppercase tracking-widest mb-2">
+                  Condition Notes
+                </p>
+                <p className="text-sm text-main/70 leading-relaxed">{book.conditionDetail}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

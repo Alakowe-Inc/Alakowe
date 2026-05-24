@@ -1,10 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { TooltipProvider } from "@/components/ui/tooltip";
-
-// Customer-facing
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -45,45 +42,15 @@ import PrivacyPolicy from "./pages/LandingPage/PrivacyPolicy";
 import TermsConditions from "./pages/LandingPage/TermsConditions";
 import NotFound from "./pages/NotFound";
 
-// Admin
-import { AdminLayout } from "@/admin/components/AdminLayout";
-import AdminLogin from "@/admin/pages/AdminLogin";
-import { RequireAdmin } from "@/admin/pages/RequireAdmin";
-import Dashboard from "@/admin/pages/Dashboard";
-import Users from "@/admin/pages/Users";
-import UserProfile from "@/admin/pages/UserProfile";
-import Listings from "@/admin/pages/Listings";
-import Orders from "@/admin/pages/Orders";
-import Inventory from "@/admin/pages/Inventory";
-import Payments from "@/admin/pages/Payments";
-import PaymentDetail from "@/admin/pages/PaymentDetail";
-import Pickups from "@/admin/pages/Pickups";
-import DropoffBooks from "@/admin/pages/DropoffBooks";
-import DropoffCentres from "@/admin/pages/DropoffCentres";
-import DropoffDetail from "@/admin/pages/DropoffDetail";
-import Analytics from "@/admin/pages/Analytics";
-import Settings from "@/admin/pages/Settings";
-import OrderDetail from "@/admin/pages/OrderDetail";
-import ListingDetail from "@/admin/pages/ListingDetail";
-import PickupDetail from "@/admin/pages/PickupDetail";
-
 const queryClient = new QueryClient();
-
-const adminWrap = (el: React.ReactNode) => (
-  <RequireAdmin>
-    <AdminLayout>{el}</AdminLayout>
-  </RequireAdmin>
-);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
       <ToastContainer position="top-right" autoClose={3000} />
       <AuthProvider>
         <CartProvider>
           <BrowserRouter>
             <Routes>
-              {/* Customer site */}
               <Route path="/" element={<RootLayout />}>
                 <Route index element={<Home />} />
                 <Route path="browse" element={<BrowseBooks />} />
@@ -120,38 +87,11 @@ const App = () => (
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
-
-              {/* Admin */}
-              <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={adminWrap(<Dashboard />)} />
-              <Route path="/admin/users" element={adminWrap(<Users />)} />
-              <Route path="/admin/users/:id" element={adminWrap(<UserProfile />)} />
-              <Route path="/admin/sellers" element={<Navigate to="/admin/users" replace />} />
-              <Route path="/admin/listings" element={adminWrap(<Listings />)} />
-              <Route path="/admin/listings/:id" element={adminWrap(<ListingDetail />)} />
-              <Route path="/admin/orders" element={adminWrap(<Orders />)} />
-              <Route path="/admin/orders/:id" element={adminWrap(<OrderDetail />)} />
-              <Route path="/admin/inventory" element={adminWrap(<Inventory />)} />
-              <Route path="/admin/payments" element={adminWrap(<Payments />)} />
-              <Route path="/admin/payments/:id" element={adminWrap(<PaymentDetail />)} />
-              <Route path="/admin/pickups" element={adminWrap(<Pickups />)} />
-              <Route path="/admin/pickups/:id" element={adminWrap(<PickupDetail />)} />
-              <Route path="/admin/dropoffs" element={<Navigate to="/admin/dropoffs/books" replace />} />
-              <Route path="/admin/dropoffs/books" element={adminWrap(<DropoffBooks />)} />
-              <Route path="/admin/dropoffs/books/:id" element={adminWrap(<DropoffDetail />)} />
-              <Route path="/admin/dropoffs/centres" element={adminWrap(<DropoffCentres />)} />
-              <Route path="/admin/analytics" element={adminWrap(<Analytics />)} />
-              <Route path="/admin/reports" element={<Navigate to="/admin/analytics" replace />} />
-              <Route path="/admin/settings" element={adminWrap(<Settings />)} />
-              <Route path="/admin/insights" element={<Navigate to="/admin/dashboard" replace />} />
-
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </CartProvider>
       </AuthProvider>
-    </TooltipProvider>
   </QueryClientProvider>
 );
 
