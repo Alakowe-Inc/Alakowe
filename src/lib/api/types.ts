@@ -97,15 +97,6 @@ export interface AddToWishlistRequestDto {
   listingId?: number
 }
 
-export interface AddCategoryRequestDto {
-  name?: string | null
-}
-
-export interface UpdateCategoryRequestDto {
-  name?: string | null
-  id?: number
-}
-
 export interface LoginResponse {
   userId?: string | null
   firstName?: string | null
