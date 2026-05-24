@@ -12,10 +12,14 @@ export interface BookDisplay {
   author: string
   genre: string
   condition: string
+  conditionDetail?: string
+  format?: string
   quantity: number
   price: number
   discount?: number
   coverColor: string
+  coverImageUrl?: string
+  imageUrls?: string[]
   description: string
   loveNote?: string
   sellerName: string
@@ -33,6 +37,10 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     quantity: listing.quantity ?? 1,
     price: Math.round((listing.price ?? 0) / 100),
     coverColor: pickColor(listing.id),
+    coverImageUrl: listing.coverImageFileName ?? undefined,
+    imageUrls: listing.imageFileNames ?? undefined,
+    conditionDetail: listing.conditionDetail ?? undefined,
+    format: listing.format ?? undefined,
     description: listing.description ?? "",
     loveNote: listing.loveNote ?? undefined,
     sellerName: listing.createdBy ?? "Seller",

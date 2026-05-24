@@ -54,10 +54,12 @@ export interface SubmitListingRequestDto {
   title?: string | null
   isbn?: string | null
   description?: string | null
+  conditionDetail?: string | null
   loveNote?: string | null
   price?: number
   quantity?: number
   bookCondition?: BookCondition
+  format?: string | null
   coverImageFileName?: string | null
   imageFileNames?: string[] | null
   author?: string | null
@@ -69,10 +71,12 @@ export interface UpdateListingRequestDto {
   title?: string | null
   isbn?: string | null
   description?: string | null
+  conditionDetail?: string | null
   loveNote?: string | null
   price?: number
   quantity?: number
   bookCondition?: BookCondition
+  format?: string | null
   coverImageFileName?: string | null
   imageFileNames?: string[] | null
   author?: string | null
@@ -116,10 +120,12 @@ export interface ListingResponse {
   title?: string | null
   isbn?: string | null
   description?: string | null
+  conditionDetail?: string | null
   loveNote?: string | null
   price?: number
   quantity?: number
   bookCondition?: BookCondition
+  format?: string | null
   coverImageFileName?: string | null
   imageFileNames?: string[] | null
   author?: string | null

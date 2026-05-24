@@ -57,5 +57,5 @@ export async function uploadToCloudinary(file: Blob, fileName: string): Promise<
     throw new Error(`Cloudinary upload failed: ${text}`)
   }
   const data = await res.json()
-  return (data.public_id as string).replace(`${UPLOAD_FOLDER}/`, '')
+  return `${(data.public_id as string).replace(`${UPLOAD_FOLDER}/`, '')}.${data.format as string}`
 }
