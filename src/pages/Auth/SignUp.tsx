@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import logo from '../../assets/media/logos/logo.png'
 import { useAuth } from '../../context/AuthContext'
 import { useSignup, useVerifyEmail, useResendOtp } from '../../lib/api/auth/auth.hooks'
@@ -19,9 +20,19 @@ function SignUp() {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [countdown, setCountdown] = useState(0)
+
+  const passwordChecks = useMemo(() => ({
+    length: password.length >= 8,
+    nonAlpha: /[^a-zA-Z0-9]/.test(password),
+    digit: /\d/.test(password),
+    lower: /[a-z]/.test(password),
+    upper: /[A-Z]/.test(password),
+  }), [password])
   const timerRef = useRef<ReturnType<typeof setInterval>>()
 
   function startCountdown() {
@@ -213,22 +224,57 @@ function SignUp() {
               onChange={e => setPhoneNumber(e.target.value)}
               className="w-full border border-gray-200 rounded-full px-4 py-3 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
             />
-            <input
-              type="password"
-              required
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full border border-gray-200 rounded-full px-4 py-3 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
-            />
-            <input
-              type="password"
-              required
-              placeholder="Confirm password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              className="w-full border border-gray-200 rounded-full px-4 py-3 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full border border-gray-200 rounded-full px-4 py-3 pr-11 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                required
+                placeholder="Confirm password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                className="w-full border border-gray-200 rounded-full px-4 py-3 pr-11 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            <ul className="text-xs text-gray-500 space-y-0.5 px-1">
+              <li className={passwordChecks.length ? 'text-green-600' : ''}>
+                {passwordChecks.length ? '✓' : '○'} At least 8 characters
+              </li>
+              <li className={passwordChecks.upper ? 'text-green-600' : ''}>
+                {passwordChecks.upper ? '✓' : '○'} At least one uppercase letter
+              </li>
+              <li className={passwordChecks.lower ? 'text-green-600' : ''}>
+                {passwordChecks.lower ? '✓' : '○'} At least one lowercase letter
+              </li>
+              <li className={passwordChecks.digit ? 'text-green-600' : ''}>
+                {passwordChecks.digit ? '✓' : '○'} At least one digit
+              </li>
+              <li className={passwordChecks.nonAlpha ? 'text-green-600' : ''}>
+                {passwordChecks.nonAlpha ? '✓' : '○'} At least one special character
+              </li>
+            </ul>
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             <button
               type="submit"
