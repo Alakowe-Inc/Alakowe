@@ -7,6 +7,7 @@ import { CONDITIONS } from '../../data/sellerData'
 import type { BookCondition } from '../../lib/api/types'
 import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
 import { useCategories } from '../../lib/api/categories/categories.hooks'
+import { useStates, useAreasByState } from '../../lib/api/location/location.hooks'
 
 type PhotoEntry = {
   file: File
@@ -26,6 +27,8 @@ type FormState = {
   price: string
   discount: string
   loveNote: string
+  stateId: string
+  areaId: string
 }
 
 const empty: FormState = {
@@ -40,6 +43,8 @@ const empty: FormState = {
   price: '',
   discount: '0',
   loveNote: '',
+  stateId: '',
+  areaId: '',
 }
 
 const inputClass = (err?: boolean) =>
@@ -63,6 +68,9 @@ export default function ListBook() {
   const { user } = useAuth()
   const submitListing = useSubmitListing()
   const { data: categories } = useCategories()
+  const { data: states } = useStates()
+  const [selectedStateId, setSelectedStateId] = useState<number>(0)
+  const { data: areas } = useAreasByState(selectedStateId || undefined)
   const navigate = useNavigate()
   const [form, setForm] = useState<FormState>(empty)
   const [errors, setErrors] = useState<Partial<FormState>>({})
@@ -78,8 +86,19 @@ export default function ListBook() {
   }, [])
 
   function set(field: keyof FormState) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      setForm(p => ({ ...p, [field]: e.target.value }))
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const value = e.target.value
+      setForm(p => {
+        const next = { ...p, [field]: value }
+        if (field === 'stateId') {
+          next.areaId = ''
+        }
+        return next
+      })
+      if (field === 'stateId') {
+        setSelectedStateId(Number(value) || 0)
+      }
+    }
   }
 
   function handlePhotos(e: React.ChangeEvent<HTMLInputElement>) {
@@ -153,6 +172,8 @@ export default function ListBook() {
     const disc = parseFloat(form.discount)
     if (isNaN(disc) || disc < 0 || disc > 50)
       e.discount = 'Discount must be 0–50%'
+    if (!form.stateId) e.stateId = 'Please select a state'
+    if (!form.areaId) e.areaId = 'Please select an area'
     return e
   }
 
@@ -206,6 +227,8 @@ export default function ListBook() {
         coverImageFileName: coverFile,
         imageFileNames: filenames,
         discount: form.discount ? Number(form.discount) : undefined,
+        stateId: Number(form.stateId),
+        areaId: Number(form.areaId),
       })
       navigate(`/listing-submitted?id=${result.id}`)
     } catch {
@@ -274,6 +297,21 @@ export default function ListBook() {
                   <option value="" disabled>Select format</option>
                   <option value="Hardcover">Hardcover</option>
                   <option value="Paperback">Paperback</option>
+                </select>
+              </Field>
+              <Field label="State" required error={errors.stateId}>
+                <select value={form.stateId} onChange={set('stateId')}
+                  className={`${inputClass(!!errors.stateId)} ${!form.stateId ? 'text-main/30' : 'text-main'}`}>
+                  <option value="" disabled>Select state</option>
+                  {states?.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </Field>
+              <Field label="Area" required error={errors.areaId}>
+                <select value={form.areaId} onChange={set('areaId')}
+                  className={`${inputClass(!!errors.areaId)} ${!form.areaId ? 'text-main/30' : 'text-main'}`}
+                  disabled={!selectedStateId}>
+                  <option value="" disabled>{selectedStateId ? 'Select area' : 'Select state first'}</option>
+                  {areas?.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
               </Field>
             </div>

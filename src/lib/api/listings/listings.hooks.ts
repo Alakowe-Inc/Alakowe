@@ -43,6 +43,7 @@ const mockListing: ListingResponse = {
   cartItemCount: 0,
   wishlistItemCount: 0,
   isDiscountApplied: false,
+  location: "Yaba, Lagos",
 }
 
 const mockPagedResult: ListingResponsePagedResult = {

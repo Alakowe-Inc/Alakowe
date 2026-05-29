@@ -14,6 +14,7 @@ import {
   Calendar,
   CheckCircle,
   ImageIcon,
+  MapPin,
 } from 'lucide-react'
 import { useMyListing, useSetDiscount } from '../../lib/api/listings/listings.hooks'
 
@@ -249,6 +250,7 @@ export default function MyListingDetail() {
                 <DetailRow icon={Layers} label="Condition" value={listing.bookCondition ?? '—'} />
                 <DetailRow icon={Package} label="Quantity" value={String(listing.quantity ?? 1)} />
                 <DetailRow icon={BookOpen} label="ISBN" value={listing.isbn ?? '—'} />
+                <DetailRow icon={MapPin} label="Location" value={listing.location ?? '—'} />
               </div>
               {listing.conditionDetail && (
                 <div className="mt-4 pt-4 border-t border-third/70">

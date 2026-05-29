@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { PlusCircle, Pencil, BookOpen, TrendingUp, ShoppingBag, Wallet, Share2, Check, Tag, ThumbsDown } from 'lucide-react'
+import { PlusCircle, Pencil, BookOpen, TrendingUp, ShoppingBag, Wallet, Share2, Check, Tag, ThumbsDown, MapPin } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useMyListings, useMyListingSummary, useSetDiscount } from '../../lib/api/listings/listings.hooks'
@@ -150,6 +150,11 @@ export default function MyListings() {
                       </span>
                       <span>{listing.categoryName}</span>
                       <span>{listing.bookCondition}</span>
+                      {listing.location && (
+                        <span className="flex items-center gap-1">
+                          <MapPin size={11} /> {listing.location}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </Link>
