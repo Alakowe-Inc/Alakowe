@@ -17,6 +17,7 @@ export interface BookDisplay {
   quantity: number
   price: number
   discount?: number
+  isDiscountApplied?: boolean
   coverColor: string
   coverImageUrl?: string
   imageUrls?: string[]
@@ -44,6 +45,7 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     description: listing.description ?? "",
     loveNote: listing.loveNote ?? undefined,
     sellerName: listing.createdBy ?? "Seller",
+    isDiscountApplied: listing.isDiscountApplied ?? false,
     isbn: listing.isbn ?? undefined,
     categoryId: listing.categoryId,
   }

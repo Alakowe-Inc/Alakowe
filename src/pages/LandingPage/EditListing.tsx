@@ -60,7 +60,7 @@ export default function EditListing() {
         conditionDetail: listing.conditionDetail ?? '',
         description: listing.description ?? '',
         price: String(Math.round((listing.price ?? 0) / 100)),
-        discount: '0',
+        discount: listing.discount != null ? String(listing.discount) : '0',
         loveNote: listing.loveNote ?? '',
       })
       const imgs: string[] = []
@@ -191,6 +191,7 @@ export default function EditListing() {
         loveNote: form.loveNote.trim() || undefined,
         coverImageFileName,
         imageFileNames,
+        discount: form.discount ? Number(form.discount) : undefined,
       })
       navigate('/my-listings')
     } catch {

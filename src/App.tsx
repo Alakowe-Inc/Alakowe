@@ -27,6 +27,7 @@ import Sell from "./pages/LandingPage/Sell";
 import ListBook from "./pages/LandingPage/ListBook";
 import ListingSubmitted from "./pages/LandingPage/ListingSubmitted";
 import MyListings from "./pages/LandingPage/MyListings";
+import MyListingDetail from "./pages/LandingPage/MyListingDetail";
 import EditListing from "./pages/LandingPage/EditListing";
 import SellerOrders from "./pages/LandingPage/SellerOrders";
 import SellerDropoff from "./pages/LandingPage/SellerDropoff";
@@ -66,6 +67,7 @@ const App = () => (
                 <Route path="list" element={<ProtectedRoute><ListBook /></ProtectedRoute>} />
                 <Route path="listing-submitted" element={<ListingSubmitted />} />
                 <Route path="my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
+                <Route path="my-listings/:id" element={<ProtectedRoute><MyListingDetail /></ProtectedRoute>} />
                 <Route path="my-listings/:id/edit" element={<ProtectedRoute><EditListing /></ProtectedRoute>} />
                 <Route path="my-sales" element={<ProtectedRoute><SellerOrders /></ProtectedRoute>} />
                 <Route path="my-sales/:id/dropoff" element={<ProtectedRoute><SellerDropoff /></ProtectedRoute>} />
