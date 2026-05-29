@@ -206,6 +206,16 @@ function BookDetail() {
               </div>
             )}
           </div>
+
+          {/* DESCRIPTION */}
+          {book.description && (
+            <div className="order-4 lg:order-none lg:col-span-7 reveal bg-white border border-third/70 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <h3 className="font-heading font-bold text-main text-lg mb-4">Description</h3>
+              <p className="text-sm text-main/70 leading-relaxed whitespace-pre-line">
+                {book.description}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
