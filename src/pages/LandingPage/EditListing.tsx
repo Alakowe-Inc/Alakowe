@@ -5,11 +5,13 @@ import { useAuth } from '../../context/AuthContext'
 import { useListing, useEditListing } from '../../lib/api/listings/listings.hooks'
 import { GENRES, CONDITIONS } from '../../data/sellerData'
 import type { BookCondition } from '../../lib/api/types'
+import { useStates, useAreasByState } from '../../lib/api/location/location.hooks'
 import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
 
 type FormState = {
   title: string; author: string; genre: string; condition: string
   conditionDetail: string; description: string; price: string; discount: string; loveNote: string
+  stateId: string; areaId: string
 }
 
 type NewPhotoEntry = {
@@ -40,6 +42,9 @@ export default function EditListing() {
   const navigate = useNavigate()
   const { data: listing } = useListing(Number(id))
   const editListing = useEditListing()
+  const { data: states } = useStates()
+  const [selectedStateId, setSelectedStateId] = useState<number>(0)
+  const { data: areas } = useAreasByState(selectedStateId || undefined)
 
   const [form, setForm] = useState<FormState | null>(null)
   const [errors, setErrors] = useState<Partial<FormState>>({})
@@ -52,6 +57,8 @@ export default function EditListing() {
 
   useEffect(() => {
     if (listing) {
+      const stateId = listing.stateId ? String(listing.stateId) : ''
+      const areaId = listing.areaId ? String(listing.areaId) : ''
       setForm({
         title: listing.title ?? '',
         author: listing.author ?? '',
@@ -62,7 +69,10 @@ export default function EditListing() {
         price: String(Math.round((listing.price ?? 0) / 100)),
         discount: listing.discount != null ? String(listing.discount) : '0',
         loveNote: listing.loveNote ?? '',
+        stateId,
+        areaId,
       })
+      if (listing.stateId) setSelectedStateId(listing.stateId)
       const imgs: string[] = []
       if (listing.coverImageFileName) imgs.push(listing.coverImageFileName)
       if (listing.imageFileNames) imgs.push(...listing.imageFileNames.filter(Boolean))
@@ -73,8 +83,16 @@ export default function EditListing() {
   const notFound = !id || (!listing && !form)
 
   function set(field: keyof FormState) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      setForm(p => p ? { ...p, [field]: e.target.value } : p)
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const value = e.target.value
+      setForm(p => {
+        if (!p) return p
+        const next = { ...p, [field]: value }
+        if (field === 'stateId') next.areaId = ''
+        return next
+      })
+      if (field === 'stateId') setSelectedStateId(Number(value) || 0)
+    }
   }
 
   function handlePhotos(e: React.ChangeEvent<HTMLInputElement>) {
@@ -149,6 +167,8 @@ export default function EditListing() {
     const price = parseFloat(form.price)
     if (!form.price || isNaN(price) || price < 100)
       e.price = 'Enter a valid price (min ₦100)'
+    if (!form.stateId) e.stateId = 'Please select a state'
+    if (!form.areaId) e.areaId = 'Please select an area'
     return e
   }
 
@@ -192,6 +212,8 @@ export default function EditListing() {
         coverImageFileName,
         imageFileNames,
         discount: form.discount ? Number(form.discount) : undefined,
+        stateId: Number(form.stateId),
+        areaId: Number(form.areaId),
       })
       navigate('/my-listings')
     } catch {
@@ -254,6 +276,21 @@ export default function EditListing() {
                   </select>
                 </Field>
               </div>
+              <Field label="State" required error={errors.stateId}>
+                <select value={form.stateId} onChange={set('stateId')}
+                  className={`${inputClass(!!errors.stateId)} ${!form.stateId ? 'text-main/30' : 'text-main'}`}>
+                  <option value="" disabled>Select state</option>
+                  {states?.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </Field>
+              <Field label="Area" required error={errors.areaId}>
+                <select value={form.areaId} onChange={set('areaId')}
+                  className={`${inputClass(!!errors.areaId)} ${!form.areaId ? 'text-main/30' : 'text-main'}`}
+                  disabled={!selectedStateId}>
+                  <option value="" disabled>{selectedStateId ? 'Select area' : 'Select state first'}</option>
+                  {areas?.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
+              </Field>
             </div>
           </div>
 

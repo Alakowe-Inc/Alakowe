@@ -65,6 +65,8 @@ export interface SubmitListingRequestDto {
   author?: string | null
   categoryId?: number
   discount?: number
+  stateId?: number
+  areaId?: number
 }
 
 export interface UpdateListingRequestDto {
@@ -83,6 +85,8 @@ export interface UpdateListingRequestDto {
   author?: string | null
   categoryId?: number
   discount?: number
+  stateId?: number
+  areaId?: number
 }
 
 export interface AddToCartRequestDto {
@@ -143,6 +147,9 @@ export interface ListingResponse {
   wishlistItemCount?: number
   discount?: number
   isDiscountApplied?: boolean
+  stateId?: number
+  areaId?: number
+  location?: string | null
 }
 
 export interface SetListingDiscountRequest {
@@ -253,6 +260,17 @@ export interface WishlistResponse {
 
 export interface CategoryResponse {
   id?: number
+  name?: string | null
+}
+
+export interface StateResponse {
+  id?: number
+  name?: string | null
+}
+
+export interface AreaResponse {
+  id?: number
+  stateId?: number
   name?: string | null
 }
 

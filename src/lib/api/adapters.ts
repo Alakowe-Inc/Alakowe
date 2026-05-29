@@ -27,6 +27,7 @@ export interface BookDisplay {
   sellerName: string
   isbn?: string
   categoryId?: number
+  location?: string
 }
 
 export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
@@ -57,6 +58,7 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     sellerName: listing.createdBy ?? "Seller",
     isbn: listing.isbn ?? undefined,
     categoryId: listing.categoryId,
+    location: listing.location ?? undefined,
   }
 }
 
