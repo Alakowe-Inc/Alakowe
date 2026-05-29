@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
-import { PlusCircle, Pencil, BookOpen, TrendingUp, ShoppingBag, Wallet, Share2, Check } from 'lucide-react'
+import { PlusCircle, Pencil, BookOpen, TrendingUp, ShoppingBag, Wallet, Share2, Check, Tag, ThumbsDown } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { useListings } from '../../lib/api/listings/listings.hooks'
+import { useMyListings, useMyListingSummary, useSetDiscount } from '../../lib/api/listings/listings.hooks'
 
 function StatCard({ icon: Icon, label, value, sub }: {
   icon: React.ElementType; label: string; value: string | number; sub?: string
@@ -21,9 +21,12 @@ function StatCard({ icon: Icon, label, value, sub }: {
 
 export default function MyListings() {
   const { user } = useAuth()
-  const { data: pagedResult } = useListings()
+  const { data: pagedResult } = useMyListings()
+  const { data: summary } = useMyListingSummary()
   const listings = pagedResult?.result ?? []
   const [copied, setCopied] = useState(false)
+  const [discountId, setDiscountId] = useState<number | null>(null)
+  const setDiscount = useSetDiscount()
 
   const storeUrl = user
     ? `${window.location.origin}/store/${encodeURIComponent(user.email)}`
@@ -36,9 +39,14 @@ export default function MyListings() {
     })
   }
 
-  const live = listings.filter(l => l.isPublished).length
-  const pending = listings.filter(l => l.status === 'PendingApproval').length
-  const sold = listings.filter(l => l.status === 'Sold').length
+  async function handleToggleDiscount(listingId: number, currentlyApplied: boolean) {
+    setDiscountId(listingId)
+    try {
+      await setDiscount.mutateAsync({ id: listingId, body: { isDiscountApplied: !currentlyApplied } })
+    } finally {
+      setDiscountId(null)
+    }
+  }
 
   return (
     <div className="bg-third min-h-screen">
@@ -59,10 +67,10 @@ export default function MyListings() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          <StatCard icon={BookOpen} label="Total" value={listings.length} />
-          <StatCard icon={TrendingUp} label="Live" value={live} sub="Visible to buyers" />
-          <StatCard icon={ShoppingBag} label="Sold" value={sold} />
-          <StatCard icon={Wallet} label="Under Review" value={pending} sub="Within 24hrs" />
+          <StatCard icon={BookOpen} label="Total" value={summary?.totalListings ?? 0} />
+          <StatCard icon={TrendingUp} label="Live" value={summary?.activePublished ?? 0} sub="Visible to buyers" />
+          <StatCard icon={Wallet} label="Under Review" value={summary?.pendingApproval ?? 0} sub="Within 24hrs" />
+          <StatCard icon={ThumbsDown} label="Rejected" value={summary?.rejected ?? 0} />
         </div>
 
         {/* Share My Store */}
@@ -104,37 +112,73 @@ export default function MyListings() {
           <div className="flex flex-col gap-4">
             {listings.map(listing => (
               <div key={listing.id} className="bg-white rounded-2xl border border-third p-5 flex items-start gap-4">
-                {/* Cover */}
-                <div className="w-12 h-[72px] rounded-xl shrink-0 shadow-sm bg-main/10" />
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-3 mb-1">
-                    <div className="min-w-0">
-                      <p className="font-heading font-bold text-main text-base leading-snug truncate">
-                        {listing.title}
-                      </p>
-                      <p className="text-main/50 text-sm">by {listing.author}</p>
+                {/* Cover + Info — clickable to view details */}
+                <Link to={`/my-listings/${listing.id}`} className="flex items-start gap-4 flex-1 min-w-0 group">
+                  {listing.coverImageFileName ? (
+                    <img src={listing.coverImageFileName} alt={listing.title ?? ''}
+                      className="w-12 h-[72px] rounded-xl shrink-0 shadow-sm object-cover group-hover:opacity-80 transition-opacity" />
+                  ) : (
+                    <div className="w-12 h-[72px] rounded-xl shrink-0 shadow-sm bg-main/10 group-hover:bg-main/20 transition-colors" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3 mb-1">
+                      <div className="min-w-0">
+                        <p className="font-heading font-bold text-main text-base leading-snug truncate group-hover:text-secondary transition-colors">
+                          {listing.title}
+                        </p>
+                        <p className="text-main/50 text-sm">by {listing.author}</p>
+                      </div>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
+                        listing.status === 'Published' ? 'bg-green-100 text-green-700' :
+                        listing.status === 'PendingApproval' ? 'bg-amber-100 text-amber-700' :
+                        listing.status === 'Sold' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {listing.status ?? 'Unknown'}
+                      </span>
                     </div>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
-                      listing.status === 'Published' ? 'bg-green-100 text-green-700' :
-                      listing.status === 'PendingApproval' ? 'bg-amber-100 text-amber-700' :
-                      listing.status === 'Sold' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
-                      {listing.status ?? 'Unknown'}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-main/45">
+                      <span className="font-semibold text-main text-sm">
+                        ₦{listing.isDiscountApplied && listing.discount && listing.discount > 0
+                          ? Math.round(Math.round((listing.price ?? 0) / 100) * (1 - listing.discount / 100)).toLocaleString()
+                          : Math.round((listing.price ?? 0) / 100).toLocaleString()}
+                        {listing.isDiscountApplied && listing.discount && listing.discount > 0 && (
+                          <span className="text-main/40 line-through ml-1.5 font-normal">
+                            ₦{Math.round((listing.price ?? 0) / 100).toLocaleString()}
+                          </span>
+                        )}
+                      </span>
+                      <span>{listing.categoryName}</span>
+                      <span>{listing.bookCondition}</span>
+                    </div>
                   </div>
+                </Link>
 
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-main/45">
-                    <span className="font-semibold text-main text-sm">₦{Math.round((listing.price ?? 0) / 100).toLocaleString()}</span>
-                    <span>{listing.categoryName}</span>
-                    <span>{listing.bookCondition}</span>
-                  </div>
+                {/* Discount badge */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {listing.isDiscountApplied && (
+                    <span className="text-[10px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded-full">
+                      {listing.discount ?? 0}% OFF
+                    </span>
+                  )}
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 shrink-0">
+                  {listing.isPublished && (
+                    <button
+                      title={`Discount: ${listing.discount ?? 0}%`}
+                      onClick={() => handleToggleDiscount(listing.id!, listing.isDiscountApplied!)}
+                      disabled={setDiscount.isPending && discountId === listing.id}
+                      className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
+                        listing.isDiscountApplied
+                          ? 'border-green-300 text-green-600 hover:border-green-500 hover:text-green-700'
+                          : 'border-main/15 text-main/50 hover:border-secondary hover:text-secondary'
+                      }`}
+                    >
+                      <Tag size={13} />
+                    </button>
+                  )}
                   <Link to={`/my-listings/${listing.id}/edit`}
                     className="w-8 h-8 rounded-full border border-main/15 flex items-center justify-center text-main/50 hover:border-secondary hover:text-secondary transition-colors"
                   >

@@ -16,7 +16,9 @@ export interface BookDisplay {
   format?: string
   quantity: number
   price: number
+  originalPrice: number
   discount?: number
+  isDiscountApplied?: boolean
   coverColor: string
   coverImageUrl?: string
   imageUrls?: string[]
@@ -28,6 +30,12 @@ export interface BookDisplay {
 }
 
 export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
+  const priceInNaira = Math.round((listing.price ?? 0) / 100)
+  const discountPct = listing.discount ?? 0
+  const discountedPrice = listing.isDiscountApplied && discountPct > 0
+    ? Math.round(priceInNaira * (1 - discountPct / 100))
+    : priceInNaira
+
   return {
     id: String(listing.id ?? ""),
     title: listing.title ?? "",
@@ -35,7 +43,10 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     genre: listing.categoryName ?? "General",
     condition: listing.bookCondition ?? "Good",
     quantity: listing.quantity ?? 1,
-    price: Math.round((listing.price ?? 0) / 100),
+    price: discountedPrice,
+    originalPrice: priceInNaira,
+    discount: discountPct,
+    isDiscountApplied: listing.isDiscountApplied ?? false,
     coverColor: pickColor(listing.id),
     coverImageUrl: listing.coverImageFileName ?? undefined,
     imageUrls: listing.imageFileNames ?? undefined,

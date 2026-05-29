@@ -205,6 +205,7 @@ export default function ListBook() {
         isbn: undefined,
         coverImageFileName: coverFile,
         imageFileNames: filenames,
+        discount: form.discount ? Number(form.discount) : undefined,
       })
       navigate(`/listing-submitted?id=${result.id}`)
     } catch {

@@ -64,6 +64,7 @@ export interface SubmitListingRequestDto {
   imageFileNames?: string[] | null
   author?: string | null
   categoryId?: number
+  discount?: number
 }
 
 export interface UpdateListingRequestDto {
@@ -81,6 +82,7 @@ export interface UpdateListingRequestDto {
   imageFileNames?: string[] | null
   author?: string | null
   categoryId?: number
+  discount?: number
 }
 
 export interface AddToCartRequestDto {
@@ -139,6 +141,13 @@ export interface ListingResponse {
   dateModified?: string | null
   cartItemCount?: number
   wishlistItemCount?: number
+  discount?: number
+  isDiscountApplied?: boolean
+}
+
+export interface SetListingDiscountRequest {
+  isDiscountApplied?: boolean
+  discount?: number
 }
 
 export interface PageLinks {
@@ -245,4 +254,11 @@ export interface WishlistResponse {
 export interface CategoryResponse {
   id?: number
   name?: string | null
+}
+
+export interface MyListingSummaryResponse {
+  totalListings?: number
+  activePublished?: number
+  pendingApproval?: number
+  rejected?: number
 }

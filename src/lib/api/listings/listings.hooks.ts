@@ -5,13 +5,20 @@ import {
   editListingApi,
   getListingsByFilterApi,
   getListingByIdApi,
+  getMyListingsApi,
+  getMyListingByIdApi,
+  setDiscountApi,
+  getMyListingSummaryApi,
   type ListingFilterParams,
+  type MyListingsFilterParams,
 } from "./listings.api"
 import type {
   SubmitListingRequestDto,
   UpdateListingRequestDto,
   ListingResponse,
   ListingResponsePagedResult,
+  SetListingDiscountRequest,
+  MyListingSummaryResponse,
 } from "../types"
 
 type SubmitListingBody = SubmitListingRequestDto
@@ -35,6 +42,7 @@ const mockListing: ListingResponse = {
   dateCreated: new Date().toISOString(),
   cartItemCount: 0,
   wishlistItemCount: 0,
+  isDiscountApplied: false,
 }
 
 const mockPagedResult: ListingResponsePagedResult = {
@@ -47,10 +55,39 @@ const mockPagedResult: ListingResponsePagedResult = {
   hasNextPage: false,
 }
 
+const mockSummary: MyListingSummaryResponse = {
+  totalListings: 1,
+  activePublished: 0,
+  pendingApproval: 1,
+  rejected: 0,
+}
+
 export function useListings(params?: ListingFilterParams) {
   return useQuery({
     queryKey: ["listings", params],
     queryFn: () => withMock(mockPagedResult, () => getListingsByFilterApi(params)),
+  })
+}
+
+export function useMyListings(params?: MyListingsFilterParams) {
+  return useQuery({
+    queryKey: ["my-listings", params],
+    queryFn: () => withMock(mockPagedResult, () => getMyListingsApi(params)),
+  })
+}
+
+export function useMyListingSummary() {
+  return useQuery({
+    queryKey: ["my-listings-summary"],
+    queryFn: () => withMock(mockSummary, () => getMyListingSummaryApi()),
+  })
+}
+
+export function useMyListing(id: number) {
+  return useQuery({
+    queryKey: ["my-listing", id],
+    queryFn: () => withMock(mockListing, () => getMyListingByIdApi(id)),
+    enabled: !!id,
   })
 }
 
@@ -80,6 +117,18 @@ export function useEditListing() {
       withMock(mockListing, () => editListingApi(body)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["listings"] })
+    },
+  })
+}
+
+export function useSetDiscount() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, body }: { id: number; body: SetListingDiscountRequest }) =>
+      withMock(mockListing, () => setDiscountApi(id, body)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-listings"] })
+      queryClient.invalidateQueries({ queryKey: ["my-listing"] })
     },
   })
 }
