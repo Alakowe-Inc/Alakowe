@@ -145,16 +145,28 @@ function BookDetail() {
                       <p className="font-heading font-bold text-main text-4xl md:text-[2.5rem] leading-none">
                         ₦{book.price.toLocaleString()}
                       </p>
+                      {book.originalPrice !== book.price && (
+                        <span className="text-lg text-main/40 line-through">
+                          ₦{book.originalPrice.toLocaleString()}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => addToCart(Number(id))}
-                    className="group inline-flex items-center justify-center gap-2 bg-main text-white font-semibold px-7 py-4 rounded-full hover:bg-main/90 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] transition-all duration-200 text-sm w-full sm:w-auto"
-                  >
-                    <ShoppingBag size={17} className="transition-transform duration-300 group-hover:rotate-[-8deg]" />
-                    Add to Cart
-                  </button>
+                  <div className="flex flex-col items-end gap-2">
+                    {book.isDiscountApplied && book.discount && book.discount > 0 && (
+                      <span className="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                        {book.discount}% OFF
+                      </span>
+                    )}
+                    <button
+                      onClick={() => addToCart(Number(id))}
+                      className="group inline-flex items-center justify-center gap-2 bg-main text-white font-semibold px-7 py-4 rounded-full hover:bg-main/90 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] transition-all duration-200 text-sm w-full sm:w-auto"
+                    >
+                      <ShoppingBag size={17} className="transition-transform duration-300 group-hover:rotate-[-8deg]" />
+                      Add to Cart
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-third/70 flex items-center gap-2 text-xs text-main/55">

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
-import { PlusCircle, Pencil, BookOpen, TrendingUp, ShoppingBag, Wallet, Share2, Check, Tag } from 'lucide-react'
+import { PlusCircle, Pencil, BookOpen, TrendingUp, ShoppingBag, Wallet, Share2, Check, Tag, ThumbsDown } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { useMyListings, useSetDiscount } from '../../lib/api/listings/listings.hooks'
+import { useMyListings, useMyListingSummary, useSetDiscount } from '../../lib/api/listings/listings.hooks'
 
 function StatCard({ icon: Icon, label, value, sub }: {
   icon: React.ElementType; label: string; value: string | number; sub?: string
@@ -22,6 +22,7 @@ function StatCard({ icon: Icon, label, value, sub }: {
 export default function MyListings() {
   const { user } = useAuth()
   const { data: pagedResult } = useMyListings()
+  const { data: summary } = useMyListingSummary()
   const listings = pagedResult?.result ?? []
   const [copied, setCopied] = useState(false)
   const [discountId, setDiscountId] = useState<number | null>(null)
@@ -37,10 +38,6 @@ export default function MyListings() {
       setTimeout(() => setCopied(false), 2000)
     })
   }
-
-  const live = listings.filter(l => l.isPublished).length
-  const pending = listings.filter(l => l.status === 'PendingApproval').length
-  const sold = listings.filter(l => l.status === 'Sold').length
 
   async function handleToggleDiscount(listingId: number, currentlyApplied: boolean) {
     setDiscountId(listingId)
@@ -70,10 +67,10 @@ export default function MyListings() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          <StatCard icon={BookOpen} label="Total" value={listings.length} />
-          <StatCard icon={TrendingUp} label="Live" value={live} sub="Visible to buyers" />
-          <StatCard icon={ShoppingBag} label="Sold" value={sold} />
-          <StatCard icon={Wallet} label="Under Review" value={pending} sub="Within 24hrs" />
+          <StatCard icon={BookOpen} label="Total" value={summary?.totalListings ?? 0} />
+          <StatCard icon={TrendingUp} label="Live" value={summary?.activePublished ?? 0} sub="Visible to buyers" />
+          <StatCard icon={Wallet} label="Under Review" value={summary?.pendingApproval ?? 0} sub="Within 24hrs" />
+          <StatCard icon={ThumbsDown} label="Rejected" value={summary?.rejected ?? 0} />
         </div>
 
         {/* Share My Store */}
@@ -141,7 +138,16 @@ export default function MyListings() {
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-main/45">
-                      <span className="font-semibold text-main text-sm">₦{Math.round((listing.price ?? 0) / 100).toLocaleString()}</span>
+                      <span className="font-semibold text-main text-sm">
+                        ₦{listing.isDiscountApplied && listing.discount && listing.discount > 0
+                          ? Math.round(Math.round((listing.price ?? 0) / 100) * (1 - listing.discount / 100)).toLocaleString()
+                          : Math.round((listing.price ?? 0) / 100).toLocaleString()}
+                        {listing.isDiscountApplied && listing.discount && listing.discount > 0 && (
+                          <span className="text-main/40 line-through ml-1.5 font-normal">
+                            ₦{Math.round((listing.price ?? 0) / 100).toLocaleString()}
+                          </span>
+                        )}
+                      </span>
                       <span>{listing.categoryName}</span>
                       <span>{listing.bookCondition}</span>
                     </div>

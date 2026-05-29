@@ -110,6 +110,9 @@ export default function MyListingDetail() {
     'bg-gray-100 text-gray-600'
 
   const priceInNaira = Math.round((listing.price ?? 0) / 100)
+  const discountedPrice = listing.isDiscountApplied && listing.discount && listing.discount > 0
+    ? Math.round(priceInNaira * (1 - listing.discount / 100))
+    : priceInNaira
   const coverColor = pickColor(listing.id)
 
   return (
@@ -217,10 +220,10 @@ export default function MyListingDetail() {
             <div className="bg-white rounded-2xl border border-third p-6">
               <h3 className="font-heading font-bold text-main text-base mb-4">Pricing</h3>
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="font-heading font-bold text-main text-3xl">₦{priceInNaira.toLocaleString()}</span>
+                <span className="font-heading font-bold text-main text-3xl">₦{discountedPrice.toLocaleString()}</span>
                 {listing.discount && listing.discount > 0 && (
                   <span className="text-sm text-main/40 line-through">
-                    ₦{Math.round(priceInNaira / (1 - listing.discount / 100)).toLocaleString()}
+                    ₦{priceInNaira.toLocaleString()}
                   </span>
                 )}
               </div>

@@ -8,6 +8,7 @@ import {
   getMyListingsApi,
   getMyListingByIdApi,
   setDiscountApi,
+  getMyListingSummaryApi,
   type ListingFilterParams,
   type MyListingsFilterParams,
 } from "./listings.api"
@@ -17,6 +18,7 @@ import type {
   ListingResponse,
   ListingResponsePagedResult,
   SetListingDiscountRequest,
+  MyListingSummaryResponse,
 } from "../types"
 
 type SubmitListingBody = SubmitListingRequestDto
@@ -53,6 +55,13 @@ const mockPagedResult: ListingResponsePagedResult = {
   hasNextPage: false,
 }
 
+const mockSummary: MyListingSummaryResponse = {
+  totalListings: 1,
+  activePublished: 0,
+  pendingApproval: 1,
+  rejected: 0,
+}
+
 export function useListings(params?: ListingFilterParams) {
   return useQuery({
     queryKey: ["listings", params],
@@ -64,6 +73,13 @@ export function useMyListings(params?: MyListingsFilterParams) {
   return useQuery({
     queryKey: ["my-listings", params],
     queryFn: () => withMock(mockPagedResult, () => getMyListingsApi(params)),
+  })
+}
+
+export function useMyListingSummary() {
+  return useQuery({
+    queryKey: ["my-listings-summary"],
+    queryFn: () => withMock(mockSummary, () => getMyListingSummaryApi()),
   })
 }
 

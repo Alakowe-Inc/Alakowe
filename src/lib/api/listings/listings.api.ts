@@ -6,6 +6,7 @@ import type {
   ListingResponsePagedResult,
   ListingStatus,
   SetListingDiscountRequest,
+  MyListingSummaryResponse,
 } from "../types"
 
 type SubmitListingBody = SubmitListingRequestDto
@@ -68,4 +69,9 @@ export async function setDiscountApi(
 ): Promise<ListingResponse> {
   const { data } = await client.post(`/api/v1/Listing/set-discount/${id}`, body)
   return data as ListingResponse
+}
+
+export async function getMyListingSummaryApi(): Promise<MyListingSummaryResponse> {
+  const { data } = await client.get("/api/v1/Listing/my-listings/summary")
+  return data as MyListingSummaryResponse
 }

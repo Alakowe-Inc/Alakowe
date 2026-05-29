@@ -255,3 +255,10 @@ export interface CategoryResponse {
   id?: number
   name?: string | null
 }
+
+export interface MyListingSummaryResponse {
+  totalListings?: number
+  activePublished?: number
+  pendingApproval?: number
+  rejected?: number
+}
