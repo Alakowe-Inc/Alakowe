@@ -1,8 +1,14 @@
 import client from "../client"
-import type { CheckoutSessionResponse, OrderResponse, PaymentInitiateResponse, PaymentStatusResponse } from "../types"
+import type {
+  CheckoutSessionResponse,
+  OrderResponse,
+  PaymentInitiateResponse,
+  PaymentStatusResponse,
+  CheckoutStartRequest,
+} from "../types"
 
-export async function startCheckoutApi(): Promise<CheckoutSessionResponse> {
-  const { data } = await client.post("/api/v1/checkout/start")
+export async function startCheckoutApi(body: CheckoutStartRequest): Promise<CheckoutSessionResponse> {
+  const { data } = await client.post("/api/v1/checkout/start", body)
   return data as CheckoutSessionResponse
 }
 

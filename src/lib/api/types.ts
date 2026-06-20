@@ -316,6 +316,13 @@ export interface ShippingAddressResponse {
   isDefault?: boolean
 }
 
+export interface CheckoutStartRequest {
+  shippingAddressId?: number
+  shippingStateId?: number | null
+  shippingAreaId?: number | null
+  shippingAddress?: string | null
+}
+
 export interface MyListingSummaryResponse {
   totalListings?: number
   activePublished?: number

@@ -8,7 +8,13 @@ import {
   completeCheckoutSessionApi,
   getPaymentStatusApi,
 } from "./checkout.api"
-import type { CheckoutSessionResponse, OrderResponse, PaymentInitiateResponse, PaymentStatusResponse } from "../types"
+import type {
+  CheckoutSessionResponse,
+  OrderResponse,
+  PaymentInitiateResponse,
+  PaymentStatusResponse,
+  CheckoutStartRequest,
+} from "../types"
 
 const mockSession: CheckoutSessionResponse = {
   sessionId: "mock-session-id",
@@ -46,7 +52,8 @@ const mockOrder: OrderResponse = {
 
 export function useStartCheckout() {
   return useMutation({
-    mutationFn: () => withMock(mockSession, () => startCheckoutApi()),
+    mutationFn: (body: CheckoutStartRequest) =>
+      withMock(mockSession, () => startCheckoutApi(body)),
   })
 }
 
