@@ -5,7 +5,7 @@ import { useCart } from '../../context/CartContext'
 import {
   useStartCheckout,
   usePayCheckout,
-  useCompleteCheckout,
+  usePaymentStatus,
 } from '../../lib/api/checkout/checkout.hooks'
 import { useValidateCart } from '../../lib/api/cart/cart.hooks'
 import {
@@ -71,6 +71,8 @@ function Checkout() {
 
   const areasQuery = useAreasByState(typeof newStateId === 'number' ? newStateId : undefined)
 
+  const savedOptions = savedAddresses ?? []
+
   // Contact data
   const [contactForm, setContactForm] = useState<ContactFormState>({
     fullName: '',
@@ -79,6 +81,17 @@ function Checkout() {
   })
   const [errors, setErrors] = useState<Partial<ContactFormState>>({})
   const [loading, setLoading] = useState(false)
+
+  // Phase 5 — payment status polling
+  const [paymentSessionId, setPaymentSessionId] = useState<string | null>(null)
+  const [paymentPollingStartAt, setPaymentPollingStartAt] = useState<number | null>(null)
+  const [paymentTimeout, setPaymentTimeout] = useState(false)
+
+  const {
+    data: paymentStatus,
+    refetch: refetchPaymentStatus,
+    isFetching: isPaymentStatusFetching,
+  } = usePaymentStatus(paymentSessionId ?? '')
 
   // Cart validation gate (Phase 2)
   const [validationLoading, setValidationLoading] = useState(false)
@@ -243,6 +256,12 @@ function Checkout() {
 
       const popup = new PaystackPop()
       popup.resumeTransaction(accessCode)
+
+      // Start Phase 5 polling after Paystack has been initialized
+      setPaymentSessionId(sessionId)
+      setPaymentPollingStartAt(Date.now())
+      setPaymentTimeout(false)
+      
     } catch {
       navigate('/payment/error')
     } finally {
@@ -250,7 +269,52 @@ function Checkout() {
     }
   }
 
-  const savedOptions = savedAddresses ?? []
+  useEffect(() => {
+    if (!paymentSessionId || !paymentPollingStartAt) return
+
+    let cancelled = false
+    const pollEveryMs = 15000
+    const maxDurationMs = 11 * 60 * 1000
+
+    async function pollOnce() {
+      if (cancelled) return
+
+      const elapsed = Date.now() - paymentPollingStartAt
+      if (elapsed >= maxDurationMs) {
+        setPaymentTimeout(true)
+        return
+      }
+
+      const result = await refetchPaymentStatus()
+      const status = result?.data?.status?.toLowerCase?.() ?? result?.data?.status
+
+      if (status === 'success') {
+        const orders = result?.data?.orders ?? paymentStatus?.orders ?? []
+        const orderId = orders?.[0]?.orderId ?? null
+        navigate(orderId ? `/payment/success?orderId=${orderId}` : '/payment/success')
+        return
+      }
+
+      if (status === 'failed' || status === 'failure') {
+        navigate('/payment/failed')
+        return
+      }
+
+      setTimeout(pollOnce, pollEveryMs)
+    }
+
+    // kick off immediately
+    pollOnce()
+
+    return () => {
+      cancelled = true
+    }
+  }, [
+    paymentSessionId,
+    paymentPollingStartAt,
+    refetchPaymentStatus,
+    navigate,
+  ])
 
   return (
     <div className="bg-third min-h-screen">
@@ -515,16 +579,26 @@ function Checkout() {
 
                 <button
                   type="submit"
-                  disabled={loading || validationLoading || !validationDone}
+                  disabled={
+                    loading ||
+                    validationLoading ||
+                    !validationDone ||
+                    !!paymentSessionId ||
+                    isPaymentStatusFetching
+                  }
                   className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {loading
-                    ? 'Processing…'
-                    : validationLoading
-                      ? 'Validating cart…'
-                      : !validationDone
+                  {paymentTimeout
+                    ? 'Transaction will be verified later'
+                    : loading
+                      ? 'Processing…'
+                      : validationLoading
                         ? 'Validating cart…'
-                        : `Place Order · ₦${total.toLocaleString()}`}
+                        : !validationDone
+                          ? 'Validating cart…'
+                          : paymentSessionId
+                            ? 'Processing payment…'
+                            : `Place Order · ₦${total.toLocaleString()}`}
                 </button>
 
                 <p className="text-xs text-main/35 text-center mt-3 leading-relaxed">
