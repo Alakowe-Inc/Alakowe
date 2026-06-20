@@ -226,6 +226,10 @@ export interface CheckoutSessionResponse {
   sessionId?: string | null
   status?: string | null
   totalAmount?: number
+  deliveryFee?: number | null
+  shippingStateId?: number
+  shippingAreaId?: number
+  shippingAddress?: string | null
   expiresAt?: string
   isExpired?: boolean
   sellerGroups?: SellerGroupResponse[] | null
@@ -239,6 +243,21 @@ export interface OrderResponse {
   orderDate?: string
   sessionId?: string | null
   sellerGroups?: SellerGroupResponse[] | null
+}
+
+export interface PaymentInitiateResponse {
+  authorizationUrl?: string | null
+  accessCode?: string | null
+  reference?: string | null
+  expiresAt?: string
+}
+
+export interface PaymentStatusResponse {
+  status?: string | null
+  message?: string | null
+  reference?: string | null
+  paidAt?: string | null
+  orders?: OrderResponse[] | null
 }
 
 export interface WishlistItemResponse {
@@ -299,6 +318,13 @@ export interface ShippingAddressResponse {
   areaName?: string | null
   addressLine?: string | null
   isDefault?: boolean
+}
+
+export interface CheckoutStartRequest {
+  shippingAddressId?: number
+  shippingStateId?: number | null
+  shippingAreaId?: number | null
+  shippingAddress?: string | null
 }
 
 export interface MyListingSummaryResponse {

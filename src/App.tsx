@@ -17,7 +17,10 @@ import HowItWorks from "./pages/LandingPage/HowItWorks";
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import Cart from "./pages/LandingPage/Cart";
-import Checkout from "./pages/LandingPage/Checkout";
+import ShippingDetails from "./pages/LandingPage/Checkout/ShippingDetails";
+import CheckoutSummary from "./pages/LandingPage/Checkout/CheckoutSummary";
+import PaymentProcessing from "./pages/LandingPage/Checkout/PaymentProcessing";
+import { CheckoutProvider } from "./context/CheckoutContext";
 import PaymentSuccess from "./pages/LandingPage/PaymentSuccess";
 import PaymentFailed from "./pages/LandingPage/PaymentFailed";
 import OrderStatus from "./pages/LandingPage/OrderStatus";
@@ -59,7 +62,9 @@ const App = () => (
                 <Route path="browse" element={<BrowseBooks />} />
                 <Route path="books/:id" element={<BookDetail />} />
                 <Route path="cart" element={<Cart />} />
-                <Route path="checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                <Route path="checkout" element={<ProtectedRoute><CheckoutProvider><ShippingDetails /></CheckoutProvider></ProtectedRoute>} />
+                <Route path="checkout/summary" element={<ProtectedRoute><CheckoutProvider><CheckoutSummary /></CheckoutProvider></ProtectedRoute>} />
+                <Route path="checkout/processing" element={<ProtectedRoute><CheckoutProvider><PaymentProcessing /></CheckoutProvider></ProtectedRoute>} />
                 <Route path="payment/success" element={<PaymentSuccess />} />
                 <Route path="payment/failed" element={<PaymentFailed />} />
                 <Route path="order/:orderId" element={<OrderStatus />} />
