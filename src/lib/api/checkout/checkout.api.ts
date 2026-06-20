@@ -1,5 +1,5 @@
 import client from "../client"
-import type { CheckoutSessionResponse, OrderResponse } from "../types"
+import type { CheckoutSessionResponse, OrderResponse, PaymentInitiateResponse, PaymentStatusResponse } from "../types"
 
 export async function startCheckoutApi(): Promise<CheckoutSessionResponse> {
   const { data } = await client.post("/api/v1/checkout/start")
@@ -11,9 +11,14 @@ export async function getCheckoutSessionApi(sessionId: string): Promise<Checkout
   return data as CheckoutSessionResponse
 }
 
-export async function payCheckoutSessionApi(sessionId: string): Promise<CheckoutSessionResponse> {
+export async function payCheckoutSessionApi(sessionId: string): Promise<PaymentInitiateResponse> {
   const { data } = await client.post(`/api/v1/checkout/${sessionId}/pay`)
-  return data as CheckoutSessionResponse
+  return data as PaymentInitiateResponse
+}
+
+export async function getPaymentStatusApi(sessionId: string): Promise<PaymentStatusResponse> {
+  const { data } = await client.get(`/api/v1/checkout/${sessionId}/payment-status`)
+  return data as PaymentStatusResponse
 }
 
 export async function cancelCheckoutSessionApi(sessionId: string): Promise<CheckoutSessionResponse> {

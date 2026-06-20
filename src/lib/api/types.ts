@@ -241,6 +241,21 @@ export interface OrderResponse {
   sellerGroups?: SellerGroupResponse[] | null
 }
 
+export interface PaymentInitiateResponse {
+  authorizationUrl?: string | null
+  accessCode?: string | null
+  reference?: string | null
+  expiresAt?: string
+}
+
+export interface PaymentStatusResponse {
+  status?: string | null
+  message?: string | null
+  reference?: string | null
+  paidAt?: string | null
+  orders?: OrderResponse[] | null
+}
+
 export interface WishlistItemResponse {
   id?: number
   listingId?: number
