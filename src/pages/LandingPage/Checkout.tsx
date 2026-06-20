@@ -278,7 +278,7 @@ function Checkout() {
 
     } catch {
       setErrorBanner('Checkout failed. Please try again.')
-      navigate('/payment/error')
+      navigate('/payment/failed')
     } finally {
       setLoading(false)
     }
@@ -568,17 +568,6 @@ function Checkout() {
                             : stage === 'verifying_payment'
                               ? 'Verifying payment'
                               : 'Pending verification'}
-                    </span>
-                    <span className="text-[10px] uppercase tracking-wider text-main/40 font-semibold">
-                      {stage === 'validating'
-                        ? 'Phase 2'
-                        : stage === 'shipping'
-                          ? 'Phase 3'
-                          : stage === 'processing_payment'
-                            ? 'Phase 4'
-                            : stage === 'verifying_payment'
-                              ? 'Phase 5'
-                              : 'Phase 5'}
                     </span>
                   </div>
 

@@ -35,7 +35,9 @@ export function useCart() {
   return useQuery({
     queryKey: ["cart"],
     queryFn: () => withMock(mockCart, () => getCartApi()),
-    enabled: import.meta.env.VITE_USE_MOCK === "true" || !!localStorage.getItem("token"),
+    enabled:
+      import.meta.env.VITE_USE_MOCK === "true" ||
+      (typeof window !== "undefined" ? !!window.localStorage.getItem("token") : false),
   })
 }
 
