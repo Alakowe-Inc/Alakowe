@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Package, Shield, Clock } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
 import { useStartCheckout, useCompleteCheckout } from '../../lib/api/checkout/checkout.hooks'
+import { useValidateCart } from '../../lib/api/cart/cart.hooks'
 
 const NIGERIAN_STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -47,9 +48,10 @@ const inputClass = (hasError?: boolean) =>
   }`
 
 function Checkout() {
-  const { items } = useCart()
+  const { items, removeFromCart } = useCart()
   const startCheckout = useStartCheckout()
   const completeCheckout = useCompleteCheckout()
+  const validateCart = useValidateCart()
   const navigate = useNavigate()
 
   const [form, setForm] = useState<FormState>({
@@ -62,6 +64,15 @@ function Checkout() {
   })
   const [errors, setErrors] = useState<Partial<FormState>>({})
   const [loading, setLoading] = useState(false)
+
+  const [validationLoading, setValidationLoading] = useState(false)
+  const [validationDone, setValidationDone] = useState(false)
+  const [validationAttempt, setValidationAttempt] = useState(0)
+
+  const itemSignature = useMemo(
+    () => items.map(i => `${i.listingId}:${i.quantity}`).sort().join('|'),
+    [items]
+  )
 
   const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
   const deliveryFee = 1500
@@ -97,6 +108,65 @@ function Checkout() {
     if (!form.state) e.state = 'Please select a state'
     return e
   }
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function runValidation() {
+      // Empty cart handled by render
+      if (items.length === 0) return
+      if (validationLoading) return
+
+      // Avoid infinite loops: only retry once after removal
+      if (validationAttempt > 1) return
+
+      setValidationLoading(true)
+      setValidationDone(false)
+
+      try {
+        const result = await validateCart.mutateAsync()
+
+        if (cancelled) return
+
+        if (!result?.isValid) {
+          const issues = result?.issues ?? []
+          const invalidListingIds = Array.from(
+            new Set(
+              issues
+                .map(i => i.listingId)
+                .filter((id): id is number => typeof id === 'number')
+            )
+          )
+
+          // Remove invalid items (user sees refreshed cart summary automatically)
+          await Promise.all(invalidListingIds.map(listingId => removeFromCart(listingId)))
+
+          setValidationAttempt(a => a + 1)
+        } else {
+          setValidationDone(true)
+        }
+      } catch {
+        // If validation fails unexpectedly, block checkout to avoid inconsistent state
+        setValidationDone(false)
+      } finally {
+        if (!cancelled) setValidationLoading(false)
+      }
+    }
+
+    // Trigger validation on landing/cart change until valid.
+    // If validation is already done for current cart signature, don't re-run.
+    if (!validationDone || validationAttempt === 0) {
+      // Reset attempt when cart signature changes
+      setValidationAttempt(0)
+    }
+
+    runValidation()
+
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemSignature])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -255,10 +325,16 @@ function Checkout() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || validationLoading || !validationDone}
                   className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Processing…' : `Place Order · ₦${total.toLocaleString()}`}
+                  {loading
+                    ? 'Processing…'
+                    : validationLoading
+                      ? 'Validating cart…'
+                      : !validationDone
+                        ? 'Validating cart…'
+                        : `Place Order · ₦${total.toLocaleString()}`}
                 </button>
 
                 <p className="text-xs text-main/35 text-center mt-3 leading-relaxed">
