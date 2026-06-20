@@ -9,6 +9,7 @@ import {
   ORDER_STATUSES,
 } from '../../data/orderData'
 import type { Order, OrderStatus } from '../../data/orderData'
+import { formatPrice } from '../../lib/utils'
 
 function OrderStatusPage() {
   const { orderId } = useParams<{ orderId: string }>()
@@ -249,14 +250,14 @@ function OrderStatusPage() {
                       <p className="text-xs text-main/40">{item.author}</p>
                     </div>
                     <span className="text-xs font-semibold text-main shrink-0">
-                      ₦{item.price.toLocaleString()}
+                      {formatPrice(item.price)}
                     </span>
                   </div>
                 ))}
               </div>
               <div className="border-t border-third mt-4 pt-3 flex justify-between text-sm font-bold">
                 <span className="text-main">Total</span>
-                <span className="text-main">₦{order.total.toLocaleString()}</span>
+                <span className="text-main">{formatPrice(order.total)}</span>
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
+import { formatPrice } from '../../lib/utils'
 
 function Cart() {
   const { items, addToCart, removeFromCart } = useCart()
@@ -110,7 +111,7 @@ function Cart() {
 
                     {/* Line total */}
                     <p className="font-heading font-bold text-main text-lg">
-                      ₦{(item.unitPrice * item.quantity).toLocaleString()}
+                      {formatPrice(item.unitPrice * item.quantity)}
                     </p>
                   </div>
                 </div>
@@ -130,7 +131,7 @@ function Cart() {
                       {item.title} {item.quantity > 1 && <span className="text-main/40">×{item.quantity}</span>}
                     </span>
                     <span className="text-main font-medium shrink-0">
-                      ₦{(item.unitPrice * item.quantity).toLocaleString()}
+                      {formatPrice(item.unitPrice * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -140,7 +141,7 @@ function Cart() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-main/60 uppercase tracking-wider">Subtotal</span>
                   <span className="font-heading font-bold text-main text-xl">
-                    ₦{subtotal.toLocaleString()}
+                    {formatPrice(subtotal)}
                   </span>
                 </div>
                 <p className="text-xs text-main/40 mt-2">

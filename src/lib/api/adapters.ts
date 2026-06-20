@@ -31,11 +31,12 @@ export interface BookDisplay {
 }
 
 export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
-  const priceInNaira = Math.round((listing.price ?? 0) / 100)
+  const buyersPriceInNaira = Math.round((listing.buyerPrice ?? listing.price ?? 0) / 100)
   const discountPct = listing.discount ?? 0
-  const discountedPrice = listing.isDiscountApplied && discountPct > 0
-    ? Math.round(priceInNaira * (1 - discountPct / 100))
-    : priceInNaira
+  const hasDiscount = listing.isDiscountApplied && discountPct > 0
+  const originalPrice = hasDiscount
+    ? Math.round(buyersPriceInNaira / (1 - discountPct / 100))
+    : buyersPriceInNaira
 
   return {
     id: String(listing.id ?? ""),
@@ -44,8 +45,8 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     genre: listing.categoryName ?? "General",
     condition: listing.bookCondition ?? "Good",
     quantity: listing.quantity ?? 1,
-    price: discountedPrice,
-    originalPrice: priceInNaira,
+    price: buyersPriceInNaira,
+    originalPrice,
     discount: discountPct,
     isDiscountApplied: listing.isDiscountApplied ?? false,
     coverColor: pickColor(listing.id),

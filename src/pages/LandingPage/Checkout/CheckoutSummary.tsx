@@ -4,6 +4,7 @@ import { ArrowLeft, Package, Shield, Clock } from 'lucide-react'
 import { useCheckout } from '../../../context/CheckoutContext'
 import { usePayCheckout } from '../../../lib/api/checkout/checkout.hooks'
 import { getCheckoutSessionApi } from '../../../lib/api/checkout/checkout.api'
+import { formatPrice } from '../../../lib/utils'
 import PaystackPop from '@paystack/inline-js'
 
 function CheckoutSummary() {
@@ -138,7 +139,7 @@ function CheckoutSummary() {
                       </p>
                     </div>
                     <span className="text-sm font-semibold text-main shrink-0">
-                      ₦{((item.unitPrice ?? 0) * (item.quantity ?? 0)).toLocaleString()}
+                      {formatPrice((item.unitPrice ?? 0) * (item.quantity ?? 0))}
                     </span>
                   </div>
                 ))}
@@ -197,18 +198,18 @@ function CheckoutSummary() {
                 <div className="flex justify-between text-sm">
                   <span className="text-main/55">Subtotal</span>
                   <span className="font-medium text-main">
-                    ₦{subtotal.toLocaleString()}
+                    {formatPrice(subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-main/55">Delivery</span>
                   <span className="font-medium text-main">
-                    {deliveryFee > 0 ? `₦${deliveryFee.toLocaleString()}` : 'Free'}
+                    {deliveryFee > 0 ? formatPrice(deliveryFee) : 'Free'}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-bold mt-1">
                   <span className="text-main">Total</span>
-                  <span className="text-main">₦{total.toLocaleString()}</span>
+                  <span className="text-main">{formatPrice(total)}</span>
                 </div>
               </div>
 
@@ -233,7 +234,7 @@ function CheckoutSummary() {
                 disabled={loading}
                 className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {loading ? 'Processing…' : `Proceed to Payment · ₦${total.toLocaleString()}`}
+                {loading ? 'Processing…' : `Proceed to Payment · ${formatPrice(total)}`}
               </button>
 
               <p className="text-xs text-main/35 text-center mt-3 leading-relaxed">

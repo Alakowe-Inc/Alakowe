@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import type { Book } from '../data/mockData'
 import { useCart } from '../context/CartContext'
+import { formatPrice } from '../lib/utils'
 
 interface BookCardProps {
   book: Book
@@ -89,7 +90,17 @@ function QuickViewModal({ book, onClose }: { book: Book; onClose: () => void }) 
 
           {/* Title & price */}
           <h2 className="text-lg sm:text-xl font-bold text-main leading-snug pr-6">{book.title}</h2>
-          <p className="text-base sm:text-lg font-semibold text-main mt-1">₦{book.price.toLocaleString()}</p>
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <p className="text-base sm:text-lg font-semibold text-main mt-1">{formatPrice(book.price)}</p>
+            {book.originalPrice !== book.price && (
+              <span className="text-sm text-main/40 line-through">{formatPrice(book.originalPrice)}</span>
+            )}
+            {book.isDiscountApplied && book.discount && book.discount > 0 && (
+              <span className="text-[10px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded-full">
+                {book.discount}% OFF
+              </span>
+            )}
+          </div>
 
           {/* Stars */}
           <div className="mt-2">
@@ -206,7 +217,17 @@ function BookCard({ book }: BookCardProps) {
           <h3 className="text-[13px] font-semibold uppercase tracking-wide text-main leading-snug mt-0.5 line-clamp-2 group-hover:text-secondary transition-colors">
             {book.title}
           </h3>
-          <p className="text-[13px] text-main mt-1">₦{book.price.toLocaleString()}</p>
+          <p className="text-[13px] text-main mt-1">
+            {formatPrice(book.price)}
+            {book.originalPrice !== book.price && (
+              <span className="text-main/40 line-through ml-1.5 text-[11px]">{formatPrice(book.originalPrice)}</span>
+            )}
+            {book.isDiscountApplied && book.discount && book.discount > 0 && (
+              <span className="text-[9px] font-bold text-green-700 bg-green-100 px-1 py-0.5 rounded-full ml-1.5">
+                {book.discount}% OFF
+              </span>
+            )}
+          </p>
           <div className="flex items-center gap-1 mt-1.5 text-main/45">
             <MapPin size={11} className="shrink-0" />
             <span className="text-[10px] truncate">{book.location}</span>

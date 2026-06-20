@@ -17,6 +17,8 @@ import {
   MapPin,
 } from 'lucide-react'
 import { useMyListing, useSetDiscount } from '../../lib/api/listings/listings.hooks'
+import { listingToBookDisplay } from '../../lib/api/adapters'
+import { formatPrice } from '../../lib/utils'
 
 const COVER_COLORS = ["#C8A97E", "#2E4057", "#6B4E3E", "#8B4513", "#4A6FA5", "#7C5C4D", "#9B6B43", "#5D7A5D"]
 
@@ -65,6 +67,8 @@ export default function MyListingDetail() {
     return images
   }, [listing])
 
+  const bookDisplay = useMemo(() => listing ? listingToBookDisplay(listing) : null, [listing])
+
   async function handleSaveDiscount() {
     if (!listing) return
     const value = Math.min(50, Math.max(0, Math.round(Number(discountInput) || 0)))
@@ -110,10 +114,6 @@ export default function MyListingDetail() {
     listing.status === 'Sold' ? 'bg-blue-100 text-blue-700' :
     'bg-gray-100 text-gray-600'
 
-  const priceInNaira = Math.round((listing.price ?? 0) / 100)
-  const discountedPrice = listing.isDiscountApplied && listing.discount && listing.discount > 0
-    ? Math.round(priceInNaira * (1 - listing.discount / 100))
-    : priceInNaira
   const coverColor = pickColor(listing.id)
 
   return (
@@ -220,24 +220,28 @@ export default function MyListingDetail() {
             {/* Pricing card */}
             <div className="bg-white rounded-2xl border border-third p-6">
               <h3 className="font-heading font-bold text-main text-base mb-4">Pricing</h3>
-              <div className="flex items-baseline gap-2 mb-2">
-                <span className="font-heading font-bold text-main text-3xl">₦{discountedPrice.toLocaleString()}</span>
-                {listing.discount && listing.discount > 0 && (
-                  <span className="text-sm text-main/40 line-through">
-                    ₦{priceInNaira.toLocaleString()}
-                  </span>
-                )}
-              </div>
-              {listing.discount && listing.discount > 0 && (
-                <div className="flex items-center gap-1.5 text-sm text-green-600 font-medium">
-                  <Percent size={14} />
-                  {listing.discount}% discount
-                  {listing.isDiscountApplied && (
-                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded-full ml-1">
-                      <CheckCircle size={10} /> Active
-                    </span>
+              {bookDisplay && (
+                <>
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className="font-heading font-bold text-main text-3xl">{formatPrice(bookDisplay.price)}</span>
+                    {bookDisplay.originalPrice !== bookDisplay.price && (
+                      <span className="text-sm text-main/40 line-through">
+                        {formatPrice(bookDisplay.originalPrice)}
+                      </span>
+                    )}
+                  </div>
+                  {bookDisplay.discount && bookDisplay.discount > 0 && (
+                    <div className="flex items-center gap-1.5 text-sm text-green-600 font-medium">
+                      <Percent size={14} />
+                      {bookDisplay.discount}% discount
+                      {bookDisplay.isDiscountApplied && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded-full ml-1">
+                          <CheckCircle size={10} /> Active
+                        </span>
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </div>
 

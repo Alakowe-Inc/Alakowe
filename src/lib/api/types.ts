@@ -147,6 +147,7 @@ export interface ListingResponse {
   wishlistItemCount?: number
   discount?: number
   isDiscountApplied?: boolean
+  buyerPrice?: number
   stateId?: number
   areaId?: number
   location?: string | null
