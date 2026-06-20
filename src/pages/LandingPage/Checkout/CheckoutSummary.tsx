@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Package, Shield, Clock } from 'lucide-react'
 import { useCheckout } from '../../../context/CheckoutContext'
 import { usePayCheckout } from '../../../lib/api/checkout/checkout.hooks'
+import { getCheckoutSessionApi } from '../../../lib/api/checkout/checkout.api'
 import PaystackPop from '@paystack/inline-js'
 
 function CheckoutSummary() {
@@ -27,6 +28,19 @@ function CheckoutSummary() {
 
   const allItems = (session.sellerGroups ?? []).flatMap((g) => g.items ?? [])
 
+  async function initiatePayment(sessionId: string) {
+    const paymentInit = await payCheckout.mutateAsync(sessionId)
+    const accessCode = paymentInit?.accessCode ?? null
+
+    if (!accessCode) {
+      return { success: false as const, reason: 'no_access_code' as const }
+    }
+
+    const popup = new PaystackPop()
+    popup.resumeTransaction(accessCode)
+    return { success: true as const }
+  }
+
   async function handlePayment() {
     const sessionId = checkout.sessionId
     if (!sessionId) {
@@ -39,22 +53,54 @@ function CheckoutSummary() {
     checkout.setErrorBanner(null)
 
     try {
-      const paymentInit = await payCheckout.mutateAsync(sessionId)
-      const accessCode = paymentInit?.accessCode ?? null
+      const result = await initiatePayment(sessionId)
 
-      if (!accessCode) {
-        checkout.setErrorBanner('Payment could not be initiated. Please try again.')
-        setLoading(false)
+      if (result.success) {
+        navigate('/checkout/processing')
         return
       }
 
-      const popup = new PaystackPop()
-      popup.resumeTransaction(accessCode)
+      // accessCode missing — session may be stale, validate before retrying
+      if (result.reason === 'no_access_code') {
+        const refreshedSession = await getCheckoutSessionApi(sessionId)
 
-      navigate('/checkout/processing')
+        if (refreshedSession?.isExpired) {
+          checkout.setErrorBanner('Your checkout session has expired. Please start again.')
+          navigate('/checkout')
+          return
+        }
+
+        // Session still active but pay returned no access code — retry once
+        const retry = await initiatePayment(sessionId)
+        if (retry.success) {
+          navigate('/checkout/processing')
+        } else {
+          checkout.setErrorBanner('Payment could not be initiated. Please try again.')
+        }
+      }
     } catch {
-      checkout.setErrorBanner('Payment failed. Please try again.')
-      navigate('/payment/failed')
+      // API call itself threw — validate session before deciding next step
+      try {
+        const refreshedSession = await getCheckoutSessionApi(sessionId)
+
+        if (refreshedSession?.isExpired) {
+          checkout.setErrorBanner('Your checkout session has expired. Please start again.')
+          navigate('/checkout')
+          return
+        }
+
+        // Session is still active — retry payment
+        const retry = await initiatePayment(sessionId)
+        if (retry.success) {
+          navigate('/checkout/processing')
+        } else {
+          checkout.setErrorBanner('Payment could not be initiated. Please try again.')
+        }
+      } catch {
+        checkout.setErrorBanner(
+          'Something went wrong. Please check your orders or try again later.'
+        )
+      }
     } finally {
       setLoading(false)
     }
