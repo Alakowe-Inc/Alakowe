@@ -23,6 +23,8 @@ import PaymentFailed from "./pages/LandingPage/PaymentFailed";
 import OrderStatus from "./pages/LandingPage/OrderStatus";
 import Dispute from "./pages/LandingPage/Dispute";
 import Profile from "./pages/LandingPage/Profile";
+import ShippingAddresses from "./pages/LandingPage/ShippingAddresses";
+
 import Sell from "./pages/LandingPage/Sell";
 import ListBook from "./pages/LandingPage/ListBook";
 import ListingSubmitted from "./pages/LandingPage/ListingSubmitted";
@@ -63,6 +65,8 @@ const App = () => (
                 <Route path="order/:orderId" element={<OrderStatus />} />
                 <Route path="order/:orderId/dispute" element={<Dispute />} />
                 <Route path="account" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="account/shipping-addresses" element={<ProtectedRoute><ShippingAddresses /></ProtectedRoute>} />
+
                 <Route path="sell" element={<Sell />} />
                 <Route path="list" element={<ProtectedRoute><ListBook /></ProtectedRoute>} />
                 <Route path="listing-submitted" element={<ListingSubmitted />} />
