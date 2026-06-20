@@ -82,6 +82,11 @@ function Checkout() {
   const [errors, setErrors] = useState<Partial<ContactFormState>>({})
   const [loading, setLoading] = useState(false)
 
+  // Phase 6 — UX / stages / messaging
+  type CheckoutStage = 'validating' | 'shipping' | 'processing_payment' | 'verifying_payment' | 'timeout'
+  const [stage, setStage] = useState<CheckoutStage>('shipping')
+  const [errorBanner, setErrorBanner] = useState<string | null>(null)
+
   // Phase 5 — payment status polling
   const [paymentSessionId, setPaymentSessionId] = useState<string | null>(null)
   const [paymentPollingStartAt, setPaymentPollingStartAt] = useState<number | null>(null)
@@ -143,6 +148,9 @@ function Checkout() {
       if (validationLoading) return
       if (validationAttempt > 1) return
 
+      setStage('validating')
+      setErrorBanner(null)
+
       setValidationLoading(true)
       setValidationDone(false)
 
@@ -164,9 +172,12 @@ function Checkout() {
           setValidationAttempt((a) => a + 1)
         } else {
           setValidationDone(true)
+          setStage('shipping')
         }
       } catch {
         setValidationDone(false)
+        setErrorBanner('Unable to validate your cart right now. Please try again.')
+        setStage('shipping')
       } finally {
         if (!cancelled) setValidationLoading(false)
       }
@@ -195,6 +206,7 @@ function Checkout() {
     }
 
     setErrors({})
+    setErrorBanner(null)
     setLoading(true)
 
     try {
@@ -230,7 +242,7 @@ function Checkout() {
       }
 
       if (!shippingAddressId) {
-        navigate('/payment/error')
+        setErrorBanner('Shipping address is missing. Please review and try again.')
         return
       }
 
@@ -243,26 +255,29 @@ function Checkout() {
 
       const sessionId = session?.sessionId ?? null
       if (!sessionId) {
-        navigate('/payment/error')
+        setErrorBanner('Could not start checkout. Please try again.')
         return
       }
+
+      setStage('processing_payment')
 
       const paymentInit = await payCheckout.mutateAsync(sessionId)
       const accessCode = paymentInit?.accessCode ?? null
       if (!accessCode) {
-        navigate('/payment/error')
+        setErrorBanner('Payment could not be initiated. Please try again.')
         return
       }
-
-      const popup = new PaystackPop()
-      popup.resumeTransaction(accessCode)
 
       // Start Phase 5 polling after Paystack has been initialized
       setPaymentSessionId(sessionId)
       setPaymentPollingStartAt(Date.now())
       setPaymentTimeout(false)
-      
+
+      const popup = new PaystackPop()
+      popup.resumeTransaction(accessCode)
+
     } catch {
+      setErrorBanner('Checkout failed. Please try again.')
       navigate('/payment/error')
     } finally {
       setLoading(false)
@@ -271,6 +286,8 @@ function Checkout() {
 
   useEffect(() => {
     if (!paymentSessionId || !paymentPollingStartAt) return
+
+    setStage('verifying_payment')
 
     let cancelled = false
     const pollEveryMs = 15000
@@ -282,6 +299,8 @@ function Checkout() {
       const elapsed = Date.now() - paymentPollingStartAt
       if (elapsed >= maxDurationMs) {
         setPaymentTimeout(true)
+        setStage('timeout')
+        setErrorBanner('Transaction will be verified later. You can check again from your orders.')
         return
       }
 
@@ -296,6 +315,7 @@ function Checkout() {
       }
 
       if (status === 'failed' || status === 'failure') {
+        setErrorBanner('Payment failed. Please try again.')
         navigate('/payment/failed')
         return
       }
@@ -535,6 +555,40 @@ function Checkout() {
               <div className="bg-white rounded-2xl border border-third p-6 lg:sticky lg:top-24">
                 <h2 className="font-heading font-bold text-main text-lg mb-5">Order Summary</h2>
 
+                {/* Phase 6 stage badge + inline error */}
+                <div className="mb-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/30">
+                    <span className="text-xs font-semibold text-main">
+                      {stage === 'validating'
+                        ? 'Validating cart'
+                        : stage === 'shipping'
+                          ? 'Entering details'
+                          : stage === 'processing_payment'
+                            ? 'Processing payment'
+                            : stage === 'verifying_payment'
+                              ? 'Verifying payment'
+                              : 'Pending verification'}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider text-main/40 font-semibold">
+                      {stage === 'validating'
+                        ? 'Phase 2'
+                        : stage === 'shipping'
+                          ? 'Phase 3'
+                          : stage === 'processing_payment'
+                            ? 'Phase 4'
+                            : stage === 'verifying_payment'
+                              ? 'Phase 5'
+                              : 'Phase 5'}
+                    </span>
+                  </div>
+
+                  {errorBanner && (
+                    <p className="text-xs text-red-600 mt-3 leading-relaxed bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                      {errorBanner}
+                    </p>
+                  )}
+                </div>
+
                 <div className="flex flex-col gap-3 mb-5">
                   {items.map((item) => (
                     <div key={item.listingId} className="flex items-center gap-3">
@@ -583,7 +637,9 @@ function Checkout() {
                     loading ||
                     validationLoading ||
                     !validationDone ||
-                    !!paymentSessionId ||
+                    stage === 'processing_payment' ||
+                    stage === 'verifying_payment' ||
+                    stage === 'timeout' ||
                     isPaymentStatusFetching
                   }
                   className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
