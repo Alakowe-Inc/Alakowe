@@ -2,13 +2,18 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Package, Shield, Clock } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
-import { useStartCheckout, useCompleteCheckout } from '../../lib/api/checkout/checkout.hooks'
+import {
+  useStartCheckout,
+  usePayCheckout,
+  useCompleteCheckout,
+} from '../../lib/api/checkout/checkout.hooks'
 import { useValidateCart } from '../../lib/api/cart/cart.hooks'
 import {
   useCreateShippingAddress,
   useShippingAddresses,
 } from '../../lib/api/shipping-addresses/shipping-addresses.hooks'
 import { useAreasByState, useStates } from '../../lib/api/location/location.hooks'
+import PaystackPop from '@paystack/inline-js'
 
 type ContactFormState = {
   fullName: string
@@ -49,7 +54,7 @@ const selectClass = (hasError?: boolean) =>
 function Checkout() {
   const { items, removeFromCart } = useCart()
   const startCheckout = useStartCheckout()
-  const completeCheckout = useCompleteCheckout()
+  const payCheckout = usePayCheckout()
   const validateCart = useValidateCart()
   const navigate = useNavigate()
 
@@ -166,6 +171,7 @@ function Checkout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemSignature])
 
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
@@ -222,8 +228,21 @@ function Checkout() {
         shippingAddress: addressMode === 'new' ? newAddressLine : null,
       })
 
-      const order = await completeCheckout.mutateAsync(session.sessionId ?? '')
-      navigate(`/payment/success?orderId=${order.orderId}`)
+      const sessionId = session?.sessionId ?? null
+      if (!sessionId) {
+        navigate('/payment/error')
+        return
+      }
+
+      const paymentInit = await payCheckout.mutateAsync(sessionId)
+      const accessCode = paymentInit?.accessCode ?? null
+      if (!accessCode) {
+        navigate('/payment/error')
+        return
+      }
+
+      const popup = new PaystackPop()
+      popup.resumeTransaction(accessCode)
     } catch {
       navigate('/payment/error')
     } finally {
