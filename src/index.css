@@ -184,6 +184,13 @@
     background: hsl(var(--border));
     border-radius: 999px;
   }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* PREMIUM GLOBAL SCROLLBAR */

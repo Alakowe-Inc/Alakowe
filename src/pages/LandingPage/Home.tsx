@@ -13,13 +13,17 @@ import {
 import { useState, useEffect, useRef } from 'react'
 import { blogPosts, bookQuotes, bookRequests, books } from '../../data/mockData'
 import { useAuth } from '../../context/AuthContext'
+import BookCarousel from '../../components/BookCarousel'
 import BookCard from '../../components/BookCard'
 import heroImage1 from '../../assets/media/images/banny4.png'
 import heroImage2 from '../../assets/media/images/banny2.png'
 import heroImage3 from '../../assets/media/images/banny3.png'
 //ALÁKÒWÉ,
 const heroSlides = [heroImage1, heroImage2, heroImage3]
-const featuredBooks = books.slice(0, 8)
+
+const likeNewBooks = books.filter(b => b.condition === 'LikeNew' || b.condition === 'Good').slice(0, 5)
+const trendingBooks = [...books].sort((a, b) => b.sellerRating - a.sellerRating).slice(0, 5)
+const bestValueBooks = books.filter(b => b.isDiscountApplied || b.badge === 'Best Value').slice(0, 5)
 
 function Home() {
   const { user } = useAuth()
@@ -309,114 +313,66 @@ function Home() {
         </div>
       </section>
 
-      {/* ── About ───────────────────────────────────────────────── */}
-      <section className="py-20 bg-third border-t border-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
-
-            {/* Text */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
-                Our Story
-              </p>
-              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl mb-6 leading-tight">
-                Welcome to ALÁKÒWÉ
-              </h2>
-              <p className="text-main/60 text-sm leading-relaxed mb-5">
-                ALÁKÒWÉ is a Yoruba word used to describe an educated or literate person. Here, anyone who has ever felt connected to a book and wanted someone else to feel it too, is included.
-              </p>
-
-              <p className="text-main/60 text-sm leading-relaxed mb-5">
-                ALÁKÒWÉ, A New Way to Read
-              </p> 
-              {/* <p className="text-main/60 text-sm leading-relaxed mb-8">
-                Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, ALÁKÒWÉ is the community for you.
-              </p> */}
-              <div
-                ref={statsRef}
-                className="grid grid-cols-3 gap-6 pt-8 border-t border-main/10"
-              >
-                {[
-                  {
-                    value: `${booksCount.toLocaleString()}${countingDone ? '+' : ''}`,
-                    label: 'Books Listed',
-                  },
-                  {
-                    value: `${readersCount.toLocaleString()}${countingDone ? '+' : ''}`,
-                    label: 'Happy Readers',
-                  },
-                  {
-                    value: statesText,
-                    label: 'States Covered',
-                  },
-                ].map(({ value, label }) => (
-                  <div key={label}>
-                    <p className="font-heading font-bold text-main text-2xl md:text-3xl">{value}</p>
-                    <p className="text-main/45 text-xs mt-1 leading-snug">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Visual panel */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-main/5 p-6 flex flex-col gap-3">
-                <div className="w-8 h-8 rounded-full bg-secondary/15 flex items-center justify-center">
-                  <BookOpen size={15} className="text-main" />
-                </div>
-                <h4 className="font-heading font-bold text-main text-base">Inspected Books</h4>
-                <p className="text-main/50 text-xs leading-relaxed">Every book is physically checked before dispatch to ensure it matches the listing, always.</p>
-              </div>
-              <div className="bg-main p-6 flex flex-col gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <Handshake size={15} className="text-white" />
-                </div>
-                <h4 className="font-heading font-bold text-white text-base">Escrow Protection</h4>
-                <p className="text-white/50 text-xs leading-relaxed">Your payment is held until you confirm receipt. Sellers get paid only when you're satisfied.</p>
-              </div>
-              <div className="bg-secondary/10 p-6 flex flex-col gap-3 col-span-2">
-                <h4 className="font-heading font-bold text-main text-base">Nationwide Delivery</h4>
-                <p className="text-main/50 text-xs leading-relaxed">We coordinate pickup from sellers and delivery to your door across every state in Nigeria. Fast, reliable, and tracked.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Featured Books ──────────────────────────────────────── */}
+      {/* ── The Store ────────────────────────────────────────────── */}
       <section className="bg-white py-20">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
 
           {/* Header */}
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
-                Discover
-              </p>
-              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
-                Your Next Read
-              </h2>
-            </div>
-            <Link
-              to="/browse"
-              className="hidden md:flex  underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
-            >
-              View all 
-            </Link>
+          <div className="mb-12">
+            <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
+              The Store
+            </p>
+            <h2 className="font-heading font-bold text-main text-3xl md:text-5xl tracking-tight max-w-3xl">Discover books, curated by condition and demand.</h2>
+            <p className="text-main/55 text-sm md:text-base mt-3 max-w-2xl">Thirty hand-picked listings from readers across Nigeria — refreshed daily.</p>
           </div>
 
-          {/* Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-            {featuredBooks.map(book => (
-              <BookCard key={book.id} book={book} />
-            ))}
+          {/* Like New */}
+          <div className="mb-14">
+            <BookCarousel
+              label="Like New"
+              icon={<span className="text-amber-400">✦</span>}
+            >
+              {likeNewBooks.map(book => (
+                <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
+                  <BookCard book={book} />
+                </div>
+              ))}
+            </BookCarousel>
+          </div>
+
+          {/* Trending Now */}
+          <div className="mb-14">
+            <BookCarousel
+              label="Trending Now"
+              icon={<span className="text-red-400">🔥</span>}
+            >
+              {trendingBooks.map(book => (
+                <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
+                  <BookCard book={book} />
+                </div>
+              ))}
+            </BookCarousel>
+          </div>
+
+          {/* Best Value */}
+          <div className="mb-14">
+            <BookCarousel
+              label="Best Value"
+              icon={<span className="text-amber-500">☆</span>}
+            >
+              {bestValueBooks.map(book => (
+                <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
+                  <BookCard book={book} />
+                </div>
+              ))}
+            </BookCarousel>
           </div>
 
           {/* Mobile CTA */}
           <div className="mt-8 text-center md:hidden">
             <Link
               to="/browse"
-              className="inline-flex  underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+              className="inline-flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
               View all books
             </Link>
