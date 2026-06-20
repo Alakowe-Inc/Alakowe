@@ -226,6 +226,10 @@ export interface CheckoutSessionResponse {
   sessionId?: string | null
   status?: string | null
   totalAmount?: number
+  deliveryFee?: number | null
+  shippingStateId?: number
+  shippingAreaId?: number
+  shippingAddress?: string | null
   expiresAt?: string
   isExpired?: boolean
   sellerGroups?: SellerGroupResponse[] | null

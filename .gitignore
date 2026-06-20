@@ -23,9 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 swagger.json
-api-setup.md
 .env
 /.env
 /.vs
-separation-plan.md
-TODO.md
