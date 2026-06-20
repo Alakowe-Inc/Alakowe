@@ -274,6 +274,33 @@ export interface AreaResponse {
   name?: string | null
 }
 
+export interface CreateShippingAddressRequest {
+  label?: string | null
+  stateId?: number
+  areaId?: number
+  addressLine?: string | null
+  isDefault?: boolean
+}
+
+export interface UpdateShippingAddressRequest {
+  label?: string | null
+  stateId?: number
+  areaId?: number
+  addressLine?: string | null
+  isDefault?: boolean
+}
+
+export interface ShippingAddressResponse {
+  id?: number
+  label?: string | null
+  stateId?: number
+  stateName?: string | null
+  areaId?: number
+  areaName?: string | null
+  addressLine?: string | null
+  isDefault?: boolean
+}
+
 export interface MyListingSummaryResponse {
   totalListings?: number
   activePublished?: number

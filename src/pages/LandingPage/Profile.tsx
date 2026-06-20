@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { User, CreditCard, AlertTriangle, Check } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { User, CreditCard, AlertTriangle, Check, MapPin } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { savePublicSellerProfile } from '../../data/sellerData'
 
@@ -273,10 +273,22 @@ export default function Profile() {
             Save Changes
           </button>
 
+          {/* Shipping addresses link */}
+          <div className="mt-6">
+            <Link
+              to="/account/shipping-addresses"
+              className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-main/70 hover:text-main transition-colors border border-main/15 bg-white rounded-full py-3"
+            >
+              <MapPin size={16} className="text-main/50" /> Manage shipping addresses
+            </Link>
+          </div>
+
         </form>
 
         {/* ── Danger Zone ── */}
         <div className="bg-white rounded-2xl border border-red-100 p-6 mt-6">
+
+
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center shrink-0">
               <AlertTriangle size={15} className="text-red-500" />
