@@ -68,6 +68,7 @@ export interface CartItemDisplay {
   title: string
   author: string
   coverColor: string
+  coverImageUrl?: string
   unitPrice: number
   quantity: number
   isbn?: string
@@ -79,6 +80,7 @@ export function cartItemToDisplay(item: CartItemResponse): CartItemDisplay {
     title: item.title ?? "",
     author: item.author ?? "",
     coverColor: pickColor(item.listingId),
+    coverImageUrl: item.coverImageFileName ?? undefined,
     unitPrice: Math.round((item.unitPrice ?? 0) / 100),
     quantity: item.quantity ?? 1,
     isbn: item.isbn ?? undefined,

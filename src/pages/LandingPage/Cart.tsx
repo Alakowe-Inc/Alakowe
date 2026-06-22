@@ -58,10 +58,18 @@ function Cart() {
                 {/* Book cover */}
                 <Link to={`/books/${item.listingId}`} className="shrink-0">
                   <div
-                    className="w-16 h-24 rounded-full shadow-md flex items-end justify-center pb-2"
+                    className="w-16 h-24 rounded-lg overflow-hidden shadow-md flex items-center justify-center"
                     style={{ backgroundColor: item.coverColor }}
                   >
-                    <div className="w-10 h-px bg-white/40 rounded" />
+                    {item.coverImageUrl ? (
+                      <img
+                        src={item.coverImageUrl}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-px bg-white/40 rounded" />
+                    )}
                   </div>
                 </Link>
 
