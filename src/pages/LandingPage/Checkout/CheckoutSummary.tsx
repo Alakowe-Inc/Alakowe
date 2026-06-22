@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Package, Shield, Clock } from 'lucide-react'
 import { useCheckout } from '../../../context/CheckoutContext'
-import { usePayCheckout } from '../../../lib/api/checkout/checkout.hooks'
+import { usePayCheckout, useCancelCheckout } from '../../../lib/api/checkout/checkout.hooks'
 import { getCheckoutSessionApi } from '../../../lib/api/checkout/checkout.api'
 import { formatPrice } from '../../../lib/utils'
 import PaystackPop from '@paystack/inline-js'
@@ -10,6 +10,7 @@ import PaystackPop from '@paystack/inline-js'
 function CheckoutSummary() {
   const checkout = useCheckout()
   const payCheckout = usePayCheckout()
+  const cancelCheckout = useCancelCheckout()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
 
@@ -21,11 +22,19 @@ function CheckoutSummary() {
     }
   }, [session, navigate])
 
+  function handleBack() {
+    const sessionId = checkout.sessionId
+    if (sessionId) {
+      cancelCheckout.mutate(sessionId)
+    }
+    navigate('/checkout')
+  }
+
   if (!session) return null
 
-  const deliveryFee = session.deliveryFee ?? 0
-  const subtotal = (session.totalAmount ?? 0) - deliveryFee
-  const total = session.totalAmount ?? 0
+  const deliveryFee = (session.deliveryFee ?? 0) / 100
+  const subtotal = ((session.totalAmount ?? 0) / 100) - deliveryFee
+  const total = (session.totalAmount ?? 0) / 100
 
   const allItems = (session.sellerGroups ?? []).flatMap((g) => g.items ?? [])
 
@@ -110,12 +119,13 @@ function CheckoutSummary() {
   return (
     <div className="bg-third min-h-screen">
       <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-10">
-        <Link
-          to="/checkout"
+        <button
+          type="button"
+          onClick={handleBack}
           className="inline-flex items-center gap-2 text-sm text-main/55 hover:text-main mb-8 transition-colors font-medium"
         >
           <ArrowLeft size={15} /> Back to Shipping Details
-        </Link>
+        </button>
 
         <h1 className="font-heading font-bold text-main text-3xl mb-8">Checkout Summary</h1>
 
@@ -139,7 +149,7 @@ function CheckoutSummary() {
                       </p>
                     </div>
                     <span className="text-sm font-semibold text-main shrink-0">
-                      {formatPrice((item.unitPrice ?? 0) * (item.quantity ?? 0))}
+                      {formatPrice(((item.buyerPrice ?? 0) / 100) * (item.quantity ?? 0))}
                     </span>
                   </div>
                 ))}

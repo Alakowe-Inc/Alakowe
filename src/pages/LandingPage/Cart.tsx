@@ -6,7 +6,7 @@ import { formatPrice } from '../../lib/utils'
 function Cart() {
   const { items, addToCart, removeFromCart } = useCart()
 
-  const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+  const subtotal = items.reduce((sum, item) => sum + item.buyerPrice * item.quantity, 0)
 
   if (items.length === 0) {
     return (
@@ -119,7 +119,7 @@ function Cart() {
 
                     {/* Line total */}
                     <p className="font-heading font-bold text-main text-lg">
-                      {formatPrice(item.unitPrice * item.quantity)}
+                      {formatPrice(item.buyerPrice * item.quantity)}
                     </p>
                   </div>
                 </div>
@@ -139,7 +139,7 @@ function Cart() {
                       {item.title} {item.quantity > 1 && <span className="text-main/40">×{item.quantity}</span>}
                     </span>
                     <span className="text-main font-medium shrink-0">
-                      {formatPrice(item.unitPrice * item.quantity)}
+                      {formatPrice(item.buyerPrice * item.quantity)}
                     </span>
                   </div>
                 ))}

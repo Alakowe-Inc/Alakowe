@@ -64,24 +64,28 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
 }
 
 export interface CartItemDisplay {
+  id: number
   listingId: number
   title: string
   author: string
   coverColor: string
   coverImageUrl?: string
   unitPrice: number
+  buyerPrice: number
   quantity: number
   isbn?: string
 }
 
 export function cartItemToDisplay(item: CartItemResponse): CartItemDisplay {
   return {
+    id: item.id ?? 0,
     listingId: item.listingId ?? 0,
     title: item.title ?? "",
     author: item.author ?? "",
     coverColor: pickColor(item.listingId),
     coverImageUrl: item.coverImageFileName ?? undefined,
     unitPrice: Math.round((item.unitPrice ?? 0) / 100),
+    buyerPrice: Math.round((item.buyerPrice ?? 0) / 100),
     quantity: item.quantity ?? 1,
     isbn: item.isbn ?? undefined,
   }

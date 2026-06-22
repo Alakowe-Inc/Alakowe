@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCart } from '../../../context/CartContext'
 import { useCheckout } from '../../../context/CheckoutContext'
 import {
@@ -52,6 +53,7 @@ function ShippingDetails() {
   const checkout = useCheckout()
   const startCheckout = useStartCheckout()
   const validateCart = useValidateCart()
+  const queryClient = useQueryClient()
   const navigate = useNavigate()
 
   const { data: savedAddresses } = useShippingAddresses()
@@ -74,7 +76,7 @@ function ShippingDetails() {
     [items]
   )
 
-  const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+  const subtotal = items.reduce((sum, item) => sum + item.buyerPrice * item.quantity, 0)
 
   useEffect(() => {
     let cancelled = false
@@ -212,6 +214,10 @@ function ShippingDetails() {
         shippingStateId: typeof checkout.newStateId === 'number' ? checkout.newStateId : null,
         shippingAreaId: typeof checkout.newAreaId === 'number' ? checkout.newAreaId : null,
         shippingAddress: checkout.addressMode === 'new' ? checkout.newAddressLine : null,
+        cartItemIds: items.map((i) => i.id),
+        deliveryFullName: checkout.contactForm.fullName || null,
+        deliveryPhoneNumber: checkout.contactForm.phone || null,
+        deliveryEmail: checkout.contactForm.email || null,
       })
 
       const sessionId = session?.sessionId ?? null
@@ -409,9 +415,19 @@ function ShippingDetails() {
                 {items.map((item) => (
                   <div key={item.listingId} className="flex items-center gap-3">
                     <div
-                      className="w-8 h-12 rounded-full shrink-0 shadow-sm"
+                      className="w-8 h-12 rounded-lg overflow-hidden shrink-0 shadow-sm flex items-center justify-center"
                       style={{ backgroundColor: item.coverColor }}
-                    />
+                    >
+                      {item.coverImageUrl ? (
+                        <img
+                          src={item.coverImageUrl}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-4 h-px bg-white/40 rounded" />
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-main truncate leading-snug">
                         {item.title}
@@ -422,7 +438,7 @@ function ShippingDetails() {
                       </p>
                     </div>
                     <span className="text-sm font-semibold text-main shrink-0">
-                      ₦{(item.unitPrice * item.quantity).toLocaleString()}
+                      ₦{(item.buyerPrice * item.quantity).toLocaleString()}
                     </span>
                   </div>
                 ))}
