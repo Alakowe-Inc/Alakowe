@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { CheckCircle, ArrowRight } from 'lucide-react'
 import { getOrder } from '../../data/orderData'
 import type { Order } from '../../data/orderData'
@@ -9,6 +10,11 @@ function PaymentSuccess() {
   const [params] = useSearchParams()
   const orderId = params.get('orderId')
   const [order, setOrder] = useState<Order | null>(null)
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['cart'] })
+  }, [queryClient])
 
   useEffect(() => {
     if (orderId) setOrder(getOrder(orderId))
