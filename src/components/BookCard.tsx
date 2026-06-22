@@ -1,9 +1,10 @@
-import { Star, X, MapPin } from 'lucide-react'
+import { Star, X, MapPin, ShoppingCart, Heart } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import type { Book } from '../data/mockData'
 import { useCart } from '../context/CartContext'
+import { formatPrice } from '../lib/utils'
 
 interface BookCardProps {
   book: Book
@@ -70,7 +71,7 @@ function QuickViewModal({ book, onClose }: { book: Book; onClose: () => void }) 
       >
         {/* Top / Left — book cover */}
         <div className="bg-[#f5f5f3] flex items-center justify-center sm:w-2/5 sm:shrink-0 p-6 sm:p-8 py-8 sm:py-12">
-          {'coverImageUrl' in book && book.coverImageUrl ? (
+          {book.coverImageUrl ? (
             <img src={book.coverImageUrl} alt={book.title} className="w-full h-full object-contain max-h-64" />
           ) : (
             <BookCover color={book.coverColor} scale={1.9} />
@@ -89,7 +90,17 @@ function QuickViewModal({ book, onClose }: { book: Book; onClose: () => void }) 
 
           {/* Title & price */}
           <h2 className="text-lg sm:text-xl font-bold text-main leading-snug pr-6">{book.title}</h2>
-          <p className="text-base sm:text-lg font-semibold text-main mt-1">₦{book.price.toLocaleString()}</p>
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <p className="text-base sm:text-lg font-semibold text-main mt-1">{formatPrice(book.price)}</p>
+            {book.originalPrice !== book.price && (
+              <span className="text-sm text-main/40 line-through">{formatPrice(book.originalPrice)}</span>
+            )}
+            {book.isDiscountApplied && book.discount && book.discount > 0 && (
+              <span className="text-[10px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded-full">
+                {book.discount}% OFF
+              </span>
+            )}
+          </div>
 
           {/* Stars */}
           <div className="mt-2">
@@ -143,7 +154,6 @@ function QuickViewModal({ book, onClose }: { book: Book; onClose: () => void }) 
 }
 
 function BookCard({ book }: BookCardProps) {
-  const [hovered, setHovered] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const { addToCart } = useCart()
 
@@ -152,64 +162,75 @@ function BookCard({ book }: BookCardProps) {
       <Link
         to={`/books/${book.id}`}
         className="group block"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
       >
-        {/* Image / Cover area */}
-        <div className="relative overflow-hidden bg-[#f5f5f3]" style={{ aspectRatio: '4/4' }}>
-          {/* Badge */}
-          {book.badge && (
-            <span
-              className={`absolute top-3 left-3 z-10 text-[10px] font-semibold tracking-widest rounded-full uppercase px-2.5 py-1 ${book.badge === 'Best Value'
-                ? 'bg-secondary/80 text-main'
-                : 'bg-main text-white'
-                }`}
+        {/* Cover image */}
+        <div className="relative overflow-hidden rounded-xl bg-[#f5f5f3]" style={{ aspectRatio: '3/4' }}>
+          {book.coverImageUrl ? (
+            <img
+              src={book.coverImageUrl}
+              alt={book.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div
+              className="w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-105"
+              style={{ backgroundColor: book.coverColor }}
             >
-              {book.badge}
-            </span>
+              <BookCover color={book.coverColor} />
+            </div>
           )}
 
-          {/* Book cover visual */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            {'coverImageUrl' in book && book.coverImageUrl ? (
-              <img
-                src={book.coverImageUrl}
-                alt={book.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            ) : (
-              <div className="transition-transform duration-500 group-hover:scale-105">
-                <BookCover color={book.coverColor} />
-              </div>
-            )}
-          </div>
-
-          {/* Quick View overlay */}
+          {/* Wishlist heart */}
           <button
-            className={`absolute cursor-pointer bottom-0 left-0 right-0 bg-secondary py-3.5 text-center text-[11px] font-semibold tracking-widest uppercase text-white transition-all duration-300 ${hovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
-              }`}
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              addToCart(book.id)
-            }}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-main/40 hover:text-red-500 hover:bg-white transition-colors"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+            aria-label="Add to wishlist"
           >
-            Add to Cart
+            <Heart size={14} />
           </button>
+
+          {/* Discount badge */}
+          {book.isDiscountApplied && book.discount && book.discount > 0 && (
+            <span className="absolute top-3 left-3 text-[10px] font-bold text-white bg-secondary px-2 py-0.5 rounded-full">
+              {book.discount}% OFF
+            </span>
+          )}
         </div>
 
         {/* Info */}
-        <div className="pt-3 pb-1">
-          <p className="text-[10px] tracking-widest uppercase text-main/50 font-medium truncate">
-            {book.author}
-          </p>
-          <h3 className="text-[13px] font-semibold uppercase tracking-wide text-main leading-snug mt-0.5 line-clamp-2 group-hover:text-secondary transition-colors">
-            {book.title}
-          </h3>
-          <p className="text-[13px] text-main mt-1">₦{book.price.toLocaleString()}</p>
-          <div className="flex items-center gap-1 mt-1.5 text-main/45">
-            <MapPin size={11} className="shrink-0" />
+        <div className="pt-3">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold text-main leading-snug line-clamp-1 group-hover:text-secondary transition-colors">
+              {book.title}
+            </h3>
+            <div className="flex items-center gap-0.5 shrink-0">
+              <Star size={11} className="fill-amber-400 text-amber-400" />
+              <span className="text-[11px] font-medium text-main/60">4.0</span>
+            </div>
+          </div>
+
+          <p className="text-xs text-secondary mt-0.5 truncate">{book.author}</p>
+
+          <div className="flex items-center gap-1 mt-1 text-main/40">
+            <MapPin size={10} className="shrink-0" />
             <span className="text-[10px] truncate">{book.location}</span>
+          </div>
+
+          <div className="flex items-center justify-between mt-2.5">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-sm font-bold text-main">{formatPrice(book.price)}</span>
+              {book.originalPrice !== book.price && (
+                <span className="text-[11px] text-main/40 line-through">{formatPrice(book.originalPrice)}</span>
+              )}
+            </div>
+
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(book.id) }}
+              className="w-8 h-8 rounded-full bg-main/8 flex items-center justify-center text-main hover:bg-main hover:text-white transition-colors"
+              aria-label="Add to cart"
+            >
+              <ShoppingCart size={13} />
+            </button>
           </div>
         </div>
       </Link>

@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Package, Shield, Clock } from 'lucide-react'
 import { useCheckout } from '../../../context/CheckoutContext'
-import { usePayCheckout } from '../../../lib/api/checkout/checkout.hooks'
+import { usePayCheckout, useCancelCheckout } from '../../../lib/api/checkout/checkout.hooks'
 import { getCheckoutSessionApi } from '../../../lib/api/checkout/checkout.api'
+import { formatPrice } from '../../../lib/utils'
 import PaystackPop from '@paystack/inline-js'
 
 function CheckoutSummary() {
   const checkout = useCheckout()
   const payCheckout = usePayCheckout()
+  const cancelCheckout = useCancelCheckout()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
 
@@ -20,11 +22,19 @@ function CheckoutSummary() {
     }
   }, [session, navigate])
 
+  function handleBack() {
+    const sessionId = checkout.sessionId
+    if (sessionId) {
+      cancelCheckout.mutate(sessionId)
+    }
+    navigate('/checkout')
+  }
+
   if (!session) return null
 
-  const deliveryFee = session.deliveryFee ?? 0
-  const subtotal = (session.totalAmount ?? 0) - deliveryFee
-  const total = session.totalAmount ?? 0
+  const deliveryFee = (session.deliveryFee ?? 0) / 100
+  const subtotal = ((session.totalAmount ?? 0) / 100) - deliveryFee
+  const total = (session.totalAmount ?? 0) / 100
 
   const allItems = (session.sellerGroups ?? []).flatMap((g) => g.items ?? [])
 
@@ -109,12 +119,13 @@ function CheckoutSummary() {
   return (
     <div className="bg-third min-h-screen">
       <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-10">
-        <Link
-          to="/checkout"
+        <button
+          type="button"
+          onClick={handleBack}
           className="inline-flex items-center gap-2 text-sm text-main/55 hover:text-main mb-8 transition-colors font-medium"
         >
           <ArrowLeft size={15} /> Back to Shipping Details
-        </Link>
+        </button>
 
         <h1 className="font-heading font-bold text-main text-3xl mb-8">Checkout Summary</h1>
 
@@ -138,7 +149,7 @@ function CheckoutSummary() {
                       </p>
                     </div>
                     <span className="text-sm font-semibold text-main shrink-0">
-                      ₦{((item.unitPrice ?? 0) * (item.quantity ?? 0)).toLocaleString()}
+                      {formatPrice(((item.buyerPrice ?? 0) / 100) * (item.quantity ?? 0))}
                     </span>
                   </div>
                 ))}
@@ -197,18 +208,18 @@ function CheckoutSummary() {
                 <div className="flex justify-between text-sm">
                   <span className="text-main/55">Subtotal</span>
                   <span className="font-medium text-main">
-                    ₦{subtotal.toLocaleString()}
+                    {formatPrice(subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-main/55">Delivery</span>
                   <span className="font-medium text-main">
-                    {deliveryFee > 0 ? `₦${deliveryFee.toLocaleString()}` : 'Free'}
+                    {deliveryFee > 0 ? formatPrice(deliveryFee) : 'Free'}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-bold mt-1">
                   <span className="text-main">Total</span>
-                  <span className="text-main">₦{total.toLocaleString()}</span>
+                  <span className="text-main">{formatPrice(total)}</span>
                 </div>
               </div>
 
@@ -233,7 +244,7 @@ function CheckoutSummary() {
                 disabled={loading}
                 className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {loading ? 'Processing…' : `Proceed to Payment · ₦${total.toLocaleString()}`}
+                {loading ? 'Processing…' : `Proceed to Payment · ${formatPrice(total)}`}
               </button>
 
               <p className="text-xs text-main/35 text-center mt-3 leading-relaxed">

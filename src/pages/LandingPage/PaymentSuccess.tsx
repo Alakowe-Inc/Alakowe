@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { CheckCircle, ArrowRight } from 'lucide-react'
 import { getOrder } from '../../data/orderData'
 import type { Order } from '../../data/orderData'
+import { formatPrice } from '../../lib/utils'
 
 function PaymentSuccess() {
   const [params] = useSearchParams()
   const orderId = params.get('orderId')
   const [order, setOrder] = useState<Order | null>(null)
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['cart'] })
+  }, [queryClient])
 
   useEffect(() => {
     if (orderId) setOrder(getOrder(orderId))
@@ -53,7 +60,7 @@ function PaymentSuccess() {
                     <p className="text-xs text-main/45">{item.author}</p>
                   </div>
                   <span className="text-sm text-main font-medium shrink-0">
-                    ₦{(item.price * item.quantity).toLocaleString()}
+                    {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
               ))}
@@ -62,15 +69,15 @@ function PaymentSuccess() {
             <div className="border-t border-third pt-4 flex flex-col gap-2">
               <div className="flex justify-between text-sm">
                 <span className="text-main/50">Subtotal</span>
-                <span className="text-main">₦{order.subtotal.toLocaleString()}</span>
+                <span className="text-main">{formatPrice(order.subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-main/50">Delivery</span>
-                <span className="text-main">₦{order.deliveryFee.toLocaleString()}</span>
+                <span className="text-main">{formatPrice(order.deliveryFee)}</span>
               </div>
               <div className="flex justify-between text-base font-bold mt-1">
                 <span className="text-main">Total</span>
-                <span className="text-main">₦{order.total.toLocaleString()}</span>
+                <span className="text-main">{formatPrice(order.total)}</span>
               </div>
             </div>
           </div>

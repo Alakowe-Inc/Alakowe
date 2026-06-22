@@ -147,6 +147,7 @@ export interface ListingResponse {
   wishlistItemCount?: number
   discount?: number
   isDiscountApplied?: boolean
+  buyerPrice?: number
   stateId?: number
   areaId?: number
   location?: string | null
@@ -183,6 +184,7 @@ export interface CartItemResponse {
   author?: string | null
   coverImageFileName?: string | null
   unitPrice?: number
+  buyerPrice: number
   quantity?: number
   isPublished?: boolean
 }
@@ -213,6 +215,7 @@ export interface CheckoutSessionItemResponse {
   author?: string | null
   coverImageFileName?: string | null
   unitPrice?: number
+  buyerPrice?: number
   quantity?: number
 }
 
@@ -325,6 +328,10 @@ export interface CheckoutStartRequest {
   shippingStateId?: number | null
   shippingAreaId?: number | null
   shippingAddress?: string | null
+  cartItemIds?: number[] | null
+  deliveryFullName?: string | null
+  deliveryPhoneNumber?: string | null
+  deliveryEmail?: string | null
 }
 
 export interface MyListingSummaryResponse {

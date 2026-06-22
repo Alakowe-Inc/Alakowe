@@ -1,6 +1,8 @@
 import { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useLogin } from '../lib/api/auth/auth.hooks'
+import { getCartApi } from '../lib/api/cart/cart.api'
 
 interface User {
   userId: string
@@ -41,6 +43,7 @@ function getStoredUser(): User | null {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useLogin()
+  const queryClient = useQueryClient()
   const [user, setUser] = useState<User | null>(getStoredUser)
 
   async function login(email: string, password: string) {
@@ -54,12 +57,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('token', result.token ?? '')
     localStorage.setItem(AUTH_KEY, JSON.stringify(u))
     setUser(u)
+    queryClient.fetchQuery({
+      queryKey: ['cart'],
+      queryFn: getCartApi,
+    })
   }
 
   function logout() {
     localStorage.removeItem(AUTH_KEY)
     localStorage.removeItem('token')
     setUser(null)
+    queryClient.removeQueries({ queryKey: ['cart'] })
   }
 
   return (

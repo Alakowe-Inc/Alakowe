@@ -3,6 +3,8 @@ import { PlusCircle, Pencil, BookOpen, TrendingUp, ShoppingBag, Wallet, Share2, 
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useMyListings, useMyListingSummary, useSetDiscount } from '../../lib/api/listings/listings.hooks'
+import { listingToBookDisplay } from '../../lib/api/adapters'
+import { formatPrice } from '../../lib/utils'
 
 function StatCard({ icon: Icon, label, value, sub }: {
   icon: React.ElementType; label: string; value: string | number; sub?: string
@@ -138,16 +140,19 @@ export default function MyListings() {
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-main/45">
-                      <span className="font-semibold text-main text-sm">
-                        ₦{listing.isDiscountApplied && listing.discount && listing.discount > 0
-                          ? Math.round(Math.round((listing.price ?? 0) / 100) * (1 - listing.discount / 100)).toLocaleString()
-                          : Math.round((listing.price ?? 0) / 100).toLocaleString()}
-                        {listing.isDiscountApplied && listing.discount && listing.discount > 0 && (
-                          <span className="text-main/40 line-through ml-1.5 font-normal">
-                            ₦{Math.round((listing.price ?? 0) / 100).toLocaleString()}
+                      {(() => {
+                        const book = listingToBookDisplay(listing)
+                        return (
+                          <span className="font-semibold text-main text-sm">
+                            {formatPrice(book.price)}
+                            {book.originalPrice !== book.price && (
+                              <span className="text-main/40 line-through ml-1.5 font-normal">
+                                {formatPrice(book.originalPrice)}
+                              </span>
+                            )}
                           </span>
-                        )}
-                      </span>
+                        )
+                      })()}
                       <span>{listing.categoryName}</span>
                       <span>{listing.bookCondition}</span>
                       {listing.location && (

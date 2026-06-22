@@ -12,6 +12,7 @@ import {
 import { useListing } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import { useCart } from '../../context/CartContext'
+import { formatPrice } from '../../lib/utils'
 
 function BookDetail() {
   const { id } = useParams()
@@ -143,11 +144,11 @@ function BookDetail() {
                     </p>
                     <div className="flex items-baseline gap-2.5 flex-wrap">
                       <p className="font-heading font-bold text-main text-4xl md:text-[2.5rem] leading-none">
-                        ₦{book.price.toLocaleString()}
+                        {formatPrice(book.price)}
                       </p>
                       {book.originalPrice !== book.price && (
                         <span className="text-lg text-main/40 line-through">
-                          ₦{book.originalPrice.toLocaleString()}
+                          {formatPrice(book.originalPrice)}
                         </span>
                       )}
                     </div>

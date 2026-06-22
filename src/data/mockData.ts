@@ -14,7 +14,9 @@ export interface Book {
   format: string
 
   price: number
-  discount?: number   // ← ADD THIS
+  originalPrice: number
+  discount?: number
+  isDiscountApplied?: boolean
 
   location: string
   badge: BookBadge
@@ -42,6 +44,7 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 2500,
+    originalPrice: 2500,
     location: 'Lagos Island',
     badge: 'Best Value',
     coverColor: '#C8A97E',
@@ -67,6 +70,7 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 3000,
+    originalPrice: 3000,
     location: 'Ibadan',
     badge: 'Recently Added',
     coverColor: '#9B5DE5',
@@ -90,6 +94,7 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 3500,
+    originalPrice: 3500,
     location: 'Abuja',
     badge: null,
     coverColor: '#F4A261',
@@ -111,8 +116,10 @@ export const books: Book[] = [
     quantity: 1,
     format: 'Paperback',
 
-    price: 4000,
-    discount: 5, // ← add this
+    price: 3800,
+    originalPrice: 4000,
+    discount: 5,
+    isDiscountApplied: true,
     location: 'Victoria Island, Lagos',
     badge: 'Best Value',
     coverColor: '#2D6A4F',
@@ -135,6 +142,7 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 2000,
+    originalPrice: 2000,
     location: 'Port Harcourt',
     badge: 'Best Value',
     coverColor: '#E63946',
@@ -157,6 +165,7 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 3200,
+    originalPrice: 3200,
     location: 'Lagos',
     badge: 'Recently Added',
     coverColor: '#457B9D',
@@ -178,8 +187,10 @@ export const books: Book[] = [
     quantity: 1,
     format: 'Paperback',
 
-    price: 4500,
-    discount: 10, // ← add this
+    price: 4050,
+    originalPrice: 4500,
+    discount: 10,
+    isDiscountApplied: true,
 
     location: 'Ikeja Lagos',
     badge: null,
@@ -203,6 +214,7 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 2800,
+    originalPrice: 2800,
     location: 'Lekki, Lagos',
     badge: 'Best Value',
     coverColor: '#E9C46A',
