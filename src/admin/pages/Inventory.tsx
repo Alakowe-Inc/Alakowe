@@ -4,6 +4,9 @@ import { PageCard } from "@/admin/components/PageCard";
 import { StatCard } from "@/admin/components/StatCard";
 import { StatusBadge } from "@/admin/components/StatusBadge";
 import { Input } from "@/components/ui/input";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import { TimeRangeFilter, defaultRange, type RangeValue } from "@/admin/components/TimeRangeFilter";
 import { Paginator, usePaginated } from "@/admin/components/Paginator";
 import { useAdminStore } from "@/admin/store/adminStore";
@@ -44,51 +47,53 @@ export default function Inventory() {
       </div>
 
       <PageCard title="Inventory Snapshot" description={`${data.length} item${data.length === 1 ? "" : "s"}`} bodyClassName="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border/70 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-5 py-3 font-medium">Book</th>
-                <th className="px-5 py-3 font-medium">Seller</th>
-                <th className="px-5 py-3 font-medium">Condition</th>
-                <th className="px-5 py-3 font-medium">Quantity</th>
-                <th className="px-5 py-3 font-medium">Price</th>
-                <th className="px-5 py-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paged.map((l) => (
-                <tr key={l.id} className="border-b border-border/40 hover:bg-muted/40">
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-7 overflow-hidden rounded ring-1 ring-border">
-                        {COVER_IMAGES[l.title]
-                          ? <img src={COVER_IMAGES[l.title]} alt={l.title} className="h-full w-full object-cover" />
-                          : <div className={`h-full w-full bg-gradient-to-br ${l.cover}`} />}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">{l.title}</p>
-                        <p className="text-[11px] text-muted-foreground">{l.author}</p>
-                      </div>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Book</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Seller</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Condition</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Quantity</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Price</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paged.map((l) => (
+              <TableRow key={l.id}>
+                <TableCell className="px-5 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-7 overflow-hidden rounded ring-1 ring-border">
+                      {COVER_IMAGES[l.title]
+                        ? <img src={COVER_IMAGES[l.title]} alt={l.title} className="h-full w-full object-cover" />
+                        : <div className={`h-full w-full bg-gradient-to-br ${l.cover}`} />}
                     </div>
-                  </td>
-                  <td className="px-5 py-3 text-muted-foreground">{l.seller}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{l.condition}</td>
-                  <td className="px-5 py-3">
-                    <span className={`inline-flex items-center justify-center rounded-md px-2 py-0.5 text-xs font-bold ${
-                      (l.quantity ?? 1) <= 1 ? "bg-warning/10 text-warning ring-1 ring-warning/20" : "bg-muted text-foreground"
-                    }`}>{l.quantity ?? 1}</span>
-                  </td>
-                  <td className="px-5 py-3 font-semibold text-foreground">₦{l.price.toLocaleString()}</td>
-                  <td className="px-5 py-3"><StatusBadge status={l.status} /></td>
-                </tr>
-              ))}
-              {data.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-12 text-center text-sm text-muted-foreground">No inventory matches your filters.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{l.title}</p>
+                      <p className="text-[11px] text-muted-foreground">{l.author}</p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="px-5 py-3 text-muted-foreground">{l.seller}</TableCell>
+                <TableCell className="px-5 py-3 text-muted-foreground">{l.condition}</TableCell>
+                <TableCell className="px-5 py-3">
+                  <span className={`inline-flex items-center justify-center rounded-md px-2 py-0.5 text-xs font-bold ${
+                    (l.quantity ?? 1) <= 1 ? "bg-warning/10 text-warning ring-1 ring-warning/20" : "bg-muted text-foreground"
+                  }`}>{l.quantity ?? 1}</span>
+                </TableCell>
+                <TableCell className="px-5 py-3 font-semibold text-foreground">₦{l.price.toLocaleString()}</TableCell>
+                <TableCell className="px-5 py-3"><StatusBadge status={l.status} /></TableCell>
+              </TableRow>
+            ))}
+            {data.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                  No inventory matches your filters.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
         <div className="border-t border-border/50 px-4">
           <Paginator page={page} pageSize={PAGE_SIZE} total={data.length} onPageChange={setPage} />
         </div>

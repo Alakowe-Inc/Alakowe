@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import { useAdminStore } from "@/admin/store/adminStore";
 import { Paginator } from "@/admin/components/Paginator";
 import {
@@ -93,65 +96,67 @@ export function UsersTable({ title, description }: Props) {
       </div>
 
       <PageCard title="All Users" description="Buyers and sellers across the marketplace." bodyClassName="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border/70 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-5 py-3 font-medium">User</th>
-                <th className="px-5 py-3 font-medium">Listings</th>
-                <th className="px-5 py-3 font-medium">Sales</th>
-                <th className="px-5 py-3 font-medium">Purchases</th>
-                <th className="px-5 py-3 font-medium">Status</th>
-                <th className="px-5 py-3 font-medium">Joined</th>
-                <th className="px-5 py-3 text-right font-medium">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={i} className="border-b border-border/40">
-                    {Array.from({ length: 7 }).map((__, j) => (
-                      <td key={j} className="px-5 py-4"><Skeleton className="h-4 w-full" /></td>
-                    ))}
-                  </tr>
-                ))
-              ) : paged.length === 0 ? (
-                <tr><td colSpan={7} className="px-5 py-12 text-center text-sm text-muted-foreground">No users match your filters.</td></tr>
-              ) : paged.map((u) => (
-                <tr
-                  key={u.id}
-                  className="cursor-pointer border-b border-border/40 transition-colors hover:bg-muted/40 animate-fade-in"
-                  onClick={() => navigate(`/admin/users/${u.id}`)}
-                >
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9 ring-2 ring-border">
-                        <AvatarFallback className="bg-gradient-primary text-xs font-semibold text-primary-foreground">{u.avatar}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <p className="font-semibold text-foreground">{u.name}</p>
-                          {u.verified && <ShieldCheck className="h-3.5 w-3.5 text-info" />}
-                        </div>
-                        <p className="text-xs text-muted-foreground">{u.email}</p>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">User</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Listings</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Sales</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Purchases</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Status</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Joined</TableHead>
+              <TableHead className="px-5 py-3 text-right text-[11px] uppercase tracking-wider">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 7 }).map((__, j) => (
+                    <TableCell key={j} className="px-5 py-4"><Skeleton className="h-4 w-full" /></TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : paged.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                  No users match your filters.
+                </TableCell>
+              </TableRow>
+            ) : paged.map((u) => (
+              <TableRow
+                key={u.id}
+                className="cursor-pointer animate-fade-in"
+                onClick={() => navigate(`/admin/users/${u.id}`)}
+              >
+                <TableCell className="px-5 py-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9 ring-2 ring-border">
+                      <AvatarFallback className="bg-gradient-primary text-xs font-semibold text-primary-foreground">{u.avatar}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-semibold text-foreground">{u.name}</p>
+                        {u.verified && <ShieldCheck className="h-3.5 w-3.5 text-info" />}
                       </div>
+                      <p className="text-xs text-muted-foreground">{u.email}</p>
                     </div>
-                  </td>
-                  <td className="px-5 py-3 font-semibold text-foreground">{u.listingCount}</td>
-                  <td className="px-5 py-3 font-semibold text-success">{u.sales}</td>
-                  <td className="px-5 py-3 font-semibold text-primary">{u.purchases}</td>
-                  <td className="px-5 py-3"><StatusBadge status={u.status} /></td>
-                  <td className="px-5 py-3 text-muted-foreground">{u.joined}</td>
-                  <td className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                    <Button size="sm" variant="outline" className="h-8 gap-1.5" onClick={() => navigate(`/admin/users/${u.id}`)}>
-                      <Eye className="h-3.5 w-3.5" /> View Profile
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </TableCell>
+                <TableCell className="px-5 py-3 font-semibold text-foreground">{u.listingCount}</TableCell>
+                <TableCell className="px-5 py-3 font-semibold text-success">{u.sales}</TableCell>
+                <TableCell className="px-5 py-3 font-semibold text-primary">{u.purchases}</TableCell>
+                <TableCell className="px-5 py-3"><StatusBadge status={u.status} /></TableCell>
+                <TableCell className="px-5 py-3 text-muted-foreground">{u.joined}</TableCell>
+                <TableCell className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                  <Button size="sm" variant="outline" className="h-8 gap-1.5" onClick={() => navigate(`/admin/users/${u.id}`)}>
+                    <Eye className="h-3.5 w-3.5" /> View Profile
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
         <div className="border-t border-border/60 px-4">
           <Paginator page={page} pageSize={PAGE_SIZE} total={data.length} onPageChange={setPage} />
         </div>

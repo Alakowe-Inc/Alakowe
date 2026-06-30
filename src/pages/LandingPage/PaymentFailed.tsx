@@ -22,7 +22,7 @@ function PaymentFailed() {
         <div className="flex flex-col gap-3">
           <Link
             to="/checkout"
-            className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm text-center"
+            className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm text-center"
           >
             Retry Payment
           </Link>

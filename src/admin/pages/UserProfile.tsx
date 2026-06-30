@@ -10,6 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import { PageCard } from "@/admin/components/PageCard";
 import { StatusBadge } from "@/admin/components/StatusBadge";
 import { useAdminStore } from "@/admin/store/adminStore";
@@ -312,25 +315,31 @@ function SimpleTable({ headers, rows, empty }: {
   empty: string;
 }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border/70 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-            {headers.map((h) => <th key={h} className="px-5 py-3 font-medium">{h}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.length === 0 ? (
-            <tr><td colSpan={headers.length} className="px-5 py-10 text-center text-sm text-muted-foreground">{empty}</td></tr>
-          ) : rows.map((r) => (
-            <tr key={r.key}
-              onClick={r.onClick}
-              className={`border-b border-border/40 transition-colors ${r.onClick ? "cursor-pointer hover:bg-muted/40" : ""}`}>
-              {r.cells.map((c, i) => <td key={i} className="px-5 py-3 text-sm">{c}</td>)}
-            </tr>
+    <Table>
+      <TableHeader>
+        <TableRow className="hover:bg-transparent">
+          {headers.map((h) => (
+            <TableHead key={h} className="px-5 py-3 text-[11px] uppercase tracking-wider">{h}</TableHead>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={headers.length} className="px-5 py-10 text-center text-sm text-muted-foreground">
+              {empty}
+            </TableCell>
+          </TableRow>
+        ) : rows.map((r) => (
+          <TableRow
+            key={r.key}
+            onClick={r.onClick}
+            className={r.onClick ? "cursor-pointer" : ""}
+          >
+            {r.cells.map((c, i) => <TableCell key={i} className="px-5 py-3 text-sm">{c}</TableCell>)}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }

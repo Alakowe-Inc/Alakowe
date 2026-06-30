@@ -6,6 +6,9 @@ import { StatusBadge } from "@/admin/components/StatusBadge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAdminStore } from "@/admin/store/adminStore";
@@ -50,46 +53,51 @@ export default function Payments() {
       </div>
 
       <PageCard title="All Payouts" description="Click any row for full bank details" bodyClassName="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border/70 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-5 py-3">ID</th>
-                <th className="px-5 py-3">Seller</th>
-                <th className="px-5 py-3">Bank</th>
-                <th className="px-5 py-3">Amount</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3">Date</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((p) => (
-                <tr key={p.id} onClick={() => navigate(`/admin/payments/${p.id}`)} className="cursor-pointer border-b border-border/40 transition-colors hover:bg-muted/40">
-                  <td className="px-5 py-3 font-mono text-xs font-semibold text-primary">{p.id}</td>
-                  <td className="px-5 py-3 font-medium text-foreground">{p.seller}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{p.bank?.bankName}</td>
-                  <td className="px-5 py-3 font-semibold text-foreground">₦{p.amount.toLocaleString()}</td>
-                  <td className="px-5 py-3"><StatusBadge status={p.status} /></td>
-                  <td className="px-5 py-3 text-muted-foreground">{p.date}</td>
-                  <td className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => navigate(`/admin/payments/${p.id}`)}><Eye className="mr-2 h-4 w-4" /> View</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { markPaid(p.id); toast("Payment marked as paid"); }}>Payment Made</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { markUnsuccessful(p.id); toast("Payment unsuccessful"); }}>Payment Unsuccessful</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { notifySeller(p.seller); toast(`Notified ${p.seller}`); }}>Notify Seller</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">ID</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Seller</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Bank</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Amount</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Status</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Date</TableHead>
+              <TableHead className="px-5 py-3" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((p) => (
+              <TableRow key={p.id} onClick={() => navigate(`/admin/payments/${p.id}`)} className="cursor-pointer">
+                <TableCell className="px-5 py-3 font-mono text-xs font-semibold text-primary">{p.id}</TableCell>
+                <TableCell className="px-5 py-3 font-medium text-foreground">{p.seller}</TableCell>
+                <TableCell className="px-5 py-3 text-muted-foreground">{p.bank?.bankName}</TableCell>
+                <TableCell className="px-5 py-3 font-semibold text-foreground">₦{p.amount.toLocaleString()}</TableCell>
+                <TableCell className="px-5 py-3"><StatusBadge status={p.status} /></TableCell>
+                <TableCell className="px-5 py-3 text-muted-foreground">{p.date}</TableCell>
+                <TableCell className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => navigate(`/admin/payments/${p.id}`)}><Eye className="mr-2 h-4 w-4" /> View</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { markPaid(p.id); toast("Payment marked as paid"); }}>Payment Made</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { markUnsuccessful(p.id); toast("Payment unsuccessful"); }}>Payment Unsuccessful</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { notifySeller(p.seller); toast(`Notified ${p.seller}`); }}>Notify Seller</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+            {data.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                  No payouts match your filters.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </PageCard>
     </div>
   );

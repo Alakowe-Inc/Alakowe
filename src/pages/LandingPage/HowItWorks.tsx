@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import {
   Search, ShoppingCart, Truck, BookOpen,
   PlusCircle, Bell, PackageCheck, Wallet,
-  ArrowRight, ShieldCheck, Banknote, HeadphonesIcon, RefreshCw,
+ShieldCheck, Banknote, HeadphonesIcon, RefreshCw,
 } from 'lucide-react'
 
 const buyerSteps = [
@@ -234,7 +234,7 @@ function HowItWorks() {
               {/* Right Action */}
               <div className="flex items-center gap-2 text-main font-semibold text-sm md:ml-auto group-hover:gap-3 transition-all">
                 Learn more
-                <ArrowRight size={16} />
+
               </div>
 
             </div>
@@ -261,13 +261,13 @@ function HowItWorks() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to="/faq"
-              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-full"
+              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-xl"
             >
-              Read the FAQ <ArrowRight size={14} />
+              Read the FAQ
             </Link>
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-full"
+              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-xl"
             >
               Contact Us
             </Link>

@@ -147,7 +147,7 @@ export default function ShippingReturns() {
               to="/how-it-works"
               className="inline-flex items-center gap-2 text-secondary text-sm font-semibold hover:text-secondary/80 transition-colors"
             >
-              Learn how our escrow works →
+              Learn how our escrow works
             </Link>
           </div>
 
@@ -159,7 +159,7 @@ export default function ShippingReturns() {
             </div>
             <Link
               to="/customer-service"
-              className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-full hover:bg-main/90 transition-colors text-sm shrink-0"
+              className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-xl hover:bg-main/90 transition-colors text-sm shrink-0"
             >
               Contact Support
             </Link>

@@ -1,26 +1,32 @@
 import { useState, useRef, useEffect } from 'react'
-import { Search, User, ShoppingBag, Menu, X, ArrowRight, LogOut, Settings, BookOpen, Wallet, Bell, Package } from 'lucide-react'
+import { Search, ShoppingBag, Menu, X } from 'lucide-react'
+import { UserIcon } from '@heroicons/react/24/outline'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import logo from '../assets/media/logos/logo.png'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Sheet, SheetClose, SheetContent, SheetTitle } from '@/components/ui/sheet'
 
 const navLinks = [
   { label: 'Sell', to: '/sell' },
+  { label: 'Buy', to: '/browse' },
   { label: 'How it works', to: '/how-it-works' },
-  { label: 'Blog', to: '/blog' },
-
   { label: 'Contact', to: '/contact' },
 ]
-
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [desktopSearchOpen, setDesktopSearchOpen] = useState(false)
-  const [accountOpen, setAccountOpen] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const desktopSearchInputRef = useRef<HTMLInputElement>(null)
-  const accountDropdownRef = useRef<HTMLDivElement>(null)
   const focusOnOpenRef = useRef(false)
   const { count } = useCart()
   const { user, logout } = useAuth()
@@ -28,7 +34,6 @@ function Navbar() {
 
   function handleLogout() {
     logout()
-    setAccountOpen(false)
     setMenuOpen(false)
     navigate('/')
   }
@@ -48,36 +53,15 @@ function Navbar() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setDesktopSearchOpen(false); setAccountOpen(false) }
+      if (e.key === 'Escape') setDesktopSearchOpen(false)
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (accountDropdownRef.current && !accountDropdownRef.current.contains(e.target as Node)) {
-        setAccountOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => { document.body.style.overflow = '' }
-  }, [menuOpen])
-
   return (
     <>
       <header className="w-full border-b border-third bg-fourth sticky top-0 z-50">
-
-        {/* Main bar */}
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 h-16 flex items-center justify-between gap-4">
 
           {/* Mobile + tablet — hamburger */}
@@ -123,87 +107,63 @@ function Navbar() {
             >
               <Search size={20} />
             </button>
-            {/* Desktop only — account */}
-            <div ref={accountDropdownRef} className="hidden lg:block relative">
-              {user ? (
-                <>
-                  <button
-                    onClick={() => setAccountOpen(v => !v)}
-                    aria-label="Account"
-                    className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white text-xs font-bold uppercase hover:bg-secondary/85 transition-colors"
-                  >
-                    {user.email[0]}
-                  </button>
-                  {accountOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-60 bg-white border border-third rounded-2xl shadow-xl overflow-hidden z-50">
-                      {/* Header */}
-                      <div className="px-4 py-3 bg-third/50">
-                        <p className="text-[11px] text-main/40 font-medium uppercase tracking-wide mb-0.5">Signed in as</p>
-                        <p className="text-sm font-semibold text-main truncate">{user.email}</p>
-                      </div>
-                      {/* Account links */}
-                      <div className="py-1">
-                        <Link
-                          to="/account"
-                          onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
-                        >
-                          <Settings size={15} className="text-main/40 shrink-0" /> My Profile
-                        </Link>
-                        <Link
-                          to="/my-purchases"
-                          onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
-                        >
-                          <Package size={15} className="text-main/40 shrink-0" /> My Purchases
-                        </Link>
-                        <Link
-                          to="/my-listings"
-                          onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
-                        >
-                          <BookOpen size={15} className="text-main/40 shrink-0" /> My Listings
-                        </Link>
 
-                        <Link
-                          to="/my-sales"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
-                        >
-                          <ShoppingBag size={13} className="text-secondary" /> My Sales
-                        </Link>
-                        <Link
-                          to="/my-earnings"
-                          onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
-                        >
-                          <Wallet size={15} className="text-main/40 shrink-0" /> My Earnings
-                        </Link>
-                        <Link
-                          to="/my-requests"
-                          onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors"
-                        >
-                          <Bell size={15} className="text-main/40 shrink-0" /> My Requests
-                        </Link>
+            {/* Desktop only — account dropdown */}
+            <div className="hidden lg:block">
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      aria-label="Account"
+                      className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white text-xs font-bold uppercase hover:bg-secondary/85 transition-colors outline-none"
+                    >
+                      {user.email[0]}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-64 rounded-2xl p-0 overflow-hidden border-third shadow-xl"
+                  >
+                    <DropdownMenuLabel className="px-4 py-3.5 flex items-center gap-3 border-b border-third font-normal">
+                      <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-white text-sm font-bold uppercase shrink-0">
+                        {user.email[0]}
                       </div>
-                      {/* Sign out — separated */}
-                      <div className="border-t border-third py-1">
-                        <button
-                          onClick={handleLogout}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-main hover:bg-third transition-colors text-left"
-                        >
-                          <LogOut size={15} className="text-main/40 shrink-0" /> Sign out
-                        </button>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-main truncate">{user.email.split('@')[0]}</p>
+                        <p className="text-xs text-main/40 truncate">{user.email}</p>
                       </div>
+                    </DropdownMenuLabel>
+                    <div className="py-1">
+                      {[
+                        { to: '/my-purchases', label: 'Purchases' },
+                        { to: '/my-listings', label: 'Listings' },
+                        { to: '/my-sales', label: 'Sales' },
+                        { to: '/my-earnings', label: 'Earnings' },
+                        { to: '/account', label: 'Profile' },
+                      ].map(({ to, label }) => (
+                        <DropdownMenuItem key={to} asChild className="px-4 py-2.5 text-sm text-main cursor-pointer rounded-none">
+                          <Link to={to}>{label}</Link>
+                        </DropdownMenuItem>
+                      ))}
                     </div>
-                  )}
-                </>
+                    <DropdownMenuSeparator className="bg-third" />
+                    <div className="py-1">
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="px-4 py-2.5 text-sm text-red-500 cursor-pointer rounded-none focus:bg-red-50 focus:text-red-500"
+                      >
+                        Log out
+                      </DropdownMenuItem>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Link to="/login" aria-label="Account" className="text-main hover:text-secondary transition-colors">
-                  <User size={20} />
+                  <UserIcon className="w-5 h-5" />
                 </Link>
               )}
             </div>
+
             {/* Cart */}
             <Link to="/cart" aria-label="Cart" className="relative flex items-center gap-1 text-main hover:text-secondary transition-colors">
               <ShoppingBag size={20} />
@@ -239,128 +199,114 @@ function Navbar() {
         </div>
       )}
 
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 z-[100] bg-fourth flex flex-col animate-in slide-in-from-left duration-300"
+      {/* Mobile menu — Sheet */}
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent
+          side="left"
+          className="w-full sm:max-w-full p-0 bg-fourth border-0 flex flex-col [&>button:last-of-type]:hidden"
         >
+          <SheetTitle className="sr-only">Navigation menu</SheetTitle>
+
           {/* Top bar */}
-          <div className="flex items-center h-14 border-b border-third shrink-0">
-            <button
-              aria-label="Close menu"
-              onClick={() => setMenuOpen(false)}
-              className="w-14 h-full flex items-center justify-center text-main shrink-0"
-            >
-              <X size={22} />
-            </button>
-            <div className="border-l border-third h-full" />
-            <div className="flex items-center gap-2 px-4 flex-1">
-              <Search size={16} className="text-main/50 shrink-0" />
+          <div className="flex items-center justify-between px-5 h-16 shrink-0">
+            <SheetClose asChild>
+              <button aria-label="Close menu" className="text-main">
+                <X size={20} />
+              </button>
+            </SheetClose>
+            <Link to="/" onClick={() => setMenuOpen(false)}>
+              <img src={logo} alt="Alakowé" className="h-5 w-auto object-contain" />
+            </Link>
+            <div className="w-5" />
+          </div>
+
+          {/* Search */}
+          <div className="px-5 pb-4 shrink-0">
+            <div className="flex items-center gap-2 border-b border-main/15 pb-2">
+              <Search size={14} className="text-main/35 shrink-0" />
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search"
-                className="flex-1 text-sm text-main placeholder-main/40 outline-none bg-transparent font-body"
+                placeholder="Search books, authors…"
+                className="flex-1 text-[15px] text-main placeholder-main/30 outline-none bg-transparent font-body"
               />
             </div>
           </div>
 
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto overscroll-contain">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-5">
+
             {/* Nav links */}
-            <nav className="flex flex-col">
+            <nav className="flex flex-col py-4 border-b border-main/8">
               {navLinks.map(({ label, to }) => (
                 <NavLink
                   key={to}
                   to={to}
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between px-5 py-5 border-b border-third text-xs uppercase tracking-widest font-semibold text-main hover:text-secondary transition-colors"
+                  className="py-3 text-xs uppercase tracking-widest font-medium text-main hover:text-secondary transition-colors"
                 >
                   {label}
-                  <ArrowRight size={16} className="text-main/50 shrink-0" />
                 </NavLink>
               ))}
             </nav>
 
-            {/* Account / utility section */}
-            <div className="border-t border-third mt-4">
+            {/* Account links */}
+            <div className="py-4 border-b border-main/8 flex flex-col">
               {user ? (
                 <>
-                  <div className="px-5 py-3.5 bg-third/50">
-                    <p className="text-[11px] text-main/40 font-medium uppercase tracking-wide mb-0.5">Signed in as</p>
-                    <p className="text-sm font-semibold text-main truncate">{user.email}</p>
-                  </div>
-                  <NavLink
-                    to="/account"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
-                  >
-                    <Settings size={16} className="text-main/40 shrink-0" /> My Profile
-                  </NavLink>
-                  <NavLink
-                    to="/my-purchases"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
-                  >
-                    <Package size={16} className="text-main/40 shrink-0" /> My Purchases
-                  </NavLink>
-                  <NavLink
-                    to="/my-listings"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
-                  >
-                    <BookOpen size={16} className="text-main/40 shrink-0" /> My Listings
-                  </NavLink>
-                  <NavLink
-                    to="/my-earnings"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
-                  >
-                    <Wallet size={16} className="text-main/40 shrink-0" /> My Earnings
-                  </NavLink>
-                  <NavLink
-                    to="/my-requests"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
-                  >
-                    <Bell size={16} className="text-main/40 shrink-0" /> My Requests
-                  </NavLink>
+                  <p className="text-xs text-main/30 font-medium mb-2 truncate">{user.email}</p>
+                  {[
+                    { to: '/account', label: 'My Profile' },
+                    { to: '/my-purchases', label: 'My Purchases' },
+                    { to: '/my-listings', label: 'My Listings' },
+                    { to: '/my-earnings', label: 'My Earnings' },
+                  ].map(({ to, label }) => (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      onClick={() => setMenuOpen(false)}
+                      className="py-3 text-xs uppercase tracking-widest font-medium text-main hover:text-secondary transition-colors"
+                    >
+                      {label}
+                    </NavLink>
+                  ))}
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors text-left"
+                    className="py-3 text-xs uppercase tracking-widest font-medium text-main hover:text-secondary transition-colors text-left"
                   >
-                    <LogOut size={16} className="text-main/40 shrink-0" /> Sign out
+                    Sign out
                   </button>
                 </>
               ) : (
                 <NavLink
                   to="/login"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-5 py-4 border-b border-third text-sm text-main hover:text-secondary transition-colors"
+                  className="py-3 text-xs uppercase tracking-widest font-medium text-main hover:text-secondary transition-colors"
                 >
-                  <User size={16} className="text-main/40 shrink-0" /> Login
+                  Login
                 </NavLink>
               )}
-              <div className="px-5 pt-4 pb-[max(2.5rem,env(safe-area-inset-bottom))] flex flex-col gap-3">
+            </div>
+
+            {/* Utility */}
+            <div className="py-4 flex flex-col pb-[max(2.5rem,env(safe-area-inset-bottom))]">
+              {[
+                { to: '/customer-service', label: 'Customer Service' },
+                { to: '/shipping', label: 'Shipping & Returns' },
+              ].map(({ to, label }) => (
                 <NavLink
-                  to="/customer-service"
+                  key={to}
+                  to={to}
                   onClick={() => setMenuOpen(false)}
-                  className="text-sm text-main/50 hover:text-secondary transition-colors"
+                  className="py-2.5 text-sm text-main/40 hover:text-secondary transition-colors"
                 >
-                  Customer Service
+                  {label}
                 </NavLink>
-                <NavLink
-                  to="/shipping"
-                  onClick={() => setMenuOpen(false)}
-                  className="text-sm text-main/50 hover:text-secondary transition-colors"
-                >
-                  Shipping & Returns
-                </NavLink>
-              </div>
+              ))}
             </div>
           </div>
-        </div>
-      )}
+        </SheetContent>
+      </Sheet>
     </>
   )
 }

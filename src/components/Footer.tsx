@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import logo from '../assets/media/logos/logo white.png'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 function IconInstagram() {
   return (
@@ -76,7 +78,6 @@ function Footer() {
                   { label: 'Browse Books', to: '/browse' },
                   { label: 'Sell a Book', to: '/sell' },
                   { label: 'How it Works', to: '/how-it-works' },
-                  { label: 'Blog', to: '/blog' },
                 ].map(({ label, to }) => (
                   <li key={to}>
                     <Link to={to} className="text-sm text-white/50 hover:text-secondary transition-colors">
@@ -117,17 +118,17 @@ function Footer() {
                 New arrivals, reading tips, and updates — straight to your inbox.
               </p>
               <form onSubmit={e => e.preventDefault()} className="flex flex-col gap-3">
-                <input
+                <Input
                   type="email"
                   placeholder="your@email.com"
-                  className="bg-white/10 border border-white/15 rounded-full px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-secondary transition-colors"
+                  className="bg-white/10 border-white/15 rounded-xl h-auto px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-secondary"
                 />
-                <button
+                <Button
                   type="submit"
-                  className="bg-secondary text-main font-semibold text-sm rounded-full px-4 py-2.5 hover:bg-secondary/80 transition-colors"
+                  className="bg-secondary text-main font-semibold text-sm rounded-xl h-auto px-4 py-2.5 hover:bg-secondary/80"
                 >
                   Subscribe
-                </button>
+                </Button>
               </form>
             </div>
           </div>

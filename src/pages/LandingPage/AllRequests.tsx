@@ -149,7 +149,7 @@ export default function AllRequests() {
 
           <Link
             to="/request"
-            className="flex items-center gap-2 bg-main text-white font-semibold px-5 py-2.5 rounded-full hover:bg-main/90 transition-colors text-sm shrink-0"
+            className="flex items-center gap-2 bg-main text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-main/90 transition-colors text-sm shrink-0"
           >
             <PlusCircle size={15} /> Post a Request
           </Link>

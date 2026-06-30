@@ -5,6 +5,9 @@ import { PageCard } from "@/admin/components/PageCard";
 import { StatusBadge } from "@/admin/components/StatusBadge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import { TimeRangeFilter, defaultRange, type RangeValue } from "@/admin/components/TimeRangeFilter";
 import { Paginator, usePaginated } from "@/admin/components/Paginator";
 import { useAdminStore } from "@/admin/store/adminStore";
@@ -79,45 +82,47 @@ export default function Orders() {
       </div>
 
       <PageCard title="All Orders" description={`${data.length} order${data.length === 1 ? "" : "s"} match your filters`} bodyClassName="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 z-10 bg-card">
-              <tr className="border-b border-border/70 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-5 py-3">Order</th>
-                <th className="px-5 py-3">Buyer</th>
-                <th className="px-5 py-3">Seller</th>
-                <th className="px-5 py-3">Book</th>
-                <th className="px-5 py-3">Amount</th>
-                <th className="px-5 py-3">Delivery</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3">Date</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {paged.map((o) => (
-                <tr key={o.id} onClick={() => navigate(`/admin/orders/${o.id}`)} className="cursor-pointer border-b border-border/40 transition-colors hover:bg-muted/40">
-                  <td className="px-5 py-3 font-mono text-xs font-semibold text-primary">{o.id}</td>
-                  <td className="px-5 py-3 font-medium text-foreground">{o.buyer}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{o.seller}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{o.book}</td>
-                  <td className="px-5 py-3 font-semibold text-foreground">₦{o.amount.toLocaleString()}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{o.delivery}</td>
-                  <td className="px-5 py-3"><StatusBadge status={o.status} /></td>
-                  <td className="px-5 py-3 text-muted-foreground">{o.date}</td>
-                  <td className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                    <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => navigate(`/admin/orders/${o.id}`)}>
-                      <Eye className="h-3.5 w-3.5" /> View
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-              {data.length === 0 && (
-                <tr><td colSpan={9} className="px-5 py-12 text-center text-sm text-muted-foreground">No orders match your filters.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader className="sticky top-0 z-10 bg-card">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Order</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Buyer</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Seller</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Book</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Amount</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Delivery</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Status</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Date</TableHead>
+              <TableHead className="px-5 py-3" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paged.map((o) => (
+              <TableRow key={o.id} onClick={() => navigate(`/admin/orders/${o.id}`)} className="cursor-pointer">
+                <TableCell className="px-5 py-3 font-mono text-xs font-semibold text-primary">{o.id}</TableCell>
+                <TableCell className="px-5 py-3 font-medium text-foreground">{o.buyer}</TableCell>
+                <TableCell className="px-5 py-3 text-muted-foreground">{o.seller}</TableCell>
+                <TableCell className="px-5 py-3 text-muted-foreground">{o.book}</TableCell>
+                <TableCell className="px-5 py-3 font-semibold text-foreground">₦{o.amount.toLocaleString()}</TableCell>
+                <TableCell className="px-5 py-3 text-muted-foreground">{o.delivery}</TableCell>
+                <TableCell className="px-5 py-3"><StatusBadge status={o.status} /></TableCell>
+                <TableCell className="px-5 py-3 text-muted-foreground">{o.date}</TableCell>
+                <TableCell className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                  <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => navigate(`/admin/orders/${o.id}`)}>
+                    <Eye className="h-3.5 w-3.5" /> View
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+            {data.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={9} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                  No orders match your filters.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
         <div className="border-t border-border/50 px-4">
           <Paginator page={page} pageSize={PAGE_SIZE} total={data.length} onPageChange={setPage} />
         </div>

@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface PageCardProps {
   title?: string;
@@ -12,17 +14,20 @@ interface PageCardProps {
 
 export function PageCard({ title, description, action, children, className, bodyClassName }: PageCardProps) {
   return (
-    <section className={cn("rounded-2xl border border-border bg-card shadow-soft", className)}>
+    <Card className={cn("rounded-2xl shadow-soft", className)}>
       {(title || action) && (
-        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border/70 px-5 py-4">
-          <div>
-            {title && <h3 className="font-display text-base font-semibold text-foreground">{title}</h3>}
-            {description && <p className="text-xs text-muted-foreground">{description}</p>}
-          </div>
-          {action}
-        </div>
+        <>
+          <CardHeader className="flex flex-row flex-wrap items-end justify-between gap-3 px-5 py-4 space-y-0">
+            <div className="space-y-0.5">
+              {title && <CardTitle className="font-display text-base font-semibold">{title}</CardTitle>}
+              {description && <CardDescription className="text-xs">{description}</CardDescription>}
+            </div>
+            {action}
+          </CardHeader>
+          <Separator />
+        </>
       )}
-      <div className={cn("p-5", bodyClassName)}>{children}</div>
-    </section>
+      <CardContent className={cn("p-5", bodyClassName)}>{children}</CardContent>
+    </Card>
   );
 }

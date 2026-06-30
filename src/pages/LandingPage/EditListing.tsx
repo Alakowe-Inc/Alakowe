@@ -234,7 +234,7 @@ export default function EditListing() {
           <button
             type="submit"
             disabled={saving || saved}
-            className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Changes'}
           </button>

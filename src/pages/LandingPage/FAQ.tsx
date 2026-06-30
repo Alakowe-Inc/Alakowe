@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const faqs: { section: string; id: string; questions: { q: string; a: React.ReactNode }[] }[] = [
@@ -223,7 +222,7 @@ function FAQ() {
               <a
                 key={id}
                 href={`#${id}`}
-                className="text-xs font-semibold px-4 py-2 rounded-full border border-main/20 text-main/60 hover:border-secondary hover:text-secondary transition-all duration-200"
+                className="text-xs font-semibold px-4 py-2 rounded-xl border border-main/20 text-main/60 hover:border-secondary hover:text-secondary transition-all duration-200"
               >
                 {section}
               </a>
@@ -285,13 +284,13 @@ function FAQ() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-full"
+              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-xl"
             >
-              Contact Us <ArrowRight size={14} />
+              Contact Us
             </Link>
             <Link
               to="/browse"
-              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-full"
+              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-xl"
             >
               Browse Books
             </Link>

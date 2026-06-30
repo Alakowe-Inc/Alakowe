@@ -5,6 +5,9 @@ import { PageCard } from "@/admin/components/PageCard";
 import { StatusBadge } from "@/admin/components/StatusBadge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import { type Listing } from "@/lib/mock-data";
 import { COVER_IMAGES } from "@/lib/covers";
 import { useAdminStore } from "@/admin/store/adminStore";
@@ -138,48 +141,50 @@ export default function Listings() {
         </>
       ) : (
         <PageCard title="Listings" bodyClassName="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 z-10 bg-card">
-                <tr className="border-b border-border/70 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <th className="px-5 py-3">Title</th>
-                  <th className="px-5 py-3">Seller</th>
-                  <th className="px-5 py-3">Format</th>
-                  <th className="px-5 py-3">Qty</th>
-                  <th className="px-5 py-3">Condition</th>
-                  <th className="px-5 py-3">Price</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3">Date</th>
-                  <th className="px-5 py-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {paged.map((l) => {
-                  const cover = COVER_IMAGES[l.title];
-                  return (
-                    <tr key={l.id} onClick={() => navigate(`/admin/listings/${l.id}`)} className="cursor-pointer border-b border-border/40 transition-colors hover:bg-muted/40">
-                      <td className="px-5 py-3">
-                        <div className="flex items-center gap-2.5">
-                          {cover ? <img src={cover} alt={l.title} className="h-10 w-7 rounded object-cover" /> : <div className="h-10 w-7 rounded bg-muted" />}
-                          <span className="font-medium text-foreground">{l.title}</span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-3 text-muted-foreground">{l.seller}</td>
-                      <td className="px-5 py-3 text-xs text-muted-foreground">{l.format ?? "Paperback"}</td>
-                      <td className="px-5 py-3 font-semibold text-foreground">{l.quantity ?? 1}</td>
-                      <td className="px-5 py-3 text-muted-foreground">{l.condition}</td>
-                      <td className="px-5 py-3 font-semibold">₦{l.price.toLocaleString()}</td>
-                      <td className="px-5 py-3"><StatusBadge status={l.status} /></td>
-                      <td className="px-5 py-3 text-muted-foreground">{l.date}</td>
-                      <td className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                        <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => navigate(`/admin/listings/${l.id}`)}><Eye className="h-3.5 w-3.5" /> View</Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader className="sticky top-0 z-10 bg-card">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Title</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Seller</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Format</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Qty</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Condition</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Price</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Status</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Date</TableHead>
+                <TableHead className="px-5 py-3" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paged.map((l) => {
+                const cover = COVER_IMAGES[l.title];
+                return (
+                  <TableRow key={l.id} onClick={() => navigate(`/admin/listings/${l.id}`)} className="cursor-pointer">
+                    <TableCell className="px-5 py-3">
+                      <div className="flex items-center gap-2.5">
+                        {cover
+                          ? <img src={cover} alt={l.title} className="h-10 w-7 rounded object-cover" />
+                          : <div className="h-10 w-7 rounded bg-muted" />}
+                        <span className="font-medium text-foreground">{l.title}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-5 py-3 text-muted-foreground">{l.seller}</TableCell>
+                    <TableCell className="px-5 py-3 text-xs text-muted-foreground">{l.format ?? "Paperback"}</TableCell>
+                    <TableCell className="px-5 py-3 font-semibold text-foreground">{l.quantity ?? 1}</TableCell>
+                    <TableCell className="px-5 py-3 text-muted-foreground">{l.condition}</TableCell>
+                    <TableCell className="px-5 py-3 font-semibold">₦{l.price.toLocaleString()}</TableCell>
+                    <TableCell className="px-5 py-3"><StatusBadge status={l.status} /></TableCell>
+                    <TableCell className="px-5 py-3 text-muted-foreground">{l.date}</TableCell>
+                    <TableCell className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => navigate(`/admin/listings/${l.id}`)}>
+                        <Eye className="h-3.5 w-3.5" /> View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
           <div className="border-t border-border/60 px-4">
             <Paginator page={page} pageSize={PAGE_SIZE} total={data.length} onPageChange={setPage} />
           </div>

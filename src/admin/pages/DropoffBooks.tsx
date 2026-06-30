@@ -5,6 +5,9 @@ import { PageCard } from "@/admin/components/PageCard";
 import { StatusBadge } from "@/admin/components/StatusBadge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import { Paginator, usePaginated } from "@/admin/components/Paginator";
 import { useAdminStore } from "@/admin/store/adminStore";
 import { COVER_IMAGES } from "@/lib/covers";
@@ -51,66 +54,69 @@ export default function DropoffBooks() {
       </div>
 
       <PageCard title="All Drop-offs" description={`${data.length} drop-off${data.length === 1 ? "" : "s"}`} bodyClassName="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border/70 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-5 py-3">ID</th>
-                <th className="px-5 py-3">Book</th>
-                <th className="px-5 py-3">Seller</th>
-                <th className="px-5 py-3">Centre</th>
-                <th className="px-5 py-3">Condition</th>
-                <th className="px-5 py-3">Tracking</th>
-                <th className="px-5 py-3">Date</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {paged.map((b) => {
-                const cover = COVER_IMAGES[b.book];
-                return (
-                  <tr key={b.id} onClick={() => navigate(`/admin/dropoffs/books/${b.id}`)} className="cursor-pointer border-b border-border/40 transition-colors hover:bg-muted/40">
-                    <td className="px-5 py-3 font-mono text-xs font-semibold text-primary">{b.id}</td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-2.5">
-                        {cover ? <img src={cover} alt={b.book} className="h-10 w-7 rounded object-cover" />
-                          : <div className="h-10 w-7 rounded bg-muted" />}
-                        <span className="font-medium text-foreground">{b.book}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">{b.seller}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{b.centre}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{b.condition}</td>
-                    <td className="px-5 py-3 font-mono text-xs text-muted-foreground">{b.tracking}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{b.date}</td>
-                    <td className="px-5 py-3"><StatusBadge status={b.status} /></td>
-                    <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex justify-end gap-1.5">
-                        {b.status === "Pending Verification" && (
-                          <>
-                            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => { verify(b.id); toast("Verified"); }}>
-                              <Check className="h-3.5 w-3.5" /> Verify
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => { reject(b.id); toast("Rejected"); }}>
-                              <X className="h-3.5 w-3.5" /> Reject
-                            </Button>
-                          </>
-                        )}
-                        <Button size="sm" variant="ghost" className="h-8 gap-1" onClick={() => navigate(`/admin/dropoffs/books/${b.id}`)}>
-                          <Eye className="h-3.5 w-3.5" /> View
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {data.length === 0 && (
-                <tr><td colSpan={9} className="px-5 py-12 text-center text-sm text-muted-foreground">No drop-offs match your filters.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">ID</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Book</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Seller</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Centre</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Condition</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Tracking</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Date</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Status</TableHead>
+              <TableHead className="px-5 py-3" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paged.map((b) => {
+              const cover = COVER_IMAGES[b.book];
+              return (
+                <TableRow key={b.id} onClick={() => navigate(`/admin/dropoffs/books/${b.id}`)} className="cursor-pointer">
+                  <TableCell className="px-5 py-3 font-mono text-xs font-semibold text-primary">{b.id}</TableCell>
+                  <TableCell className="px-5 py-3">
+                    <div className="flex items-center gap-2.5">
+                      {cover
+                        ? <img src={cover} alt={b.book} className="h-10 w-7 rounded object-cover" />
+                        : <div className="h-10 w-7 rounded bg-muted" />}
+                      <span className="font-medium text-foreground">{b.book}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-5 py-3 text-muted-foreground">{b.seller}</TableCell>
+                  <TableCell className="px-5 py-3 text-muted-foreground">{b.centre}</TableCell>
+                  <TableCell className="px-5 py-3 text-muted-foreground">{b.condition}</TableCell>
+                  <TableCell className="px-5 py-3 font-mono text-xs text-muted-foreground">{b.tracking}</TableCell>
+                  <TableCell className="px-5 py-3 text-muted-foreground">{b.date}</TableCell>
+                  <TableCell className="px-5 py-3"><StatusBadge status={b.status} /></TableCell>
+                  <TableCell className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex justify-end gap-1.5">
+                      {b.status === "Pending Verification" && (
+                        <>
+                          <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => { verify(b.id); toast("Verified"); }}>
+                            <Check className="h-3.5 w-3.5" /> Verify
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => { reject(b.id); toast("Rejected"); }}>
+                            <X className="h-3.5 w-3.5" /> Reject
+                          </Button>
+                        </>
+                      )}
+                      <Button size="sm" variant="ghost" className="h-8 gap-1" onClick={() => navigate(`/admin/dropoffs/books/${b.id}`)}>
+                        <Eye className="h-3.5 w-3.5" /> View
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {data.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={9} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                  No drop-offs match your filters.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
         <div className="border-t border-border/50 px-4">
           <Paginator page={page} pageSize={8} total={data.length} onPageChange={setPage} />
         </div>

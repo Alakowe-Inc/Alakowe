@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
 import { useSearchParams } from 'react-router-dom'
 import { books } from '../../data/mockData'
 import BookCard from '../../components/BookCard'
@@ -16,6 +17,8 @@ function BrowseBooks() {
   const [location, setLocation] = useState('All')
   const [sortBy, setSortBy] = useState('default')
   const [showFilters, setShowFilters] = useState(false)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 12
 
   useEffect(() => {
     document.body.style.overflow = showFilters ? 'hidden' : ''
@@ -26,6 +29,7 @@ function BrowseBooks() {
   const closeFilters = () => setShowFilters(false)
 
   const filtered = useMemo(() => {
+    setPage(1)
     let result = [...books]
     if (query) {
       const q = query.toLowerCase()
@@ -43,6 +47,9 @@ function BrowseBooks() {
     if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price)
     return result
   }, [query, genre, condition, location, sortBy])
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const hasFilters = genre !== 'All' || condition !== 'All' || location !== 'All'
 
@@ -125,11 +132,46 @@ function BrowseBooks() {
         {/* ── Grid ── */}
         <div className="py-10">
           {filtered.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-10">
-              {filtered.map(book => (
-                <BookCard key={book.id} book={book} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-10">
+                {paginated.map(book => (
+                  <BookCard key={book.id} book={book} />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-16">
+                  <button
+                    onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                    disabled={page === 1}
+                    className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <CaretLeftIcon size={14} weight="bold" />
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                    <button
+                      key={n}
+                      onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                      className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${n === page
+                        ? 'bg-main text-white'
+                        : 'border border-main/15 text-main/50 hover:border-main/40 hover:text-main'
+                        }`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                    disabled={page === totalPages}
+                    className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <CaretRightIcon size={14} weight="bold" />
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center py-32 text-center">
               <span className="font-heading font-bold text-8xl text-secondary/20 mb-6 select-none">✦</span>
@@ -147,7 +189,7 @@ function BrowseBooks() {
           onClick={closeFilters}
         >
           <div
-            className="absolute right-0 top-0 h-full w-full sm:w-105 bg-white flex flex-col"
+            className="absolute right-0 top-0 h-full w-full sm:w-[420px] bg-white flex flex-col"
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
@@ -283,16 +325,16 @@ function BrowseBooks() {
             </div>
 
             {/* Footer */}
-            <div className="px-8 pt-4 pb-6 shrink-0 flex items-center gap-3">
+            <div className="px-8 pt-4 pb-4 shrink-0 flex items-center gap-3">
               <button
                 onClick={clearFilters}
-                className="flex-1 border border-main/15 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-main/50 hover:border-main/40 hover:text-main transition-colors rounded-full"
+                className="flex-1 border border-main/15 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-main/50 hover:border-main/40 hover:text-main transition-colors rounded-xl"
               >
                 Clear All
               </button>
               <button
                 onClick={closeFilters}
-                className="flex-1 bg-main text-white py-4 text-xs font-semibold uppercase tracking-[0.2em] hover:bg-main/90 transition-colors rounded-full"
+                className="flex-1 bg-main text-white py-4 text-xs font-semibold uppercase tracking-[0.2em] hover:bg-main/90 transition-colors rounded-xl"
               >
                 Show {filtered.length} {filtered.length === 1 ? 'Result' : 'Results'}
               </button>

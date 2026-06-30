@@ -201,7 +201,7 @@ export default function RequestBook() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? 'Submitting…' : 'Submit Request'}
           </button>

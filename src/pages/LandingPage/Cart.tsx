@@ -2,6 +2,17 @@ import { Link } from 'react-router-dom'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
 import { books } from '../../data/mockData'
+import { Button } from '@/components/ui/button'
+import book1 from '../../assets/media/images/book-1.jpg'
+import book2 from '../../assets/media/images/book-2.jpg'
+import book3 from '../../assets/media/images/book-3.jpg'
+import book4 from '../../assets/media/images/book-4.jpg'
+
+const bookImages = [book1, book2, book3, book4]
+function getBookImage(id: string) {
+  const index = (parseInt(id, 10) - 1) % bookImages.length
+  return bookImages[Math.max(0, index)]
+}
 
 function Cart() {
   const { items, removeFromCart, updateQuantity, clearCart } = useCart()
@@ -26,7 +37,7 @@ function Cart() {
           </p>
           <Link
             to="/browse"
-            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-full hover:bg-main/90 transition-colors text-sm"
+            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-xl hover:bg-main/90 transition-colors text-sm"
           >
             Browse Books
           </Link>
@@ -49,12 +60,13 @@ function Cart() {
 
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-heading font-bold text-main text-3xl">Your Cart</h1>
-          <button
+          <Button
+            variant="ghost"
             onClick={clearCart}
-            className="text-xs text-main/45 hover:text-main/70 transition-colors font-medium underline underline-offset-2"
+            className="h-auto p-0 text-xs text-main/45 hover:text-main/70 font-medium underline underline-offset-2 hover:bg-transparent"
           >
             Clear all
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -67,19 +79,18 @@ function Cart() {
                 className="bg-white rounded-lg border border-third p-5 flex gap-5"
               >
                 {/* Book cover */}
-                <Link to={`/books/${book.id}`} className="shrink-0">
-                  <div
-                    className="w-16 h-24 rounded-full shadow-md flex items-end justify-center pb-2"
-                    style={{ backgroundColor: book.coverColor }}
-                  >
-                    <div className="w-10 h-px bg-white/40 rounded" />
-                  </div>
+                <Link to={`/books/${book.slug}`} className="shrink-0">
+                  <img
+                    src={getBookImage(book.id)}
+                    alt={book.title}
+                    className="w-16 h-24 object-cover rounded shadow-md"
+                  />
                 </Link>
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-3 mb-1">
-                    <Link to={`/books/${book.id}`} className="hover:underline">
+                    <Link to={`/books/${book.slug}`} className="hover:underline">
                       <p className="font-heading font-bold text-main text-base leading-snug">
                         {book.title}
                       </p>
@@ -160,7 +171,7 @@ function Cart() {
 
               <Link
                 to="/checkout"
-                className="block w-full bg-main text-white font-semibold py-3.5 rounded-full hover:bg-main/90 transition-colors text-sm mb-3 text-center"
+                className="block w-full bg-main text-white font-semibold py-3.5 rounded-xl hover:bg-main/90 transition-colors text-sm mb-3 text-center"
               >
                 Proceed to Checkout
               </Link>

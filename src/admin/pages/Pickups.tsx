@@ -5,6 +5,9 @@ import { PageCard } from "@/admin/components/PageCard";
 import { StatusBadge } from "@/admin/components/StatusBadge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import { Paginator, usePaginated } from "@/admin/components/Paginator";
 import { useAdminStore } from "@/admin/store/adminStore";
 import { toast } from "react-toastify";
@@ -64,47 +67,49 @@ export default function Pickups() {
 
       {view === "list" ? (
         <PageCard title="All Pickups" description={`${data.length} request${data.length === 1 ? "" : "s"}`} bodyClassName="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/70 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <th className="px-5 py-3">Request</th>
-                  <th className="px-5 py-3">Pickup Code</th>
-                  <th className="px-5 py-3">Seller</th>
-                  <th className="px-5 py-3">Address</th>
-                  <th className="px-5 py-3">Books</th>
-                  <th className="px-5 py-3">Date</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {paged.map((p) => (
-                  <tr key={p.id} onClick={() => navigate(`/admin/pickups/${p.id}`)} className="cursor-pointer border-b border-border/40 hover:bg-muted/40">
-                    <td className="px-5 py-3 font-mono text-xs font-semibold text-primary">{p.id}</td>
-                    <td className="px-5 py-3" onClick={(e) => { e.stopPropagation(); copyCode(p.code); }}>
-                      <span className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-primary/40 bg-primary/5 px-2 py-1 font-mono text-xs font-bold text-primary">
-                        {p.code} <Copy className="h-3 w-3" />
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 font-medium text-foreground">{p.user}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{p.address}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{p.books}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{p.date}</td>
-                    <td className="px-5 py-3"><StatusBadge status={p.status} /></td>
-                    <td className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                      <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => navigate(`/admin/pickups/${p.id}`)}>
-                        <Eye className="h-3.5 w-3.5" /> View
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-                {data.length === 0 && (
-                  <tr><td colSpan={8} className="px-5 py-12 text-center text-sm text-muted-foreground">No pickups match your filters.</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Request</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Pickup Code</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Seller</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Address</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Books</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Date</TableHead>
+                <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Status</TableHead>
+                <TableHead className="px-5 py-3" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paged.map((p) => (
+                <TableRow key={p.id} onClick={() => navigate(`/admin/pickups/${p.id}`)} className="cursor-pointer">
+                  <TableCell className="px-5 py-3 font-mono text-xs font-semibold text-primary">{p.id}</TableCell>
+                  <TableCell className="px-5 py-3" onClick={(e) => { e.stopPropagation(); copyCode(p.code); }}>
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-primary/40 bg-primary/5 px-2 py-1 font-mono text-xs font-bold text-primary">
+                      {p.code} <Copy className="h-3 w-3" />
+                    </span>
+                  </TableCell>
+                  <TableCell className="px-5 py-3 font-medium text-foreground">{p.user}</TableCell>
+                  <TableCell className="px-5 py-3 text-muted-foreground">{p.address}</TableCell>
+                  <TableCell className="px-5 py-3 text-muted-foreground">{p.books}</TableCell>
+                  <TableCell className="px-5 py-3 text-muted-foreground">{p.date}</TableCell>
+                  <TableCell className="px-5 py-3"><StatusBadge status={p.status} /></TableCell>
+                  <TableCell className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                    <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => navigate(`/admin/pickups/${p.id}`)}>
+                      <Eye className="h-3.5 w-3.5" /> View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {data.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                    No pickups match your filters.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
           <div className="border-t border-border/50 px-4">
             <Paginator page={page} pageSize={PAGE_SIZE} total={data.length} onPageChange={setPage} />
           </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { CheckCircle, ArrowRight } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 import { getOrder } from '../../data/orderData'
 import type { Order } from '../../data/orderData'
 
@@ -89,9 +89,9 @@ function PaymentSuccess() {
           {orderId && (
             <Link
               to={`/order/${orderId}`}
-              className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm text-center flex items-center justify-center gap-2"
+              className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm text-center flex items-center justify-center gap-2"
             >
-              View Order Status <ArrowRight size={15} />
+              View Order Status
             </Link>
           )}
           <Link

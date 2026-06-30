@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Calendar, Download, TrendingUp } from "lucide-react";
 import { PageCard } from "@/admin/components/PageCard";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup,
   DropdownMenuRadioItem, DropdownMenuTrigger, DropdownMenuLabel,
@@ -140,10 +141,12 @@ export default function Analytics() {
 
 function Stat({ label, value, delta }: { label: string; value: string; delta: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-2 font-display text-2xl font-bold text-foreground">{value}</p>
-      <p className="mt-1 text-xs font-semibold text-success">{delta} vs prev</p>
-    </div>
+    <Card className="rounded-2xl shadow-soft">
+      <CardContent className="p-5">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="mt-2 font-display text-2xl font-bold text-foreground">{value}</p>
+        <p className="mt-1 text-xs font-semibold text-success">{delta} vs prev</p>
+      </CardContent>
+    </Card>
   );
 }

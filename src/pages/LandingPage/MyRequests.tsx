@@ -49,7 +49,7 @@ export default function MyRequests() {
           </div>
           <Link
             to="/request"
-            className="flex items-center gap-2 bg-main text-white font-semibold px-5 py-2.5 rounded-full hover:bg-main/90 transition-colors text-sm"
+            className="flex items-center gap-2 bg-main text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-main/90 transition-colors text-sm"
           >
             <PlusCircle size={15} /> New Request
           </Link>
@@ -87,7 +87,7 @@ export default function MyRequests() {
             </p>
             <Link
               to="/request"
-              className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-full text-sm hover:bg-main/90 transition-colors"
+              className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-main/90 transition-colors"
             >
               <PlusCircle size={15} /> Request a Book
             </Link>

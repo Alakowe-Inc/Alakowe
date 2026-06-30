@@ -1,18 +1,18 @@
 import { Link } from 'react-router-dom'
-import { 
-BookOpen, 
-Bell, 
-Package, 
-Banknote, 
-CheckCircle, 
-ArrowRight,
-Sparkles,
-ThumbsUp,
-Check,
-Minus,
-AlertCircle
+import {
+  BookOpen,
+  Bell,
+  Package,
+  Banknote,
+  CheckCircle,
+  Sparkles,
+  ThumbsUp,
+  Check,
+  Minus,
+  AlertCircle
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { COVER_IMAGES } from '@/lib/covers'
 
 const steps = [
   {
@@ -72,13 +72,13 @@ export default function Sell() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 to={user ? '/list' : '/login?redirect=/list'}
-                className="inline-flex items-center justify-center gap-2 bg-secondary text-white font-semibold px-8 py-4 rounded-full hover:bg-secondary/90 transition-colors text-sm"
+                className="inline-flex items-center justify-center gap-2 bg-secondary text-white font-semibold px-8 py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm"
               >
-                List Your Book <ArrowRight size={16} />
+                List Your Book
               </Link>
               <Link
                 to="/how-it-works"
-                className="inline-flex items-center justify-center gap-2 border border-white/20 text-white/80 font-semibold px-8 py-4 rounded-full hover:bg-white/8 transition-colors text-sm"
+                className="inline-flex items-center justify-center gap-2 border border-white/20 text-white/80 font-semibold px-8 py-4 rounded-xl hover:bg-white/8 transition-colors text-sm"
               >
                 How it works
               </Link>
@@ -178,11 +178,12 @@ export default function Sell() {
 
             {/* Visual */}
             <div className="grid grid-cols-3 gap-3">
-              {['#C8A97E','#9B5DE5','#F4A261','#2D6A4F','#E63946','#457B9D','#1D3557','#E9C46A','#52B788'].map((color, i) => (
-                <div
+              {Object.values(COVER_IMAGES).slice(0, 9).map((src, i) => (
+                <img
                   key={i}
-                  className="aspect-[2/3] rounded-2xl shadow-sm opacity-80"
-                  style={{ backgroundColor: color }}
+                  src={src}
+                  alt=""
+                  className="h-52 w-full object-cover rounded-2xl shadow-sm"
                 />
               ))}
             </div>
@@ -255,9 +256,9 @@ export default function Sell() {
           </p>
           <Link
             to={user ? '/list' : '/login?redirect=/list'}
-            className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-10 py-4 rounded-full hover:bg-secondary/90 transition-colors text-sm"
+            className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-10 py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm"
           >
-            List Your Book <ArrowRight size={16} />
+            List Your Book
           </Link>
           <p className="text-white/30 text-xs mt-5">
             By listing, you agree to our{' '}

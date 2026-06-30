@@ -12,13 +12,12 @@ import RootLayout from "./layouts/RootLayout";
 import Home from "./pages/LandingPage/Home";
 import BrowseBooks from "./pages/LandingPage/BrowseBooks";
 import BookDetail from "./pages/LandingPage/BookDetail";
-import Blog from "./pages/LandingPage/Blog";
-import BlogPost from "./pages/LandingPage/BlogPost";
 import Contact from "./pages/LandingPage/Contact";
 import FAQ from "./pages/LandingPage/FAQ";
 import HowItWorks from "./pages/LandingPage/HowItWorks";
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
+import ForgotPassword from "./pages/Auth/ForgotPassword";
 import Cart from "./pages/LandingPage/Cart";
 import Checkout from "./pages/LandingPage/Checkout";
 import PaymentSuccess from "./pages/LandingPage/PaymentSuccess";
@@ -36,9 +35,6 @@ import SellerDropoff from "./pages/LandingPage/SellerDropoff";
 import MyPurchases from "./pages/LandingPage/MyPurchases";
 import SellerEarnings from "./pages/LandingPage/SellerEarnings";
 import SellerStorefront from "./pages/LandingPage/SellerStorefront";
-import RequestBook from "./pages/LandingPage/RequestBook";
-import MyRequests from "./pages/LandingPage/MyRequests";
-import AllRequests from "./pages/LandingPage/AllRequests";
 import CustomerService from "./pages/LandingPage/CustomerService";
 import ShippingReturns from "./pages/LandingPage/ShippingReturns";
 import PrivacyPolicy from "./pages/LandingPage/PrivacyPolicy";
@@ -87,7 +83,7 @@ const App = () => (
               <Route path="/" element={<RootLayout />}>
                 <Route index element={<Home />} />
                 <Route path="browse" element={<BrowseBooks />} />
-                <Route path="books/:id" element={<BookDetail />} />
+                <Route path="books/:slug" element={<BookDetail />} />
                 <Route path="cart" element={<Cart />} />
                 <Route path="checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
                 <Route path="payment/success" element={<PaymentSuccess />} />
@@ -103,23 +99,19 @@ const App = () => (
                 <Route path="my-sales" element={<ProtectedRoute><SellerOrders /></ProtectedRoute>} />
                 <Route path="my-sales/:id/dropoff" element={<ProtectedRoute><SellerDropoff /></ProtectedRoute>} />
                 <Route path="my-earnings" element={<ProtectedRoute><SellerEarnings /></ProtectedRoute>} />
-                <Route path="request" element={<ProtectedRoute><RequestBook /></ProtectedRoute>} />
                 <Route path="my-purchases" element={<ProtectedRoute><MyPurchases /></ProtectedRoute>} />
-                <Route path="my-requests" element={<ProtectedRoute><MyRequests /></ProtectedRoute>} />
-                <Route path="requests" element={<AllRequests />} />
                 <Route path="store/:email" element={<SellerStorefront />} />
                 <Route path="customer-service" element={<CustomerService />} />
                 <Route path="shipping" element={<ShippingReturns />} />
                 <Route path="privacy" element={<PrivacyPolicy />} />
                 <Route path="terms" element={<TermsConditions />} />
-                <Route path="blog" element={<Blog />} />
-                <Route path="blog/:slug" element={<BlogPost />} />
                 <Route path="contact" element={<Contact />} />
                 <Route path="faq" element={<FAQ />} />
                 <Route path="how-it-works" element={<HowItWorks />} />
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
 
               {/* Admin */}
               <Route path="/admin" element={<AdminLogin />} />

@@ -44,7 +44,7 @@ function ListingCard({ listing }: { listing: Listing }) {
         </div>
         <Link
           to="/browse"
-          className="mt-4 block w-full text-center bg-main text-white text-xs font-semibold py-2.5 rounded-full hover:bg-main/90 transition-colors"
+          className="mt-4 block w-full text-center bg-main text-white text-xs font-semibold py-2.5 rounded-xl hover:bg-main/90 transition-colors"
         >
           Buy on Alakowe
         </Link>

@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
@@ -85,61 +88,59 @@ function AdminsPanel() {
         action={<Button size="sm" onClick={startCreate} className="gap-1.5"><Plus className="h-4 w-4" /> Add Admin</Button>}
         bodyClassName="p-0"
       >
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border/70 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-5 py-3">Admin</th>
-                <th className="px-5 py-3">Role</th>
-                <th className="px-5 py-3">Permissions</th>
-                <th className="px-5 py-3">Last login</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {admins.map((a) => (
-                <tr key={a.id} className="border-b border-border/40 transition-colors hover:bg-muted/40">
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9"><AvatarFallback className="bg-secondary text-xs font-semibold text-primary">{a.avatar}</AvatarFallback></Avatar>
-                      <div>
-                        <p className="font-semibold text-foreground">{a.name}</p>
-                        <p className="text-xs text-muted-foreground">{a.email}</p>
-                      </div>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Admin</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Role</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Permissions</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Last login</TableHead>
+              <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Status</TableHead>
+              <TableHead className="px-5 py-3" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {admins.map((a) => (
+              <TableRow key={a.id}>
+                <TableCell className="px-5 py-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9"><AvatarFallback className="bg-secondary text-xs font-semibold text-primary">{a.avatar}</AvatarFallback></Avatar>
+                    <div>
+                      <p className="font-semibold text-foreground">{a.name}</p>
+                      <p className="text-xs text-muted-foreground">{a.email}</p>
                     </div>
-                  </td>
-                  <td className="px-5 py-3">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-secondary/40 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-                      <ShieldCheck className="h-3 w-3" /> {a.role}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-xs text-muted-foreground">{a.permissions.join(", ")}</td>
-                  <td className="px-5 py-3 text-xs text-muted-foreground">{new Date(a.lastLogin).toLocaleString()}</td>
-                  <td className="px-5 py-3">
-                    <button onClick={() => toggleActive(a.id)} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset transition-all ${
-                      a.active ? "bg-success/10 text-success ring-success/20" : "bg-muted text-muted-foreground ring-border"
-                    }`}>{a.active ? "Active" : "Inactive"}</button>
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => startEdit(a)}><Edit className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { toggleActive(a.id); toast(a.active ? "Deactivated" : "Activated"); }}>
-                          <Check className="mr-2 h-4 w-4" /> {a.active ? "Deactivate" : "Activate"}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => setConfirm(a)}><Trash2 className="mr-2 h-4 w-4" /> Remove</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-secondary/40 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                    <ShieldCheck className="h-3 w-3" /> {a.role}
+                  </span>
+                </TableCell>
+                <TableCell className="px-5 py-3 text-xs text-muted-foreground">{a.permissions.join(", ")}</TableCell>
+                <TableCell className="px-5 py-3 text-xs text-muted-foreground">{new Date(a.lastLogin).toLocaleString()}</TableCell>
+                <TableCell className="px-5 py-3">
+                  <button onClick={() => toggleActive(a.id)} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset transition-all ${
+                    a.active ? "bg-success/10 text-success ring-success/20" : "bg-muted text-muted-foreground ring-border"
+                  }`}>{a.active ? "Active" : "Inactive"}</button>
+                </TableCell>
+                <TableCell className="px-5 py-3 text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => startEdit(a)}><Edit className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toggleActive(a.id); toast(a.active ? "Deactivated" : "Activated"); }}>
+                        <Check className="mr-2 h-4 w-4" /> {a.active ? "Deactivate" : "Activate"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive" onClick={() => setConfirm(a)}><Trash2 className="mr-2 h-4 w-4" /> Remove</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </PageCard>
 
       <Dialog open={creating || !!editing} onOpenChange={(o) => { if (!o) { setCreating(false); setEditing(null); } }}>
@@ -322,39 +323,37 @@ function PrioritiesPanel() {
 
   return (
     <PageCard title="Product Priorities" description="Higher priority numbers surface products first across the storefront." bodyClassName="p-0">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border/70 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-              <th className="w-10 px-4 py-3"></th>
-              <th className="px-5 py-3">Product</th>
-              <th className="px-5 py-3">Seller</th>
-              <th className="px-5 py-3">Status</th>
-              <th className="px-5 py-3 text-right">Priority</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((l) => (
-              <tr key={l.id} className="border-b border-border/40 hover:bg-muted/40">
-                <td className="px-4 py-3 text-muted-foreground"><GripVertical className="h-4 w-4 cursor-grab" /></td>
-                <td className="px-5 py-3">
-                  <p className="font-semibold text-foreground">{l.title}</p>
-                  <p className="text-[11px] font-mono text-muted-foreground">{l.id}</p>
-                </td>
-                <td className="px-5 py-3 text-muted-foreground">{l.seller}</td>
-                <td className="px-5 py-3 text-muted-foreground">{l.status}</td>
-                <td className="px-5 py-3">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => move(l.id, -1)}>−</Button>
-                    <Input type="number" value={pri[l.id] ?? 0} onChange={(e) => set(l.id, +e.target.value || 0)} className="h-8 w-16 text-center" />
-                    <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => move(l.id, 1)}>+</Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="w-10 px-4 py-3" />
+            <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Product</TableHead>
+            <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Seller</TableHead>
+            <TableHead className="px-5 py-3 text-[11px] uppercase tracking-wider">Status</TableHead>
+            <TableHead className="px-5 py-3 text-right text-[11px] uppercase tracking-wider">Priority</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sorted.map((l) => (
+            <TableRow key={l.id}>
+              <TableCell className="px-4 py-3 text-muted-foreground"><GripVertical className="h-4 w-4 cursor-grab" /></TableCell>
+              <TableCell className="px-5 py-3">
+                <p className="font-semibold text-foreground">{l.title}</p>
+                <p className="text-[11px] font-mono text-muted-foreground">{l.id}</p>
+              </TableCell>
+              <TableCell className="px-5 py-3 text-muted-foreground">{l.seller}</TableCell>
+              <TableCell className="px-5 py-3 text-muted-foreground">{l.status}</TableCell>
+              <TableCell className="px-5 py-3">
+                <div className="flex items-center justify-end gap-1.5">
+                  <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => move(l.id, -1)}>−</Button>
+                  <Input type="number" value={pri[l.id] ?? 0} onChange={(e) => set(l.id, +e.target.value || 0)} className="h-8 w-16 text-center" />
+                  <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => move(l.id, 1)}>+</Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </PageCard>
   );
 }

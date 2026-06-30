@@ -61,7 +61,7 @@ function Dispute() {
           </div>
           <Link
             to="/browse"
-            className="inline-block bg-main text-white font-semibold px-8 py-3.5 rounded-full text-sm hover:bg-main/90 transition-colors"
+            className="inline-block bg-main text-white font-semibold px-8 py-3.5 rounded-xl text-sm hover:bg-main/90 transition-colors"
           >
             Back to Browse
           </Link>
@@ -175,7 +175,7 @@ function Dispute() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? 'Submitting…' : 'Submit Report'}
           </button>
