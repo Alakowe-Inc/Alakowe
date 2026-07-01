@@ -9,6 +9,7 @@ import {
   getMyListingByIdApi,
   setDiscountApi,
   getMyListingSummaryApi,
+  getLandingPageApi,
   type ListingFilterParams,
   type MyListingsFilterParams,
 } from "./listings.api"
@@ -19,6 +20,7 @@ import type {
   ListingResponsePagedResult,
   SetListingDiscountRequest,
   MyListingSummaryResponse,
+  LandingPageResponse,
 } from "../types"
 
 type SubmitListingBody = SubmitListingRequestDto
@@ -131,5 +133,12 @@ export function useSetDiscount() {
       queryClient.invalidateQueries({ queryKey: ["my-listings"] })
       queryClient.invalidateQueries({ queryKey: ["my-listing"] })
     },
+  })
+}
+
+export function useLandingPage() {
+  return useQuery({
+    queryKey: ["landing-page"],
+    queryFn: () => withMock({ sections: [] }, () => getLandingPageApi()),
   })
 }
