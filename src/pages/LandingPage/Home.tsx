@@ -11,19 +11,17 @@ import {
   Wallet
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
-import { blogPosts, bookQuotes, bookRequests, books } from '../../data/mockData'
+import { blogPosts, bookQuotes, bookRequests } from '../../data/mockData'
 import { useAuth } from '../../context/AuthContext'
 import BookCarousel from '../../components/BookCarousel'
 import BookCard from '../../components/BookCard'
+import { useLandingPage } from '../../lib/api/listings/listings.hooks'
+import { listingToBookDisplay } from '../../lib/api/adapters'
 import heroImage1 from '../../assets/media/images/banny4.png'
 import heroImage2 from '../../assets/media/images/banny2.png'
 import heroImage3 from '../../assets/media/images/banny3.png'
 //ALÁKÒWÉ,
 const heroSlides = [heroImage1, heroImage2, heroImage3]
-
-const likeNewBooks = books.filter(b => b.condition === 'LikeNew' || b.condition === 'Good').slice(0, 5)
-const trendingBooks = [...books].sort((a, b) => b.sellerRating - a.sellerRating).slice(0, 5)
-const bestValueBooks = books.filter(b => b.isDiscountApplied || b.badge === 'Best Value').slice(0, 5)
 
 function Home() {
   const { user } = useAuth()
@@ -38,6 +36,9 @@ function Home() {
   const [timestamps, setTimestamps] = useState<Record<string, number>>({})
   const [showModal, setShowModal] = useState(false)
   const [activeTitle, setActiveTitle] = useState("")
+
+  const { data: landingPage, isLoading: sectionsLoading } = useLandingPage()
+  const sections = landingPage?.sections ?? []
 
   // ── Stats animation state ─────────────────────────────────────
   const statsRef = useRef<HTMLDivElement | null>(null)
@@ -323,50 +324,49 @@ function Home() {
               The Store
             </p>
             <h2 className="font-heading font-bold text-main text-3xl md:text-5xl tracking-tight max-w-3xl">Discover books, curated by condition and demand.</h2>
-            <p className="text-main/55 text-sm md:text-base mt-3 max-w-2xl">Thirty hand-picked listings from readers across Nigeria — refreshed daily.</p>
+            <p className="text-main/55 text-sm md:text-base mt-3 max-w-2xl">Hand-picked listings from readers across Nigeria — refreshed daily.</p>
           </div>
 
-          {/* Like New */}
-          <div className="mb-14">
-            <BookCarousel
-              label="Like New"
-              icon={<span className="text-amber-400">✦</span>}
-            >
-              {likeNewBooks.map(book => (
-                <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
-                  <BookCard book={book} />
-                </div>
-              ))}
-            </BookCarousel>
-          </div>
+          {/* Dynamic sections from API */}
+          {sectionsLoading && (
+            <div className="py-12 text-center text-main/40 text-sm">Loading collections...</div>
+          )}
 
-          {/* Trending Now */}
-          <div className="mb-14">
-            <BookCarousel
-              label="Trending Now"
-              icon={<span className="text-red-400">🔥</span>}
-            >
-              {trendingBooks.map(book => (
-                <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
-                  <BookCard book={book} />
-                </div>
-              ))}
-            </BookCarousel>
-          </div>
+          {sections.map((section) => {
+            const listings = (section.listings ?? []).map(listingToBookDisplay)
+            if (listings.length === 0) return null
 
-          {/* Best Value */}
-          <div className="mb-14">
-            <BookCarousel
-              label="Best Value"
-              icon={<span className="text-amber-500">☆</span>}
-            >
-              {bestValueBooks.map(book => (
-                <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
-                  <BookCard book={book} />
-                </div>
-              ))}
-            </BookCarousel>
-          </div>
+            const iconMap: Record<string, React.ReactNode> = {
+              category: <span className="text-amber-400">✦</span>,
+              collection: <span className="text-red-400">🔥</span>,
+              tag: <span className="text-amber-500">☆</span>,
+            }
+
+            const filterKey = section.sectionType ?? "category"
+            const filterValue = section.filterParam?.[filterKey] ?? ""
+
+            return (
+              <div key={section.id} className="mb-14">
+                <BookCarousel
+                  label={section.title ?? "Featured"}
+                  icon={iconMap[filterKey]}
+                  seeAllLink={`/browse?${filterKey}=${filterValue}`}
+                >
+                  {listings.map((book) => (
+                    <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
+                      <BookCard book={book} />
+                    </div>
+                  ))}
+                </BookCarousel>
+              </div>
+            )
+          })}
+
+          {!sectionsLoading && sections.length === 0 && (
+            <div className="py-12 text-center text-main/40 text-sm">
+              No collections available yet. Check back soon!
+            </div>
+          )}
 
           {/* Mobile CTA */}
           <div className="mt-8 text-center md:hidden">

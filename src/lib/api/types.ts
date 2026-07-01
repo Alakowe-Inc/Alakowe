@@ -340,3 +340,17 @@ export interface MyListingSummaryResponse {
   pendingApproval?: number
   rejected?: number
 }
+
+/* ───────── Landing Page ───────── */
+
+export interface LandingPageSectionResponse {
+  id?: number
+  title?: string | null
+  sectionType?: string | null
+  filterParam?: any
+  listings?: ListingResponse[] | null
+}
+
+export interface LandingPageResponse {
+  sections?: LandingPageSectionResponse[] | null
+}
