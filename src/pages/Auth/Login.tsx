@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 function Login() {
-  const { login } = useAuth()
+  const { login, isLoading } = useAuth()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const redirect = params.get('redirect') ?? '/'
@@ -15,11 +15,17 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
 
-  function handleSubmit(e: React.SyntheticEvent) {
+  async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
-    login(email)
-    navigate(redirect, { replace: true })
+    setError('')
+    try {
+      await login(email, password)
+      navigate(redirect, { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed')
+    }
   }
 
   return (
@@ -66,12 +72,20 @@ function Login() {
                 Forgot password?
               </Link>
             </div>
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             <Button
               type="submit"
+              disabled={isLoading}
               className="w-full rounded-xl bg-secondary hover:bg-secondary/90 h-auto py-3.5 text-sm font-semibold"
             >
-              Sign in
+              {isLoading ? 'Signing in…' : 'Sign in'}
             </Button>
+            <p className="text-xs text-gray-400 text-center mt-1">
+              By continuing, you agree to our{' '}
+              <Link to="/terms" className="underline hover:text-gray-600 transition-colors">
+                Terms of service
+              </Link>
+            </p>
           </form>
 
           <p className="text-sm text-gray-500 mt-8">

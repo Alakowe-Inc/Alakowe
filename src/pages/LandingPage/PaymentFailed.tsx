@@ -1,7 +1,15 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { XCircle } from 'lucide-react'
 
 function PaymentFailed() {
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['cart'] })
+  }, [queryClient])
+
   return (
     <div className="bg-third min-h-screen flex items-center justify-center px-4 py-16">
       <div className="max-w-md w-full text-center">

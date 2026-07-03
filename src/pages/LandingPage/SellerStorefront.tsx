@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { MapPin, BookOpen, ShoppingBag } from 'lucide-react'
 import { getSellerListings, getPublicSellerProfile } from '../../data/sellerData'
 import type { Listing, PublicSellerProfile } from '../../data/sellerData'
+import { formatPrice } from '../../lib/utils'
 
 function ListingCard({ listing }: { listing: Listing }) {
   const discountedPrice = listing.discount > 0
@@ -29,11 +30,11 @@ function ListingCard({ listing }: { listing: Listing }) {
         </h3>
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-bold text-main text-sm">
-            ₦{(discountedPrice ?? listing.price).toLocaleString()}
+            {formatPrice(discountedPrice ?? listing.price)}
           </span>
           {discountedPrice && (
             <span className="text-xs text-main/40 line-through">
-              ₦{listing.price.toLocaleString()}
+              {formatPrice(listing.price)}
             </span>
           )}
         </div>

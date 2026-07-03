@@ -10,19 +10,24 @@ import {
   Wallet
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
-import { bookQuotes, books } from '../../data/mockData'
+import { bookQuotes } from '../../data/mockData'
+import BookCarousel from '../../components/BookCarousel'
 import BookCard from '../../components/BookCard'
+import { useLandingPage } from '../../lib/api/listings/listings.hooks'
+import { listingToBookDisplay } from '../../lib/api/adapters'
 import heroImage1 from '../../assets/media/images/banny4.png'
 import heroImage2 from '../../assets/media/images/banny2.png'
 import heroImage3 from '../../assets/media/images/banny3.png'
 //ALÁKÒWÉ,
 const heroSlides = [heroImage1, heroImage2, heroImage3]
-const featuredBooks = books.slice(0, 8)
 
 function Home() {
   const [slideIndex, setSlideIndex] = useState(0)
   const [quoteIndex, setQuoteIndex] = useState(0)
   const [visible, setVisible] = useState(true)
+
+  const { data: landingPage, isLoading: sectionsLoading } = useLandingPage()
+  const sections = landingPage?.sections ?? []
 
   // ── Stats animation state ─────────────────────────────────────
   const statsRef = useRef<HTMLDivElement | null>(null)
@@ -249,40 +254,66 @@ function Home() {
         </div>
       </section>
 
-      {/* ── Featured Books ──────────────────────────────────────── */}
+      {/* ── The Store ────────────────────────────────────────────── */}
       <section className="bg-white py-20">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
 
           {/* Header */}
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
-                Discover
-              </p>
-              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
-                Your Next Read
-              </h2>
-            </div>
-            <Link
-              to="/browse"
-              className="hidden md:flex  underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
-            >
-              View all
-            </Link>
+          <div className="mb-12">
+            <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
+              The Store
+            </p>
+            <h2 className="font-heading font-bold text-main text-3xl md:text-5xl tracking-tight max-w-3xl">Discover books, curated by condition and demand.</h2>
+            <p className="text-main/55 text-sm md:text-base mt-3 max-w-2xl">Hand-picked listings from readers across Nigeria — refreshed daily.</p>
           </div>
 
-          {/* Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-            {featuredBooks.map(book => (
-              <BookCard key={book.id} book={book} />
-            ))}
-          </div>
+          {/* Dynamic sections from API */}
+          {sectionsLoading && (
+            <div className="py-12 text-center text-main/40 text-sm">Loading collections...</div>
+          )}
+
+          {sections.map((section) => {
+            const listings = (section.listings ?? []).map(listingToBookDisplay)
+            if (listings.length === 0) return null
+
+            const iconMap: Record<string, React.ReactNode> = {
+              category: <span className="text-amber-400">✦</span>,
+              collection: <span className="text-red-400">🔥</span>,
+              tag: <span className="text-amber-500">☆</span>,
+            }
+
+            const filterKey = section.sectionType ?? "category"
+            const filterValue = section.filterParam?.[filterKey] ?? ""
+
+            return (
+              <div key={section.id} className="mb-14">
+                <BookCarousel
+                  label={section.title ?? "Featured"}
+                  icon={iconMap[filterKey]}
+                  seeAllLink={`/browse?${filterKey}=${filterValue}`}
+                >
+                  {listings.map((book) => (
+                    <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      <BookCard book={book as any} />
+                    </div>
+                  ))}
+                </BookCarousel>
+              </div>
+            )
+          })}
+
+          {!sectionsLoading && sections.length === 0 && (
+            <div className="py-12 text-center text-main/40 text-sm">
+              No collections available yet. Check back soon!
+            </div>
+          )}
 
           {/* Mobile CTA */}
           <div className="mt-8 text-center md:hidden">
             <Link
               to="/browse"
-              className="inline-flex  underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+              className="inline-flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
             >
               View all books
             </Link>

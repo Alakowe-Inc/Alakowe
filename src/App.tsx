@@ -1,10 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { TooltipProvider } from "@/components/ui/tooltip";
-
-// Customer-facing
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -19,16 +16,22 @@ import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import Cart from "./pages/LandingPage/Cart";
-import Checkout from "./pages/LandingPage/Checkout";
+import ShippingDetails from "./pages/LandingPage/Checkout/ShippingDetails";
+import CheckoutSummary from "./pages/LandingPage/Checkout/CheckoutSummary";
+import PaymentProcessing from "./pages/LandingPage/Checkout/PaymentProcessing";
+import { CheckoutProvider } from "./context/CheckoutContext";
 import PaymentSuccess from "./pages/LandingPage/PaymentSuccess";
 import PaymentFailed from "./pages/LandingPage/PaymentFailed";
 import OrderStatus from "./pages/LandingPage/OrderStatus";
 import Dispute from "./pages/LandingPage/Dispute";
 import Profile from "./pages/LandingPage/Profile";
+import ShippingAddresses from "./pages/LandingPage/ShippingAddresses";
+
 import Sell from "./pages/LandingPage/Sell";
 import ListBook from "./pages/LandingPage/ListBook";
 import ListingSubmitted from "./pages/LandingPage/ListingSubmitted";
 import MyListings from "./pages/LandingPage/MyListings";
+import MyListingDetail from "./pages/LandingPage/MyListingDetail";
 import EditListing from "./pages/LandingPage/EditListing";
 import SellerOrders from "./pages/LandingPage/SellerOrders";
 import SellerDropoff from "./pages/LandingPage/SellerDropoff";
@@ -41,60 +44,35 @@ import PrivacyPolicy from "./pages/LandingPage/PrivacyPolicy";
 import TermsConditions from "./pages/LandingPage/TermsConditions";
 import NotFound from "./pages/NotFound";
 
-// Admin
-import { AdminLayout } from "@/admin/components/AdminLayout";
-import AdminLogin from "@/admin/pages/AdminLogin";
-import { RequireAdmin } from "@/admin/pages/RequireAdmin";
-import Dashboard from "@/admin/pages/Dashboard";
-import Users from "@/admin/pages/Users";
-import UserProfile from "@/admin/pages/UserProfile";
-import Listings from "@/admin/pages/Listings";
-import Orders from "@/admin/pages/Orders";
-import Inventory from "@/admin/pages/Inventory";
-import Payments from "@/admin/pages/Payments";
-import PaymentDetail from "@/admin/pages/PaymentDetail";
-import Pickups from "@/admin/pages/Pickups";
-import DropoffBooks from "@/admin/pages/DropoffBooks";
-import DropoffCentres from "@/admin/pages/DropoffCentres";
-import DropoffDetail from "@/admin/pages/DropoffDetail";
-import Analytics from "@/admin/pages/Analytics";
-import Settings from "@/admin/pages/Settings";
-import OrderDetail from "@/admin/pages/OrderDetail";
-import ListingDetail from "@/admin/pages/ListingDetail";
-import PickupDetail from "@/admin/pages/PickupDetail";
-
 const queryClient = new QueryClient();
-
-const adminWrap = (el: React.ReactNode) => (
-  <RequireAdmin>
-    <AdminLayout>{el}</AdminLayout>
-  </RequireAdmin>
-);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
       <ToastContainer position="top-right" autoClose={3000} />
       <AuthProvider>
         <CartProvider>
           <BrowserRouter>
             <Routes>
-              {/* Customer site */}
               <Route path="/" element={<RootLayout />}>
                 <Route index element={<Home />} />
                 <Route path="browse" element={<BrowseBooks />} />
-                <Route path="books/:slug" element={<BookDetail />} />
+                <Route path="books/:id" element={<BookDetail />} />
                 <Route path="cart" element={<Cart />} />
-                <Route path="checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                <Route path="checkout" element={<ProtectedRoute><CheckoutProvider><ShippingDetails /></CheckoutProvider></ProtectedRoute>} />
+                <Route path="checkout/summary" element={<ProtectedRoute><CheckoutProvider><CheckoutSummary /></CheckoutProvider></ProtectedRoute>} />
+                <Route path="checkout/processing" element={<ProtectedRoute><CheckoutProvider><PaymentProcessing /></CheckoutProvider></ProtectedRoute>} />
                 <Route path="payment/success" element={<PaymentSuccess />} />
                 <Route path="payment/failed" element={<PaymentFailed />} />
                 <Route path="order/:orderId" element={<OrderStatus />} />
                 <Route path="order/:orderId/dispute" element={<Dispute />} />
                 <Route path="account" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="account/shipping-addresses" element={<ProtectedRoute><ShippingAddresses /></ProtectedRoute>} />
+
                 <Route path="sell" element={<Sell />} />
                 <Route path="list" element={<ProtectedRoute><ListBook /></ProtectedRoute>} />
                 <Route path="listing-submitted" element={<ListingSubmitted />} />
                 <Route path="my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
+                <Route path="my-listings/:id" element={<ProtectedRoute><MyListingDetail /></ProtectedRoute>} />
                 <Route path="my-listings/:id/edit" element={<ProtectedRoute><EditListing /></ProtectedRoute>} />
                 <Route path="my-sales" element={<ProtectedRoute><SellerOrders /></ProtectedRoute>} />
                 <Route path="my-sales/:id/dropoff" element={<ProtectedRoute><SellerDropoff /></ProtectedRoute>} />
@@ -112,38 +90,11 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
-
-              {/* Admin */}
-              <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={adminWrap(<Dashboard />)} />
-              <Route path="/admin/users" element={adminWrap(<Users />)} />
-              <Route path="/admin/users/:id" element={adminWrap(<UserProfile />)} />
-              <Route path="/admin/sellers" element={<Navigate to="/admin/users" replace />} />
-              <Route path="/admin/listings" element={adminWrap(<Listings />)} />
-              <Route path="/admin/listings/:id" element={adminWrap(<ListingDetail />)} />
-              <Route path="/admin/orders" element={adminWrap(<Orders />)} />
-              <Route path="/admin/orders/:id" element={adminWrap(<OrderDetail />)} />
-              <Route path="/admin/inventory" element={adminWrap(<Inventory />)} />
-              <Route path="/admin/payments" element={adminWrap(<Payments />)} />
-              <Route path="/admin/payments/:id" element={adminWrap(<PaymentDetail />)} />
-              <Route path="/admin/pickups" element={adminWrap(<Pickups />)} />
-              <Route path="/admin/pickups/:id" element={adminWrap(<PickupDetail />)} />
-              <Route path="/admin/dropoffs" element={<Navigate to="/admin/dropoffs/books" replace />} />
-              <Route path="/admin/dropoffs/books" element={adminWrap(<DropoffBooks />)} />
-              <Route path="/admin/dropoffs/books/:id" element={adminWrap(<DropoffDetail />)} />
-              <Route path="/admin/dropoffs/centres" element={adminWrap(<DropoffCentres />)} />
-              <Route path="/admin/analytics" element={adminWrap(<Analytics />)} />
-              <Route path="/admin/reports" element={<Navigate to="/admin/analytics" replace />} />
-              <Route path="/admin/settings" element={adminWrap(<Settings />)} />
-              <Route path="/admin/insights" element={<Navigate to="/admin/dashboard" replace />} />
-
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </CartProvider>
       </AuthProvider>
-    </TooltipProvider>
   </QueryClientProvider>
 );
 
