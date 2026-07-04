@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { FormControl, TextareaControl } from '@/components/ui/form-controls'
 
 function IconInstagram() {
   return (
@@ -81,44 +82,44 @@ function Contact() {
                     <label className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-2 block">
                       Name
                     </label>
-                    <input
+                    <FormControl
                       type="text"
                       required
                       placeholder="Your full name"
                       value={form.name}
                       onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                      className="w-full bg-third border border-third rounded-xl px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
+                      style="bg-third border border-third rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/40 outline-none focus-visible:ring-0 focus:border-secondary transition-colors"
                     />
                   </div>
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-2 block">
                       Email
                     </label>
-                    <input
+                    <FormControl
                       type="email"
                       required
                       placeholder="your@email.com"
                       value={form.email}
                       onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                      className="w-full bg-third border border-third rounded-xl px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors"
+                      style="bg-third border border-third rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/40 outline-none focus-visible:ring-0 focus:border-secondary transition-colors"
                     />
                   </div>
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-2 block">
                       Message
                     </label>
-                    <textarea
+                    <TextareaControl
                       required
                       placeholder="How can we help you?"
                       rows={6}
                       value={form.message}
                       onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                      className="w-full bg-third border border-third rounded-xl px-4 py-3 text-sm text-main placeholder-main/40 outline-none focus:border-secondary transition-colors resize-none"
+                      style="bg-third border border-third rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/40 outline-none focus-visible:ring-0 focus:border-secondary transition-colors"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="bg-main text-white font-semibold px-7 py-3.5 rounded-full hover:bg-main/90 transition-colors text-sm"
+                    className="bg-main text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-main/90 transition-colors text-sm"
                   >
                     Send Message
                   </button>

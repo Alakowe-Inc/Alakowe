@@ -1,9 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { 
-  ArrowRight, 
-  Search, 
-  ShoppingCart, 
-  Handshake, 
+import { Link } from 'react-router-dom'
+import {
+  Search,
+  ShoppingCart,
+  Handshake,
   BookOpen,
   BookPlus,
   BellRing,
@@ -11,8 +10,7 @@ import {
   Wallet
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
-import { blogPosts, bookQuotes, bookRequests } from '../../data/mockData'
-import { useAuth } from '../../context/AuthContext'
+import { bookQuotes } from '../../data/mockData'
 import BookCarousel from '../../components/BookCarousel'
 import BookCard from '../../components/BookCard'
 import { useLandingPage } from '../../lib/api/listings/listings.hooks'
@@ -24,18 +22,9 @@ import heroImage3 from '../../assets/media/images/banny3.png'
 const heroSlides = [heroImage1, heroImage2, heroImage3]
 
 function Home() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
   const [slideIndex, setSlideIndex] = useState(0)
   const [quoteIndex, setQuoteIndex] = useState(0)
   const [visible, setVisible] = useState(true)
-
-
-  const [joined, setJoined] = useState<Record<string, boolean>>({})
-  const [counts, setCounts] = useState<Record<string, number>>({})
-  const [timestamps, setTimestamps] = useState<Record<string, number>>({})
-  const [showModal, setShowModal] = useState(false)
-  const [activeTitle, setActiveTitle] = useState("")
 
   const { data: landingPage, isLoading: sectionsLoading } = useLandingPage()
   const sections = landingPage?.sections ?? []
@@ -48,133 +37,10 @@ function Home() {
   const [statesText, setStatesText] = useState("")
   const [countingDone, setCountingDone] = useState(false)
 
-  function handleJoinQueue(title: string) {
-    if (joined[title]) return
-
-    const newJoined = { ...joined, [title]: true }
-    setJoined(newJoined)
-
-    const newCounts = {
-      ...counts,
-      [title]:
-        (counts[title] ||
-          bookRequests.find(b => b.title === title)?.requestCount ||
-          0) + 1,
-    }
-
-    setCounts(newCounts)
-
-    const newTimestamps = {
-      ...timestamps,
-      [title]: Date.now(),
-    }
-
-    setTimestamps(newTimestamps)
-
-    // SAVE TO LOCAL STORAGE
-    localStorage.setItem("queueJoined", JSON.stringify(newJoined))
-    localStorage.setItem("queueCounts", JSON.stringify(newCounts))
-    localStorage.setItem("queueTime", JSON.stringify(newTimestamps))
-
-    setActiveTitle(title)
-    setShowModal(true)
-
-    setTimeout(() => {
-      setShowModal(false)
-    }, 2000)
-  }
-
-  useEffect(() => {
-    const savedJoined = localStorage.getItem("queueJoined")
-    const savedCounts = localStorage.getItem("queueCounts")
-    const savedTime = localStorage.getItem("queueTime")
-
-    if (savedJoined) setJoined(JSON.parse(savedJoined))
-    if (savedCounts) setCounts(JSON.parse(savedCounts))
-    if (savedTime) setTimestamps(JSON.parse(savedTime))
-  }, [])
-
-  function formatTime(timestamp?: number, fallbackDays?: number) {
-    if (!timestamp) {
-      return fallbackDays === 1
-        ? "1 day ago"
-        : `${fallbackDays} days ago`
-    }
-
-    const diff = Date.now() - timestamp
-
-    const seconds = Math.floor(diff / 1000)
-    const minutes = Math.floor(diff / 60000)
-    const hours = Math.floor(diff / 3600000)
-    const days = Math.floor(diff / 86400000)
-
-    // Just now
-    if (seconds < 10) return "Just now"
-
-    // Seconds
-    if (seconds < 60) return `${seconds}s ago`
-
-    // Minutes
-    if (minutes < 60) {
-      return minutes === 1
-        ? "1 minute ago"
-        : `${minutes} minutes ago`
-    }
-
-    // Hours + minutes (example: 1hr 30min ago)
-    if (hours < 24) {
-      const remainingMinutes = minutes % 60
-
-      if (remainingMinutes === 0) {
-        return hours === 1
-          ? "1hr ago"
-          : `${hours}hr ago`
-      }
-
-      return `${hours}hr ${remainingMinutes}min ago`
-    }
-
-    // Days
-    if (days < 7) {
-      return days === 1
-        ? "1 day ago"
-        : `${days} days ago`
-    }
-
-    const weeks = Math.floor(days / 7)
-    if (weeks < 4) {
-      return weeks === 1
-        ? "1 week ago"
-        : `${weeks} weeks ago`
-    }
-
-    const months = Math.floor(days / 30)
-    if (months < 12) {
-      return months === 1
-        ? "1 month ago"
-        : `${months} months ago`
-    }
-
-    const years = Math.floor(days / 365)
-    return years === 1 ? "1 year ago" : `${years} years ago`
-  }
-
-  function handleIHaveThis() {
-    navigate(user ? '/list' : '/login?redirect=/list')
-  }
-
   useEffect(() => {
     const interval = setInterval(() => {
       setSlideIndex(i => (i + 1) % heroSlides.length)
     }, 5000)
-    return () => clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimestamps(prev => ({ ...prev }))
-    }, 60000)
-
     return () => clearInterval(interval)
   }, [])
 
@@ -259,7 +125,7 @@ function Home() {
   return (
     <div>
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="relative w-full h-screen flex flex-col overflow-hidden">
+      <section className="relative w-full h-[calc(90vh-100px)] flex flex-col overflow-hidden">
 
         {/* Background slides */}
         {heroSlides.map((src, i) => (
@@ -284,18 +150,18 @@ function Home() {
 
           <h1 className="font-heading font-bold text-white uppercase leading-none mb-4 sm:mb-5 text-3xl sm:text-5xl md:text-6xl xl:text-7xl max-w-xs sm:max-w-xl md:max-w-3xl">
             Buy, Sell & Request Used Books
-          </h1> 
+          </h1>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <Link
               to="/browse"
-              className="w-full sm:w-auto inline-flex justify-center items-center border border-white text-white font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white hover:text-main transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase rounded-full"
+              className="w-full sm:w-auto inline-flex justify-center items-center border border-white text-white font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white hover:text-main transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase rounded-xl"
             >
               Browse Books
             </Link>
             <Link
               to="/list"
-              className="w-full sm:w-auto inline-flex justify-center items-center border border-white bg-white text-main font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white/85 transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase rounded-full"
+              className="w-full sm:w-auto inline-flex justify-center items-center border border-white bg-white text-main font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white/85 transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase rounded-xl"
             >
               List a Book
             </Link>
@@ -311,6 +177,80 @@ function Home() {
               className={`rounded-full transition-all duration-300 ${i === slideIndex ? 'w-2.5 h-2.5 bg-white' : 'w-2 h-2 bg-white/40'}`}
             />
           ))}
+        </div>
+      </section>
+
+      {/* ── About ───────────────────────────────────────────────── */}
+      <section className="py-20 bg-third border-t border-third">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+
+            {/* Text */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
+                Our Story
+              </p>
+              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl mb-6 leading-tight">
+                Welcome to ALÁKÒWÉ
+              </h2>
+              <p className="text-main/60 text-sm leading-relaxed mb-5">
+                ALÁKÒWÉ is a Yoruba word used to describe an educated or literate person. Here, anyone who has ever felt connected to a book and wanted someone else to feel it too, is included.
+              </p>
+
+              <p className="text-main/60 text-sm leading-relaxed mb-5">
+                ALÁKÒWÉ, A New Way to Read
+              </p>
+              {/* <p className="text-main/60 text-sm leading-relaxed mb-8">
+                Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, ALÁKÒWÉ is the community for you.
+              </p> */}
+              <div
+                ref={statsRef}
+                className="grid grid-cols-3 gap-6 pt-8 border-t border-main/10"
+              >
+                {[
+                  {
+                    value: `${booksCount.toLocaleString()}${countingDone ? '+' : ''}`,
+                    label: 'Books Listed',
+                  },
+                  {
+                    value: `${readersCount.toLocaleString()}${countingDone ? '+' : ''}`,
+                    label: 'Happy Readers',
+                  },
+                  {
+                    value: statesText,
+                    label: 'States Covered',
+                  },
+                ].map(({ value, label }) => (
+                  <div key={label}>
+                    <p className="font-heading font-bold text-main text-2xl md:text-3xl">{value}</p>
+                    <p className="text-main/45 text-xs mt-1 leading-snug">{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Visual panel */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-main/5 p-6 flex flex-col gap-3">
+                <div className="w-8 h-8 rounded-full bg-secondary/15 flex items-center justify-center">
+                  <BookOpen size={15} className="text-main" />
+                </div>
+                <h4 className="font-heading font-bold text-main text-base">Inspected Books</h4>
+                <p className="text-main/50 text-xs leading-relaxed">Every book is physically checked before dispatch to ensure it matches the listing, always.</p>
+              </div>
+              <div className="bg-main p-6 flex flex-col gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <Handshake size={15} className="text-white" />
+                </div>
+                <h4 className="font-heading font-bold text-white text-base">Escrow Protection</h4>
+                <p className="text-white/50 text-xs leading-relaxed">Your payment is held until you confirm receipt. Sellers get paid only when you're satisfied.</p>
+              </div>
+              <div className="bg-secondary/10 p-6 flex flex-col gap-3 col-span-2">
+                <h4 className="font-heading font-bold text-main text-base">Nationwide Delivery</h4>
+                <p className="text-main/50 text-xs leading-relaxed">We coordinate pickup from sellers and delivery to your door across every state in Nigeria. Fast, reliable, and tracked.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -354,7 +294,8 @@ function Home() {
                 >
                   {listings.map((book) => (
                     <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
-                      <BookCard book={book} />
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      <BookCard book={book as any} />
                     </div>
                   ))}
                 </BookCarousel>
@@ -401,7 +342,7 @@ function Home() {
       </section>
 
       {/* ── How it Works ────────────────────────────────────────── */}
-      <section className="py-20 bg-white border-t border-third">
+      <section className="py-16 bg-white border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
 
           {/* Header */}
@@ -480,7 +421,7 @@ function Home() {
 
 
 
-      <section className="py-5 bg-white border-t border-third">
+      <section className="py-16 bg-white border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
 
           {/* Header */}
@@ -555,148 +496,6 @@ function Home() {
       </section>
 
 
-      {/* ── Book Requests ───────────────────────────────────────── */}
-      <section className="py-20 bg-third border-t border-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
-
-          {/* Header */}
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
-                Community
-              </p>
-              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
-                Book Requests
-              </h2>
-              <p className="text-main/50 text-sm mt-2 max-w-md">
-                Can't find what you're looking for? Post a request and we will notify you when we have it.
-              </p>
-            </div>
-          </div>
-
-          {/* Request cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {bookRequests.map(req => (
-              <div key={req.id} className="bg-white p-5 flex flex-col gap-4">
-                <div className="flex-1">
-                  <h3 className="font-heading font-bold text-main text-base leading-snug">{req.title}</h3>
-                  {req.author && (
-                    <p className="text-xs text-main/45 mt-0.5">{req.author}</p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3 text-[11px]">
-                  <span className="font-semibold text-secondary">
-                    {(counts[req.title] ?? req.requestCount)} 
-                    {(counts[req.title] ?? req.requestCount) === 1 
-                      ? ' person needs this' 
-                      : ' people need this'}
-                  </span>
-                  <span className="text-main/35">
-                    {formatTime(timestamps[req.title], req.daysAgo)}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-3 pt-1 border-t border-third">
-                  <button
-                    disabled={joined[req.title]}
-                    onClick={() => handleJoinQueue(req.title)}
-                    className={`text-[11px] font-semibold tracking-widest uppercase px-4 py-2 transition-colors shrink-0 rounded-full
-                    ${joined[req.title] 
-                      ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                      : 'bg-main text-white hover:bg-main/85'}`}
-                  >
-                    {joined[req.title] ? "Joined" : "Join Queue"}
-                  </button>
-                  <button
-                    onClick={handleIHaveThis}
-                    className="text-[11px] font-semibold text-main/50 hover:text-secondary transition-colors underline underline-offset-2"
-                  >
-                    I have this
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-between">
-            <p className="text-sm text-main/50">
-              Looking for a specific book? Let the community help you find it.
-            </p>
-
-            <Link
-              to="/requests"
-              className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3 text-[11px] tracking-widest uppercase hover:bg-main/85 transition-colors shrink-0 rounded-full"
-            >
-              View all requests <ArrowRight size={13} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Blog ────────────────────────────────────────────────── */}
-      <section className="py-28 bg-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
-
-          {/* Header */}
-          <div className="flex items-end justify-between mb-14">
-            <div>
-              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
-                Our Blog
-              </p>
-              <h2 className="font-heading font-bold text-main text-4xl md:text-5xl max-w-md leading-tight">
-                Stories &amp; Insights
-              </h2>
-            </div>
-            <Link
-              to="/blog"
-              className="hidden md:flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
-            >
-              View all posts
-            </Link>
-          </div>
-
-          {/* Blog cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {blogPosts.slice(0, 3).map(post => (
-              <Link
-                key={post.id}
-                to={`/blog/${post.slug}`}
-                className="group flex flex-col"
-              >
-                {/* Image area */}
-                <div className="overflow-hidden aspect-video bg-secondary/10 flex items-center justify-center mb-5">
-                  <span className="font-heading font-bold text-8xl text-secondary/20 group-hover:text-secondary/35 group-hover:scale-110 transition-all duration-500 select-none">
-                    ✦
-                  </span>
-                </div>
-
-                {/* Meta */}
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-main/40 mb-3">
-                  {post.date}
-                </p>
-
-                {/* Title */}
-                <h3 className="font-heading font-bold text-main text-lg leading-snug mb-3 group-hover:text-secondary transition-colors line-clamp-2">
-                  {post.title}
-                </h3>
-
-                {/* Excerpt */}
-                <p className="text-sm text-main/55 leading-relaxed line-clamp-2 flex-1">
-                  {post.excerpt}
-                </p>
-
-                {/* Read more */}
-                <span className="mt-4 text-sm font-semibold text-main/60 group-hover:text-secondary transition-colors underline underline-offset-4 decoration-main/20 group-hover:decoration-secondary">
-                  Read more
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── CTA ─────────────────────────────────────────────────── */}
       <section className="bg-main py-28">
         <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center text-center gap-8">
@@ -714,13 +513,13 @@ function Home() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to="/browse"
-              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-full"
+              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-xl"
             >
-              Browse Books <ArrowRight size={14} />
+              Browse Books
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-full"
+              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-xl"
             >
               Create Account
             </Link>
@@ -729,28 +528,6 @@ function Home() {
       </section>
 
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-[90%] text-center 
-            animate-[modalIn_.45s_cubic-bezier(.34,1.56,.64,1)]">
-            
-            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 
-              flex items-center justify-center
-              animate-[modalIn_.55s_cubic-bezier(.34,1.56,.64,1)]">
-                ✓
-            </div>
-
-            <h3 className="font-heading font-bold text-lg text-main mb-2">
-              Added to Queue
-            </h3>
-
-            <p className="text-sm text-main/60">
-              You'll be notified when this book becomes available.
-            </p>
-
-          </div>
-        </div>
-      )}
     </div>
   )
 }

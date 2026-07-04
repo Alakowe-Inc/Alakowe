@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useAreasByState, useStates } from '../../lib/api/location/location.hooks'
 import { useShippingAddresses, useCreateShippingAddress, useUpdateShippingAddress, useDeleteShippingAddress, useSetDefaultShippingAddress } from '../../lib/api/shipping-addresses/shipping-addresses.hooks'
 import type { CreateShippingAddressRequest, ShippingAddressResponse, UpdateShippingAddressRequest } from '../../lib/api/types'
+import { FormControl, SelectBoxControl, CheckBoxControl, type SelectOption } from '@/components/ui/form-controls'
 
 
 type FormState = {
@@ -293,76 +294,59 @@ export default function ShippingAddresses() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Label" error={errors.label}>
-                  <input
+                  <FormControl
                     type="text"
                     placeholder="e.g. Home, Work"
                     value={form.label}
                     onChange={e => setField('label', e.target.value)}
-                    className={inputClass(!!errors.label)}
+                    style={inputClass(!!errors.label)}
                   />
                 </Field>
 
                 <Field label="State" error={errors.stateId ? 'State is required' : undefined}>
-
-                  <select
-
-                    value={form.stateId === '' ? '' : String(form.stateId)}
-                    onChange={e => {
-                      const next = toNumberOrEmpty(e.target.value)
-                      setField('stateId', next)
+                  <SelectBoxControl
+                    placeholder="Select state"
+                    options={(states ?? []).map(s => ({ label: s.name, value: s.id }))}
+                    value={form.stateId === '' ? null : (states ?? []).map(s => ({ label: s.name, value: s.id })).find(o => o.value === form.stateId) ?? null}
+                    onChange={(option: SelectOption) => {
+                      setField('stateId', toNumberOrEmpty(String(option.value)))
                       setField('areaId', '')
                     }}
-                    className={classNames(inputClass(!!errors.stateId), !form.stateId ? 'text-main/30' : 'text-main')}
-                  >
-                    <option value="" disabled>Select state</option>
-                    {(states ?? []).map(s => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
+                    style={inputClass(!!errors.stateId)}
+                  />
                 </Field>
 
                 <Field label="Area" error={errors.areaId ? String(errors.areaId) : undefined}>
-
-                  <select
-                    value={form.areaId === '' ? '' : String(form.areaId)}
-                    onChange={e => setField('areaId', toNumberOrEmpty(e.target.value))}
-                    className={classNames(inputClass(!!errors.areaId), !form.areaId ? 'text-main/30' : 'text-main')}
+                  <SelectBoxControl
+                    placeholder="Select area"
+                    options={(areas ?? []).map(a => ({ label: a.name, value: a.id }))}
+                    value={form.areaId === '' ? null : (areas ?? []).map(a => ({ label: a.name, value: a.id })).find(o => o.value === form.areaId) ?? null}
+                    onChange={(option: SelectOption) => setField('areaId', toNumberOrEmpty(String(option.value)))}
                     disabled={!selectedStateId}
-                  >
-                    <option value="" disabled>Select area</option>
-                    {(areas ?? []).map(a => (
-                      <option key={a.id} value={a.id}>
-                        {a.name}
-                      </option>
-                    ))}
-                  </select>
+                    style={inputClass(!!errors.areaId)}
+                  />
                 </Field>
 
                 <div className="sm:col-span-2">
                   <Field label="Address Line" error={errors.addressLine}>
-                    <input
+                    <FormControl
                       type="text"
                       placeholder="e.g. 12 Broad Street, Flat 3"
                       value={form.addressLine}
                       onChange={e => setField('addressLine', e.target.value)}
-                      className={inputClass(!!errors.addressLine)}
+                      style={inputClass(!!errors.addressLine)}
                     />
                   </Field>
                 </div>
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="flex items-center gap-3 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={form.isDefault}
-                    onChange={e => setField('isDefault', e.target.checked)}
-                    className="w-4 h-4 accent-secondary"
-                  />
-                  <span className="text-sm font-semibold text-main">Set as default shipping address</span>
-                </label>
+                <CheckBoxControl
+                  checked={form.isDefault}
+                  onChange={e => setField('isDefault', e.target.checked)}
+                  className="accent-secondary"
+                  label={{ exist: true, text: 'Set as default shipping address', style: 'font-semibold text-main' }}
+                />
 
                 <button
                   type="submit"

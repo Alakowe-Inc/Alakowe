@@ -19,6 +19,7 @@ import {
 import { useMyListing, useSetDiscount } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import { formatPrice } from '../../lib/utils'
+import { FormControl } from '@/components/ui/form-controls'
 
 const COVER_COLORS = ["#C8A97E", "#2E4057", "#6B4E3E", "#8B4513", "#4A6FA5", "#7C5C4D", "#9B6B43", "#5D7A5D"]
 
@@ -289,13 +290,13 @@ export default function MyListingDetail() {
                 <h3 className="font-heading font-bold text-main text-sm mb-3">Discount</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <input
+                    <FormControl
                       type="number"
                       min="0"
                       max="50"
                       value={discountInput}
                       onChange={e => setDiscountInput(e.target.value)}
-                      className="w-full border border-main/15 rounded-xl px-3 py-2 text-sm text-main outline-none focus:border-secondary transition-colors"
+                      style="min-h-0 border border-main/15 rounded-xl px-3 py-2 text-sm text-main outline-none focus-visible:ring-0 focus:border-secondary transition-colors"
                     />
                     <span className="text-sm text-main/50">%</span>
                     <button

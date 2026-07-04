@@ -3,6 +3,7 @@ export type BookBadge = 'Best Value' | 'Recently Added' | null
 
 export interface Book {
   id: string
+  slug: string
   title: string
   author: string
   genre: string
@@ -21,6 +22,7 @@ export interface Book {
   location: string
   badge: BookBadge
   coverColor: string
+  coverImageUrl?: string
 
   description: string
   sellerName: string
@@ -33,6 +35,7 @@ export interface Book {
 export const books: Book[] = [
   {
     id: '1',
+    slug: 'things-fall-apart',
     title: 'Things Fall Apart',
     author: 'Chinua Achebe',
     genre: 'African Fiction',
@@ -59,6 +62,7 @@ export const books: Book[] = [
   },
   {
     id: '2',
+    slug: 'purple-hibiscus',
     title: 'Purple Hibiscus',
     author: 'Chimamanda Ngozi Adichie',
     genre: 'African Fiction',
@@ -83,6 +87,7 @@ export const books: Book[] = [
   },
   {
     id: '3',
+    slug: 'half-of-a-yellow-sun',
     title: 'Half of a Yellow Sun',
     author: 'Chimamanda Ngozi Adichie',
     genre: 'African Fiction',
@@ -106,6 +111,7 @@ export const books: Book[] = [
   },
   {
     id: '4',
+    slug: 'americanah',
     title: 'Americanah',
     author: 'Chimamanda Ngozi Adichie',
     genre: 'African Fiction',
@@ -131,6 +137,7 @@ export const books: Book[] = [
   },
   {
     id: '5',
+    slug: 'the-famished-road',
     title: 'The Famished Road',
     author: 'Ben Okri',
     genre: 'African Fiction',
@@ -154,6 +161,7 @@ export const books: Book[] = [
   },
   {
     id: '6',
+    slug: 'stay-with-me',
     title: 'Stay With Me',
     author: 'Ayobami Adeyemi',
     genre: 'African Fiction',
@@ -176,7 +184,8 @@ export const books: Book[] = [
     loveNote: 'I read this in two days. It will haunt you in the best way.',
   },
   {
-  id: '7',
+    id: '7',
+    slug: 'atomic-habits',
     title: 'Atomic Habits',
     author: 'James Clear',
     genre: 'Self Help',
@@ -203,6 +212,7 @@ export const books: Book[] = [
   },
   {
     id: '8',
+    slug: 'the-alchemist',
     title: 'The Alchemist',
     author: 'Paulo Coelho',
     genre: 'Foreign Fiction',

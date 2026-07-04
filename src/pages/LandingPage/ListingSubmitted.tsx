@@ -37,13 +37,13 @@ export default function ListingSubmitted() {
         <div className="flex flex-col gap-3">
           <Link
             to="/my-listings"
-            className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm text-center flex items-center justify-center gap-2"
+            className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm text-center flex items-center justify-center gap-2"
           >
             <ListChecks size={16} /> View My Listings
           </Link>
           <Link
             to="/list"
-            className="w-full border border-main/15 text-main font-semibold py-4 rounded-full hover:bg-main/5 transition-colors text-sm text-center flex items-center justify-center gap-2"
+            className="w-full border border-main/15 text-main font-semibold py-4 rounded-xl hover:bg-main/5 transition-colors text-sm text-center flex items-center justify-center gap-2"
           >
             <PlusCircle size={16} /> List Another Book
           </Link>

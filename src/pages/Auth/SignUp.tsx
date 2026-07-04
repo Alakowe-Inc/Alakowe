@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import logo from '../../assets/media/logos/logo.png'
 import { useAuth } from '../../context/AuthContext'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
 import { useSignup, useVerifyEmail, useResendOtp } from '../../lib/api/auth/auth.hooks'
 
 function SignUp() {
@@ -97,6 +100,9 @@ function SignUp() {
     }
   }
 
+  const inputClass = "rounded-xl border-gray-200 h-auto py-3 text-[.9rem] text-gray-800 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:border-secondary"
+  const submitClass = "w-full rounded-xl bg-secondary hover:bg-secondary/90 h-auto py-3.5 text-sm font-semibold"
+
   if (step === 'verify') {
     return (
       <div className="min-h-screen bg-white flex flex-col">
@@ -107,29 +113,26 @@ function SignUp() {
             </Link>
 
             <h1 className="text-2xl font-bold text-gray-900 self-start mb-1">Verify your email</h1>
-            <p className="text-sm text-gray-500 self-start mb-6">
+            <p className="text-sm text-gray-500 self-start mb-8">
               Enter the 6-digit code sent to {email}
             </p>
 
-            <form onSubmit={handleVerifySubmit} className="w-full flex flex-col gap-4">
-              <input
-                type="text"
-                required
-                inputMode="numeric"
-                maxLength={6}
-                placeholder="6-digit code"
-                value={code}
-                onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                className="w-full border border-gray-900 rounded-full px-4 py-3 text-[.9rem] tracking-widest font-bold placeholder:font-normal text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors text-center"
-              />
+            <form onSubmit={handleVerifySubmit} className="w-full flex flex-col items-center gap-6">
+              <InputOTP maxLength={6} value={code} onChange={setCode}>
+                <InputOTPGroup>
+                  {[0, 1, 2, 3, 4, 5].map(i => (
+                    <InputOTPSlot
+                      key={i}
+                      index={i}
+                      className="h-14 w-12 text-lg font-bold border-gray-200 first:rounded-l-xl last:rounded-r-xl"
+                    />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
               {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-              <button
-                type="submit"
-                disabled={verifyEmailMutation.isPending}
-                className="w-full bg-secondary hover:bg-secondary/90 disabled:bg-secondary/50 text-white font-semibold py-3.5 rounded-full transition-colors text-sm"
-              >
+              <Button type="submit" className={submitClass} disabled={code.length < 6 || verifyEmailMutation.isPending}>
                 {verifyEmailMutation.isPending ? 'Verifying…' : 'Verify account'}
-              </button>
+              </Button>
             </form>
 
             {countdown > 0 ? (
@@ -167,12 +170,9 @@ function SignUp() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-
-      {/* Card */}
       <div className="flex-1 flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md flex flex-col items-center">
 
-          {/* Logo */}
           <Link to="/" className="mb-8">
             <img src={logo} alt="Alakowé" className="h-8 w-auto object-contain" />
           </Link>
@@ -184,78 +184,80 @@ function SignUp() {
 
           <form onSubmit={handleRegisterSubmit} className="w-full flex flex-col gap-4">
             <div className="flex gap-3">
-              <input
+              <Input
                 type="text"
                 required
                 placeholder="First name"
                 value={firstName}
                 onChange={e => setFirstName(e.target.value)}
-                className="flex-1 w-full border border-gray-200 rounded-full px-4 py-3 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
+                className={inputClass}
               />
-              <input
+              <Input
                 type="text"
                 required
                 placeholder="Last name"
                 value={lastName}
                 onChange={e => setLastName(e.target.value)}
-                className="flex-1 w-full border border-gray-200 rounded-full px-4 py-3 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
+                className={inputClass}
               />
             </div>
-            <input
+            <Input
               type="text"
               placeholder="Nickname (optional)"
               value={nickname}
               onChange={e => setNickname(e.target.value)}
-              className="w-full border border-gray-200 rounded-full px-4 py-3 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
+              className={inputClass}
             />
-            <input
+            <Input
               type="email"
               required
               placeholder="Email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full border border-gray-200 rounded-full px-4 py-3 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
+              className={inputClass}
             />
-            <input
+            <Input
               type="tel"
               required
               placeholder="Phone number"
               value={phoneNumber}
               onChange={e => setPhoneNumber(e.target.value)}
-              className="w-full border border-gray-200 rounded-full px-4 py-3 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
+              className={inputClass}
             />
             <div className="relative">
-              <input
+              <Input
                 type={showPassword ? 'text' : 'password'}
                 required
                 placeholder="Password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full border border-gray-200 rounded-full px-4 py-3 pr-11 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
+                className={`${inputClass} pr-11`}
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={() => setShowPassword(v => !v)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                tabIndex={-1}
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
             <div className="relative">
-              <input
+              <Input
                 type={showConfirmPassword ? 'text' : 'password'}
                 required
                 placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
-                className="w-full border border-gray-200 rounded-full px-4 py-3 pr-11 text-[.9rem] text-gray-800 placeholder-gray-400 outline-none focus:border-secondary transition-colors"
+                className={`${inputClass} pr-11`}
               />
               <button
                 type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={() => setShowConfirmPassword(v => !v)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                tabIndex={-1}
               >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
             <ul className="text-xs text-gray-500 space-y-0.5 px-1">
@@ -276,13 +278,9 @@ function SignUp() {
               </li>
             </ul>
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-            <button
-              type="submit"
-              disabled={signupMutation.isPending}
-              className="w-full bg-secondary hover:bg-secondary/90 disabled:bg-secondary/50 text-white font-semibold py-3.5 rounded-full transition-colors text-sm"
-            >
+            <Button type="submit" className={submitClass} disabled={signupMutation.isPending}>
               {signupMutation.isPending ? 'Creating account…' : 'Create account'}
-            </button>
+            </Button>
             <p className="text-xs text-gray-400 text-center mt-1">
               By continuing, you agree to our{' '}
               <Link to="/terms" className="underline hover:text-gray-600 transition-colors">
@@ -300,14 +298,6 @@ function SignUp() {
 
         </div>
       </div>
-
-      {/* Privacy policy footer */}
-      <p className="text-sm text-gray-500 text-center py-4">
-        <Link to="/privacy" className="hover:text-gray-700 transition-colors">
-          Privacy policy
-        </Link>
-      </p>
-
     </div>
   )
 }

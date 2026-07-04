@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "react-toastify"
 import { withMock } from "../use-mock"
 import {
   getCartApi,
@@ -48,6 +49,7 @@ export function useAddToCart() {
       withMock(mockCart, () => addToCartApi(body)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] })
+      toast.success("Added to cart")
     },
   })
 }

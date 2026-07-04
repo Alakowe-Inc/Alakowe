@@ -56,7 +56,7 @@ export default function MyPurchases() {
             </p>
             <Link
               to="/browse"
-              className="inline-block bg-main text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-main/90 transition-colors"
+              className="inline-block bg-main text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-main/90 transition-colors"
             >
               Browse Books
             </Link>
@@ -114,7 +114,7 @@ export default function MyPurchases() {
                       to={`/order/${order.id}`}
                       className="text-xs font-semibold text-secondary hover:underline"
                     >
-                      Track Order →
+                      Track Order
                     </Link>
                   </div>
 

@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
+import { Button } from '@/components/ui/button'
 import { formatPrice } from '../../lib/utils'
 
 function Cart() {
-  const { items, addToCart, removeFromCart } = useCart()
+  const { items, addToCart, removeFromCart, clearCart } = useCart()
 
   const subtotal = items.reduce((sum, item) => sum + item.buyerPrice * item.quantity, 0)
 
@@ -21,7 +22,7 @@ function Cart() {
           </p>
           <Link
             to="/browse"
-            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-full hover:bg-main/90 transition-colors text-sm"
+            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-xl hover:bg-main/90 transition-colors text-sm"
           >
             Browse Books
           </Link>
@@ -44,6 +45,13 @@ function Cart() {
 
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-heading font-bold text-main text-3xl">Your Cart</h1>
+          <Button
+            variant="ghost"
+            onClick={clearCart}
+            className="h-auto p-0 text-xs text-main/45 hover:text-main/70 font-medium underline underline-offset-2 hover:bg-transparent"
+          >
+            Clear all
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -58,7 +66,7 @@ function Cart() {
                 {/* Book cover */}
                 <Link to={`/books/${item.listingId}`} className="shrink-0">
                   <div
-                    className="w-16 h-24 rounded-lg overflow-hidden shadow-md flex items-center justify-center"
+                    className="w-16 h-24 rounded overflow-hidden shadow-md flex items-center justify-center"
                     style={{ backgroundColor: item.coverColor }}
                   >
                     {item.coverImageUrl ? (
@@ -159,7 +167,7 @@ function Cart() {
 
               <Link
                 to="/checkout"
-                className="block w-full bg-main text-white font-semibold py-3.5 rounded-full hover:bg-main/90 transition-colors text-sm mb-3 text-center"
+                className="block w-full bg-main text-white font-semibold py-3.5 rounded-xl hover:bg-main/90 transition-colors text-sm mb-3 text-center"
               >
                 Proceed to Checkout
               </Link>

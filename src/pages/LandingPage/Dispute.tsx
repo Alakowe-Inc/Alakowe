@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Upload, CheckCircle } from 'lucide-react'
 import { getOrder } from '../../data/orderData'
+import { RadioInput, FileUpload, TextareaControl } from '@/components/ui/form-controls'
 
 const ISSUE_TYPES = [
   'Wrong book received',
@@ -61,7 +62,7 @@ function Dispute() {
           </div>
           <Link
             to="/browse"
-            className="inline-block bg-main text-white font-semibold px-8 py-3.5 rounded-full text-sm hover:bg-main/90 transition-colors"
+            className="inline-block bg-main text-white font-semibold px-8 py-3.5 rounded-xl text-sm hover:bg-main/90 transition-colors"
           >
             Back to Browse
           </Link>
@@ -106,8 +107,7 @@ function Dispute() {
                       <div className="w-2 h-2 rounded-full bg-white" />
                     )}
                   </div>
-                  <input
-                    type="radio"
+                  <RadioInput
                     name="issueType"
                     value={type}
                     checked={issueType === type}
@@ -130,18 +130,16 @@ function Dispute() {
               <span className="text-main/35 font-normal text-sm">(optional)</span>
             </h2>
             <p className="text-xs text-main/45 mb-4">Attach up to 3 photos showing the issue</p>
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-main/15 rounded-xl py-8 cursor-pointer hover:border-secondary/40 transition-colors">
-              <Upload size={24} className="text-main/30 mb-2" />
-              <span className="text-sm text-main/50 font-medium">Click to upload photos</span>
-              <span className="text-xs text-main/30 mt-1">PNG, JPG up to 5MB each</span>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                className="sr-only"
-                onChange={handlePhotoChange}
-              />
-            </label>
+            <FileUpload
+              id="dispute-photos"
+              label="Click to upload photos"
+              hint="PNG, JPG up to 5MB each"
+              icon={Upload}
+              multiple
+              accept="image/*"
+              onChange={handlePhotoChange}
+              style="border-main/15 py-8 hover:border-secondary/40 bg-transparent hover:bg-transparent"
+            />
             {photos.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {photos.map(f => (
@@ -163,19 +161,19 @@ function Dispute() {
               <span className="text-main/35 font-normal text-sm">(optional)</span>
             </h2>
             <p className="text-xs text-main/45 mb-4">Tell us more about what happened</p>
-            <textarea
+            <TextareaControl
               value={notes}
               onChange={e => setNotes(e.target.value)}
               placeholder="Describe the issue in detail…"
               rows={4}
-              className="w-full border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors resize-none"
+              style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? 'Submitting…' : 'Submit Report'}
           </button>

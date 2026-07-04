@@ -4,6 +4,7 @@ import { ArrowLeft, Bell } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { saveRequest, generateRequestId } from '../../data/requestData'
 import { CONDITIONS, GENRES } from '../../data/sellerData'
+import { FormControl, SelectBoxControl, TextareaControl, type SelectOption } from '@/components/ui/form-controls'
 
 type FormState = {
   title: string
@@ -54,6 +55,10 @@ export default function RequestBook() {
   function set(field: keyof FormState) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
       setForm(p => ({ ...p, [field]: e.target.value }))
+  }
+
+  function setSelect(field: keyof FormState) {
+    return (option: SelectOption) => setForm(p => ({ ...p, [field]: String(option.value) }))
   }
 
   function validate(): Partial<FormState> {
@@ -124,43 +129,41 @@ export default function RequestBook() {
             <h2 className="font-heading font-bold text-main text-base mb-5">Book Details</h2>
             <div className="flex flex-col gap-4">
               <Field label="Book Title" required error={errors.title}>
-                <input
+                <FormControl
                   type="text"
                   placeholder="e.g. Purple Hibiscus"
                   value={form.title}
                   onChange={set('title')}
-                  className={inputClass(!!errors.title)}
+                  style={inputClass(!!errors.title)}
                 />
               </Field>
               <Field label="Author" hint="Leave blank if you're not sure">
-                <input
+                <FormControl
                   type="text"
                   placeholder="e.g. Chimamanda Ngozi Adichie"
                   value={form.author}
                   onChange={set('author')}
-                  className={inputClass()}
+                  style={inputClass()}
                 />
               </Field>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Genre" required error={errors.genre}>
-                  <select
-                    value={form.genre}
-                    onChange={set('genre')}
-                    className={`${inputClass(!!errors.genre)} ${!form.genre ? 'text-main/30' : 'text-main'}`}
-                  >
-                    <option value="" disabled>Select genre</option>
-                    {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
-                  </select>
+                  <SelectBoxControl
+                    placeholder="Select genre"
+                    options={GENRES.map(g => ({ label: g, value: g }))}
+                    value={GENRES.map(g => ({ label: g, value: g })).find(o => o.value === form.genre) ?? null}
+                    onChange={setSelect('genre')}
+                    style={inputClass(!!errors.genre)}
+                  />
                 </Field>
                 <Field label="Min. Condition" hint="Optional">
-                  <select
-                    value={form.condition}
-                    onChange={set('condition')}
-                    className={`${inputClass()} ${!form.condition ? 'text-main/30' : 'text-main'}`}
-                  >
-                    <option value="">Any condition</option>
-                    {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <SelectBoxControl
+                    placeholder="Any condition"
+                    options={CONDITIONS.map(c => ({ label: c, value: c }))}
+                    value={form.condition ? { label: form.condition, value: form.condition } : null}
+                    onChange={setSelect('condition')}
+                    style={inputClass()}
+                  />
                 </Field>
               </div>
             </div>
@@ -172,13 +175,13 @@ export default function RequestBook() {
             <Field label="Maximum Price (₦)" hint="Optional — helps sellers know your budget" error={errors.maxPrice}>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-medium">₦</span>
-                <input
+                <FormControl
                   type="number"
                   min="100"
                   placeholder="e.g. 5000"
                   value={form.maxPrice}
                   onChange={set('maxPrice')}
-                  className={`${inputClass(!!errors.maxPrice)} pl-8`}
+                  style={`${inputClass(!!errors.maxPrice)} pl-8`}
                 />
               </div>
             </Field>
@@ -188,12 +191,12 @@ export default function RequestBook() {
           <div className="bg-white rounded-2xl border border-third p-6">
             <h2 className="font-heading font-bold text-main text-base mb-4">Additional Notes</h2>
             <Field label="Notes" hint="Any edition preference, urgency, or extra details for sellers">
-              <textarea
+              <TextareaControl
                 placeholder="e.g. Looking for the 2006 Farafina edition. Need it before end of month."
                 value={form.notes}
                 onChange={set('notes')}
                 rows={4}
-                className="w-full border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors resize-none bg-white"
+                style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white"
               />
             </Field>
           </div>
@@ -201,7 +204,7 @@ export default function RequestBook() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? 'Submitting…' : 'Submit Request'}
           </button>

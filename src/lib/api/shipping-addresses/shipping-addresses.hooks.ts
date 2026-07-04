@@ -38,11 +38,11 @@ export function useShippingAddresses() {
   })
 }
 
-export function useCreateShippingAddress() {
+export function useCreateShippingAddress(options?: { skipSuccessToast?: boolean }) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (body: CreateShippingAddressRequest) =>
-      withMock(mockShippingAddresses[0], () => createShippingAddressApi(body)),
+      withMock(mockShippingAddresses[0], () => createShippingAddressApi(body, options)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["shipping-addresses"] })
     },

@@ -7,6 +7,7 @@ import { GENRES, CONDITIONS } from '../../data/sellerData'
 import type { BookCondition } from '../../lib/api/types'
 import { useStates, useAreasByState } from '../../lib/api/location/location.hooks'
 import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
+import { FormControl, SelectBoxControl, TextareaControl, FileUpload, type SelectOption } from '@/components/ui/form-controls'
 
 type FormState = {
   title: string; author: string; genre: string; condition: string
@@ -85,6 +86,19 @@ export default function EditListing() {
   function set(field: keyof FormState) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const value = e.target.value
+      setForm(p => {
+        if (!p) return p
+        const next = { ...p, [field]: value }
+        if (field === 'stateId') next.areaId = ''
+        return next
+      })
+      if (field === 'stateId') setSelectedStateId(Number(value) || 0)
+    }
+  }
+
+  function setSelect(field: keyof FormState) {
+    return (option: SelectOption) => {
+      const value = String(option.value)
       setForm(p => {
         if (!p) return p
         const next = { ...p, [field]: value }
@@ -256,40 +270,50 @@ export default function EditListing() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
                 <Field label="Book Title" required error={errors.title}>
-                  <input type="text" value={form.title} onChange={set('title')} className={inputClass(!!errors.title)} />
+                  <FormControl type="text" value={form.title} onChange={set('title')} style={inputClass(!!errors.title)} />
                 </Field>
               </div>
               <Field label="Author" required error={errors.author}>
-                <input type="text" value={form.author} onChange={set('author')} className={inputClass(!!errors.author)} />
+                <FormControl type="text" value={form.author} onChange={set('author')} style={inputClass(!!errors.author)} />
               </Field>
               <Field label="Genre" required error={errors.genre}>
-                <select value={form.genre} onChange={set('genre')} className={`${inputClass(!!errors.genre)} text-main`}>
-                  <option value="" disabled>Select genre</option>
-                  {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
+                <SelectBoxControl
+                  placeholder="Select genre"
+                  options={GENRES.map(g => ({ label: g, value: g }))}
+                  value={GENRES.map(g => ({ label: g, value: g })).find(o => o.value === form.genre) ?? null}
+                  onChange={setSelect('genre')}
+                  style={inputClass(!!errors.genre)}
+                />
               </Field>
               <div className="sm:col-span-2">
                 <Field label="Condition" required error={errors.condition}>
-                  <select value={form.condition} onChange={set('condition')} className={`${inputClass(!!errors.condition)} text-main`}>
-                    <option value="" disabled>Select condition</option>
-                    {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <SelectBoxControl
+                    placeholder="Select condition"
+                    options={CONDITIONS.map(c => ({ label: c, value: c }))}
+                    value={CONDITIONS.map(c => ({ label: c, value: c })).find(o => o.value === form.condition) ?? null}
+                    onChange={setSelect('condition')}
+                    style={inputClass(!!errors.condition)}
+                  />
                 </Field>
               </div>
               <Field label="State" required error={errors.stateId}>
-                <select value={form.stateId} onChange={set('stateId')}
-                  className={`${inputClass(!!errors.stateId)} ${!form.stateId ? 'text-main/30' : 'text-main'}`}>
-                  <option value="" disabled>Select state</option>
-                  {states?.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
+                <SelectBoxControl
+                  placeholder="Select state"
+                  options={states?.map(s => ({ label: s.name, value: s.id })) ?? []}
+                  value={states?.map(s => ({ label: s.name, value: s.id })).find(o => String(o.value) === form.stateId) ?? null}
+                  onChange={setSelect('stateId')}
+                  style={inputClass(!!errors.stateId)}
+                />
               </Field>
               <Field label="Area" required error={errors.areaId}>
-                <select value={form.areaId} onChange={set('areaId')}
-                  className={`${inputClass(!!errors.areaId)} ${!form.areaId ? 'text-main/30' : 'text-main'}`}
-                  disabled={!selectedStateId}>
-                  <option value="" disabled>{selectedStateId ? 'Select area' : 'Select state first'}</option>
-                  {areas?.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
+                <SelectBoxControl
+                  placeholder={selectedStateId ? 'Select area' : 'Select state first'}
+                  options={areas?.map(a => ({ label: a.name, value: a.id })) ?? []}
+                  value={areas?.map(a => ({ label: a.name, value: a.id })).find(o => String(o.value) === form.areaId) ?? null}
+                  onChange={setSelect('areaId')}
+                  disabled={!selectedStateId}
+                  style={inputClass(!!errors.areaId)}
+                />
               </Field>
             </div>
           </div>
@@ -298,14 +322,14 @@ export default function EditListing() {
             <h2 className="font-heading font-bold text-main text-base mb-1">Declare Book Condition</h2>
             <p className="text-xs text-main/45 mb-4">Be honest about its condition and any marks or damages.</p>
             <Field label="Condition Details">
-              <textarea value={form.conditionDetail} onChange={set('conditionDetail')} rows={3}
+              <TextareaControl value={form.conditionDetail} onChange={set('conditionDetail')} rows={3}
                 placeholder="e.g. There's a small crease on the spine and a few pencil marks in chapter 3."
-                className="w-full border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors resize-none bg-white" />
+                style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
             </Field>
             <div className="mt-4">
               <Field label="Description" required error={errors.description}>
-                <textarea value={form.description} onChange={set('description')} rows={5}
-                  className="w-full border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors resize-none bg-white" />
+                <TextareaControl value={form.description} onChange={set('description')} rows={5}
+                  style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
               </Field>
             </div>
           </div>
@@ -315,12 +339,17 @@ export default function EditListing() {
             <p className="text-xs text-main/45 mb-4">Upload up to 5 photos. Tap a thumbnail to set it as the cover.</p>
             {photoError && <p className="text-xs text-red-500 mb-3">{photoError}</p>}
             {totalImages < 5 && (
-              <label className="flex flex-col items-center justify-center border-2 border-dashed border-main/15 rounded-xl py-8 cursor-pointer hover:border-secondary/40 transition-colors">
-                <Upload size={24} className="text-main/30 mb-2" />
-                <span className="text-sm text-main/50 font-medium">Click to add photos</span>
-                <span className="text-xs text-main/30 mt-1">PNG, JPG up to 5MB each</span>
-                <input type="file" multiple accept=".jpg,.jpeg,.png" className="sr-only" onChange={handlePhotos} disabled={uploading} />
-              </label>
+              <FileUpload
+                id="edit-listing-photos"
+                label="Click to add photos"
+                hint="PNG, JPG up to 5MB each"
+                icon={Upload}
+                multiple
+                accept=".jpg,.jpeg,.png"
+                onChange={handlePhotos}
+                disabled={uploading}
+                style="border-main/15 py-8 hover:border-secondary/40 hover:bg-transparent bg-transparent"
+              />
             )}
             {totalImages > 0 && (
               <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
@@ -361,12 +390,12 @@ export default function EditListing() {
               <Field label="Price (₦)" required error={errors.price}>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-medium">₦</span>
-                  <input type="number" min="100" value={form.price} onChange={set('price')} className={`${inputClass(!!errors.price)} pl-8`} />
+                  <FormControl type="number" min="100" value={form.price} onChange={set('price')} style={`${inputClass(!!errors.price)} pl-8`} />
                 </div>
               </Field>
               <Field label="Discount (%)" error={errors.discount}>
                 <div className="relative">
-                  <input type="number" min="0" max="50" value={form.discount} onChange={set('discount')} className={`${inputClass(!!errors.discount)} pr-8`} />
+                  <FormControl type="number" min="0" max="50" value={form.discount} onChange={set('discount')} style={`${inputClass(!!errors.discount)} pr-8`} />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-main/40">%</span>
                 </div>
               </Field>
@@ -378,9 +407,9 @@ export default function EditListing() {
               <Heart size={15} className="text-secondary" />
               <h2 className="font-heading font-bold text-main text-base">Love Note</h2>
             </div>
-            <textarea value={form.loveNote} onChange={set('loveNote')} rows={3}
+            <TextareaControl value={form.loveNote} onChange={set('loveNote')} rows={3}
               placeholder="A message to the next reader…"
-              className="w-full border border-secondary/25 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors resize-none bg-white" />
+              style="border border-secondary/25 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
           </div>
 
           <button type="submit" disabled={editListing.isPending || uploading}
