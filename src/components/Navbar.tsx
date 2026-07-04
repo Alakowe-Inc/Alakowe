@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Sheet, SheetClose, SheetContent, SheetTitle } from '@/components/ui/sheet'
+import { FormControl } from '@/components/ui/form-controls'
 
 const navLinks = [
   { label: 'Sell', to: '/sell' },
@@ -182,12 +183,14 @@ function Navbar() {
         <div className="hidden lg:block sticky top-16 z-40 border-b border-third bg-fourth">
           <div className="max-w-8xl mx-auto px-12 h-14 flex items-center gap-3">
             <Search size={16} className="text-main/50 shrink-0" />
-            <input
-              ref={desktopSearchInputRef}
-              type="text"
-              placeholder="Search for books, authors, genres…"
-              className="flex-1 text-sm text-main placeholder-main/40 outline-none bg-transparent font-body"
-            />
+            <div className="flex-1">
+              <FormControl
+                ref={desktopSearchInputRef}
+                type="text"
+                placeholder="Search for books, authors, genres…"
+                style="min-h-0 text-sm text-main placeholder:text-main/40 outline-none bg-transparent border-0 rounded-none focus-visible:ring-0 font-body"
+              />
+            </div>
             <button
               aria-label="Close search"
               onClick={() => setDesktopSearchOpen(false)}
@@ -224,12 +227,14 @@ function Navbar() {
           <div className="px-5 pb-4 shrink-0">
             <div className="flex items-center gap-2 border-b border-main/15 pb-2">
               <Search size={14} className="text-main/35 shrink-0" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search books, authors…"
-                className="flex-1 text-[15px] text-main placeholder-main/30 outline-none bg-transparent font-body"
-              />
+              <div className="flex-1">
+                <FormControl
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search books, authors…"
+                  style="min-h-0 text-[15px] text-main placeholder:text-main/30 outline-none bg-transparent border-0 rounded-none focus-visible:ring-0 font-body"
+                />
+              </div>
             </div>
           </div>
 

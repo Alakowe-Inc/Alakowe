@@ -22,6 +22,7 @@ export interface Book {
   location: string
   badge: BookBadge
   coverColor: string
+  coverImageUrl?: string
 
   description: string
   sellerName: string

@@ -15,7 +15,7 @@ export async function getCartApi(): Promise<CartResponse> {
 }
 
 export async function addToCartApi(body: AddToCartBody): Promise<CartResponse> {
-  const { data } = await client.post("/api/v1/cart/add-item", body)
+  const { data } = await client.post("/api/v1/cart/add-item", body, { skipSuccessToast: true })
   return data as CartResponse
 }
 
@@ -25,7 +25,7 @@ export async function bulkAddToCartApi(body: BulkAddToCartBody): Promise<CartRes
 }
 
 export async function validateCartApi(): Promise<CartValidationResponse> {
-  const { data } = await client.post("/api/v1/cart/validate")
+  const { data } = await client.post("/api/v1/cart/validate", undefined, { skipSuccessToast: true })
   return data as CartValidationResponse
 }
 

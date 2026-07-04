@@ -10,6 +10,7 @@ import { useCategories } from '../../lib/api/categories/categories.hooks'
 import { useStates, useAreasByState } from '../../lib/api/location/location.hooks'
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { FormControl, SelectBoxControl, TextareaControl, FileUpload, type SelectOption } from '@/components/ui/form-controls'
 
 const HOW_TO_STEPS = [
   {
@@ -122,6 +123,22 @@ export default function ListBook() {
   function set(field: keyof FormState) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const value = e.target.value
+      setForm(p => {
+        const next = { ...p, [field]: value }
+        if (field === 'stateId') {
+          next.areaId = ''
+        }
+        return next
+      })
+      if (field === 'stateId') {
+        setSelectedStateId(Number(value) || 0)
+      }
+    }
+  }
+
+  function setSelect(field: keyof FormState) {
+    return (option: SelectOption) => {
+      const value = String(option.value)
       setForm(p => {
         const next = { ...p, [field]: value }
         if (field === 'stateId') {
@@ -372,54 +389,63 @@ export default function ListBook() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="sm:col-span-2">
                 <Field label="Book Title" required error={errors.title}>
-                  <input type="text" placeholder="e.g. Things Fall Apart" value={form.title}
-                    onChange={set('title')} className={inputClass(!!errors.title)} />
+                  <FormControl type="text" placeholder="e.g. Things Fall Apart" value={form.title}
+                    onChange={set('title')} style={inputClass(!!errors.title)} />
                 </Field>
               </div>
               <Field label="Author" required error={errors.author}>
-                <input type="text" placeholder="e.g. Chinua Achebe" value={form.author}
-                  onChange={set('author')} className={inputClass(!!errors.author)} />
+                <FormControl type="text" placeholder="e.g. Chinua Achebe" value={form.author}
+                  onChange={set('author')} style={inputClass(!!errors.author)} />
               </Field>
               <Field label="Category" required error={errors.genre}>
-                <select value={form.genre} onChange={set('genre')}
-                  className={`${inputClass(!!errors.genre)} ${!form.genre ? 'text-main/30' : 'text-main'}`}>
-                  <option value="" disabled>Select category</option>
-                  {categories?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
+                <SelectBoxControl
+                  placeholder="Select category"
+                  options={categories?.map(c => ({ label: c.name, value: c.id })) ?? []}
+                  value={categories?.map(c => ({ label: c.name, value: c.id })).find(o => String(o.value) === form.genre) ?? null}
+                  onChange={setSelect('genre')}
+                  style={inputClass(!!errors.genre)}
+                />
               </Field>
               <Field label="Condition" required error={errors.condition}>
-                <select value={form.condition} onChange={set('condition')}
-                  className={`${inputClass(!!errors.condition)} ${!form.condition ? 'text-main/30' : 'text-main'}`}>
-                  <option value="" disabled>Select condition</option>
-                  {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <SelectBoxControl
+                  placeholder="Select condition"
+                  options={CONDITIONS.map(c => ({ label: c, value: c }))}
+                  value={CONDITIONS.map(c => ({ label: c, value: c })).find(o => o.value === form.condition) ?? null}
+                  onChange={setSelect('condition')}
+                  style={inputClass(!!errors.condition)}
+                />
               </Field>
               <Field label="Quantity" required>
-                <input type="number" min="1" placeholder="e.g. 2" value={form.quantity}
-                  onChange={set('quantity')} className={inputClass()} />
+                <FormControl type="number" min="1" placeholder="e.g. 2" value={form.quantity}
+                  onChange={set('quantity')} style={inputClass()} />
               </Field>
               <Field label="Format" required>
-                <select value={form.format} onChange={set('format')}
-                  className={`${inputClass()} ${!form.format ? 'text-main/30' : 'text-main'}`}>
-                  <option value="" disabled>Select format</option>
-                  <option value="Hardcover">Hardcover</option>
-                  <option value="Paperback">Paperback</option>
-                </select>
+                <SelectBoxControl
+                  placeholder="Select format"
+                  options={[{ label: 'Hardcover', value: 'Hardcover' }, { label: 'Paperback', value: 'Paperback' }]}
+                  value={form.format ? { label: form.format, value: form.format } : null}
+                  onChange={setSelect('format')}
+                  style={inputClass()}
+                />
               </Field>
               <Field label="State" required error={errors.stateId}>
-                <select value={form.stateId} onChange={set('stateId')}
-                  className={`${inputClass(!!errors.stateId)} ${!form.stateId ? 'text-main/30' : 'text-main'}`}>
-                  <option value="" disabled>Select state</option>
-                  {states?.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
+                <SelectBoxControl
+                  placeholder="Select state"
+                  options={states?.map(s => ({ label: s.name, value: s.id })) ?? []}
+                  value={states?.map(s => ({ label: s.name, value: s.id })).find(o => String(o.value) === form.stateId) ?? null}
+                  onChange={setSelect('stateId')}
+                  style={inputClass(!!errors.stateId)}
+                />
               </Field>
               <Field label="Area" required error={errors.areaId}>
-                <select value={form.areaId} onChange={set('areaId')}
-                  className={`${inputClass(!!errors.areaId)} ${!form.areaId ? 'text-main/30' : 'text-main'}`}
-                  disabled={!selectedStateId}>
-                  <option value="" disabled>{selectedStateId ? 'Select area' : 'Select state first'}</option>
-                  {areas?.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
+                <SelectBoxControl
+                  placeholder={selectedStateId ? 'Select area' : 'Select state first'}
+                  options={areas?.map(a => ({ label: a.name, value: a.id })) ?? []}
+                  value={areas?.map(a => ({ label: a.name, value: a.id })).find(o => String(o.value) === form.areaId) ?? null}
+                  onChange={setSelect('areaId')}
+                  disabled={!selectedStateId}
+                  style={inputClass(!!errors.areaId)}
+                />
               </Field>
             </div>
           </div>
@@ -429,9 +455,9 @@ export default function ListBook() {
             <h2 className="font-heading font-bold text-main text-base mb-1">Declare Book Condition</h2>
             <p className="text-xs text-main/45 mb-4">Be honest about its condition and any marks or damages.</p>
             <Field label="Condition" required error={errors.description}>
-              <textarea placeholder="e.g. There's a small crease on the spine and a few pencil marks in chapter 3."
+              <TextareaControl placeholder="e.g. There's a small crease on the spine and a few pencil marks in chapter 3."
                 value={form.conditionNotes} onChange={set('conditionNotes')} rows={5}
-                className="w-full border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors resize-none bg-white" />
+                style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
             </Field>
           </div>
 
@@ -439,8 +465,8 @@ export default function ListBook() {
             <h2 className="font-heading font-bold text-main text-base mb-1">Book Overview</h2>
             <p className="text-xs text-main/45 mb-4">Provide a brief overview of the book.</p>
             <Field label="Description" required error={errors.description}>
-              <textarea value={form.description} onChange={set('description')} rows={5}
-                className="w-full border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors resize-none bg-white" />
+              <TextareaControl value={form.description} onChange={set('description')} rows={5}
+                style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
             </Field>
           </div>
 
@@ -452,14 +478,14 @@ export default function ListBook() {
               <Field label="Price (₦)" required error={errors.price}>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-medium">₦</span>
-                  <input type="number" min="100" placeholder="e.g. 3000" value={form.price}
-                    onChange={set('price')} className={`${inputClass(!!errors.price)} pl-8`} />
+                  <FormControl type="number" min="100" placeholder="e.g. 3000" value={form.price}
+                    onChange={set('price')} style={`${inputClass(!!errors.price)} pl-8`} />
                 </div>
               </Field>
               <Field label="Discount (%)" error={errors.discount}>
                 <div className="relative">
-                  <input type="number" min="0" max="50" placeholder="0" value={form.discount}
-                    onChange={set('discount')} className={`${inputClass(!!errors.discount)} pr-8`} />
+                  <FormControl type="number" min="0" max="50" placeholder="0" value={form.discount}
+                    onChange={set('discount')} style={`${inputClass(!!errors.discount)} pr-8`} />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-main/40">%</span>
                 </div>
               </Field>
@@ -472,12 +498,17 @@ export default function ListBook() {
             <p className="text-xs text-main/45 mb-4">Upload 3–5 photos. Tap a thumbnail to set it as the cover.</p>
             {photoError && <p className="text-xs text-red-500 mb-3">{photoError}</p>}
             {photos.length < 5 && (
-              <label className="flex flex-col items-center justify-center border-2 border-dashed border-main/15 rounded-xl py-8 cursor-pointer hover:border-secondary/40 transition-colors">
-                <Upload size={24} className="text-main/30 mb-2" />
-                <span className="text-sm text-main/50 font-medium">Click to upload photos</span>
-                <span className="text-xs text-main/30 mt-1">PNG, JPG up to 5MB each</span>
-                <input type="file" multiple accept=".jpg,.jpeg,.png" className="sr-only" onChange={handlePhotos} disabled={uploading} />
-              </label>
+              <FileUpload
+                id="book-photos"
+                label="Click to upload photos"
+                hint="PNG, JPG up to 5MB each"
+                icon={Upload}
+                multiple
+                accept=".jpg,.jpeg,.png"
+                onChange={handlePhotos}
+                disabled={uploading}
+                style="border-main/15 py-8 hover:border-secondary/40 hover:bg-transparent bg-transparent"
+              />
             )}
             {photos.length > 0 && (
               <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
@@ -521,9 +552,9 @@ export default function ListBook() {
             <p className="text-xs text-main/45 mb-4">
               Leave a personal message for whoever buys this book.
             </p>
-            <textarea placeholder="e.g. This book changed how I see the world…" value={form.loveNote}
+            <TextareaControl placeholder="e.g. This book changed how I see the world…" value={form.loveNote}
               onChange={set('loveNote')} rows={3}
-              className="w-full border border-secondary/25 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors resize-none bg-white" />
+              style="border border-secondary/25 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
           </div>
 
           <button type="submit" disabled={submitListing.isPending || uploading}

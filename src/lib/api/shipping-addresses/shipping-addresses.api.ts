@@ -19,8 +19,11 @@ export async function getShippingAddressesApi(): Promise<ShippingAddressResponse
 
 export async function createShippingAddressApi(
   body: CreateShippingAddressBody,
+  options?: { skipSuccessToast?: boolean },
 ): Promise<ShippingAddressResponse> {
-  const { data } = await client.post("/api/v1/shipping-addresses", body)
+  const { data } = await client.post("/api/v1/shipping-addresses", body, {
+    skipSuccessToast: options?.skipSuccessToast,
+  })
   return data as unknown as ShippingAddressResponse
 }
 

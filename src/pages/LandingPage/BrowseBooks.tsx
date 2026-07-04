@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useListings } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import BookCard from '../../components/BookCard'
+import { FormControl, SelectBoxControl, type SelectOption } from '@/components/ui/form-controls'
 
 const genres = ['All', 'African Fiction', 'Foreign Fiction', 'Romance', 'Thriller', 'Fantasy', 'Children', 'Academic', 'Self Help']
 const conditions = ['All', 'New', 'LikeNew', 'Excellent', 'Good', 'Fair', 'Poor']
@@ -75,13 +76,15 @@ function BrowseBooks() {
           {/* Search bar */}
           <div className="flex items-center bg-white/10 backdrop-blur-md border border-white/15 rounded-md overflow-hidden max-w-xl mx-auto focus-within:border-secondary transition-colors">
             <Search size={15} className="ml-4 text-white/40 shrink-0" />
-            <input
-              type="text"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Search by title, author…"
-              className="flex-1 px-4 py-3.5 text-sm text-white placeholder-white/30 outline-none bg-transparent font-body"
-            />
+            <div className="flex-1">
+              <FormControl
+                type="text"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search by title, author…"
+                style="min-h-0 px-4 py-3.5 text-sm text-white placeholder:text-white/30 outline-none bg-transparent border-0 rounded-none focus-visible:ring-0 font-body"
+              />
+            </div>
             {query && (
               <button
                 onClick={() => setQuery('')}
@@ -100,15 +103,22 @@ function BrowseBooks() {
         {/* ── Toolbar ── */}
         <div className="flex items-center justify-between py-4 border-b border-main/10">
           <div className="flex items-center gap-3 md:gap-6">
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="text-xs font-semibold uppercase tracking-[0.15em] text-main bg-transparent outline-none cursor-pointer max-w-30 md:max-w-none truncate"
-            >
-              <option value="default">Featured</option>
-              <option value="price-asc">Price: Low → High</option>
-              <option value="price-desc">Price: High → Low</option>
-            </select>
+            <div className="max-w-30 md:max-w-none">
+              <SelectBoxControl
+                options={[
+                  { label: 'Featured', value: 'default' },
+                  { label: 'Price: Low → High', value: 'price-asc' },
+                  { label: 'Price: High → Low', value: 'price-desc' },
+                ]}
+                value={{
+                  default: { label: 'Featured', value: 'default' },
+                  'price-asc': { label: 'Price: Low → High', value: 'price-asc' },
+                  'price-desc': { label: 'Price: High → Low', value: 'price-desc' },
+                }[sortBy]}
+                onChange={(option: SelectOption) => setSortBy(String(option.value))}
+                style="min-h-0 px-0 py-0 border-0 rounded-none bg-transparent hover:bg-transparent text-xs font-semibold uppercase tracking-[0.15em] text-main truncate"
+              />
+            </div>
             <span className="hidden sm:block text-xs font-semibold uppercase tracking-[0.15em] text-main/40">
               {filtered.length} {filtered.length === 1 ? 'Product' : 'Products'}
             </span>

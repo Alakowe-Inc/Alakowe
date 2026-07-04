@@ -1,6 +1,12 @@
 import axios from "axios"
 import { toast } from "react-toastify"
 
+declare module "axios" {
+  export interface AxiosRequestConfig {
+    skipSuccessToast?: boolean
+  }
+}
+
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "https://localhost:7175/",
   headers: { "Content-Type": "application/json" },
@@ -22,7 +28,7 @@ client.interceptors.response.use(
     const isMutating = mutatingMethods.has(response.config.method ?? "")
 
     if (body.success) {
-      if (isMutating && body.message) toast.success(body.message)
+      if (isMutating && body.message && !response.config.skipSuccessToast) toast.success(body.message)
       response.data = body.data
       return response
     }

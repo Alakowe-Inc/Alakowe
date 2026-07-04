@@ -13,6 +13,8 @@ import {
   useShippingAddresses,
 } from '../../../lib/api/shipping-addresses/shipping-addresses.hooks'
 import { useAreasByState, useStates } from '../../../lib/api/location/location.hooks'
+import { FormControl, SelectBoxControl, RadioControl, type SelectOption } from '@/components/ui/form-controls'
+import { cn } from '@/lib/utils'
 
 function Field({
   label,
@@ -35,12 +37,16 @@ function Field({
 }
 
 const inputClass = (hasError?: boolean) =>
-  `w-full border rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors bg-white ${
-    hasError ? 'border-red-400' : 'border-main/15'
-  }`
+  cn(
+    'rounded-xl border-gray-200 h-auto py-3 text-[.9rem] text-gray-800 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:border-secondary',
+    hasError && 'border-red-400'
+  )
 
 const selectClass = (hasError?: boolean) =>
-  `${inputClass(hasError)} bg-white`
+  cn(
+    'w-full rounded-xl border px-4 py-3 text-[.9rem] text-gray-800 outline-none focus:ring-0 focus:border-secondary transition-colors bg-white',
+    hasError ? 'border-red-400' : 'border-gray-200'
+  )
 
 type ContactErrors = {
   fullName?: string
@@ -57,7 +63,7 @@ function ShippingDetails() {
   const navigate = useNavigate()
 
   const { data: savedAddresses } = useShippingAddresses()
-  const createShippingAddress = useCreateShippingAddress()
+  const createShippingAddress = useCreateShippingAddress({ skipSuccessToast: true })
   const statesQuery = useStates()
   const areasQuery = useAreasByState(
     typeof checkout.newStateId === 'number' ? checkout.newStateId : undefined
@@ -257,33 +263,33 @@ function ShippingDetails() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
                   <Field label="Full Name" error={errors.fullName}>
-                    <input
+                    <FormControl
                       type="text"
                       placeholder="e.g. Amaka Okonkwo"
                       value={checkout.contactForm.fullName}
                       onChange={setContact('fullName')}
-                      className={inputClass(!!errors.fullName)}
+                      style={inputClass(!!errors.fullName)}
                     />
                   </Field>
                 </div>
 
                 <Field label="Email Address" error={errors.email}>
-                  <input
+                  <FormControl
                     type="email"
                     placeholder="you@example.com"
                     value={checkout.contactForm.email}
                     onChange={setContact('email')}
-                    className={inputClass(!!errors.email)}
+                    style={inputClass(!!errors.email)}
                   />
                 </Field>
 
                 <Field label="Phone Number" error={errors.phone}>
-                  <input
+                  <FormControl
                     type="tel"
                     placeholder="080XXXXXXXX"
                     value={checkout.contactForm.phone}
                     onChange={setContact('phone')}
-                    className={inputClass(!!errors.phone)}
+                    style={inputClass(!!errors.phone)}
                   />
                 </Field>
               </div>
@@ -295,102 +301,82 @@ function ShippingDetails() {
 
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-4 flex-wrap">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="radio"
-                      name="addressMode"
-                      checked={checkout.addressMode === 'saved'}
-                      onChange={() => checkout.setAddressMode('saved')}
-                    />
-                    Use saved address
-                  </label>
+                  <RadioControl
+                    name="addressMode"
+                    checked={checkout.addressMode === 'saved'}
+                    onChange={() => checkout.setAddressMode('saved')}
+                    label={{ exist: true, text: 'Use saved address', style: 'text-sm' }}
+                  />
 
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="radio"
-                      name="addressMode"
-                      checked={checkout.addressMode === 'new'}
-                      onChange={() => checkout.setAddressMode('new')}
-                    />
-                    Enter a new address
-                  </label>
+                  <RadioControl
+                    name="addressMode"
+                    checked={checkout.addressMode === 'new'}
+                    onChange={() => checkout.setAddressMode('new')}
+                    label={{ exist: true, text: 'Enter a new address', style: 'text-sm' }}
+                  />
                 </div>
 
                 {checkout.addressMode === 'saved' ? (
                   <Field label="Choose address">
-                    <select
-                      value={checkout.selectedShippingAddressId}
-                      onChange={(e) =>
-                        checkout.setSelectedShippingAddressId(
-                          e.target.value === '' ? '' : Number(e.target.value)
-                        )
+                    <SelectBoxControl
+                      placeholder="Select shipping address"
+                      options={savedOptions.map((a) => ({
+                        label: `${a.label ?? 'Address'}${a.stateName ? ` (${a.stateName})` : ''}`,
+                        value: a.id ?? '',
+                      }))}
+                      value={
+                        checkout.selectedShippingAddressId
+                          ? savedOptions
+                              .map((a) => ({
+                                label: `${a.label ?? 'Address'}${a.stateName ? ` (${a.stateName})` : ''}`,
+                                value: a.id ?? '',
+                              }))
+                              .find((o) => o.value === checkout.selectedShippingAddressId) ?? null
+                          : null
                       }
-                      className={selectClass(false)}
-                    >
-                      <option value="" disabled>
-                        Select shipping address
-                      </option>
-                      {savedOptions.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.label ?? 'Address'}
-                          {a.stateName ? ` (${a.stateName})` : ''}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(option: SelectOption) => checkout.setSelectedShippingAddressId(Number(option.value))}
+                      style={selectClass(false)}
+                    />
                   </Field>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field label="State">
-                      <select
-                        value={checkout.newStateId}
-                        onChange={(e) =>
-                          checkout.setNewStateId(
-                            e.target.value === '' ? '' : Number(e.target.value)
-                          )
+                      <SelectBoxControl
+                        placeholder="Select state"
+                        options={(statesQuery.data ?? []).map((s) => ({ label: s.name, value: s.id }))}
+                        value={
+                          typeof checkout.newStateId === 'number'
+                            ? (statesQuery.data ?? []).map((s) => ({ label: s.name, value: s.id })).find((o) => o.value === checkout.newStateId) ?? null
+                            : null
                         }
-                        className={selectClass(false)}
-                      >
-                        <option value="" disabled>
-                          Select state
-                        </option>
-                        {(statesQuery.data ?? []).map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(option: SelectOption) => checkout.setNewStateId(Number(option.value))}
+                        style={selectClass(false)}
+                      />
                     </Field>
 
                     <Field label="Area">
-                      <select
-                        value={checkout.newAreaId}
-                        onChange={(e) =>
-                          checkout.setNewAreaId(
-                            e.target.value === '' ? '' : Number(e.target.value)
-                          )
+                      <SelectBoxControl
+                        placeholder="Select area"
+                        options={(areasQuery.data ?? []).map((a) => ({ label: a.name, value: a.id }))}
+                        value={
+                          typeof checkout.newAreaId === 'number'
+                            ? (areasQuery.data ?? []).map((a) => ({ label: a.name, value: a.id })).find((o) => o.value === checkout.newAreaId) ?? null
+                            : null
                         }
-                        className={selectClass(false)}
+                        onChange={(option: SelectOption) => checkout.setNewAreaId(Number(option.value))}
                         disabled={typeof checkout.newStateId !== 'number'}
-                      >
-                        <option value="" disabled>
-                          Select area
-                        </option>
-                        {(areasQuery.data ?? []).map((a) => (
-                          <option key={a.id} value={a.id}>
-                            {a.name}
-                          </option>
-                        ))}
-                      </select>
+                        style={selectClass(false)}
+                      />
                     </Field>
 
                     <div className="sm:col-span-2">
                       <Field label="Address line">
-                        <input
+                        <FormControl
                           type="text"
                           placeholder="e.g. 12 Broad Street, Flat 3"
                           value={checkout.newAddressLine}
                           onChange={(e) => checkout.setNewAddressLine(e.target.value)}
-                          className={inputClass(false)}
+                          style={inputClass(false)}
                         />
                       </Field>
                     </div>
@@ -415,7 +401,7 @@ function ShippingDetails() {
                 {items.map((item) => (
                   <div key={item.listingId} className="flex items-center gap-3">
                     <div
-                      className="w-8 h-12 rounded-lg overflow-hidden shrink-0 shadow-sm flex items-center justify-center"
+                      className="w-8 h-10 rounded overflow-hidden shrink-0 shadow-sm flex items-center justify-center"
                       style={{ backgroundColor: item.coverColor }}
                     >
                       {item.coverImageUrl ? (

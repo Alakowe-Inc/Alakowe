@@ -8,7 +8,7 @@ import type {
 } from "../types"
 
 export async function startCheckoutApi(body: CheckoutStartRequest): Promise<CheckoutSessionResponse> {
-  const { data } = await client.post("/api/v1/checkout/start", body)
+  const { data } = await client.post("/api/v1/checkout/start", body, { skipSuccessToast: true })
   return data as CheckoutSessionResponse
 }
 
