@@ -151,6 +151,13 @@ export interface ListingResponse {
   stateId?: number
   areaId?: number
   location?: string | null
+  language?: string | null
+  pages?: number | null
+  sellerId?: number | null
+  sellerAvatarUrl?: string | null
+  sellerVerified?: boolean
+  sellerRating?: number
+  sellerSalesCount?: number
 }
 
 export interface SetListingDiscountRequest {
