@@ -37,20 +37,20 @@ function BookCarousel({ label, icon, seeAllLink = '/browse', children }: BookCar
             See all
           </Link>
           <div className="hidden sm:flex items-center gap-1.5">
-            {/* <button
+            <button
               onClick={() => scroll('left')}
               className="w-8 h-8 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main transition-colors"
               aria-label="Scroll left"
             >
               <ChevronLeft size={15} />
             </button>
-            {/* <button
+            <button
               onClick={() => scroll('right')}
               className="w-8 h-8 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main transition-colors"
               aria-label="Scroll right"
             >
               <ChevronRight size={15} />
-            </button> */}
+            </button>
           </div>
         </div>
       </div>
