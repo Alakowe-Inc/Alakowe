@@ -25,19 +25,9 @@ export interface BookDisplay {
   description: string
   loveNote?: string
   sellerName: string
-  sellerAvatarUrl?: string
-  sellerVerified?: boolean
-  sellerRating?: number
-  sellerSalesCount?: number
   isbn?: string
   categoryId?: number
   location?: string
-  language?: string
-  pages?: number
-  sellerId?: number
-  sellerVerified?: boolean
-  sellerRating?: number
-  sellerSalesCount?: number
 }
 
 export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
@@ -67,16 +57,9 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     description: listing.description ?? "",
     loveNote: listing.loveNote ?? undefined,
     sellerName: listing.createdBy ?? "Seller",
-    sellerAvatarUrl: listing.sellerAvatarUrl ?? undefined,
-    sellerVerified: listing.sellerVerified ?? false,
-    sellerRating: listing.sellerRating ?? 4.8,
-    sellerSalesCount: listing.sellerSalesCount ?? 0,
     isbn: listing.isbn ?? undefined,
     categoryId: listing.categoryId,
     location: listing.location ?? undefined,
-    language: listing.language ?? undefined,
-    pages: listing.pages ?? undefined,
-    sellerId: listing.sellerId ?? undefined,
   }
 }
 
