@@ -31,7 +31,7 @@ export interface BookDisplay {
 }
 
 export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
-  const buyersPriceInNaira = Math.round((listing.buyerPrice ?? listing.price ?? 0) / 100)
+  const buyersPriceInNaira = Math.round((listing.buyerPrice || listing.price || 0) / 100)
   const discountPct = listing.discount ?? 0
   const hasDiscount = listing.isDiscountApplied && discountPct > 0
   const originalPrice = hasDiscount

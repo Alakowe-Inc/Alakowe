@@ -1,4 +1,4 @@
-import { Star, MapPin, Heart, ShoppingCart } from 'lucide-react'
+import { Star, Heart, ShoppingBag } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Book } from '../data/mockData'
@@ -40,7 +40,7 @@ function BookCard({ book }: BookCardProps) {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Image / Cover area */}
-      <div className="relative overflow-hidden bg-[#f5f5f3] rounded-[20px] aspect-[4/5] shadow-sm">
+      <div className="relative overflow-hidden bg-[#f5f5f3] rounded-[16px] aspect-[4/5] shadow-sm">
         {/* Favorite button */}
         <button
           className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
@@ -52,7 +52,7 @@ function BookCard({ book }: BookCardProps) {
         >
           <Heart
             size={14}
-            className={isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}
+            className={isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-900'}
           />
         </button>
 
@@ -92,7 +92,7 @@ function BookCard({ book }: BookCardProps) {
       </div>
 
       {/* Info */}
-      <div className="pt-3 pb-1 px-0.5">
+      <div className="pt-2.5 pb-1 px-0.5">
         {/* Title and Rating Row */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-sm font-bold text-main leading-snug truncate group-hover:text-secondary transition-colors flex-1">
@@ -105,18 +105,12 @@ function BookCard({ book }: BookCardProps) {
         </div>
 
         {/* Author */}
-        <p className="text-xs text-secondary font-medium mt-1 truncate">
+        <p className="text-xs text-slate-500 font-normal mt-0.5 truncate">
           {book.author}
         </p>
 
-        {/* Location */}
-        <div className="flex items-center gap-1 mt-1 text-gray-400">
-          <MapPin size={11} className="shrink-0" />
-          <span className="text-[11px] font-medium truncate">{book.location}</span>
-        </div>
-
         {/* Price and Cart Row */}
-        <div className="flex items-center justify-between mt-2.5">
+        <div className="flex items-center justify-between mt-2">
           <span className="text-sm font-bold text-main">
             {formatPrice(book.price)}
           </span>
@@ -128,7 +122,7 @@ function BookCard({ book }: BookCardProps) {
               addToCart(book.id)
             }}
           >
-            <ShoppingCart size={13} />
+            <ShoppingBag size={13} />
           </button>
         </div>
       </div>
@@ -138,4 +132,3 @@ function BookCard({ book }: BookCardProps) {
 
 export { StarRating }
 export default BookCard
-

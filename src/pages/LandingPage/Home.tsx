@@ -41,7 +41,7 @@ function Home() {
   return (
     <div>
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="relative w-full h-[calc(90vh-100px)] flex flex-col overflow-hidden">
+      <section className="relative w-full h-[60vh] min-h-[460px] flex flex-col overflow-hidden">
 
         {/* Background slides */}
         {heroSlides.map((src, i) => (
@@ -98,11 +98,11 @@ function Home() {
 
 
       {/* ── The Store ────────────────────────────────────────────── */}
-      <section className="bg-white py-20">
+      <section className="bg-white py-12">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
 
           {/* Header */}
-          <div className="mb-12">
+          <div className="mb-8">
             <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
               The Store
             </p>
@@ -128,7 +128,7 @@ function Home() {
             const filterValue = section.filterParam?.[filterKey] ?? ""
 
             return (
-              <div key={section.id} className="mb-14">
+              <div key={section.id} className="mb-10">
                 <BookCarousel
                   label={section.title ?? "Featured"}
                   icon={iconMap[filterKey]}
@@ -164,10 +164,10 @@ function Home() {
       </section>
 
       {/* ── Book Quotes ─────────────────────────────────────────── */}
-      <section className="bg-white py-20 border-t border-b border-third">
+      <section className="bg-white py-12 border-t border-b border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
           {/* Header */}
-          <div className="mb-12 text-left">
+          <div className="mb-8 text-left">
             <h2 className="font-heading font-bold text-main text-3xl">
               Notes from the pages
             </h2>
@@ -231,7 +231,7 @@ function Home() {
             </div>
 
             {/* Desktop pagination dots matching mockup layout */}
-            <div className="hidden lg:flex items-center justify-center gap-2 mt-12">
+            <div className="hidden lg:flex items-center justify-center gap-2 mt-8">
               <span className="w-2.5 h-2.5 rounded-full bg-main" />
               <span className="w-2.5 h-2.5 rounded-full bg-main/20" />
               <span className="w-2.5 h-2.5 rounded-full bg-main/20" />
@@ -241,10 +241,10 @@ function Home() {
       </section>
 
       {/* ── How it Works ────────────────────────────────────────── */}
-      <section className="py-20 bg-white border-t border-third">
+      <section className="py-12 bg-white border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-16">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
             <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
               How it works
             </h2>
@@ -369,7 +369,7 @@ function Home() {
 
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section className="bg-main py-28">
+      <section className="bg-main py-16">
         <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center text-center gap-8">
           <div>
             <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">
