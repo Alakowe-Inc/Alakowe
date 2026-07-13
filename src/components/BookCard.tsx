@@ -1,4 +1,4 @@
-import { Star, MapPin } from 'lucide-react'
+import { Star, MapPin, Heart, ShoppingCart } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Book } from '../data/mockData'
@@ -29,24 +29,41 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
 
 function BookCard({ book }: BookCardProps) {
   const [hovered, setHovered] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(false)
   const { addToCart } = useCart()
 
   return (
     <Link
       to={`/books/${book.id}`}
-      className="group block"
+      className="group block w-full max-w-[240px] mx-auto transition-transform duration-300 hover:-translate-y-0.5"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Image / Cover area */}
-      <div className="relative overflow-hidden bg-[#f5f5f3]" style={{ aspectRatio: '4/4' }}>
+      <div className="relative overflow-hidden bg-[#f5f5f3] rounded-[20px] aspect-[4/5] shadow-sm">
+        {/* Favorite button */}
+        <button
+          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setIsFavorite(!isFavorite)
+          }}
+        >
+          <Heart
+            size={14}
+            className={isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}
+          />
+        </button>
+
         {/* Badge */}
         {book.badge && (
           <span
-            className={`absolute top-3 left-3 z-10 text-[10px] font-semibold tracking-widest rounded-full uppercase px-2.5 py-1 ${book.badge === 'Best Value'
-              ? 'bg-secondary/80 text-main'
-              : 'bg-main text-white'
-              }`}
+            className={`absolute top-3 left-3 z-10 text-[9px] font-semibold tracking-wider rounded-full uppercase px-2.5 py-1 ${
+              book.badge === 'Best Value'
+                ? 'bg-secondary/90 text-white'
+                : 'bg-main text-white'
+            }`}
           >
             {book.badge}
           </span>
@@ -54,7 +71,7 @@ function BookCard({ book }: BookCardProps) {
 
         {/* Discount badge (real listings) */}
         {!book.badge && book.isDiscountApplied && book.discount && book.discount > 0 && (
-          <span className="absolute top-3 left-3 z-10 text-[10px] font-bold text-white bg-secondary px-2.5 py-1 rounded-full uppercase tracking-widest">
+          <span className="absolute top-3 left-3 z-10 text-[9px] font-bold text-white bg-secondary px-2.5 py-1 rounded-full uppercase tracking-wider">
             {book.discount}% off
           </span>
         )}
@@ -72,33 +89,47 @@ function BookCard({ book }: BookCardProps) {
             style={{ backgroundColor: book.coverColor }}
           />
         )}
-
-        {/* Add to cart overlay */}
-        <button
-          className={`absolute cursor-pointer bottom-0 left-0 right-0 bg-secondary py-3.5 text-center text-[11px] font-semibold tracking-widest uppercase text-white transition-all duration-300 ${hovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
-            }`}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            addToCart(book.id)
-          }}
-        >
-          Add to Cart
-        </button>
       </div>
 
       {/* Info */}
-      <div className="pt-3 pb-1">
-        <p className="text-[10px] tracking-widest uppercase text-main/50 font-medium truncate">
+      <div className="pt-3 pb-1 px-0.5">
+        {/* Title and Rating Row */}
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-sm font-bold text-main leading-snug truncate group-hover:text-secondary transition-colors flex-1">
+            {book.title}
+          </h3>
+          <div className="flex items-center gap-0.5 text-xs text-slate-500 shrink-0 mt-0.5">
+            <span className="font-semibold">{book.sellerRating?.toFixed(1) || '4.0'}</span>
+            <Star className="fill-amber-400 text-amber-400" size={11} />
+          </div>
+        </div>
+
+        {/* Author */}
+        <p className="text-xs text-secondary font-medium mt-1 truncate">
           {book.author}
         </p>
-        <h3 className="text-[13px] font-semibold uppercase tracking-wide text-main leading-snug mt-0.5 line-clamp-2 group-hover:text-secondary transition-colors">
-          {book.title}
-        </h3>
-        <p className="text-[13px] text-main mt-1">{formatPrice(book.price)}</p>
-        <div className="flex items-center gap-1 mt-1.5 text-main/45">
+
+        {/* Location */}
+        <div className="flex items-center gap-1 mt-1 text-gray-400">
           <MapPin size={11} className="shrink-0" />
-          <span className="text-[10px] truncate">{book.location}</span>
+          <span className="text-[11px] font-medium truncate">{book.location}</span>
+        </div>
+
+        {/* Price and Cart Row */}
+        <div className="flex items-center justify-between mt-2.5">
+          <span className="text-sm font-bold text-main">
+            {formatPrice(book.price)}
+          </span>
+          <button
+            className="w-8 h-8 rounded-full bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-colors duration-300 flex items-center justify-center"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              addToCart(book.id)
+            }}
+          >
+            <ShoppingCart size={13} />
+          </button>
         </div>
       </div>
     </Link>
@@ -107,3 +138,4 @@ function BookCard({ book }: BookCardProps) {
 
 export { StarRating }
 export default BookCard
+

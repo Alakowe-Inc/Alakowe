@@ -140,6 +140,9 @@
 }
 
 @layer utilities {
+  .font-handwritten {
+    font-family: 'Caveat', cursive;
+  }
   .font-display {
     font-family: 'Poppins', system-ui, sans-serif;
   }

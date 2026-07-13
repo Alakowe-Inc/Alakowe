@@ -7,7 +7,9 @@ import {
   BookPlus,
   BellRing,
   MapPin,
-  Wallet
+  Wallet,
+  Shield,
+  Truck
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { bookQuotes } from '../../data/mockData'
@@ -23,19 +25,11 @@ const heroSlides = [heroImage1, heroImage2, heroImage3]
 
 function Home() {
   const [slideIndex, setSlideIndex] = useState(0)
-  const [quoteIndex, setQuoteIndex] = useState(0)
-  const [visible, setVisible] = useState(true)
+  const [activeQuoteIndex, setActiveQuoteIndex] = useState(0)
+  const [howItWorksTab, setHowItWorksTab] = useState<'buy' | 'sell'>('buy')
 
   const { data: landingPage, isLoading: sectionsLoading } = useLandingPage()
   const sections = landingPage?.sections ?? []
-
-  // ── Stats animation state ─────────────────────────────────────
-  const statsRef = useRef<HTMLDivElement | null>(null)
-  const [startCount, setStartCount] = useState(false)
-  const [booksCount, setBooksCount] = useState(0)
-  const [readersCount, setReadersCount] = useState(0)
-  const [statesText, setStatesText] = useState("")
-  const [countingDone, setCountingDone] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -43,84 +37,6 @@ function Home() {
     }, 5000)
     return () => clearInterval(interval)
   }, [])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVisible(false)
-      setTimeout(() => {
-        setQuoteIndex(i => (i + 1) % bookQuotes.length)
-        setVisible(true)
-      }, 500)
-    }, 60000)
-    return () => clearInterval(interval)
-  }, [])
-
-  // ── Scroll trigger for stats (one-time) ───────────────────────
-  useEffect(() => {
-    const node = statsRef.current
-    if (!node) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setStartCount(true)
-            observer.disconnect()
-          }
-        })
-      },
-      { threshold: 0.3 }
-    )
-
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [])
-
-  // ── Animated counters + typing effect ─────────────────────────
-  useEffect(() => {
-    if (!startCount) return
-
-    const duration = 1800
-    const startTime = performance.now()
-    const booksTarget = 5000
-    const readersTarget = 1200
-
-    let rafId: number
-    const tick = (now: number) => {
-      const elapsed = now - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      // easeOutCubic
-      const eased = 1 - Math.pow(1 - progress, 3)
-
-      setBooksCount(Math.floor(eased * booksTarget))
-      setReadersCount(Math.floor(eased * readersTarget))
-
-      if (progress < 1) {
-        rafId = requestAnimationFrame(tick)
-      } else {
-        setBooksCount(booksTarget)
-        setReadersCount(readersTarget)
-        setCountingDone(true)
-      }
-    }
-
-    rafId = requestAnimationFrame(tick)
-
-    // Typing effect for "All"
-    const word = "All"
-    let i = 0
-    setStatesText("")
-    const typeInterval = setInterval(() => {
-      i += 1
-      setStatesText(word.slice(0, i))
-      if (i >= word.length) clearInterval(typeInterval)
-    }, 80)
-
-    return () => {
-      cancelAnimationFrame(rafId)
-      clearInterval(typeInterval)
-    }
-  }, [startCount])
 
   return (
     <div>
@@ -180,79 +96,6 @@ function Home() {
         </div>
       </section>
 
-      {/* ── About ───────────────────────────────────────────────── */}
-      <section className="py-20 bg-third border-t border-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
-
-            {/* Text */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
-                Our Story
-              </p>
-              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl mb-6 leading-tight">
-                Welcome to ALÁKÒWÉ
-              </h2>
-              <p className="text-main/60 text-sm leading-relaxed mb-5">
-                ALÁKÒWÉ is a Yoruba word used to describe an educated or literate person. Here, anyone who has ever felt connected to a book and wanted someone else to feel it too, is included.
-              </p>
-
-              <p className="text-main/60 text-sm leading-relaxed mb-5">
-                ALÁKÒWÉ, A New Way to Read
-              </p>
-              {/* <p className="text-main/60 text-sm leading-relaxed mb-8">
-                Whether you're a student hunting for a textbook, a bibliophile expanding your collection, or someone clearing shelf space, ALÁKÒWÉ is the community for you.
-              </p> */}
-              <div
-                ref={statsRef}
-                className="grid grid-cols-3 gap-6 pt-8 border-t border-main/10"
-              >
-                {[
-                  {
-                    value: `${booksCount.toLocaleString()}${countingDone ? '+' : ''}`,
-                    label: 'Books Listed',
-                  },
-                  {
-                    value: `${readersCount.toLocaleString()}${countingDone ? '+' : ''}`,
-                    label: 'Happy Readers',
-                  },
-                  {
-                    value: statesText,
-                    label: 'States Covered',
-                  },
-                ].map(({ value, label }) => (
-                  <div key={label}>
-                    <p className="font-heading font-bold text-main text-2xl md:text-3xl">{value}</p>
-                    <p className="text-main/45 text-xs mt-1 leading-snug">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Visual panel */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-main/5 p-6 flex flex-col gap-3">
-                <div className="w-8 h-8 rounded-full bg-secondary/15 flex items-center justify-center">
-                  <BookOpen size={15} className="text-main" />
-                </div>
-                <h4 className="font-heading font-bold text-main text-base">Inspected Books</h4>
-                <p className="text-main/50 text-xs leading-relaxed">Every book is physically checked before dispatch to ensure it matches the listing, always.</p>
-              </div>
-              <div className="bg-main p-6 flex flex-col gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <Handshake size={15} className="text-white" />
-                </div>
-                <h4 className="font-heading font-bold text-white text-base">Escrow Protection</h4>
-                <p className="text-white/50 text-xs leading-relaxed">Your payment is held until you confirm receipt. Sellers get paid only when you're satisfied.</p>
-              </div>
-              <div className="bg-secondary/10 p-6 flex flex-col gap-3 col-span-2">
-                <h4 className="font-heading font-bold text-main text-base">Nationwide Delivery</h4>
-                <p className="text-main/50 text-xs leading-relaxed">We coordinate pickup from sellers and delivery to your door across every state in Nigeria. Fast, reliable, and tracked.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ── The Store ────────────────────────────────────────────── */}
       <section className="bg-white py-20">
@@ -263,7 +106,6 @@ function Home() {
             <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
               The Store
             </p>
-            <h2 className="font-heading font-bold text-main text-3xl md:text-5xl tracking-tight max-w-3xl">Discover books, curated by condition and demand.</h2>
             <p className="text-main/55 text-sm md:text-base mt-3 max-w-2xl">Hand-picked listings from readers across Nigeria — refreshed daily.</p>
           </div>
 
@@ -322,175 +164,205 @@ function Home() {
       </section>
 
       {/* ── Book Quotes ─────────────────────────────────────────── */}
-      <section className="bg-white py-24 border-t border-b border-third">
-        <div className="max-w-3xl mx-auto px-4 md:px-6 text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-main/40 mb-12">
-            From the Pages
-          </p>
-          <div
-            className="transition-opacity duration-500"
-            style={{ opacity: visible ? 1 : 0 }}
-          >
-            <p className="font-heading font-bold text-main text-2xl md:text-3xl lg:text-4xl leading-snug">
-              "{bookQuotes[quoteIndex].quote}"
-            </p>
-            <p className="mt-6 text-xs uppercase tracking-widest text-main/40 font-semibold">
-              — {bookQuotes[quoteIndex].author}
-            </p>
+      <section className="bg-white py-20 border-t border-b border-third">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+          {/* Header */}
+          <div className="mb-12 text-left">
+            <h2 className="font-heading font-bold text-main text-3xl">
+              Notes from the pages
+            </h2>
+          </div>
+
+          {/* Cards Grid / Carousel */}
+          <div className="relative">
+            {/* On desktop: show all three cards in a grid */}
+            <div className="hidden lg:grid grid-cols-3 gap-8">
+              {bookQuotes.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="relative bg-[#FFFDF0] pt-12 pb-8 px-8 rounded-lg shadow-[0_10px_25px_-5px_rgba(23,33,49,0.05)] flex flex-col min-h-[220px] transition-transform duration-300 hover:-translate-y-1"
+                >
+                  {/* Tape decoration */}
+                  <div className="absolute -top-2 w-14 h-4 bg-slate-400/20 rounded-[3px] shadow-sm border border-white/20 left-1/2 -translate-x-1/2" />
+
+                  {/* Quote text (handwritten) */}
+                  <p className="font-handwritten text-[24px] text-main/90 leading-relaxed font-medium mb-8">
+                    "{item.quote}"
+                  </p>
+
+                  {/* Author */}
+                  <p className="font-heading font-bold text-xs text-main mt-auto self-start">
+                    {item.author}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* On mobile/tablet: show only the active card with slider dots */}
+            <div className="lg:hidden flex flex-col items-center">
+              <div className="w-full max-w-md relative bg-[#FFFDF0] pt-12 pb-8 px-8 rounded-lg shadow-[0_10px_25px_-5px_rgba(23,33,49,0.05)] flex flex-col min-h-[220px]">
+                {/* Tape decoration */}
+                <div className="absolute -top-2 w-14 h-4 bg-slate-400/20 rounded-[3px] shadow-sm border border-white/20 left-1/2 -translate-x-1/2" />
+
+                {/* Quote text (handwritten) */}
+                <p className="font-handwritten text-[24px] text-main/90 leading-relaxed font-medium mb-8">
+                  "{bookQuotes[activeQuoteIndex].quote}"
+                </p>
+
+                {/* Author */}
+                <p className="font-heading font-bold text-xs text-main mt-auto self-start">
+                  {bookQuotes[activeQuoteIndex].author}
+                </p>
+              </div>
+
+              {/* Mobile pagination dots */}
+              <div className="flex gap-2.5 mt-8">
+                {bookQuotes.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveQuoteIndex(idx)}
+                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                      activeQuoteIndex === idx ? 'bg-main w-5' : 'bg-main/20'
+                    }`}
+                    aria-label={`Go to quote ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop pagination dots matching mockup layout */}
+            <div className="hidden lg:flex items-center justify-center gap-2 mt-12">
+              <span className="w-2.5 h-2.5 rounded-full bg-main" />
+              <span className="w-2.5 h-2.5 rounded-full bg-main/20" />
+              <span className="w-2.5 h-2.5 rounded-full bg-main/20" />
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── How it Works ────────────────────────────────────────── */}
-      <section className="py-16 bg-white border-t border-third">
+      <section className="py-20 bg-white border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
-
           {/* Header */}
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
-                Simple process
-              </p>
-              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
-                How does it works for buyers?
-              </h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-16">
+            <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
+              How it works
+            </h2>
+
+            {/* Toggle Container */}
+            <div className="flex bg-[#f5f6fa] p-1 rounded-full border border-main/5 self-start sm:self-center">
+              <button
+                onClick={() => setHowItWorksTab('buy')}
+                className={`px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-full transition-all duration-300 ${
+                  howItWorksTab === 'buy'
+                    ? 'bg-secondary text-white shadow-sm'
+                    : 'text-main/40 hover:text-main'
+                }`}
+              >
+                Buy
+              </button>
+              <button
+                onClick={() => setHowItWorksTab('sell')}
+                className={`px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-full transition-all duration-300 ${
+                  howItWorksTab === 'sell'
+                    ? 'bg-secondary text-white shadow-sm'
+                    : 'text-main/40 hover:text-main'
+                }`}
+              >
+                Sell
+              </button>
             </div>
+
             <Link
               to="/how-it-works"
-              className="hidden md:flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
+              className="text-sm font-semibold text-secondary hover:underline underline-offset-2 flex items-center gap-1.5 self-start sm:self-auto"
             >
-              Learn more
+              <span>Learn more</span>
+              <span className="text-base">&rarr;</span>
             </Link>
           </div>
 
-          {/* Steps */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-8">
-            {[
-              {
-                step: '01',
-                Icon: Search,
-                title: 'Browse & Find',
-                desc: 'Search thousands of pre-loved books by title, author, or genre. Filter by location and price.',
-              },
-              {
-                step: '02',
-                Icon: ShoppingCart,
-                title: 'Add to Cart',
-                desc: 'Pay securely at checkout. Your money is held in escrow, released only when you confirm delivery.',
-              },
-              {
-                step: '03',
-                Icon: Handshake,
-                title: 'We Coordinate',
-                desc: 'We notify the seller, arrange collection, inspect the book, and prepare it for dispatch.',
-              },
-              {
-                step: '04',
-                Icon: BookOpen,
-                title: 'Start Reading',
-                desc: 'Your book arrives in 3–7 business days. Confirm receipt and the seller gets paid.',
-              },
-            ].map(({ step, Icon, title, desc }) => (
-              <div key={step} className="flex flex-col">
-                {/* Step number + icon row */}
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="font-heading font-bold text-4xl text-main/10 leading-none select-none">
-                    {step}
-                  </span>
-                  <div className="w-9 h-9 rounded-full bg-secondary/15 flex items-center justify-center shrink-0">
-                    <Icon size={16} className="text-main" />
+          {/* Steps Display */}
+          <div className="relative">
+            {/* Horizontal Dashed Line (Desktop Only) */}
+            <div className="absolute top-[36px] left-[12%] right-[12%] h-[1px] border-t border-dashed border-secondary/30 -z-10 hidden lg:block" />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+              {(howItWorksTab === 'buy'
+                ? [
+                    {
+                      step: 1,
+                      Icon: ShoppingCart,
+                      title: 'Add to cart',
+                      desc: 'Find a book you love and add it to your cart.',
+                    },
+                    {
+                      step: 2,
+                      Icon: Shield,
+                      title: 'Pay securely',
+                      desc: 'Your payment is protected with us.',
+                    },
+                    {
+                      step: 3,
+                      Icon: Truck,
+                      title: 'We coordinate',
+                      desc: 'We handle the pickup, shipping and delivery.',
+                    },
+                    {
+                      step: 4,
+                      Icon: BookOpen,
+                      title: 'Start reading',
+                      desc: 'Receive your book and enjoy!',
+                    },
+                  ]
+                : [
+                    {
+                      step: 1,
+                      Icon: BookPlus,
+                      title: 'List your books',
+                      desc: 'Create a listing in minutes with photos and price.',
+                    },
+                    {
+                      step: 2,
+                      Icon: BellRing,
+                      title: 'Get notified',
+                      desc: 'Receive details immediately when your book sells.',
+                    },
+                    {
+                      step: 3,
+                      Icon: Truck,
+                      title: 'We coordinate',
+                      desc: 'We arrange collection and inspect the book.',
+                    },
+                    {
+                      step: 4,
+                      Icon: Wallet,
+                      title: 'Get paid',
+                      desc: 'Receive your money once the buyer confirms receipt.',
+                    },
+                  ]
+              ).map(({ step, Icon, title, desc }) => (
+                <div key={step} className="flex flex-col items-center text-center px-4">
+                  {/* Icon Circle */}
+                  <div className="w-[72px] h-[72px] rounded-full bg-secondary/10 text-secondary flex items-center justify-center mb-6 shrink-0 relative z-10 hover:scale-105 transition-transform duration-300">
+                    <Icon size={22} className="text-secondary" />
                   </div>
+
+                  {/* Title & Step Number */}
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <span className="w-5 h-5 rounded-full bg-secondary text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                      {step}
+                    </span>
+                    <h3 className="font-heading font-bold text-main text-base">{title}</h3>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-main/60 text-sm leading-relaxed max-w-[240px] mx-auto">
+                    {desc}
+                  </p>
                 </div>
-
-                <h3 className="font-heading font-bold text-main text-lg mb-2">{title}</h3>
-                <p className="text-main/50 text-sm leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center md:hidden">
-            <Link
-              to="/how-it-works"
-              className="inline-flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
-            >
-              Learn more
-            </Link>
-          </div>
-        </div>
-      </section>
-
-
-
-      <section className="py-16 bg-white border-t border-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
-
-          {/* Header */}
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
-                How does it works for sellers?
-              </h2>
+              ))}
             </div>
-            <Link
-              to="/how-it-works"
-              className="hidden md:flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
-            >
-              Learn more
-            </Link>
-          </div>
-
-          {/* Steps */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-8">
-            {[
-              {
-                step: '01',
-                Icon: BookPlus,
-                title: 'List Your Books',
-                desc: 'Create a listing in minutes. Set your price, upload photos, and share details about your book’s condition and edition.',
-              },
-              {
-                step: '02',
-                Icon: BellRing,
-                title: 'Get Notified',
-                desc: 'When your book sells, we send you a notification with the book details and instructions for the next steps.',
-              },
-              {
-                step: '03',
-                Icon: MapPin,
-                title: 'We Coordinate',
-                desc: 'You drop off the book at a nearby location or we arrange a pickup. We inspect the book to ensure it matches your listing before dispatch.',
-              },
-              {
-                step: '04',
-                Icon: Wallet,
-                title: 'Get Paid',
-                desc: 'Once the buyer confirms receipt, we release your payment. It’s that simple.',
-              },
-            ].map(({ step, Icon, title, desc }) => (
-              <div key={step} className="flex flex-col">
-                {/* Step number + icon row */}
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="font-heading font-bold text-4xl text-main/10 leading-none select-none">
-                    {step}
-                  </span>
-                  <div className="w-9 h-9 rounded-full bg-secondary/15 flex items-center justify-center shrink-0">
-                    <Icon size={16} className="text-main" />
-                  </div>
-                </div>
-
-                <h3 className="font-heading font-bold text-main text-lg mb-2">{title}</h3>
-                <p className="text-main/50 text-sm leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center md:hidden">
-            <Link
-              to="/how-it-works"
-              className="inline-flex underline underline-offset-4 items-center gap-2 text-sm font-semibold text-main/50 hover:text-main transition-colors"
-            >
-              Learn more
-            </Link>
           </div>
         </div>
       </section>
