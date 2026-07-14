@@ -57,7 +57,7 @@ export default function Sell() {
 
       {/* ── Hero ── */}
       <section className="bg-main text-white">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-20 md:py-28">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12 md:py-16">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-4">
               Sell on ALÁKÒWÉ
@@ -89,7 +89,7 @@ export default function Sell() {
 
       {/* ── How selling works ── */}
       <section className="bg-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-20">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12">
           <div className="text-center mb-14">
             <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-3">
               The Process
@@ -118,7 +118,7 @@ export default function Sell() {
 
       {/* ── What we accept ── */}
       <section className="bg-white">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-20">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-3">
@@ -193,7 +193,7 @@ export default function Sell() {
 
       {/* ── Perks ── */}
       <section className="bg-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-20">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-3">
               Why Sell Here
@@ -216,7 +216,7 @@ export default function Sell() {
 
       {/* ── Fees ── */}
       <section className="bg-white">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-20">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12">
           <div className="max-w-2xl mx-auto text-center">
             <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-3">
               Pricing & Fees
@@ -247,7 +247,7 @@ export default function Sell() {
 
       {/* ── CTA ── */}
       <section className="bg-main text-white">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-20 text-center">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-16 text-center">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
             Ready to list your first book?
           </h2>

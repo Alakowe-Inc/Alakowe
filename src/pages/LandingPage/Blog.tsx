@@ -16,7 +16,7 @@ function Blog() {
     <div className="min-h-screen bg-third">
 
       {/* Header */}
-      <div className="bg-main text-white min-h-[50vh] flex items-center justify-center py-20">
+      <div className="bg-main text-white h-[40vh] min-h-[320px] flex items-center justify-center py-12">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full text-center">
           <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-3">
             Our Blog
@@ -78,7 +78,7 @@ function Blog() {
         </div>
 
         {filtered.length === 0 && (
-          <div className="text-center py-20">
+          <div className="text-center py-12">
             <p className="font-heading font-semibold text-main text-xl mb-2">No posts yet</p>
             <p className="text-main/55 text-sm">Check back soon.</p>
           </div>

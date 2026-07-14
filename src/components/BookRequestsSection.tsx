@@ -105,7 +105,7 @@ function BookRequestsSection() {
 
   return (
     <>
-      <section className="py-20 bg-third border-t border-third">
+      <section className="py-12 bg-third border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
 
           {/* Header */}

@@ -26,7 +26,7 @@ function BlogPost() {
     <div className="min-h-screen bg-white">
 
       {/* Hero */}
-      <div className="bg-main text-white py-20 px-4">
+      <div className="bg-main text-white py-12 px-4">
         <div className="max-w-3xl mx-auto">
           <Link
             to="/blog"

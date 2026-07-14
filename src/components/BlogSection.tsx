@@ -3,11 +3,11 @@ import { blogPosts } from '../data/mockData'
 
 function BlogSection() {
   return (
-    <section className="py-28 bg-third">
+    <section className="py-12 bg-third">
       <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
 
         {/* Header */}
-        <div className="flex items-end justify-between mb-14">
+        <div className="flex items-end justify-between mb-8">
           <div>
             <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
               Our Blog

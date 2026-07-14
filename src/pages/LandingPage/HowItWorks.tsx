@@ -108,7 +108,7 @@ function HowItWorks() {
     <div>
 
       {/* ── Page Header ─────────────────────────────────────────── */}
-      <section className="bg-main min-h-[50vh] flex items-center justify-center py-20">
+      <section className="bg-main h-[40vh] min-h-[320px] flex items-center justify-center py-12">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full text-center">
           <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-3">
             Simple process
@@ -123,7 +123,7 @@ function HowItWorks() {
       </section>
 
       {/* ── Buyer Flow ──────────────────────────────────────────── */}
-      <section className="py-20 bg-white border-t border-third">
+      <section className="py-12 bg-white border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
           <div className="flex items-end justify-between mb-12">
             <div>
@@ -151,7 +151,7 @@ function HowItWorks() {
       </section>
 
       {/* ── Seller Flow ─────────────────────────────────────────── */}
-      <section className="py-20 bg-white border-t border-third">
+      <section className="py-12 bg-white border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
           <div className="flex items-end justify-between mb-12">
             <div>
@@ -179,7 +179,7 @@ function HowItWorks() {
       </section>
 
       {/* ── Trust & Safety ──────────────────────────────────────── */}
-      <section className="py-20 bg-white border-t border-third">
+      <section className="py-12 bg-white border-t border-third">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
           <div className="flex items-end justify-between mb-12">
             <div>
@@ -245,7 +245,7 @@ function HowItWorks() {
       </section>
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section className="bg-main py-28">
+      <section className="bg-main py-16">
         <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center text-center gap-8">
           <div>
             <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">
