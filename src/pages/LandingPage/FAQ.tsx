@@ -195,7 +195,7 @@ function FAQ() {
     <div>
 
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="bg-main text-white min-h-[50vh] flex items-center justify-center py-20">
+      <section className="bg-main text-white h-[40vh] min-h-[320px] flex items-center justify-center py-12">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full text-center">
           <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-3">
             Help Centre
@@ -213,7 +213,7 @@ function FAQ() {
       </section>
 
       {/* ── Content ────────────────────────────────────────────── */}
-      <section className="bg-white py-28">
+      <section className="bg-white py-12">
         <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-12">
 
           {/* Section jump links */}
@@ -268,7 +268,7 @@ function FAQ() {
       </section>
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section className="bg-main py-28">
+      <section className="bg-main py-16">
         <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center text-center gap-8">
           <div>
             <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">

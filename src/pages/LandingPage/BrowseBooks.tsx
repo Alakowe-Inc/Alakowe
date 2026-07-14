@@ -64,7 +64,7 @@ function BrowseBooks() {
     <div className="min-h-screen bg-third">
 
       {/* ── Page header ─────────────────────────────────────────── */}
-      <div className="bg-main min-h-[50vh] flex items-center justify-center py-20">
+      <div className="bg-main h-[40vh] min-h-[320px] flex items-center justify-center py-12">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full text-center">
           <p className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4">
             Marketplace
@@ -147,7 +147,7 @@ function BrowseBooks() {
             </div>
           ) : filtered.length > 0 ? (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-10">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
                 {paginated.map(book => (
                   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
                   <BookCard key={book.id} book={book as any} />

@@ -17,14 +17,12 @@ import BookCarousel from '../../components/BookCarousel'
 import BookCard from '../../components/BookCard'
 import { useLandingPage } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
-import heroImage1 from '../../assets/media/images/banny4.png'
+// import heroImage1 from '../../assets/media/images/banny4.png'
 import heroImage2 from '../../assets/media/images/banny2.png'
 import heroImage3 from '../../assets/media/images/banny3.png'
 //ALÁKÒWÉ,
-const heroSlides = [heroImage1, heroImage2, heroImage3]
 
 function Home() {
-  const [slideIndex, setSlideIndex] = useState(0)
   const [activeQuoteIndex, setActiveQuoteIndex] = useState(0)
   const [howItWorksTab, setHowItWorksTab] = useState<'buy' | 'sell'>('buy')
 
@@ -32,10 +30,7 @@ function Home() {
   const sections = landingPage?.sections ?? []
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setSlideIndex(i => (i + 1) % heroSlides.length)
-    }, 5000)
-    return () => clearInterval(interval)
+    // no-op: hero is static per breakpoint (mobile vs desktop)
   }, [])
 
   return (
@@ -43,17 +38,19 @@ function Home() {
       {/* ── Hero ───────────────────────────────────────────────── */}
       <section className="relative w-full h-[60vh] min-h-[460px] flex flex-col overflow-hidden">
 
-        {/* Background slides */}
-        {heroSlides.map((src, i) => (
-          <img
-            key={i}
-            src={src}
-            alt=""
-            aria-hidden
-            className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000"
-            style={{ opacity: i === slideIndex ? 1 : 0 }}
-          />
-        ))}
+        {/* Background images: mobile uses banny3, desktop uses banny2 */}
+        <img
+          src={heroImage3}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 lg:hidden"
+        />
+        <img
+          src={heroImage2}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 hidden lg:block"
+        />
 
         {/* Uniform dark overlay */}
         <div className="absolute inset-0 bg-main/50" />
@@ -84,16 +81,7 @@ function Home() {
           </div>
         </div>
 
-        {/* Dot indicators */}
-        <div className="relative flex items-center justify-center gap-2.5 pb-6 sm:pb-8">
-          {heroSlides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setSlideIndex(i)}
-              className={`rounded-full transition-all duration-300 ${i === slideIndex ? 'w-2.5 h-2.5 bg-white' : 'w-2 h-2 bg-white/40'}`}
-            />
-          ))}
-        </div>
+        {/* Static hero per breakpoint (no pagination dots) */}
       </section>
 
 
@@ -102,12 +90,11 @@ function Home() {
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
 
           {/* Header */}
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
               The Store
             </p>
-            <p className="text-main/55 text-sm md:text-base mt-3 max-w-2xl">Hand-picked listings from readers across Nigeria — refreshed daily.</p>
-          </div>
+          </div> */}
 
           {/* Dynamic sections from API */}
           {sectionsLoading && (
