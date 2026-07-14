@@ -35,7 +35,7 @@ function BookCard({ book }: BookCardProps) {
   return (
     <Link
       to={`/books/${book.id}`}
-      className="group block w-full max-w-[240px] mx-auto transition-transform duration-300 hover:-translate-y-0.5"
+      className="group block w-full max-w-[190px] mx-auto transition-transform duration-300 hover:-translate-y-0.5"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
