@@ -89,8 +89,14 @@ export default function MyListings() {
               {copied ? 'Copied!' : 'Copy Link'}
             </button>
           </div>
-          <div className="mt-3 bg-third rounded-xl px-4 py-2.5 text-xs text-main/50 font-mono break-all">
-            {storeUrl}
+          <div className="mt-3 bg-third rounded-xl px-4 py-2.5 text-xs text-main/50 font-mono break-all flex items-center justify-between gap-4">
+            <span className="truncate">{storeUrl}</span>
+            <Link
+              to={`/store/${encodeURIComponent(user?.email || '')}`}
+              className="text-xs font-semibold text-secondary hover:underline shrink-0"
+            >
+              Visit Store &rarr;
+            </Link>
           </div>
         </div>
 
