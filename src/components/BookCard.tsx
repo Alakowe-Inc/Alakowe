@@ -1,12 +1,29 @@
 import { Star, Heart, ShoppingBag } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { Book } from '../data/mockData'
+import type { BookBadge } from '../data/mockData'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../lib/utils'
 
+/**
+ * Minimal shape BookCard actually renders. Both the mock `Book` and the
+ * API-backed `BookDisplay` satisfy this, so either can be passed directly.
+ */
+export interface BookCardData {
+  id: string
+  title: string
+  author: string
+  price: number
+  coverColor: string
+  coverImageUrl?: string
+  badge?: BookBadge
+  discount?: number
+  isDiscountApplied?: boolean
+  sellerRating?: number
+}
+
 interface BookCardProps {
-  book: Book
+  book: BookCardData
 }
 
 function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {

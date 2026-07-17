@@ -23,7 +23,6 @@ import { CheckoutProvider } from "./context/CheckoutContext";
 import PaymentSuccess from "./pages/LandingPage/PaymentSuccess";
 import PaymentFailed from "./pages/LandingPage/PaymentFailed";
 import OrderStatus from "./pages/LandingPage/OrderStatus";
-import Dispute from "./pages/LandingPage/Dispute";
 import Profile from "./pages/LandingPage/Profile";
 import ShippingAddresses from "./pages/LandingPage/ShippingAddresses";
 
@@ -34,7 +33,6 @@ import MyListings from "./pages/LandingPage/MyListings";
 import MyListingDetail from "./pages/LandingPage/MyListingDetail";
 import EditListing from "./pages/LandingPage/EditListing";
 import SellerOrders from "./pages/LandingPage/SellerOrders";
-import SellerDropoff from "./pages/LandingPage/SellerDropoff";
 import MyPurchases from "./pages/LandingPage/MyPurchases";
 import SellerEarnings from "./pages/LandingPage/SellerEarnings";
 import SellerStorefront from "./pages/LandingPage/SellerStorefront";
@@ -64,7 +62,6 @@ const App = () => (
                 <Route path="payment/success" element={<PaymentSuccess />} />
                 <Route path="payment/failed" element={<PaymentFailed />} />
                 <Route path="order/:orderId" element={<OrderStatus />} />
-                <Route path="order/:orderId/dispute" element={<Dispute />} />
                 <Route path="account" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="account/shipping-addresses" element={<ProtectedRoute><ShippingAddresses /></ProtectedRoute>} />
 
@@ -75,7 +72,6 @@ const App = () => (
                 <Route path="my-listings/:id" element={<ProtectedRoute><MyListingDetail /></ProtectedRoute>} />
                 <Route path="my-listings/:id/edit" element={<ProtectedRoute><EditListing /></ProtectedRoute>} />
                 <Route path="my-sales" element={<ProtectedRoute><SellerOrders /></ProtectedRoute>} />
-                <Route path="my-sales/:id/dropoff" element={<ProtectedRoute><SellerDropoff /></ProtectedRoute>} />
                 <Route path="my-earnings" element={<ProtectedRoute><SellerEarnings /></ProtectedRoute>} />
                 <Route path="my-purchases" element={<ProtectedRoute><MyPurchases /></ProtectedRoute>} />
                 <Route path="store/:email" element={<SellerStorefront />} />

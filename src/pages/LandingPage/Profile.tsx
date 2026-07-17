@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { User, CreditCard, AlertTriangle, Check, KeyRound, Eye, EyeOff, MapPin } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { savePublicSellerProfile } from '../../data/sellerData'
+import { useSellerStoreProfile, useUpdateSellerStoreProfile } from '../../lib/api/store/store.hooks'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -94,6 +95,21 @@ export default function Profile() {
   const [profile, setProfile] = useState<ProfileData>(loadProfile)
   const [saved, setSaved] = useState(false)
 
+  const { data: store } = useSellerStoreProfile(!!user)
+  const updateStore = useUpdateSellerStoreProfile()
+
+  // Hydrate the form with the seller's saved storefront values (bio/location)
+  // from the backend, falling back to whatever is already in the form.
+  useEffect(() => {
+    if (!store) return
+    setProfile(p => ({
+      ...p,
+      bio: p.bio || store.description || '',
+      city: p.city || store.city || '',
+      state: p.state || store.state || '',
+    }))
+  }, [store])
+
   const [pwOpen, setPwOpen] = useState(false)
   const [currentPw, setCurrentPw] = useState('')
   const [newPw, setNewPw] = useState('')
@@ -128,6 +144,18 @@ export default function Profile() {
       city: profile.city,
       state: profile.state,
       bio: profile.bio,
+    })
+    // The bio doubles as the public storefront description; city/state
+    // become the seller's public storefront location.
+    updateStore.mutate({
+      storeName:
+        store?.storeName ||
+        `${profile.fullName || user!.email.split('@')[0]}'s Store`,
+      description: profile.bio || null,
+      city: profile.city || null,
+      state: profile.state || null,
+      isOnVacation: store?.isOnVacation ?? false,
+      vacationMessage: store?.vacationMessage ?? null,
     })
     setSaved(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })

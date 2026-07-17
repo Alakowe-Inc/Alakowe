@@ -354,3 +354,104 @@ export interface LandingPageSectionResponse {
 export interface LandingPageResponse {
   sections?: LandingPageSectionResponse[] | null
 }
+
+/* ───────── Orders & seller payouts ───────── */
+
+export interface OrderDeliveryAddress {
+  fullName?: string | null
+  phone?: string | null
+  email?: string | null
+  street?: string | null
+  city?: string | null
+  state?: string | null
+}
+
+export interface OrderItemDto {
+  id: number
+  listingId: number
+  bookTitle: string
+  sellerEmail: string
+  sellerName?: string | null
+  coverImageFileName?: string | null
+  quantity: number
+  unitPrice: number
+  totalPrice: number
+  buyerPrice: number
+  sellerPayout: number
+  platformFee: number
+  markupAmount: number
+  commissionAmount: number
+}
+
+export interface OrderDto {
+  id: number
+  orderNumber: string
+  totalAmount: number
+  status: string
+  shippingAddress?: string | null
+  deliveryFee?: number | null
+  shippingStateId?: number | null
+  shippingAreaId?: number | null
+  shippingStateName?: string | null
+  shippingAreaName?: string | null
+  deliveryAddress?: OrderDeliveryAddress | null
+  orderDate: string
+  shippedDate?: string | null
+  deliveredDate?: string | null
+  userId: string
+  sellerEmail: string
+  sellerName?: string | null
+  baseAmount: number
+  sellerPayout: number
+  platformFee: number
+  markupTotal: number
+  commissionTotal: number
+  isSettled: boolean
+  settledAt?: string | null
+  items: OrderItemDto[]
+}
+
+/* ───────── Store profiles ───────── */
+
+export interface StoreProfileResponse {
+  id: number
+  userId: number
+  storeName: string
+  storeSlug: string
+  description?: string | null
+  city?: string | null
+  state?: string | null
+  isOnVacation: boolean
+  vacationMessage?: string | null
+}
+
+export interface PublicStoreProfileResponse {
+  storeName: string
+  storeSlug: string
+  description?: string | null
+  city?: string | null
+  state?: string | null
+  isOnVacation: boolean
+  vacationMessage?: string | null
+  sellerEmail: string
+  sellerName: string
+  memberSince?: string | null
+  booksSold: number
+}
+
+export interface UpdateStoreProfileRequest {
+  storeName: string
+  description?: string | null
+  city?: string | null
+  state?: string | null
+  isOnVacation: boolean
+  vacationMessage?: string | null
+}
+
+export interface PayoutSummaryResponse {
+  sellerEmail: string
+  totalEarned: number
+  totalPaidOut: number
+  pendingPayout: number
+  orderCount: number
+}

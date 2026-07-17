@@ -1,24 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import { CheckCircle } from 'lucide-react'
-import { getOrder } from '../../data/orderData'
-import type { Order } from '../../data/orderData'
+import { CheckCircle, Package } from 'lucide-react'
+import { useOrder } from '../../lib/api/orders/orders.hooks'
+import { moneyInNaira, orderTotalInNaira, sellerDisplayName } from '../../lib/orders'
 import { formatPrice } from '../../lib/utils'
 
 function PaymentSuccess() {
   const [params] = useSearchParams()
   const orderId = params.get('orderId')
-  const [order, setOrder] = useState<Order | null>(null)
+  const numericOrderId = Number(orderId)
+  const { data: order } = useOrder(numericOrderId)
   const queryClient = useQueryClient()
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ['cart'] })
   }, [queryClient])
-
-  useEffect(() => {
-    if (orderId) setOrder(getOrder(orderId))
-  }, [orderId])
 
   return (
     <div className="bg-third min-h-screen flex items-center justify-center px-4 py-16">
@@ -45,22 +42,29 @@ function PaymentSuccess() {
           <div className="bg-white rounded-2xl border border-third p-6 mb-5">
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-semibold text-main/40 uppercase tracking-wider">Order ID</span>
-              <span className="font-heading font-bold text-main text-sm">{order.id}</span>
+              <span className="font-heading font-bold text-main text-sm">{order.orderNumber || order.id}</span>
             </div>
 
             <div className="flex flex-col gap-3 mb-4">
               {order.items.map(item => (
-                <div key={item.bookId} className="flex items-center gap-3">
-                  <div
-                    className="w-7 h-10 rounded-full shrink-0 shadow-sm"
-                    style={{ backgroundColor: item.coverColor }}
-                  />
+                <div key={item.id} className="flex items-center gap-3">
+                  <div className="w-7 h-10 rounded-lg shrink-0 overflow-hidden bg-main/8 flex items-center justify-center">
+                    {item.coverImageFileName ? (
+                      <img
+                        src={item.coverImageFileName}
+                        alt={item.bookTitle}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Package size={12} className="text-main/25" />
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-main truncate">{item.title}</p>
-                    <p className="text-xs text-main/45">{item.author}</p>
+                    <p className="text-sm font-semibold text-main truncate">{item.bookTitle}</p>
+                    <p className="text-xs text-main/45">{sellerDisplayName(item)}</p>
                   </div>
                   <span className="text-sm text-main font-medium shrink-0">
-                    {formatPrice(item.price * item.quantity)}
+                    {formatPrice(moneyInNaira(item.buyerPrice * item.quantity))}
                   </span>
                 </div>
               ))}
@@ -69,15 +73,15 @@ function PaymentSuccess() {
             <div className="border-t border-third pt-4 flex flex-col gap-2">
               <div className="flex justify-between text-sm">
                 <span className="text-main/50">Subtotal</span>
-                <span className="text-main">{formatPrice(order.subtotal)}</span>
+                <span className="text-main">{formatPrice(moneyInNaira(order.baseAmount + order.markupTotal))}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-main/50">Delivery</span>
-                <span className="text-main">{formatPrice(order.deliveryFee)}</span>
+                <span className="text-main">{formatPrice(moneyInNaira(order.deliveryFee))}</span>
               </div>
               <div className="flex justify-between text-base font-bold mt-1">
                 <span className="text-main">Total</span>
-                <span className="text-main">{formatPrice(order.total)}</span>
+                <span className="text-main">{formatPrice(orderTotalInNaira(order))}</span>
               </div>
             </div>
           </div>

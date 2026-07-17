@@ -123,8 +123,7 @@ function Home() {
                 >
                   {listings.map((book) => (
                     <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      <BookCard book={book as any} />
+                      <BookCard book={book} />
                     </div>
                   ))}
                 </BookCarousel>
