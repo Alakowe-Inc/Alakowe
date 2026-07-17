@@ -3,6 +3,7 @@ import {
   getOrderByIdApi,
   getOrdersByUserApi,
   getSellerPayoutSummaryApi,
+  getSellerSalesApi,
 } from "./orders.api"
 
 export function useOrdersByUser(userId: string) {
@@ -25,5 +26,12 @@ export function useSellerPayoutSummary() {
   return useQuery({
     queryKey: ["seller", "payout-summary"],
     queryFn: getSellerPayoutSummaryApi,
+  })
+}
+
+export function useSellerSales() {
+  return useQuery({
+    queryKey: ["seller", "sales"],
+    queryFn: getSellerSalesApi,
   })
 }
