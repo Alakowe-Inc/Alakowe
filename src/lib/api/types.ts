@@ -455,3 +455,16 @@ export interface PayoutSummaryResponse {
   pendingPayout: number
   orderCount: number
 }
+
+export interface SellerSaleResponse {
+  orderId: number
+  orderNumber: string
+  bookTitle: string
+  buyerInitials: string
+  saleAmount: number
+  platformFee: number
+  sellerPayout: number
+  status: string
+  isSettled: boolean
+  orderDate: string
+}

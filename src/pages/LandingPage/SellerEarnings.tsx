@@ -1,10 +1,36 @@
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Wallet, Clock, CheckCircle, TrendingUp } from 'lucide-react'
-import { useSellerPayoutSummary } from '../../lib/api/orders/orders.hooks'
+import { useSellerPayoutSummary, useSellerSales } from '../../lib/api/orders/orders.hooks'
 import { moneyInNaira } from '../../lib/orders'
 
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime()
+  const d = Math.floor(diff / 86_400_000)
+  const h = Math.floor(diff / 3_600_000)
+  if (d > 0) return `${d}d ago`
+  if (h > 0) return `${h}h ago`
+  return 'Just now'
+}
+
+type EarningStatus = 'released' | 'pending'
+
+const STATUS_CONFIG: Record<EarningStatus, { label: string; class: string; icon: React.ElementType }> = {
+  released: {
+    label: 'Released',
+    class: 'bg-green-50 text-green-700 border border-green-200',
+    icon: CheckCircle,
+  },
+  pending: {
+    label: 'Pending',
+    class: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+    icon: Clock,
+  },
+}
+
 export default function SellerEarnings() {
-  const { data: summary, isLoading, error } = useSellerPayoutSummary()
+  const { data: summary, isLoading: isSummaryLoading, error } = useSellerPayoutSummary()
+  const { data: sales = [], isLoading: isSalesLoading } = useSellerSales()
+
   const total = moneyInNaira(summary?.totalEarned)
   const released = moneyInNaira(summary?.totalPaidOut)
   const pending = moneyInNaira(summary?.pendingPayout)
@@ -38,7 +64,7 @@ export default function SellerEarnings() {
               <TrendingUp size={15} className="text-secondary" />
               <span className="text-xs font-semibold text-main/45 uppercase tracking-wider">Total Earned</span>
             </div>
-            <p className="font-heading font-bold text-main text-2xl">{isLoading ? '—' : `₦${total.toLocaleString()}`}</p>
+            <p className="font-heading font-bold text-main text-2xl">{isSummaryLoading ? '—' : `₦${total.toLocaleString()}`}</p>
             <p className="text-xs text-main/40 mt-0.5">All time</p>
           </div>
           <div className="bg-white rounded-2xl border border-third p-5">
@@ -46,7 +72,7 @@ export default function SellerEarnings() {
               <CheckCircle size={15} className="text-green-500" />
               <span className="text-xs font-semibold text-main/45 uppercase tracking-wider">Released</span>
             </div>
-            <p className="font-heading font-bold text-main text-2xl">{isLoading ? '—' : `₦${released.toLocaleString()}`}</p>
+            <p className="font-heading font-bold text-main text-2xl">{isSummaryLoading ? '—' : `₦${released.toLocaleString()}`}</p>
             <p className="text-xs text-main/40 mt-0.5">In your account</p>
           </div>
           <div className="bg-white rounded-2xl border border-third p-5">
@@ -54,7 +80,7 @@ export default function SellerEarnings() {
               <Clock size={15} className="text-yellow-500" />
               <span className="text-xs font-semibold text-main/45 uppercase tracking-wider">Pending</span>
             </div>
-            <p className="font-heading font-bold text-main text-2xl">{isLoading ? '—' : `₦${pending.toLocaleString()}`}</p>
+            <p className="font-heading font-bold text-main text-2xl">{isSummaryLoading ? '—' : `₦${pending.toLocaleString()}`}</p>
             <p className="text-xs text-main/40 mt-0.5">Awaiting buyer confirmation</p>
           </div>
         </div>
@@ -69,19 +95,59 @@ export default function SellerEarnings() {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-third p-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-main/6 flex items-center justify-center mx-auto mb-4">
-            <Wallet size={28} className="text-main/30" />
+        {/* Transaction list */}
+        {isSalesLoading ? (
+          <div className="bg-white rounded-2xl border border-third p-12 text-center">
+            <p className="text-main/50 text-sm">Loading transactions…</p>
           </div>
-          <h2 className="font-heading font-bold text-main text-lg mb-2">
-            {summary?.orderCount ? `${summary.orderCount} earning order${summary.orderCount === 1 ? '' : 's'}` : 'No earnings yet'}
-          </h2>
-          <p className="text-main/50 text-sm">
-            {summary?.orderCount
-              ? 'Your payout totals are shown above.'
-              : 'Earnings will appear here once buyers place orders for your books.'}
-          </p>
-        </div>
+        ) : sales.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-third p-12 text-center">
+            <div className="w-16 h-16 rounded-full bg-main/6 flex items-center justify-center mx-auto mb-4">
+              <Wallet size={28} className="text-main/30" />
+            </div>
+            <h2 className="font-heading font-bold text-main text-lg mb-2">No earnings yet</h2>
+            <p className="text-main/50 text-sm">Earnings will appear here once buyers confirm their deliveries.</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <h2 className="font-heading font-bold text-main text-base">Transaction History</h2>
+            {sales.map(sale => {
+              const status: EarningStatus = sale.isSettled ? 'released' : 'pending'
+              const cfg = STATUS_CONFIG[status]
+              const Icon = cfg.icon
+              return (
+                <div key={sale.orderId} className="bg-white rounded-2xl border border-third p-5">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div>
+                      <p className="font-heading font-bold text-main text-base leading-snug">
+                        {sale.bookTitle}
+                      </p>
+                      <p className="text-xs text-main/45 mt-0.5">{timeAgo(sale.orderDate)}</p>
+                    </div>
+                    <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.class}`}>
+                      <Icon size={11} /> {cfg.label}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-6 text-sm border-t border-third pt-4">
+                    <div>
+                      <p className="text-xs text-main/40 mb-0.5">Sale Price</p>
+                      <p className="font-semibold text-main">₦{moneyInNaira(sale.saleAmount).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-main/40 mb-0.5">Platform Fee</p>
+                      <p className="font-semibold text-main/55">−₦{moneyInNaira(sale.platformFee).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-main/40 mb-0.5">Your Payout</p>
+                      <p className="font-heading font-bold text-main">₦{moneyInNaira(sale.sellerPayout).toLocaleString()}</p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
 
       </div>
     </div>
