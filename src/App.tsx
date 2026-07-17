@@ -42,6 +42,7 @@ import CustomerService from "./pages/LandingPage/CustomerService";
 import ShippingReturns from "./pages/LandingPage/ShippingReturns";
 import PrivacyPolicy from "./pages/LandingPage/PrivacyPolicy";
 import TermsConditions from "./pages/LandingPage/TermsConditions";
+import RequestBook from "./pages/LandingPage/RequestBook";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -70,6 +71,7 @@ const App = () => (
 
                 <Route path="sell" element={<Sell />} />
                 <Route path="list" element={<ProtectedRoute><ListBook /></ProtectedRoute>} />
+                <Route path="request-book" element={<ProtectedRoute><RequestBook /></ProtectedRoute>} />
                 <Route path="listing-submitted" element={<ListingSubmitted />} />
                 <Route path="my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
                 <Route path="my-listings/:id" element={<ProtectedRoute><MyListingDetail /></ProtectedRoute>} />

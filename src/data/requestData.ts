@@ -11,6 +11,7 @@ export interface BookRequest {
   notes: string
   status: RequestStatus
   createdAt: string
+  waitlist?: string[] // Array of buyer emails on the waitlist
 }
 
 export const REQUEST_STATUS_LABEL: Record<RequestStatus, string> = {
@@ -62,4 +63,46 @@ export function generateRequestId(): string {
     Date.now().toString(36).toUpperCase() +
     Math.random().toString(36).substring(2, 5).toUpperCase()
   )
+}
+
+// Check if a book request already exists by title
+export function getExistingRequestByTitle(title: string): BookRequest | null {
+  const all = getAllRequests()
+  const requests = Object.values(all)
+  const existing = requests.find(r => r.title.toLowerCase() === title.toLowerCase() && r.status === 'open')
+  return existing || null
+}
+
+// Add a user to the waitlist of an existing request
+export function addToWaitlist(requestId: string, buyerEmail: string): boolean {
+  const all = getAllRequests()
+  if (!all[requestId]) return false
+  
+  // Initialize waitlist if it doesn't exist
+  if (!all[requestId].waitlist) {
+    all[requestId].waitlist = []
+  }
+  
+  // Add user if not already on waitlist
+  if (!all[requestId].waitlist!.includes(buyerEmail)) {
+    all[requestId].waitlist!.push(buyerEmail)
+    localStorage.setItem(REQUESTS_KEY, JSON.stringify(all))
+    return true
+  }
+  
+  return false
+}
+
+// Get waitlist count for a book request
+export function getWaitlistCount(requestId: string): number {
+  const all = getAllRequests()
+  const request = all[requestId]
+  return request?.waitlist?.length || 0
+}
+
+// Check if user is on waitlist for a book
+export function isUserOnWaitlist(requestId: string, buyerEmail: string): boolean {
+  const all = getAllRequests()
+  const request = all[requestId]
+  return request?.waitlist?.includes(buyerEmail) || false
 }
