@@ -9,8 +9,98 @@ import {
   MapPin,
   Wallet,
   Shield,
-  Truck
+  Truck,
+  Leaf,
+  Store,
+  Users,
+  HeartHandshake,
 } from 'lucide-react'
+
+/* ── Promo Insert Cards ─────────────────────────────────────────── */
+const promoInserts = [
+  {
+    id: 'sell-why',
+    icon: Leaf,
+    iconColor: 'text-emerald-600',
+    iconBg: 'bg-emerald-50',
+    accentColor: 'bg-emerald-50 border-emerald-100',
+    question: 'Why do I need to sell my books?',
+    answer: `Because every 25 books successfully sold on Alákòwé helps save one tree, hence, giving books, and our planet, a longer life. Also, by passing on the books you've finished, you're helping someone else discover their next great read.`,
+    buttonLabel: 'Learn More',
+    buttonTo: '/how-it-works',
+  },
+  {
+    id: 'sell-alakowe',
+    icon: Store,
+    iconColor: 'text-secondary',
+    iconBg: 'bg-secondary/10',
+    accentColor: 'bg-violet-50/60 border-violet-100',
+    question: 'Why do I need to sell them on Alákòwé?',
+    answer: 'Because Alákòwé was built by readers, for readers, so we understand the value of books. Every book you sell on Alákòwé helps grow a community where great books keep moving.',
+    buttonLabel: 'List a Book',
+    buttonTo: '/list',
+  },
+  {
+    id: 'bookstore-dream',
+    icon: Store,
+    iconColor: 'text-indigo-600',
+    iconBg: 'bg-indigo-50',
+    accentColor: 'bg-indigo-50/60 border-indigo-100',
+    question: 'Want to start the bookstore of your dreams?',
+    answer: `You already have the books. We'll give you the bookstore. Once your first book is approved, you automatically get your own bookstore page where readers can browse everything you're selling. Consider it your own little corner of Alákòwé.`,
+    buttonLabel: 'View Sample Bookstore',
+    buttonTo: '/store/sample',
+  },
+  {
+    id: 'who-buying-from',
+    icon: Users,
+    iconColor: 'text-amber-600',
+    iconBg: 'bg-amber-50',
+    accentColor: 'bg-amber-50/60 border-amber-100',
+    question: 'Who am I buying from on Alákòwé?',
+    answer: `From readers just like you. Every book on Alákòwé comes from someone's shelf: students, teachers, parents, collectors, and fellow book lovers who believe every great book deserves another reader.`,
+    buttonLabel: 'Browse Books',
+    buttonTo: '/browse',
+  },
+  {
+    id: 'bottomline',
+    icon: HeartHandshake,
+    iconColor: 'text-rose-600',
+    iconBg: 'bg-rose-50',
+    accentColor: 'bg-rose-50/50 border-rose-100',
+    question: 'Our bottomline',
+    answer: `Every order matters. We're committed to making sure buyers receive the books they paid for and sellers get paid for the books they sell. If you ever have a question or concern, our team — made up of real humans — is here to help.`,
+    buttonLabel: 'Contact Us',
+    buttonTo: '/contact',
+  },
+]
+
+function PromoInsert({ promo }: { promo: typeof promoInserts[0] }) {
+  const Icon = promo.icon
+  return (
+    <div className={`rounded-2xl border ${promo.accentColor} px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10`}>
+      <div className="flex items-start gap-4">
+        <div className={`w-9 h-9 rounded-full ${promo.iconBg} flex items-center justify-center shrink-0 mt-0.5`}>
+          <Icon size={16} className={promo.iconColor} />
+        </div>
+        <div className="min-w-0">
+          <p className="font-heading font-bold text-main text-sm sm:text-base leading-snug mb-1">
+            {promo.question}
+          </p>
+          <p className="text-xs sm:text-sm text-main/60 leading-relaxed max-w-2xl">
+            {promo.answer}
+          </p>
+        </div>
+      </div>
+      <Link
+        to={promo.buttonTo}
+        className="shrink-0 inline-flex items-center justify-center bg-secondary text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-secondary/85 transition-colors whitespace-nowrap"
+      >
+        {promo.buttonLabel}
+      </Link>
+    </div>
+  )
+}
 import { useState, useEffect, useRef } from 'react'
 import { bookQuotes } from '../../data/mockData'
 import BookCarousel from '../../components/BookCarousel'
@@ -101,36 +191,60 @@ function Home() {
             <div className="py-12 text-center text-main/40 text-sm">Loading collections...</div>
           )}
 
-          {sections.map((section) => {
-            const listings = (section.listings ?? []).map(listingToBookDisplay)
-            if (listings.length === 0) return null
-
+          {(() => {
+            // Filter out empty sections first
+            const validSections = sections.filter(
+              (s) => (s.listings ?? []).length > 0
+            )
             const iconMap: Record<string, React.ReactNode> = {
               category: <span className="text-amber-400">✦</span>,
               collection: <span className="text-red-400">🔥</span>,
               tag: <span className="text-amber-500">☆</span>,
             }
+            const result: React.ReactNode[] = []
+            let promoIndex = 0
 
-            const filterKey = section.sectionType ?? "category"
-            const filterValue = section.filterParam?.[filterKey] ?? ""
+            validSections.forEach((section, idx) => {
+              const listings = (section.listings ?? []).map(listingToBookDisplay)
+              const filterKey = section.sectionType ?? "category"
+              const filterValue = section.filterParam?.[filterKey] ?? ""
 
-            return (
-              <div key={section.id} className="mb-10">
-                <BookCarousel
-                  label={section.title ?? "Featured"}
-                  icon={iconMap[filterKey]}
-                  seeAllLink={`/browse?${filterKey}=${filterValue}`}
-                >
-                  {listings.map((book) => (
-                    <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      <BookCard book={book as any} />
-                    </div>
-                  ))}
-                </BookCarousel>
-              </div>
-            )
-          })}
+              result.push(
+                <div key={section.id} className="mb-10">
+                  <BookCarousel
+                    label={section.title ?? "Featured"}
+                    icon={iconMap[filterKey]}
+                    seeAllLink={`/browse?${filterKey}=${filterValue}`}
+                  >
+                    {listings.map((book) => (
+                      <div key={book.id} className="shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-[20%] px-1.5 sm:px-2 snap-start">
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                        <BookCard book={book as any} />
+                      </div>
+                    ))}
+                  </BookCarousel>
+                </div>
+              )
+
+              // After every 2 sections, insert a promo card
+              if ((idx + 1) % 2 === 0 && promoIndex < promoInserts.length) {
+                result.push(
+                  <PromoInsert key={`promo-${promoIndex}`} promo={promoInserts[promoIndex]} />
+                )
+                promoIndex++
+              }
+            })
+
+            // If there are remaining promos after the last sections, append them
+            while (promoIndex < promoInserts.length) {
+              result.push(
+                <PromoInsert key={`promo-${promoIndex}`} promo={promoInserts[promoIndex]} />
+              )
+              promoIndex++
+            }
+
+            return result
+          })()}
 
           {!sectionsLoading && sections.length === 0 && (
             <div className="py-12 text-center text-main/40 text-sm">
