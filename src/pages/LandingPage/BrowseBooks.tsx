@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { Search, SlidersHorizontal, X, Plus } from 'lucide-react'
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useListings } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import BookCard from '../../components/BookCard'
@@ -12,6 +12,7 @@ const conditions = ['All', 'New', 'LikeNew', 'Excellent', 'Good', 'Fair', 'Poor'
 
 function BrowseBooks() {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [query, setQuery] = useState(searchParams.get('q') ?? '')
   const [genre, setGenre] = useState('All')
   const [condition, setCondition] = useState('All')
@@ -60,6 +61,11 @@ function BrowseBooks() {
     setCondition('All')
   }
 
+  function handleRequestBook() {
+    const params = query ? `?title=${encodeURIComponent(query)}` : ''
+    navigate(`/request-book${params}`)
+  }
+
   return (
     <div className="min-h-screen bg-third">
 
@@ -101,7 +107,7 @@ function BrowseBooks() {
       <div className="max-w-8xl py-6 mx-auto px-4 md:px-6 lg:px-12">
 
         {/* ── Toolbar ── */}
-        <div className="flex items-center justify-between py-4 border-b border-main/10">
+        <div className="flex items-center justify-between py-4 border-b border-main/10 flex-wrap gap-4">
           <div className="flex items-center gap-3 md:gap-6">
             <div className="max-w-30 md:max-w-none">
               <SelectBoxControl
@@ -124,19 +130,30 @@ function BrowseBooks() {
             </span>
           </div>
 
-          <button
-            onClick={openFilters}
-            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-main hover:text-secondary transition-colors"
-          >
-            <SlidersHorizontal size={13} />
-            <span className="hidden sm:inline">Filter and Sort</span>
-            <span className="sm:hidden">Filter</span>
-            {hasFilters && (
-              <span className="w-4 h-4 rounded-full bg-secondary text-white text-[9px] flex items-center justify-center">
-                ✓
-              </span>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRequestBook}
+              className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-secondary hover:text-secondary/80 transition-colors"
+            >
+              <Plus size={13} />
+              <span className="hidden sm:inline">Request a Book</span>
+              <span className="sm:hidden">Request</span>
+            </button>
+
+            <button
+              onClick={openFilters}
+              className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-main hover:text-secondary transition-colors"
+            >
+              <SlidersHorizontal size={13} />
+              <span className="hidden sm:inline">Filter and Sort</span>
+              <span className="sm:hidden">Filter</span>
+              {hasFilters && (
+                <span className="w-4 h-4 rounded-full bg-secondary text-white text-[9px] flex items-center justify-center">
+                  ✓
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* ── Grid ── */}
@@ -190,7 +207,21 @@ function BrowseBooks() {
             <div className="flex flex-col items-center justify-center py-32 text-center">
               <span className="font-heading font-bold text-8xl text-secondary/20 mb-6 select-none">✦</span>
               <p className="font-heading font-semibold text-main text-xl mb-2">No books found</p>
-              <p className="text-main/50 text-sm">Try adjusting your search or filters.</p>
+              <p className="text-main/50 text-sm mb-6">Try adjusting your search or filters.</p>
+              
+              {query && (
+                <div className="bg-secondary/6 border border-secondary/20 rounded-2xl px-5 py-4 max-w-sm">
+                  <p className="text-sm text-main/70 mb-3">
+                    Can't find <span className="font-semibold text-main">"{query}"</span>?
+                  </p>
+                  <button
+                    onClick={handleRequestBook}
+                    className="w-full bg-secondary text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-secondary/90 transition-colors text-sm"
+                  >
+                    Request this book
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
