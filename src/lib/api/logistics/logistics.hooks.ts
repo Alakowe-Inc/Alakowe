@@ -1,5 +1,9 @@
-import { useQuery } from "@tanstack/react-query"
-import { getOrderShipmentsApi, getSpeedafStationsApi } from "./logistics.api"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  getOrderShipmentsApi,
+  getSpeedafStationsApi,
+  scheduleSellerDropoffApi,
+} from "./logistics.api"
 
 export function useSpeedafStations(city?: string, area?: string) {
   return useQuery({
@@ -14,5 +18,16 @@ export function useOrderShipments(orderId?: number) {
     queryKey: ["order-shipments", orderId],
     queryFn: () => getOrderShipmentsApi(orderId!),
     enabled: typeof orderId === "number" && orderId > 0,
+  })
+}
+
+export function useScheduleSellerDropoff() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ orderId, speedafStationId }: { orderId: number; speedafStationId: number }) =>
+      scheduleSellerDropoffApi(orderId, speedafStationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["seller", "sales"] })
+    },
   })
 }

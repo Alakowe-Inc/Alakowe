@@ -467,4 +467,10 @@ export interface SellerSaleResponse {
   status: string
   isSettled: boolean
   orderDate: string
+  preferredSpeedafStationId?: number | null
+  preferredSpeedafStationName?: string | null
+  preferredSpeedafStationAddress?: string | null
+  sellerDropoffScheduledAt?: string | null
+  speedafBillCode?: string | null
+  labelUrl?: string | null
 }

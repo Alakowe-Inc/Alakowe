@@ -15,6 +15,7 @@ const STATUS_CONFIG: Record<DisplayOrderStatus, { class: string; icon: React.Ele
   payment_received:    { class: 'bg-blue-50 text-blue-700 border border-blue-200',       icon: Clock },
   awaiting_seller:     { class: 'bg-yellow-50 text-yellow-700 border border-yellow-200', icon: AlertCircle },
   dropoff_scheduled:   { class: 'bg-blue-50 text-blue-700 border border-blue-200',       icon: Clock },
+  in_transit_to_hub:   { class: 'bg-blue-50 text-blue-700 border border-blue-200',       icon: Truck },
   received_by_alakowe: { class: 'bg-purple-50 text-purple-700 border border-purple-200', icon: Package },
   processing:          { class: 'bg-purple-50 text-purple-700 border border-purple-200', icon: Package },
   dispatched:          { class: 'bg-secondary/8 text-secondary border border-secondary/20', icon: Truck },

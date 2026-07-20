@@ -1,18 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Clock, CheckCircle, Truck, Package, AlertCircle } from 'lucide-react'
 import { useSellerSales } from '../../lib/api/orders/orders.hooks'
-import { moneyInNaira } from '../../lib/orders'
+import { moneyInNaira, normalizeSellerSaleStatus, type SellerSaleDisplayStatus } from '../../lib/orders'
 import type { SellerSaleResponse } from '../../lib/api/types'
+import { ScheduleDropoffModal } from './ScheduleDropoffModal'
 
-type SaleDisplayStatus =
-  | 'awaiting_seller'
-  | 'dropoff_scheduled'
-  | 'received_by_alakowe'
-  | 'dispatched'
-  | 'delivered'
-  | 'confirmed'
-
-const STATUS_CONFIG: Record<SaleDisplayStatus, { label: string; class: string; icon: React.ElementType }> = {
+const STATUS_CONFIG: Record<SellerSaleDisplayStatus, { label: string; class: string; icon: React.ElementType }> = {
   awaiting_seller: {
     label: 'Action Required',
     class: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
@@ -45,16 +39,6 @@ const STATUS_CONFIG: Record<SaleDisplayStatus, { label: string; class: string; i
   },
 }
 
-/** Maps a backend order status to the seller-facing display status. */
-function saleDisplayStatus(sale: SellerSaleResponse): SaleDisplayStatus {
-  if (sale.isSettled) return 'confirmed'
-  const s = sale.status?.trim().toLowerCase()
-  if (s === 'shipped') return 'dispatched'
-  if (s === 'delivered') return 'delivered'
-  // "Confirmed" = payment confirmed; the seller still has to hand the book over.
-  return 'awaiting_seller'
-}
-
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
   const h = Math.floor(diff / 3_600_000)
@@ -66,6 +50,7 @@ function timeAgo(iso: string): string {
 
 export default function SellerOrders() {
   const { data: sales = [], isLoading, error } = useSellerSales()
+  const [schedulingSale, setSchedulingSale] = useState<SellerSaleResponse | null>(null)
 
   return (
     <div className="bg-third min-h-screen">
@@ -89,14 +74,13 @@ export default function SellerOrders() {
           </div>
         )}
 
-        {/* Action required banner */}
-        {sales.some(s => saleDisplayStatus(s) === 'awaiting_seller') && (
+        {sales.some(s => normalizeSellerSaleStatus(s) === 'awaiting_seller') && (
           <div className="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-xl px-5 py-4 mb-6">
             <AlertCircle size={16} className="text-yellow-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-yellow-800">You have books to drop off</p>
               <p className="text-xs text-yellow-700 mt-0.5">
-                One or more buyers are waiting. Please drop off your book within 48 hours of the sale.
+                Choose a Speedaf station near you so Alákọ̀wé can prepare your drop-off details.
               </p>
             </div>
           </div>
@@ -117,7 +101,7 @@ export default function SellerOrders() {
         ) : (
           <div className="flex flex-col gap-4">
             {sales.map(sale => {
-              const status = saleDisplayStatus(sale)
+              const status = normalizeSellerSaleStatus(sale)
               const cfg = STATUS_CONFIG[status]
               const Icon = cfg.icon
               return (
@@ -130,6 +114,24 @@ export default function SellerOrders() {
                       <p className="text-xs text-main/45 mt-0.5">
                         Order {sale.orderNumber} · Buyer: {sale.buyerInitials} · {timeAgo(sale.orderDate)}
                       </p>
+                      {sale.preferredSpeedafStationName && (
+                        <p className="text-xs text-main/50 mt-1">
+                          Drop-off: <span className="font-semibold text-main">{sale.preferredSpeedafStationName}</span>
+                          {sale.speedafBillCode ? (
+                            <span className="text-main/40"> · Waybill {sale.speedafBillCode}</span>
+                          ) : null}
+                        </p>
+                      )}
+                      {sale.labelUrl && (
+                        <a
+                          href={sale.labelUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-block text-xs font-semibold text-secondary mt-1 hover:underline"
+                        >
+                          View / print label
+                        </a>
+                      )}
                     </div>
                     <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.class}`}>
                       <Icon size={11} /> {cfg.label}
@@ -151,12 +153,13 @@ export default function SellerOrders() {
                     </div>
                     {status === 'awaiting_seller' && (
                       <div className="ml-auto">
-                        <Link
-                          to={`/my-sales/${sale.orderId}/dropoff`}
+                        <button
+                          type="button"
+                          onClick={() => setSchedulingSale(sale)}
                           className="bg-main text-white font-semibold text-xs px-4 py-2 rounded-xl hover:bg-main/90 transition-colors"
                         >
                           Schedule Drop-off
-                        </Link>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -167,6 +170,14 @@ export default function SellerOrders() {
         )}
 
       </div>
+
+      <ScheduleDropoffModal
+        sale={schedulingSale}
+        open={!!schedulingSale}
+        onOpenChange={(open) => {
+          if (!open) setSchedulingSale(null)
+        }}
+      />
     </div>
   )
 }

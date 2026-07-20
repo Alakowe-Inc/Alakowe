@@ -4,6 +4,7 @@ export type DisplayOrderStatus =
   | "payment_received"
   | "awaiting_seller"
   | "dropoff_scheduled"
+  | "in_transit_to_hub"
   | "received_by_alakowe"
   | "processing"
   | "dispatched"
@@ -14,6 +15,7 @@ export const ORDER_STATUS_LABELS: Record<DisplayOrderStatus, string> = {
   payment_received: "Payment Received",
   awaiting_seller: "Awaiting Seller Action",
   dropoff_scheduled: "Drop-off Scheduled",
+  in_transit_to_hub: "In Transit to Alakowe",
   received_by_alakowe: "Book Received by Alakowe",
   processing: "Order Processing",
   dispatched: "Dispatched",
@@ -24,9 +26,10 @@ export const ORDER_STATUS_LABELS: Record<DisplayOrderStatus, string> = {
 export const ORDER_STATUS_DESCRIPTIONS: Record<DisplayOrderStatus, string> = {
   payment_received: "Your payment is held securely in escrow.",
   awaiting_seller: "We've notified the seller. They have 48 hours to hand over the book.",
-  dropoff_scheduled: "The seller has scheduled a drop-off or pickup.",
+  dropoff_scheduled: "The seller has scheduled a Speedaf drop-off and will hand over the book at their station.",
+  in_transit_to_hub: "Your book is on its way to our Alakowe centre.",
   received_by_alakowe: "Your book has arrived at our centre and is being prepared for delivery.",
-  processing: "Your order is being packed and processed.",
+  processing: "Your order is being sorted and packed for delivery to you.",
   dispatched: "Your book is on its way to you.",
   delivered: "Your book has been delivered.",
   confirmed: "Delivery has been confirmed.",
@@ -36,6 +39,7 @@ export const ORDER_STATUSES: DisplayOrderStatus[] = [
   "payment_received",
   "awaiting_seller",
   "dropoff_scheduled",
+  "in_transit_to_hub",
   "received_by_alakowe",
   "processing",
   "dispatched",
@@ -43,23 +47,124 @@ export const ORDER_STATUSES: DisplayOrderStatus[] = [
   "confirmed",
 ]
 
+/** Backend uses PascalCase (e.g. OutForDelivery); timeline keys use snake_case. */
+export function backendStatusKey(status?: string | null): string {
+  if (!status?.trim()) return ""
+  return status
+    .trim()
+    .replace(/([a-z])([A-Z])/g, "$1_$2")
+    .replace(/[\s-]+/g, "_")
+    .toLowerCase()
+}
+
 export function normalizeOrderStatus(status?: string | null): DisplayOrderStatus {
-  const normalized = status?.trim().toLowerCase().replace(/[\s-]+/g, "_")
+  const key = backendStatusKey(status)
 
-  // Checkout currently creates an order as "Confirmed"; in the existing
-  // backend this means payment/order confirmation, not buyer delivery confirmation.
-  if (normalized === "confirmed") return "awaiting_seller"
+  if (!key) return "payment_received"
 
-  if (normalized === "paid" || normalized === "payment_confirmed") return "payment_received"
-  if (normalized === "awaiting_seller_action") return "awaiting_seller"
-  if (normalized === "received" || normalized === "received_by_alakowe") return "received_by_alakowe"
-  if (normalized === "shipped" || normalized === "out_for_delivery") return "dispatched"
-  if (normalized === "delivery_confirmed" || normalized === "completed") return "confirmed"
-  if (normalized && ORDER_STATUSES.includes(normalized as DisplayOrderStatus)) {
-    return normalized as DisplayOrderStatus
+  switch (key) {
+    case "pending":
+    case "payment_pending":
+    case "paid":
+    case "payment_confirmed":
+      return "payment_received"
+
+    // Checkout creates "Confirmed" = paid, waiting on seller — not buyer delivery confirmation.
+    case "confirmed":
+      return "awaiting_seller"
+
+    case "awaiting_seller":
+    case "awaiting_seller_action":
+      return "awaiting_seller"
+
+    case "awaiting_inbound":
+    case "inbound_booked":
+      return "dropoff_scheduled"
+
+    case "in_transit_to_hub":
+      return "in_transit_to_hub"
+
+    case "at_hub":
+    case "received":
+    case "received_by_alakowe":
+      return "received_by_alakowe"
+
+    case "sorted":
+    case "outbound_booked":
+      return "processing"
+
+    case "out_for_delivery":
+    case "shipped":
+    case "dispatched":
+    case "in_transit":
+      return "dispatched"
+
+    case "delivered":
+      return "delivered"
+
+    case "delivery_confirmed":
+    case "completed":
+      return "confirmed"
+
+    case "cancelled":
+    case "canceled":
+      return "awaiting_seller"
+
+    default:
+      break
+  }
+
+  if (ORDER_STATUSES.includes(key as DisplayOrderStatus)) {
+    return key as DisplayOrderStatus
   }
 
   return "processing"
+}
+
+export type SellerSaleDisplayStatus =
+  | "awaiting_seller"
+  | "dropoff_scheduled"
+  | "received_by_alakowe"
+  | "dispatched"
+  | "delivered"
+  | "confirmed"
+
+/** Seller-facing subset of the buyer timeline (same backend status strings). */
+export function normalizeSellerSaleStatus(sale: {
+  status?: string | null
+  isSettled?: boolean
+  preferredSpeedafStationId?: number | null
+}): SellerSaleDisplayStatus {
+  if (sale.isSettled) return "confirmed"
+
+  const step = normalizeOrderStatus(sale.status)
+
+  if (
+    sale.preferredSpeedafStationId &&
+    (step === "awaiting_seller" || step === "payment_received")
+  ) {
+    return "dropoff_scheduled"
+  }
+
+  switch (step) {
+    case "payment_received":
+    case "awaiting_seller":
+      return "awaiting_seller"
+    case "dropoff_scheduled":
+    case "in_transit_to_hub":
+      return "dropoff_scheduled"
+    case "received_by_alakowe":
+    case "processing":
+      return "received_by_alakowe"
+    case "dispatched":
+      return "dispatched"
+    case "delivered":
+      return "delivered"
+    case "confirmed":
+      return "confirmed"
+    default:
+      return "awaiting_seller"
+  }
 }
 
 export function orderTotalInNaira(order: OrderDto): number {
