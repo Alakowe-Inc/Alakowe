@@ -52,7 +52,7 @@ export default function RequestBook() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const [activeTab, setActiveTab] = useState<'form' | 'requests'>('form')
+  const [activeTab, setActiveTab] = useState<'form' | 'requests'>('requests')
   const [form, setForm] = useState<FormState>({
     ...empty,
     title: params.get('title') ?? '',
@@ -215,7 +215,7 @@ export default function RequestBook() {
 
         {/* Divider nav line — mirrors tab bar from storefront */}
         <div className="flex border-b border-main/10 mb-8">
-          {(['form', 'requests'] as const).map((tab) => {
+          {(['requests','form' ] as const).map((tab) => {
             const labelMap = {
               form: 'Book Request Form',
               requests: `Requested Books${allRequests.length > 0 ? ` (${allRequests.length})` : ''}`,
@@ -297,59 +297,10 @@ export default function RequestBook() {
                   </div>
                 </div>
               </div>
-
-              {/* Notes card */}
-              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
-                    <StickyNote size={16} className="text-secondary" />
-                  </div>
-                  <h2 className="font-heading font-bold text-main text-base">Additional Notes</h2>
-                </div>
-
-                <Field label="Notes" hint="— Any edition preference, urgency, or extra details">
-                  <TextareaControl
-                    placeholder="e.g. Looking for the 2006 Farafina edition. Need it before end of month."
-                    value={form.notes}
-                    onChange={set('notes')}
-                    rows={4}
-                    style="w-full border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors bg-white resize-none"
-                  />
-                </Field>
-              </div>
             </div>
 
             {/* Right sidebar — budget + tips */}
             <div className="flex flex-col gap-5">
-
-              {/* Budget card */}
-              <div className="border border-main/10 rounded-2xl bg-white p-5 shadow-sm">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
-                    <Wallet size={16} className="text-secondary" />
-                  </div>
-                  <h2 className="font-heading font-bold text-main text-sm">Your Budget</h2>
-                </div>
-
-                <Field label="Maximum Price (₦)" hint="— Optional" error={errors.maxPrice}>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-medium">₦</span>
-                    <FormControl
-                      type="number"
-                      min="100"
-                      placeholder="e.g. 5000"
-                      value={form.maxPrice}
-                      onChange={set('maxPrice')}
-                      style={`${inputClass(!!errors.maxPrice)} pl-8`}
-                    />
-                  </div>
-                </Field>
-
-                <p className="text-[11px] text-main/40 mt-3 leading-relaxed">
-                  Helps sellers know your budget. Leave blank to accept any price.
-                </p>
-              </div>
-
               {/* How it works tip card */}
               <div className="border border-violet-100 rounded-2xl bg-gradient-to-b from-violet-50/60 to-indigo-50/30 p-5 space-y-4">
                 <p className="text-xs font-bold uppercase tracking-wider text-secondary">How it works</p>
