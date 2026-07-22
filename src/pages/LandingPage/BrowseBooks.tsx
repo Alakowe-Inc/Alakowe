@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Search, SlidersHorizontal, X, Plus, Sparkles } from 'lucide-react'
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import { useListings } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import BookCard from '../../components/BookCard'
@@ -30,18 +30,21 @@ function BrowseBooks() {
     return () => { document.body.style.overflow = '' }
   }, [showFilters])
 
+  useEffect(() => {
+    setPage(1)
+  }, [query, genre, condition, sortBy])
+
   const openFilters = () => setShowFilters(true)
   const closeFilters = () => setShowFilters(false)
 
   const filtered = useMemo(() => {
-    setPage(1)
     let result = [...books]
     if (query) {
       const q = query.toLowerCase()
       result = result.filter(
         b =>
-          b.title.toLowerCase().includes(q) ||
-          b.author.toLowerCase().includes(q),
+          (b.title && b.title.toLowerCase().includes(q)) ||
+          (b.author && b.author.toLowerCase().includes(q)),
       )
     }
     if (genre !== 'All') result = result.filter(b => b.genre === genre)
@@ -238,24 +241,20 @@ function BrowseBooks() {
               )}
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center py-32 text-center">
-              <span className="font-heading font-bold text-8xl text-secondary/20 mb-6 select-none">✦</span>
-              <p className="font-heading font-semibold text-main text-xl mb-2">No books found</p>
-              <p className="text-main/50 text-sm mb-6">Try adjusting your search or filters.</p>
-              
-              {query && (
-                <div className="bg-secondary/6 border border-secondary/20 rounded-2xl px-5 py-4 max-w-sm">
-                  <p className="text-sm text-main/70 mb-3">
-                    Can't find <span className="font-semibold text-main">"{query}"</span>?
-                  </p>
-                  <button
-                    onClick={handleRequestBook}
-                    className="w-full bg-secondary text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-secondary/90 transition-colors text-sm"
-                  >
-                    Request this book
-                  </button>
-                </div>
-              )}
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-3xl border border-third p-8 shadow-sm">
+              <span className="font-heading font-bold text-7xl text-secondary/20 mb-4 select-none">✦</span>
+              <p className="font-heading font-bold text-main text-xl mb-2">No books found</p>
+              <p className="text-main/55 text-sm mb-6 max-w-md">
+                {query
+                  ? `We couldn't find any listings matching "${query}". Submit a book request so sellers know you're looking for it!`
+                  : 'No books match your current filters. You can submit a request for the book you need!'}
+              </p>
+              <Link
+                to={query ? `/request-book?title=${encodeURIComponent(query)}` : '/request-book'}
+                className="inline-flex items-center gap-2 bg-main text-white font-semibold text-xs px-6 py-3.5 rounded-xl hover:bg-main/90 transition-all shadow-sm"
+              >
+                Request this Book {query ? `"${query}"` : ''} &rarr;
+              </Link>
             </div>
           )}
         </div>
