@@ -48,7 +48,7 @@ export const books: Book[] = [
 
     price: 2500,
     originalPrice: 2500,
-    location: 'Lagos Island',
+    location: 'Lagos Island, Lagos',
     badge: 'Best Value',
     coverColor: '#C8A97E',
 
@@ -75,7 +75,7 @@ export const books: Book[] = [
 
     price: 3000,
     originalPrice: 3000,
-    location: 'Ibadan',
+    location: 'Bodija, Oyo',
     badge: 'Recently Added',
     coverColor: '#9B5DE5',
     description:
@@ -100,7 +100,7 @@ export const books: Book[] = [
 
     price: 3500,
     originalPrice: 3500,
-    location: 'Abuja',
+    location: 'Garki, Abuja',
     badge: null,
     coverColor: '#F4A261',
     description:
@@ -150,7 +150,7 @@ export const books: Book[] = [
 
     price: 2000,
     originalPrice: 2000,
-    location: 'Port Harcourt',
+    location: 'GRA, Rivers',
     badge: 'Best Value',
     coverColor: '#E63946',
     description:
@@ -174,7 +174,7 @@ export const books: Book[] = [
 
     price: 3200,
     originalPrice: 3200,
-    location: 'Lagos',
+    location: 'Yaba, Lagos',
     badge: 'Recently Added',
     coverColor: '#457B9D',
     description:
@@ -201,7 +201,7 @@ export const books: Book[] = [
     discount: 10,
     isDiscountApplied: true,
 
-    location: 'Ikeja Lagos',
+    location: 'Ikeja, Lagos',
     badge: null,
     coverColor: '#1D3557',
     description:

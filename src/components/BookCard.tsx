@@ -1,4 +1,4 @@
-import { Star, Heart, ShoppingBag } from 'lucide-react'
+import { Star, Heart, ShoppingBag, MapPin } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Book } from '../data/mockData'
@@ -108,6 +108,14 @@ function BookCard({ book }: BookCardProps) {
         <p className="text-xs text-slate-500 font-normal mt-0.5 truncate">
           {book.author}
         </p>
+
+        {/* Location Tag */}
+        {book.location && (
+          <div className="flex items-center gap-1 text-[11px] text-main/55 mt-1 truncate">
+            <MapPin size={11} className="text-secondary shrink-0" />
+            <span className="truncate">{book.location}</span>
+          </div>
+        )}
 
         {/* Price and Cart Row */}
         <div className="flex items-center justify-between mt-2">

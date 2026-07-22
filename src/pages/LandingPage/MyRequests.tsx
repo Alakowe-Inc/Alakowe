@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PlusCircle, Bell, BookOpen, X } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import {
-  getBuyerRequests,
-  closeRequest,
   REQUEST_STATUS_LABEL,
   REQUEST_STATUS_CLASS,
 } from '../../data/requestData'
-import type { BookRequest } from '../../data/requestData'
+import {
+  useMyBookRequests,
+  useCloseBookRequest,
+} from '../../lib/api/requests/requests.hooks'
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -21,17 +22,16 @@ function timeAgo(iso: string): string {
 
 export default function MyRequests() {
   const { user } = useAuth()
-  const [requests, setRequests] = useState<BookRequest[]>([])
+  const { data: requests = [], isLoading } = useMyBookRequests(user?.email)
+  const closeRequestMutation = useCloseBookRequest()
   const [closing, setClosing] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (user) setRequests(getBuyerRequests(user.email))
-  }, [user])
-
-  function handleClose(id: string) {
-    closeRequest(id)
-    setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'closed' } : r))
-    setClosing(null)
+  async function handleClose(id: string) {
+    try {
+      await closeRequestMutation.mutateAsync(id)
+    } finally {
+      setClosing(null)
+    }
   }
 
   const open = requests.filter(r => r.status === 'open').length
