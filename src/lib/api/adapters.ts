@@ -59,7 +59,7 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     sellerName: listing.createdBy ?? "Seller",
     isbn: listing.isbn ?? undefined,
     categoryId: listing.categoryId,
-    location: listing.location || "Undefined",
+    location: listing.location || undefined,
   }
 }
 
