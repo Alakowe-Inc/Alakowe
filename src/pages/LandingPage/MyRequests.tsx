@@ -65,6 +65,7 @@ export default function MyRequests() {
             <p className="font-heading font-bold text-main text-2xl">{open}</p>
             <p className="text-xs text-main/40 mt-0.5">Waiting for a match</p>
           </div>
+
           <div className="bg-white rounded-2xl border border-third p-5">
             <div className="flex items-center gap-2 mb-3">
               <BookOpen size={15} className="text-green-500" />
@@ -81,10 +82,15 @@ export default function MyRequests() {
             <div className="w-16 h-16 rounded-full bg-main/6 flex items-center justify-center mx-auto mb-4">
               <Bell size={28} className="text-main/30" />
             </div>
-            <h2 className="font-heading font-bold text-main text-lg mb-2">No requests yet</h2>
+
+            <h2 className="font-heading font-bold text-main text-lg mb-2">
+              No requests yet
+            </h2>
+
             <p className="text-main/50 text-sm mb-6">
               Can't find a book you're looking for? Submit a request and get notified when it's listed.
             </p>
+
             <Link
               to="/request"
               className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-main/90 transition-colors"
@@ -95,41 +101,48 @@ export default function MyRequests() {
         ) : (
           <div className="flex flex-col gap-4">
             {requests.map(req => (
-              <div key={req.id} className="bg-white rounded-2xl border border-third p-5">
+              <div
+                key={req.id}
+                className="bg-white rounded-2xl border border-third p-5"
+              >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="min-w-0">
                     <p className="font-heading font-bold text-main text-base leading-snug truncate">
                       {req.title}
                     </p>
+
                     {req.author && (
-                      <p className="text-sm text-main/50 mt-0.5">by {req.author}</p>
+                      <p className="text-sm text-main/50 mt-0.5">
+                        by {req.author}
+                      </p>
                     )}
                   </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${REQUEST_STATUS_CLASS[req.status]}`}>
+
+                  <span
+                    className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${REQUEST_STATUS_CLASS[req.status]}`}
+                  >
                     {REQUEST_STATUS_LABEL[req.status]}
                   </span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-main/45 mb-3">
-                  <span>{req.genre}</span>
+                  <span>{req.category}</span>
                   {req.condition && <span>Min: {req.condition}</span>}
-                  {req.maxPrice > 0 && <span>Budget: ₦{req.maxPrice.toLocaleString()}</span>}
-                  <span>{timeAgo(req.createdAt)}</span>
                 </div>
-
-                {req.notes && (
-                  <p className="text-xs text-main/55 bg-third rounded-lg px-3 py-2 mb-3 leading-relaxed">
-                    {req.notes}
-                  </p>
-                )}
 
                 {req.status === 'matched' && (
                   <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-3">
                     <BookOpen size={14} className="text-green-600 shrink-0" />
+
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-green-800">A match was found!</p>
-                      <p className="text-xs text-green-700 mt-0.5">Check your email for the listing link.</p>
+                      <p className="text-sm font-semibold text-green-800">
+                        A match was found!
+                      </p>
+                      <p className="text-xs text-green-700 mt-0.5">
+                        Check your email for the listing link.
+                      </p>
                     </div>
+
                     <Link
                       to="/browse"
                       className="text-xs font-semibold text-green-700 hover:underline shrink-0"
@@ -143,13 +156,17 @@ export default function MyRequests() {
                   <div className="flex justify-end">
                     {closing === req.id ? (
                       <div className="flex items-center gap-3">
-                        <span className="text-xs text-main/50">Close this request?</span>
+                        <span className="text-xs text-main/50">
+                          Close this request?
+                        </span>
+
                         <button
                           onClick={() => handleClose(req.id)}
                           className="text-xs font-semibold text-red-600 hover:text-red-800 transition-colors"
                         >
                           Yes, close it
                         </button>
+
                         <button
                           onClick={() => setClosing(null)}
                           className="text-xs font-semibold text-main/45 hover:text-main transition-colors"
@@ -171,7 +188,6 @@ export default function MyRequests() {
             ))}
           </div>
         )}
-
       </div>
     </div>
   )
