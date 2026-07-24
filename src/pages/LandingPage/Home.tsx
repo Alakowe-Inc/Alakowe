@@ -15,6 +15,7 @@ import BookCarousel from '../../components/BookCarousel'
 import BookCard from '../../components/BookCard'
 import { useLandingPage } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
+import BookRequestsSection from '../../components/BookRequestsSection'
 import heroImage2 from '../../assets/media/images/banny2.png'
 import heroImage3 from '../../assets/media/images/banny3.png'
 
@@ -251,6 +252,9 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── Looking for something? (Book Requests Section) ──────── */}
+      <BookRequestsSection />
 
       {/* ── Book Quotes ─────────────────────────────────────────── */}
       <section className="bg-white py-12 border-t border-b border-third">

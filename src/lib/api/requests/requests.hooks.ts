@@ -2,10 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { withMock } from "../use-mock"
 import {
   submitBookRequestApi,
-  getMyBookRequestsApi,
-  getAllBookRequestsApi,
-  joinWaitlistApi,
-  closeBookRequestApi,
+  getMyBookActivityApi,
 } from "./requests.api"
 import type {
   CreateBookRequestDto,
@@ -15,9 +12,9 @@ import type {
 import {
   saveRequest,
   getBuyerRequests,
-  closeRequest,
-  addToWaitlist,
   generateRequestId,
+  addToWaitlist,
+  closeRequest,
 } from "../../../data/requestData"
 
 function getSharedRequests(): BookRequestResponse[] {
@@ -31,6 +28,10 @@ function getSharedRequests(): BookRequestResponse[] {
   }
 }
 
+/**
+ * Submit a new book request.
+ * Uses POST /api/v1/BookRequest under the hood (via withMock).
+ */
 export function useSubmitBookRequest() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -40,10 +41,8 @@ export function useSubmitBookRequest() {
         buyerEmail: body.buyerEmail,
         title: body.title ?? "",
         author: body.author ?? "",
-        genre: body.genre ?? "",
+        genre: body.category ?? "",
         condition: body.bookCondition ?? "",
-        maxPrice: body.maxPrice ?? 0,
-        notes: body.notes ?? "",
         status: "open",
         createdAt: new Date().toISOString(),
         waitlist: [body.buyerEmail],
@@ -74,6 +73,10 @@ export function useSubmitBookRequest() {
   })
 }
 
+/**
+ * Fetch the authenticated user's own requests & waitlists.
+ * Uses GET /api/v1/BookRequest/my-activity under the hood (via withMock).
+ */
 export function useMyBookRequests(userEmail?: string) {
   return useQuery({
     queryKey: ["my-book-requests", userEmail],
@@ -85,16 +88,20 @@ export function useMyBookRequests(userEmail?: string) {
             isUserOnWaitlist: r.waitlist?.includes(userEmail) || true,
           }))
         : []
-      return withMock(mockList, () => getMyBookRequestsApi())
+      return withMock(mockList, () => getMyBookActivityApi())
     },
     enabled: !!userEmail,
   })
 }
 
-export function useAllBookRequests(params?: BookRequestFilterParams, userEmail?: string) {
+/**
+ * Fetch ALL open book requests (community-wide).
+ * No dedicated backend endpoint yet — uses localStorage mock only.
+ */
+export function useAllBookRequests(_params?: BookRequestFilterParams, userEmail?: string) {
   return useQuery({
-    queryKey: ["book-requests", params, userEmail],
-    queryFn: () => {
+    queryKey: ["book-requests", _params, userEmail],
+    queryFn: async () => {
       const all = getSharedRequests()
       const mockList: BookRequestResponse[] = all
         .filter((r) => r.status === "open")
@@ -103,15 +110,20 @@ export function useAllBookRequests(params?: BookRequestFilterParams, userEmail?:
           waitlistCount: r.waitlist?.length || 1,
           isUserOnWaitlist: userEmail ? r.waitlist?.includes(userEmail) ?? false : false,
         }))
-      return withMock(mockList, () => getAllBookRequestsApi(params))
+      return mockList
     },
   })
 }
 
+/**
+ * Join the waitlist for an existing book request.
+ * No dedicated backend endpoint yet — uses localStorage mock only.
+ * (The POST /api/v1/BookRequest endpoint handles join-or-create on the backend.)
+ */
 export function useJoinWaitlist() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ requestId, buyerEmail }: { requestId: string; buyerEmail: string }) => {
+    mutationFn: async ({ requestId, buyerEmail }: { requestId: string; buyerEmail: string }) => {
       addToWaitlist(requestId, buyerEmail)
       const all = getSharedRequests()
       const updated = all.find((r) => r.id === requestId) ?? {
@@ -121,7 +133,7 @@ export function useJoinWaitlist() {
         status: "open" as const,
         createdAt: new Date().toISOString(),
       }
-      return withMock(updated, () => joinWaitlistApi(requestId))
+      return updated as BookRequestResponse
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["book-requests"] })
@@ -130,10 +142,14 @@ export function useJoinWaitlist() {
   })
 }
 
+/**
+ * Close / fulfil a book request.
+ * No dedicated backend endpoint yet — uses localStorage mock only.
+ */
 export function useCloseBookRequest() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (requestId: string) => {
+    mutationFn: async (requestId: string) => {
       closeRequest(requestId)
       const mockResult: BookRequestResponse = {
         id: requestId,
@@ -142,7 +158,7 @@ export function useCloseBookRequest() {
         status: "closed",
         createdAt: new Date().toISOString(),
       }
-      return withMock(mockResult, () => closeBookRequestApi(requestId))
+      return mockResult
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["book-requests"] })

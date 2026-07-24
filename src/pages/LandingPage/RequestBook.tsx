@@ -13,15 +13,12 @@ import {
 type FormState = {
   title: string
   author: string
-  genre: string
+  category: string
   condition: string
-  maxPrice: string
-  notes: string
 }
 
 const empty: FormState = {
-  title: '', author: '', genre: '', condition: '',
-  maxPrice: '', notes: '',
+  title: '', author: '', category: '', condition: '',
 }
 
 function Field({ label, required, hint, error, children }: {
@@ -85,10 +82,7 @@ export default function RequestBook() {
   function validate(): Partial<FormState> {
     const e: Partial<FormState> = {}
     if (!form.title.trim()) e.title = 'Book title is required'
-    if (!form.genre) e.genre = 'Please select a genre'
-    const price = parseFloat(form.maxPrice)
-    if (form.maxPrice && (isNaN(price) || price < 100))
-      e.maxPrice = 'Enter a valid amount (min ₦100)'
+    if (!form.category) e.category = 'Please select a category'
     return e
   }
 
@@ -107,10 +101,8 @@ export default function RequestBook() {
         buyerEmail: user.email,
         title: form.title.trim(),
         author: form.author.trim(),
-        genre: form.genre,
+        category: form.category,
         bookCondition: form.condition,
-        maxPrice: parseFloat(form.maxPrice) || 0,
-        notes: form.notes.trim(),
       })
       setForm(empty)
       setActiveTab('requests')
@@ -222,17 +214,17 @@ export default function RequestBook() {
                   <Field label="Book Title" required error={errors.title}>
                     <FormControl type="text" placeholder="e.g. Purple Hibiscus" value={form.title} onChange={set('title')} style={inputClass(!!errors.title)} />
                   </Field>
-                  <Field label="Author" hint="— Leave blank if unsure">
+                  <Field label="Author" required error={errors.author}>
                     <FormControl type="text" placeholder="e.g. Chimamanda Ngozi Adichie" value={form.author} onChange={set('author')} style={inputClass()} />
                   </Field>
                   <div className="grid grid-cols-2 gap-4">
-                    <Field label="Genre" required error={errors.genre}>
+                    <Field label="Category" required error={errors.category}>
                       <SelectBoxControl
-                        placeholder="Select genre"
+                        placeholder="Select Category"
                         options={GENRES.map(g => ({ label: g, value: g }))}
-                        value={GENRES.map(g => ({ label: g, value: g })).find(o => o.value === form.genre) ?? null}
-                        onChange={setSelect('genre')}
-                        style={inputClass(!!errors.genre)}
+                        value={GENRES.map(g => ({ label: g, value: g })).find(o => o.value === form.category) ?? null}
+                        onChange={setSelect('category')}
+                        style={inputClass(!!errors.category)}
                       />
                     </Field>
                     <Field label="Min. Condition" hint="— Optional">

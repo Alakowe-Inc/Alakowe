@@ -360,10 +360,8 @@ export interface LandingPageResponse {
 export interface CreateBookRequestDto {
   title?: string | null
   author?: string | null
-  genre?: string | null
+  category?: string | null
   bookCondition?: string | null
-  maxPrice?: number
-  notes?: string | null
 }
 
 export interface BookRequestResponse {

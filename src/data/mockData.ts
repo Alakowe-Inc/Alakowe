@@ -6,7 +6,7 @@ export interface Book {
   slug: string
   title: string
   author: string
-  genre: string
+  category: string
 
   condition: string
   conditionNotes: string
@@ -38,7 +38,7 @@ export const books: Book[] = [
     slug: 'things-fall-apart',
     title: 'Things Fall Apart',
     author: 'Chinua Achebe',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Good',
     conditionNotes: 'Minor cover scuff, pages slightly yellowed',
@@ -65,7 +65,7 @@ export const books: Book[] = [
     slug: 'purple-hibiscus',
     title: 'Purple Hibiscus',
     author: 'Chimamanda Ngozi Adichie',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Good',
     conditionNotes: 'Small crease on spine, light pencil marks inside',
@@ -90,7 +90,7 @@ export const books: Book[] = [
     slug: 'half-of-a-yellow-sun',
     title: 'Half of a Yellow Sun',
     author: 'Chimamanda Ngozi Adichie',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Fair',
     conditionNotes: 'Faded spine, minor corner wear',
@@ -114,7 +114,7 @@ export const books: Book[] = [
     slug: 'americanah',
     title: 'Americanah',
     author: 'Chimamanda Ngozi Adichie',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Good',
     conditionNotes: 'Clean pages, small sticker residue on back cover',
