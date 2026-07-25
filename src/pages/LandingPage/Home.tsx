@@ -1,29 +1,29 @@
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Search,
+  ChevronDown,
   ShoppingCart,
-  Handshake,
   BookOpen,
   BookPlus,
   BellRing,
-  MapPin,
   Wallet,
   Shield,
   Truck,
-  Leaf,
-  Store,
-  Users,
-  HeartHandshake,
 } from 'lucide-react'
+import { bookQuotes } from '../../data/mockData'
+import BookCarousel from '../../components/BookCarousel'
+import BookCard from '../../components/BookCard'
+import { useLandingPage } from '../../lib/api/listings/listings.hooks'
+import { listingToBookDisplay } from '../../lib/api/adapters'
+import BookRequestsSection from '../../components/BookRequestsSection'
+import heroImage2 from '../../assets/media/images/banny2.png'
+import heroImage3 from '../../assets/media/images/banny3.png'
 
 /* ── Promo Insert Cards ─────────────────────────────────────────── */
 const promoInserts = [
   {
     id: 'sell-why',
-    icon: Leaf,
-    iconColor: 'text-emerald-600',
-    iconBg: 'bg-emerald-50',
-    accentColor: 'bg-emerald-50 border-emerald-100',
+    accentColor: 'bg-emerald-50/70 border-emerald-100',
     question: 'Why do I need to sell my books?',
     answer: `Because every 25 books successfully sold on Alákòwé helps save one tree, hence, giving books, and our planet, a longer life. Also, by passing on the books you've finished, you're helping someone else discover their next great read.`,
     buttonLabel: 'Learn More',
@@ -31,9 +31,6 @@ const promoInserts = [
   },
   {
     id: 'sell-alakowe',
-    icon: Store,
-    iconColor: 'text-secondary',
-    iconBg: 'bg-secondary/10',
     accentColor: 'bg-violet-50/60 border-violet-100',
     question: 'Why do I need to sell them on Alákòwé?',
     answer: 'Because Alákòwé was built by readers, for readers, so we understand the value of books. Every book you sell on Alákòwé helps grow a community where great books keep moving.',
@@ -42,9 +39,6 @@ const promoInserts = [
   },
   {
     id: 'bookstore-dream',
-    icon: Store,
-    iconColor: 'text-indigo-600',
-    iconBg: 'bg-indigo-50',
     accentColor: 'bg-indigo-50/60 border-indigo-100',
     question: 'Want to start the bookstore of your dreams?',
     answer: `You already have the books. We'll give you the bookstore. Once your first book is approved, you automatically get your own bookstore page where readers can browse everything you're selling. Consider it your own little corner of Alákòwé.`,
@@ -53,9 +47,6 @@ const promoInserts = [
   },
   {
     id: 'who-buying-from',
-    icon: Users,
-    iconColor: 'text-amber-600',
-    iconBg: 'bg-amber-50',
     accentColor: 'bg-amber-50/60 border-amber-100',
     question: 'Who am I buying from on Alákòwé?',
     answer: `From readers just like you. Every book on Alákòwé comes from someone's shelf: students, teachers, parents, collectors, and fellow book lovers who believe every great book deserves another reader.`,
@@ -64,9 +55,6 @@ const promoInserts = [
   },
   {
     id: 'bottomline',
-    icon: HeartHandshake,
-    iconColor: 'text-rose-600',
-    iconBg: 'bg-rose-50',
     accentColor: 'bg-rose-50/50 border-rose-100',
     question: 'Our bottomline',
     answer: `Every order matters. We're committed to making sure buyers receive the books they paid for and sellers get paid for the books they sell. If you ever have a question or concern, our team — made up of real humans — is here to help.`,
@@ -76,41 +64,42 @@ const promoInserts = [
 ]
 
 function PromoInsert({ promo }: { promo: typeof promoInserts[0] }) {
-  const Icon = promo.icon
+  const [expanded, setExpanded] = useState(false)
+  const MAX_CHARS = 110
+  const isLong = promo.answer.length > MAX_CHARS
+  const displayText = isLong && !expanded ? `${promo.answer.slice(0, MAX_CHARS)}…` : promo.answer
+
   return (
-    <div className={`rounded-2xl border ${promo.accentColor} px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10`}>
-      <div className="flex items-start gap-4">
-        <div className={`w-9 h-9 rounded-full ${promo.iconBg} flex items-center justify-center shrink-0 mt-0.5`}>
-          <Icon size={16} className={promo.iconColor} />
-        </div>
-        <div className="min-w-0">
-          <p className="font-heading font-bold text-main text-sm sm:text-base leading-snug mb-1">
-            {promo.question}
-          </p>
-          <p className="text-xs sm:text-sm text-main/60 leading-relaxed max-w-2xl">
-            {promo.answer}
-          </p>
-        </div>
+    <div className={`rounded-2xl border ${promo.accentColor} px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 transition-all`}>
+      <div className="min-w-0 flex-1">
+        <h4 className="font-heading font-bold text-main text-sm sm:text-base leading-snug mb-1">
+          {promo.question}
+        </h4>
+        <p className="text-xs sm:text-sm text-main/65 leading-relaxed max-w-2xl">
+          {displayText}
+          {isLong && (
+            <button
+              type="button"
+              onClick={() => setExpanded(!expanded)}
+              className="inline-flex items-center gap-0.5 text-xs font-semibold text-secondary hover:underline ml-1.5 focus:outline-none"
+            >
+              <span>{expanded ? 'Show less' : 'Show more'}</span>
+              <ChevronDown size={12} className={`transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+        </p>
       </div>
+
       <Link
         to={promo.buttonTo}
-        className="shrink-0 inline-flex items-center justify-center bg-secondary text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-secondary/85 transition-colors whitespace-nowrap"
+        className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-secondary hover:underline underline-offset-2 transition-colors whitespace-nowrap self-start sm:self-center"
       >
-        {promo.buttonLabel}
+        <span>{promo.buttonLabel}</span>
+        <span className="text-sm">&rarr;</span>
       </Link>
     </div>
   )
 }
-import { useState, useEffect, useRef } from 'react'
-import { bookQuotes } from '../../data/mockData'
-import BookCarousel from '../../components/BookCarousel'
-import BookCard from '../../components/BookCard'
-import { useLandingPage } from '../../lib/api/listings/listings.hooks'
-import { listingToBookDisplay } from '../../lib/api/adapters'
-// import heroImage1 from '../../assets/media/images/banny4.png'
-import heroImage2 from '../../assets/media/images/banny2.png'
-import heroImage3 from '../../assets/media/images/banny3.png'
-//ALÁKÒWÉ,
 
 function Home() {
   const [activeQuoteIndex, setActiveQuoteIndex] = useState(0)
@@ -177,7 +166,7 @@ function Home() {
 
       {/* ── The Store ────────────────────────────────────────────── */}
       <section className="bg-white py-12">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+        <div className="max-w-5xl mx-auto px-4 md:px-6">
 
           {/* Header */}
           {/* <div className="mb-8">
@@ -264,9 +253,12 @@ function Home() {
         </div>
       </section>
 
+      {/* ── Looking for something? (Book Requests Section) ──────── */}
+      <BookRequestsSection />
+
       {/* ── Book Quotes ─────────────────────────────────────────── */}
       <section className="bg-white py-12 border-t border-b border-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+        <div className="max-w-5xl mx-auto px-4 md:px-6">
           {/* Header */}
           <div className="mb-8 text-left">
             <h2 className="font-heading font-bold text-main text-3xl">
@@ -343,7 +335,7 @@ function Home() {
 
       {/* ── How it Works ────────────────────────────────────────── */}
       <section className="py-12 bg-white border-t border-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+        <div className="max-w-5xl mx-auto px-4 md:px-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
             <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">

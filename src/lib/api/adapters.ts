@@ -61,7 +61,7 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     sellerSlug: listing.storeSlug ?? undefined,
     isbn: listing.isbn ?? undefined,
     categoryId: listing.categoryId,
-    location: listing.location ?? undefined,
+    location: listing.location || undefined,
   }
 }
 

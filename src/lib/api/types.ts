@@ -369,6 +369,39 @@ export interface LandingPageResponse {
   sections?: LandingPageSectionResponse[] | null
 }
 
+/* ───────── Book Requests ───────── */
+
+export interface CreateBookRequestDto {
+  title?: string | null
+  author?: string | null
+  category?: string | null
+  bookCondition?: string | null
+}
+
+export interface BookRequestResponse {
+  id: string
+  buyerEmail: string
+  title: string
+  author?: string | null
+  genre?: string | null
+  condition?: string | null
+  maxPrice?: number
+  notes?: string | null
+  status: "open" | "matched" | "closed"
+  createdAt: string
+  waitlist?: string[] | null
+  waitlistCount?: number
+  isUserOnWaitlist?: boolean
+}
+
+export interface BookRequestFilterParams {
+  Title?: string
+  Genre?: string
+  Status?: string
+  PageNumber?: number
+  PageSize?: number
+}
+
 /* ───────── Orders & seller payouts ───────── */
 
 export interface OrderDeliveryAddress {

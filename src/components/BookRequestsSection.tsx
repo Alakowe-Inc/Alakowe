@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { bookRequests } from '../data/mockData'
+import { User, Flame } from 'lucide-react'
+import { bookRequests as mockBookRequests } from '../data/mockData'
 import { useAuth } from '../context/AuthContext'
+import { useAllBookRequests, useJoinWaitlist } from '../lib/api/requests/requests.hooks'
 import {
   Dialog,
   DialogContent,
@@ -9,56 +11,78 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 
-function BookRequestsSection() {
+export default function BookRequestsSection() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  const [joined, setJoined] = useState<Record<string, boolean>>({})
-  const [counts, setCounts] = useState<Record<string, number>>({})
-  const [timestamps, setTimestamps] = useState<Record<string, number>>({})
+  const { data: apiRequests } = useAllBookRequests(undefined, user?.email)
+  const joinWaitlistMutation = useJoinWaitlist()
+
+  const [joinedMap, setJoinedMap] = useState<Record<string, boolean>>({})
+  const [countsMap, setCountsMap] = useState<Record<string, number>>({})
   const [showModal, setShowModal] = useState(false)
   const [activeTitle, setActiveTitle] = useState("")
 
   useEffect(() => {
     const savedJoined = localStorage.getItem("queueJoined")
     const savedCounts = localStorage.getItem("queueCounts")
-    const savedTime = localStorage.getItem("queueTime")
 
-    if (savedJoined) setJoined(JSON.parse(savedJoined))
-    if (savedCounts) setCounts(JSON.parse(savedCounts))
-    if (savedTime) setTimestamps(JSON.parse(savedTime))
-  }, [])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimestamps(prev => ({ ...prev }))
-    }, 60000)
-    return () => clearInterval(interval)
-  }, [])
-
-  function handleJoinQueue(title: string) {
-    if (joined[title]) return
-
-    const newJoined = { ...joined, [title]: true }
-    setJoined(newJoined)
-
-    const newCounts = {
-      ...counts,
-      [title]:
-        (counts[title] ||
-          bookRequests.find(b => b.title === title)?.requestCount ||
-          0) + 1,
+    if (savedJoined) {
+      try { setJoinedMap(JSON.parse(savedJoined)) } catch { /* ignore */ }
     }
-    setCounts(newCounts)
+    if (savedCounts) {
+      try { setCountsMap(JSON.parse(savedCounts)) } catch { /* ignore */ }
+    }
+  }, [])
 
-    const newTimestamps = { ...timestamps, [title]: Date.now() }
-    setTimestamps(newTimestamps)
+  // Combine top 5 items for display
+  const items = (apiRequests && apiRequests.length > 0
+    ? apiRequests.slice(0, 5).map(r => ({
+        id: r.id,
+        title: r.title,
+        author: r.author || '',
+        requestCount: r.waitlist?.length || r.waitlistCount || 1,
+        isUserJoined: r.isUserOnWaitlist || (r.waitlist?.includes(user?.email || '') ?? false),
+      }))
+    : mockBookRequests.slice(0, 5).map(r => ({
+        id: r.id,
+        title: r.title,
+        author: r.author || '',
+        requestCount: r.requestCount,
+        isUserJoined: false,
+      }))
+  )
+
+  async function handleJoin(item: typeof items[0]) {
+    if (!user) {
+      navigate('/login?redirect=/request-book')
+      return
+    }
+
+    const currentJoined = joinedMap[item.id] || item.isUserJoined
+    if (currentJoined) return
+
+    const newJoined = { ...joinedMap, [item.id]: true }
+    const newCounts = {
+      ...countsMap,
+      [item.id]: (countsMap[item.id] ?? item.requestCount) + 1,
+    }
+
+    setJoinedMap(newJoined)
+    setCountsMap(newCounts)
 
     localStorage.setItem("queueJoined", JSON.stringify(newJoined))
     localStorage.setItem("queueCounts", JSON.stringify(newCounts))
-    localStorage.setItem("queueTime", JSON.stringify(newTimestamps))
 
-    setActiveTitle(title)
+    try {
+      if (item.id.startsWith('REQ-') || item.id.length > 10) {
+        await joinWaitlistMutation.mutateAsync({ requestId: item.id, buyerEmail: user.email })
+      }
+    } catch {
+      // optimistic fallback already set
+    }
+
+    setActiveTitle(item.title)
     setShowModal(true)
 
     setTimeout(() => {
@@ -66,146 +90,121 @@ function BookRequestsSection() {
     }, 2000)
   }
 
-  function handleIHaveThis() {
-    navigate(user ? '/list' : '/login?redirect=/list')
-  }
-
-  function formatTime(timestamp?: number, fallbackDays?: number) {
-    if (!timestamp) {
-      return fallbackDays === 1 ? "1 day ago" : `${fallbackDays} days ago`
-    }
-
-    const diff = Date.now() - timestamp
-    const seconds = Math.floor(diff / 1000)
-    const minutes = Math.floor(diff / 60000)
-    const hours = Math.floor(diff / 3600000)
-    const days = Math.floor(diff / 86400000)
-
-    if (seconds < 10) return "Just now"
-    if (seconds < 60) return `${seconds}s ago`
-    if (minutes < 60) return minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`
-
-    if (hours < 24) {
-      const remainingMinutes = minutes % 60
-      if (remainingMinutes === 0) return hours === 1 ? "1hr ago" : `${hours}hr ago`
-      return `${hours}hr ${remainingMinutes}min ago`
-    }
-
-    if (days < 7) return days === 1 ? "1 day ago" : `${days} days ago`
-
-    const weeks = Math.floor(days / 7)
-    if (weeks < 4) return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`
-
-    const months = Math.floor(days / 30)
-    if (months < 12) return months === 1 ? "1 month ago" : `${months} months ago`
-
-    const years = Math.floor(days / 365)
-    return years === 1 ? "1 year ago" : `${years} years ago`
+  function handleListThisBook(title: string) {
+    const targetPath = `/list?title=${encodeURIComponent(title)}`
+    navigate(user ? targetPath : `/login?redirect=${encodeURIComponent(targetPath)}`)
   }
 
   return (
-    <>
-      <section className="py-12 bg-third border-t border-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12">
+    <section className="py-12 bg-white border-t border-third">
+      <div className="max-w-5xl mx-auto px-4 md:px-6">
 
-          {/* Header */}
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-2">
-                Community
-              </p>
-              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
-                Book Requests
-              </h2>
-              <p className="text-main/50 text-sm mt-2 max-w-md">
-                Can't find what you're looking for? Post a request and we will notify you when we have it.
-              </p>
-            </div>
+        {/* Section Header */}
+        <div className="flex items-start justify-between gap-4 mb-8">
+          <div>
+            <h2 className="font-heading font-bold text-main text-2xl sm:text-3xl md:text-4xl">
+              Looking for something?
+            </h2>
+            <p className="text-main/50 text-xs sm:text-sm mt-1">
+              Join others waiting for books that are not yet listed.
+            </p>
           </div>
 
-          {/* Request cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {bookRequests.map(req => (
-              <div key={req.id} className="bg-white p-5 flex flex-col gap-4">
-                <div className="flex-1">
-                  <h3 className="font-heading font-bold text-main text-base leading-snug">{req.title}</h3>
-                  {req.author && (
-                    <p className="text-xs text-main/45 mt-0.5">{req.author}</p>
+          <Link
+            to="/request-book"
+            className="shrink-0 text-xs sm:text-sm font-semibold text-secondary hover:underline flex items-center gap-1 transition-colors pt-1"
+          >
+            <span>View more</span>
+            <span className="text-base">&rarr;</span>
+          </Link>
+        </div>
+
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {items.map((item) => {
+            const count = countsMap[item.id] ?? item.requestCount
+            const isJoined = joinedMap[item.id] || item.isUserJoined
+            const isHighDemand = count >= 15
+
+            return (
+              <div
+                key={item.id}
+                className="bg-white border border-main/10 rounded-2xl p-4 flex flex-col justify-between shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md transition-all duration-200"
+              >
+                {/* Top Information */}
+                <div>
+                  <h3 className="font-heading font-bold text-main text-sm sm:text-base leading-snug line-clamp-1" title={item.title}>
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-main/45 mt-0.5 line-clamp-1 min-h-[16px]" title={item.author}>
+                    {item.author || 'Unknown Author'}
+                  </p>
+
+                  <div className="flex items-center gap-1.5 text-xs text-main/60 font-medium mt-3">
+                    <User size={13} className="text-main/40 shrink-0" />
+                    <span>{count} {count === 1 ? 'reader waiting' : 'readers waiting'}</span>
+                  </div>
+
+                  {isHighDemand ? (
+                    <div className="mt-2.5 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 border border-indigo-100/80 px-2.5 py-0.5 rounded-full">
+                      <Flame size={11} className="text-amber-500 fill-amber-500" />
+                      <span>HIGH DEMAND</span>
+                    </div>
+                  ) : (
+                    <div className="h-[23px] mt-2.5" /> // spacer to align buttons across row
                   )}
                 </div>
 
-                <div className="flex items-center gap-3 text-[11px]">
-                  <span className="font-semibold text-secondary">
-                    {(counts[req.title] ?? req.requestCount)}
-                    {(counts[req.title] ?? req.requestCount) === 1
-                      ? ' person needs this'
-                      : ' people need this'}
-                  </span>
-                  <span className="text-main/35">
-                    {formatTime(timestamps[req.title], req.daysAgo)}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-3 pt-1 border-t border-third">
+                {/* Bottom Buttons */}
+                <div className="mt-5 space-y-2">
                   <button
-                    disabled={joined[req.title]}
-                    onClick={() => handleJoinQueue(req.title)}
-                    className={`text-[11px] font-semibold tracking-widest uppercase px-4 py-2 transition-colors shrink-0 rounded-full
-                    ${joined[req.title]
-                      ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                      : 'bg-main text-white hover:bg-main/85'}`}
+                    type="button"
+                    disabled={isJoined}
+                    onClick={() => handleJoin(item)}
+                    className={`w-full font-bold text-[11px] tracking-wider uppercase py-2.5 rounded-full transition-all duration-200 shadow-sm ${
+                      isJoined
+                        ? 'bg-main/10 text-main/40 cursor-not-allowed shadow-none'
+                        : 'bg-[#5C5CFF] hover:bg-[#4B4BEE] text-white active:scale-[0.98]'
+                    }`}
                   >
-                    {joined[req.title] ? "Joined" : "Join Queue"}
+                    {isJoined ? '✓ JOINED' : 'JOIN WAITLIST'}
                   </button>
+
                   <button
-                    onClick={handleIHaveThis}
-                    className="text-[11px] font-semibold text-main/50 hover:text-secondary transition-colors underline underline-offset-2"
+                    type="button"
+                    onClick={() => handleListThisBook(item.title)}
+                    className="w-full border border-main/20 text-main/75 hover:border-main/40 hover:text-main font-bold text-[11px] tracking-wider uppercase py-2.5 rounded-full transition-all duration-200 active:scale-[0.98] block text-center"
                   >
-                    I have this
+                    LIST THIS BOOK
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-between">
-            <p className="text-sm text-main/50">
-              Looking for a specific book? Let the community help you find it.
-            </p>
-            <Link
-              to="/requests"
-              className="inline-flex items-center gap-2 bg-main text-white font-semibold px-7 py-3 text-[11px] tracking-widest uppercase hover:bg-main/85 transition-colors shrink-0 rounded-xl"
-            >
-              View all requests
-            </Link>
-          </div>
+            )
+          })}
         </div>
-      </section>
+      </div>
 
-      {/* Queue success dialog */}
+      {/* Success Dialog */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-sm text-center rounded-2xl border-0 shadow-xl p-8 [&>button]:hidden">
-          <DialogTitle className="sr-only">Added to Queue</DialogTitle>
+          <DialogTitle className="sr-only">Added to Waitlist</DialogTitle>
           <DialogDescription className="sr-only">
-            You have been added to the queue for {activeTitle}
+            You have joined the waitlist for {activeTitle}
           </DialogDescription>
 
-          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center text-xl animate-[modalIn_.55s_cubic-bezier(.34,1.56,.64,1)]">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center text-xl animate-[modalIn_.55s_cubic-bezier(.34,1.56,.64,1)] text-green-600">
             ✓
           </div>
 
           <h3 className="font-heading font-bold text-lg text-main mb-2">
-            Added to Queue
+            Joined Waitlist!
           </h3>
 
           <p className="text-sm text-main/60">
-            You'll be notified when <strong>{activeTitle}</strong> becomes available.
+            You'll be notified as soon as <strong>{activeTitle}</strong> is listed for sale.
           </p>
         </DialogContent>
       </Dialog>
-    </>
+    </section>
   )
 }
-
-export default BookRequestsSection
