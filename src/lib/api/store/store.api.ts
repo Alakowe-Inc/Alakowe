@@ -5,9 +5,9 @@ import type {
   UpdateStoreProfileRequest,
 } from "../types"
 
-/** Public storefront profile (no auth) looked up by seller email. */
-export async function getPublicStoreByEmailApi(email: string): Promise<PublicStoreProfileResponse> {
-  const { data } = await client.get(`/api/v1/store/by-email/${encodeURIComponent(email)}`)
+/** Public storefront profile (no auth) looked up by store slug. */
+export async function getPublicStoreBySlugApi(slug: string): Promise<PublicStoreProfileResponse> {
+  const { data } = await client.get(`/api/v1/store/by-slug/${encodeURIComponent(slug)}`)
   return data as PublicStoreProfileResponse
 }
 

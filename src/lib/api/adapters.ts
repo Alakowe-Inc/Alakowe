@@ -25,6 +25,7 @@ export interface BookDisplay {
   description: string
   loveNote?: string
   sellerName: string
+  sellerSlug?: string
   isbn?: string
   categoryId?: number
   location?: string
@@ -57,6 +58,7 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     description: listing.description ?? "",
     loveNote: listing.loveNote ?? undefined,
     sellerName: listing.createdBy ?? "Seller",
+    sellerSlug: listing.storeSlug ?? undefined,
     isbn: listing.isbn ?? undefined,
     categoryId: listing.categoryId,
     location: listing.location ?? undefined,

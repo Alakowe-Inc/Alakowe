@@ -48,8 +48,13 @@ function timeAgo(iso: string): string {
   return 'Just now'
 }
 
+const PAGE_SIZE = 10
+
 export default function SellerOrders() {
-  const { data: sales = [], isLoading, error } = useSellerSales()
+  const [page, setPage] = useState(1)
+  const { data, isLoading, error } = useSellerSales(page, PAGE_SIZE)
+  const sales = data?.result ?? []
+  const totalPages = data?.totalPages ?? 1
   const [schedulingSale, setSchedulingSale] = useState<SellerSaleResponse | null>(null)
 
   return (
@@ -166,6 +171,28 @@ export default function SellerOrders() {
                 </div>
               )
             })}
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="text-xs font-semibold px-4 py-2 rounded-xl border border-third text-main disabled:opacity-40 hover:bg-white transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-xs text-main/50">Page {page} of {totalPages}</span>
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="text-xs font-semibold px-4 py-2 rounded-xl border border-third text-main disabled:opacity-40 hover:bg-white transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
 

@@ -80,7 +80,7 @@ const App = () => (
                 <Route path="my-sales/:id/dropoff" element={<ProtectedRoute><SellerDropoff /></ProtectedRoute>} />
                 <Route path="my-earnings" element={<ProtectedRoute><SellerEarnings /></ProtectedRoute>} />
                 <Route path="my-purchases" element={<ProtectedRoute><MyPurchases /></ProtectedRoute>} />
-                <Route path="store/:email" element={<SellerStorefront />} />
+                <Route path="store/:slug" element={<SellerStorefront />} />
                 <Route path="customer-service" element={<CustomerService />} />
                 <Route path="shipping" element={<ShippingReturns />} />
                 <Route path="privacy" element={<PrivacyPolicy />} />

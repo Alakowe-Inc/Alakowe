@@ -151,6 +151,9 @@ export interface ListingResponse {
   stateId?: number
   areaId?: number
   location?: string | null
+  storeProfileId?: number | null
+  storeName?: string | null
+  storeSlug?: string | null
 }
 
 export interface SetListingDiscountRequest {
@@ -167,6 +170,17 @@ export interface PageLinks {
 
 export interface ListingResponsePagedResult {
   result?: ListingResponse[] | null
+  pageNumber?: number
+  pageSize?: number
+  totalCount?: number
+  totalPages?: number
+  hasPreviousPage?: boolean
+  hasNextPage?: boolean
+  links?: PageLinks
+}
+
+export interface PagedResult<T> {
+  result?: T[] | null
   pageNumber?: number
   pageSize?: number
   totalCount?: number

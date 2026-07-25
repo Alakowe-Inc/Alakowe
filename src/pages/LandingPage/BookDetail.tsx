@@ -305,13 +305,15 @@ function BookDetail() {
                   </div>
                 </div>
               </div>
-              <Link
-                to={`/store/${encodeURIComponent(book.sellerName)}`}
-                className="text-[10px] font-semibold text-secondary hover:underline shrink-0 flex items-center gap-0.5 self-end sm:self-auto"
-              >
-                <span>View seller's profile</span>
-                <span>&rarr;</span>
-              </Link>
+              {book.sellerSlug && (
+                <Link
+                  to={`/store/${encodeURIComponent(book.sellerSlug)}`}
+                  className="text-[10px] font-semibold text-secondary hover:underline shrink-0 flex items-center gap-0.5 self-end sm:self-auto"
+                >
+                  <span>View seller's profile</span>
+                  <span>&rarr;</span>
+                </Link>
+              )}
             </div>
 
             {/* Handwritten Seller Sticky Note */}

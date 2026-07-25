@@ -2,33 +2,34 @@ import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { MapPin, ShoppingBag, User } from 'lucide-react'
 import { useListings } from '../../lib/api/listings/listings.hooks'
-import { usePublicStoreByEmail } from '../../lib/api/store/store.hooks'
+import { usePublicStoreBySlug } from '../../lib/api/store/store.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import BookCard from '../../components/BookCard'
 
 export default function SellerStorefront() {
-  const { email } = useParams<{ email: string }>()
-  const decodedEmail = email ? decodeURIComponent(email) : ''
+  const { slug } = useParams<{ slug: string }>()
+  const storeSlug = slug ? decodeURIComponent(slug) : ''
 
   const [activeTab, setActiveTab] = useState<'bookstore' | 'about'>('bookstore')
 
   const { data: pagedResult, isLoading } = useListings()
-  const { data: store, isLoading: isStoreLoading } = usePublicStoreByEmail(decodedEmail)
+  const { data: store, isLoading: isStoreLoading } = usePublicStoreBySlug(storeSlug)
 
+  const sellerEmail = store?.sellerEmail?.toLowerCase() ?? ''
   const listings = useMemo(() => {
-    if (!pagedResult?.result) return []
+    if (!pagedResult?.result || !sellerEmail) return []
     return pagedResult.result
-      .filter((l) => l.createdBy?.toLowerCase() === decodedEmail.toLowerCase())
+      .filter((l) => l.createdBy?.toLowerCase() === sellerEmail)
       .map(listingToBookDisplay)
-  }, [pagedResult, decodedEmail])
+  }, [pagedResult, sellerEmail])
 
-  const displayName = store?.sellerName || decodedEmail.split('@')[0]
+  const displayName = store?.sellerName || storeSlug
   const location = [store?.city, store?.state].filter(Boolean).join(', ')
   const memberSince = store?.memberSince
     ? new Date(store.memberSince).toLocaleDateString('en-NG', { month: 'long', year: 'numeric' })
     : ''
 
-  if (!decodedEmail) {
+  if (!storeSlug) {
     return (
       <div className="bg-white min-h-screen flex items-center justify-center">
         <p className="text-main/50 text-sm">Store not found.</p>

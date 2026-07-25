@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Wallet, Clock, CheckCircle, TrendingUp } from 'lucide-react'
 import { useSellerPayoutSummary, useSellerSales } from '../../lib/api/orders/orders.hooks'
@@ -27,9 +28,14 @@ const STATUS_CONFIG: Record<EarningStatus, { label: string; class: string; icon:
   },
 }
 
+const PAGE_SIZE = 10
+
 export default function SellerEarnings() {
+  const [page, setPage] = useState(1)
   const { data: summary, isLoading: isSummaryLoading, error } = useSellerPayoutSummary()
-  const { data: sales = [], isLoading: isSalesLoading } = useSellerSales()
+  const { data, isLoading: isSalesLoading } = useSellerSales(page, PAGE_SIZE)
+  const sales = data?.result ?? []
+  const totalPages = data?.totalPages ?? 1
 
   const total = moneyInNaira(summary?.totalEarned)
   const released = moneyInNaira(summary?.totalPaidOut)
@@ -146,6 +152,28 @@ export default function SellerEarnings() {
                 </div>
               )
             })}
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="text-xs font-semibold px-4 py-2 rounded-xl border border-third text-main disabled:opacity-40 hover:bg-white transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-xs text-main/50">Page {page} of {totalPages}</span>
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="text-xs font-semibold px-4 py-2 rounded-xl border border-third text-main disabled:opacity-40 hover:bg-white transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
 

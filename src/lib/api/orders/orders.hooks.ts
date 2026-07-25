@@ -29,9 +29,9 @@ export function useSellerPayoutSummary() {
   })
 }
 
-export function useSellerSales() {
+export function useSellerSales(pageNumber = 1, pageSize = 20) {
   return useQuery({
-    queryKey: ["seller", "sales"],
-    queryFn: getSellerSalesApi,
+    queryKey: ["seller", "sales", pageNumber, pageSize],
+    queryFn: () => getSellerSalesApi(pageNumber, pageSize),
   })
 }

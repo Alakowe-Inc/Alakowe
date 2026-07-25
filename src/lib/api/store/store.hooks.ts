@@ -1,16 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
-  getPublicStoreByEmailApi,
+  getPublicStoreBySlugApi,
   getSellerStoreProfileApi,
   updateSellerStoreProfileApi,
 } from "./store.api"
 import type { UpdateStoreProfileRequest } from "../types"
 
-export function usePublicStoreByEmail(email: string) {
+export function usePublicStoreBySlug(slug: string) {
   return useQuery({
-    queryKey: ["store", "public", email.toLowerCase()],
-    queryFn: () => getPublicStoreByEmailApi(email),
-    enabled: !!email,
+    queryKey: ["store", "public", slug.toLowerCase()],
+    queryFn: () => getPublicStoreBySlugApi(slug),
+    enabled: !!slug,
   })
 }
 
