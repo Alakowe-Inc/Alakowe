@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Clock, CheckCircle, Truck, Package, AlertCircle } from 'lucide-react'
-import { getAllSellerOrders, seedSellerOrders } from '../../data/sellerData'
-import { seedDemoOrder } from '../../data/orderData'
-import type { SellerOrder } from '../../data/sellerData'
+import { useSellerSales } from '../../lib/api/orders/orders.hooks'
+import { moneyInNaira, normalizeSellerSaleStatus, type SellerSaleDisplayStatus } from '../../lib/orders'
+import type { SellerSaleResponse } from '../../lib/api/types'
+import { ScheduleDropoffModal } from './ScheduleDropoffModal'
 
-const STATUS_CONFIG: Record<SellerOrder['status'], { label: string; class: string; icon: React.ElementType }> = {
+const STATUS_CONFIG: Record<SellerSaleDisplayStatus, { label: string; class: string; icon: React.ElementType }> = {
   awaiting_seller: {
     label: 'Action Required',
     class: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
@@ -47,16 +48,14 @@ function timeAgo(iso: string): string {
   return 'Just now'
 }
 
-export default function SellerOrders() {
-  const [orders, setOrders] = useState<SellerOrder[]>([])
+const PAGE_SIZE = 10
 
-  useEffect(() => {
-    seedDemoOrder()
-    seedSellerOrders()
-    setOrders(Object.values(getAllSellerOrders()).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    ))
-  }, [])
+export default function SellerOrders() {
+  const [page, setPage] = useState(1)
+  const { data, isLoading, error } = useSellerSales(page, PAGE_SIZE)
+  const sales = data?.result ?? []
+  const totalPages = data?.totalPages ?? 1
+  const [schedulingSale, setSchedulingSale] = useState<SellerSaleResponse | null>(null)
 
   return (
     <div className="bg-third min-h-screen">
@@ -74,20 +73,29 @@ export default function SellerOrders() {
           <p className="text-main/50 text-sm mt-1">Orders placed for your books</p>
         </div>
 
-        {/* Action required banner */}
-        {orders.some(o => o.status === 'awaiting_seller') && (
+        {error && (
+          <div className="bg-white rounded-2xl border border-third p-5 mb-6 text-red-500 text-sm">
+            {error.message}
+          </div>
+        )}
+
+        {sales.some(s => normalizeSellerSaleStatus(s) === 'awaiting_seller') && (
           <div className="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-xl px-5 py-4 mb-6">
             <AlertCircle size={16} className="text-yellow-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-yellow-800">You have books to drop off</p>
               <p className="text-xs text-yellow-700 mt-0.5">
-                One or more buyers are waiting. Please drop off your book within 48 hours of the sale.
+                Choose a Speedaf station near you so Alákọ̀wé can prepare your drop-off details.
               </p>
             </div>
           </div>
         )}
 
-        {orders.length === 0 ? (
+        {isLoading ? (
+          <div className="bg-white rounded-2xl border border-third p-12 text-center">
+            <p className="text-main/50 text-sm">Loading your sales…</p>
+          </div>
+        ) : sales.length === 0 ? (
           <div className="bg-white rounded-2xl border border-third p-12 text-center">
             <div className="w-16 h-16 rounded-full bg-main/6 flex items-center justify-center mx-auto mb-4">
               <Package size={28} className="text-main/30" />
@@ -97,19 +105,38 @@ export default function SellerOrders() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {orders.map(order => {
-              const cfg = STATUS_CONFIG[order.status]
+            {sales.map(sale => {
+              const status = normalizeSellerSaleStatus(sale)
+              const cfg = STATUS_CONFIG[status]
               const Icon = cfg.icon
               return (
-                <div key={order.id} className="bg-white rounded-2xl border border-third p-5">
+                <div key={sale.orderId} className="bg-white rounded-2xl border border-third p-5">
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div>
                       <p className="font-heading font-bold text-main text-base leading-snug">
-                        {order.bookTitle}
+                        {sale.bookTitle}
                       </p>
                       <p className="text-xs text-main/45 mt-0.5">
-                        Order {order.orderId} · Buyer: {order.buyerInitials} · {timeAgo(order.createdAt)}
+                        Order {sale.orderNumber} · Buyer: {sale.buyerInitials} · {timeAgo(sale.orderDate)}
                       </p>
+                      {sale.preferredSpeedafStationName && (
+                        <p className="text-xs text-main/50 mt-1">
+                          Drop-off: <span className="font-semibold text-main">{sale.preferredSpeedafStationName}</span>
+                          {sale.speedafBillCode ? (
+                            <span className="text-main/40"> · Waybill {sale.speedafBillCode}</span>
+                          ) : null}
+                        </p>
+                      )}
+                      {sale.labelUrl && (
+                        <a
+                          href={sale.labelUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-block text-xs font-semibold text-secondary mt-1 hover:underline"
+                        >
+                          View / print label
+                        </a>
+                      )}
                     </div>
                     <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.class}`}>
                       <Icon size={11} /> {cfg.label}
@@ -119,34 +146,65 @@ export default function SellerOrders() {
                   <div className="flex items-center gap-6 text-sm border-t border-third pt-4">
                     <div>
                       <p className="text-xs text-main/40 mb-0.5">Sale Price</p>
-                      <p className="font-semibold text-main">₦{order.saleAmount.toLocaleString()}</p>
+                      <p className="font-semibold text-main">₦{moneyInNaira(sale.saleAmount).toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-xs text-main/40 mb-0.5">Platform Fee</p>
-                      <p className="font-semibold text-main/55">−₦{order.platformFee.toLocaleString()}</p>
+                      <p className="font-semibold text-main/55">−₦{moneyInNaira(sale.platformFee).toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-xs text-main/40 mb-0.5">Your Payout</p>
-                      <p className="font-heading font-bold text-main">₦{order.netAmount.toLocaleString()}</p>
+                      <p className="font-heading font-bold text-main">₦{moneyInNaira(sale.sellerPayout).toLocaleString()}</p>
                     </div>
-                    {order.status === 'awaiting_seller' && (
+                    {status === 'awaiting_seller' && (
                       <div className="ml-auto">
-                        <Link
-                          to={`/my-sales/${order.id}/dropoff`}
+                        <button
+                          type="button"
+                          onClick={() => setSchedulingSale(sale)}
                           className="bg-main text-white font-semibold text-xs px-4 py-2 rounded-xl hover:bg-main/90 transition-colors"
                         >
                           Schedule Drop-off
-                        </Link>
+                        </button>
                       </div>
                     )}
                   </div>
                 </div>
               )
             })}
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="text-xs font-semibold px-4 py-2 rounded-xl border border-third text-main disabled:opacity-40 hover:bg-white transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-xs text-main/50">Page {page} of {totalPages}</span>
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="text-xs font-semibold px-4 py-2 rounded-xl border border-third text-main disabled:opacity-40 hover:bg-white transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
 
       </div>
+
+      <ScheduleDropoffModal
+        sale={schedulingSale}
+        open={!!schedulingSale}
+        onOpenChange={(open) => {
+          if (!open) setSchedulingSale(null)
+        }}
+      />
     </div>
   )
 }

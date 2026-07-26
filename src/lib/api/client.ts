@@ -27,6 +27,12 @@ client.interceptors.response.use(
     const body = response.data
     const isMutating = mutatingMethods.has(response.config.method ?? "")
 
+    // A few legacy endpoints (notably /orders) return their DTOs directly
+    // instead of the shared { success, data, message } response envelope.
+    if (typeof body?.success !== "boolean") {
+      return response
+    }
+
     if (body.success) {
       if (isMutating && body.message && !response.config.skipSuccessToast) toast.success(body.message)
       response.data = body.data

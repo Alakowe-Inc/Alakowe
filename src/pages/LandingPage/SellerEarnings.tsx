@@ -1,7 +1,8 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Wallet, Clock, CheckCircle, TrendingUp } from 'lucide-react'
-import { MOCK_EARNINGS } from '../../data/sellerData'
-import type { Earning } from '../../data/sellerData'
+import { useSellerPayoutSummary, useSellerSales } from '../../lib/api/orders/orders.hooks'
+import { moneyInNaira } from '../../lib/orders'
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -12,7 +13,9 @@ function timeAgo(iso: string): string {
   return 'Just now'
 }
 
-const STATUS_CONFIG: Record<Earning['status'], { label: string; class: string; icon: React.ElementType }> = {
+type EarningStatus = 'released' | 'pending'
+
+const STATUS_CONFIG: Record<EarningStatus, { label: string; class: string; icon: React.ElementType }> = {
   released: {
     label: 'Released',
     class: 'bg-green-50 text-green-700 border border-green-200',
@@ -25,12 +28,18 @@ const STATUS_CONFIG: Record<Earning['status'], { label: string; class: string; i
   },
 }
 
-export default function SellerEarnings() {
-  const earnings = MOCK_EARNINGS
+const PAGE_SIZE = 10
 
-  const total = earnings.reduce((s, e) => s + e.netAmount, 0)
-  const released = earnings.filter(e => e.status === 'released').reduce((s, e) => s + e.netAmount, 0)
-  const pending = earnings.filter(e => e.status === 'pending').reduce((s, e) => s + e.netAmount, 0)
+export default function SellerEarnings() {
+  const [page, setPage] = useState(1)
+  const { data: summary, isLoading: isSummaryLoading, error } = useSellerPayoutSummary()
+  const { data, isLoading: isSalesLoading } = useSellerSales(page, PAGE_SIZE)
+  const sales = data?.result ?? []
+  const totalPages = data?.totalPages ?? 1
+
+  const total = moneyInNaira(summary?.totalEarned)
+  const released = moneyInNaira(summary?.totalPaidOut)
+  const pending = moneyInNaira(summary?.pendingPayout)
 
   return (
     <div className="bg-third min-h-screen">
@@ -48,6 +57,12 @@ export default function SellerEarnings() {
           <p className="text-main/50 text-sm mt-1">Your payout summary from completed sales</p>
         </div>
 
+        {error && (
+          <div className="bg-white rounded-2xl border border-third p-5 mb-6 text-red-500 text-sm">
+            {error.message}
+          </div>
+        )}
+
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-2xl border border-third p-5">
@@ -55,7 +70,7 @@ export default function SellerEarnings() {
               <TrendingUp size={15} className="text-secondary" />
               <span className="text-xs font-semibold text-main/45 uppercase tracking-wider">Total Earned</span>
             </div>
-            <p className="font-heading font-bold text-main text-2xl">₦{total.toLocaleString()}</p>
+            <p className="font-heading font-bold text-main text-2xl">{isSummaryLoading ? '—' : `₦${total.toLocaleString()}`}</p>
             <p className="text-xs text-main/40 mt-0.5">All time</p>
           </div>
           <div className="bg-white rounded-2xl border border-third p-5">
@@ -63,7 +78,7 @@ export default function SellerEarnings() {
               <CheckCircle size={15} className="text-green-500" />
               <span className="text-xs font-semibold text-main/45 uppercase tracking-wider">Released</span>
             </div>
-            <p className="font-heading font-bold text-main text-2xl">₦{released.toLocaleString()}</p>
+            <p className="font-heading font-bold text-main text-2xl">{isSummaryLoading ? '—' : `₦${released.toLocaleString()}`}</p>
             <p className="text-xs text-main/40 mt-0.5">In your account</p>
           </div>
           <div className="bg-white rounded-2xl border border-third p-5">
@@ -71,7 +86,7 @@ export default function SellerEarnings() {
               <Clock size={15} className="text-yellow-500" />
               <span className="text-xs font-semibold text-main/45 uppercase tracking-wider">Pending</span>
             </div>
-            <p className="font-heading font-bold text-main text-2xl">₦{pending.toLocaleString()}</p>
+            <p className="font-heading font-bold text-main text-2xl">{isSummaryLoading ? '—' : `₦${pending.toLocaleString()}`}</p>
             <p className="text-xs text-main/40 mt-0.5">Awaiting buyer confirmation</p>
           </div>
         </div>
@@ -87,7 +102,11 @@ export default function SellerEarnings() {
         </div>
 
         {/* Transaction list */}
-        {earnings.length === 0 ? (
+        {isSalesLoading ? (
+          <div className="bg-white rounded-2xl border border-third p-12 text-center">
+            <p className="text-main/50 text-sm">Loading transactions…</p>
+          </div>
+        ) : sales.length === 0 ? (
           <div className="bg-white rounded-2xl border border-third p-12 text-center">
             <div className="w-16 h-16 rounded-full bg-main/6 flex items-center justify-center mx-auto mb-4">
               <Wallet size={28} className="text-main/30" />
@@ -98,17 +117,18 @@ export default function SellerEarnings() {
         ) : (
           <div className="flex flex-col gap-4">
             <h2 className="font-heading font-bold text-main text-base">Transaction History</h2>
-            {earnings.map(earning => {
-              const cfg = STATUS_CONFIG[earning.status]
+            {sales.map(sale => {
+              const status: EarningStatus = sale.isSettled ? 'released' : 'pending'
+              const cfg = STATUS_CONFIG[status]
               const Icon = cfg.icon
               return (
-                <div key={earning.id} className="bg-white rounded-2xl border border-third p-5">
+                <div key={sale.orderId} className="bg-white rounded-2xl border border-third p-5">
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div>
                       <p className="font-heading font-bold text-main text-base leading-snug">
-                        {earning.bookTitle}
+                        {sale.bookTitle}
                       </p>
-                      <p className="text-xs text-main/45 mt-0.5">{timeAgo(earning.createdAt)}</p>
+                      <p className="text-xs text-main/45 mt-0.5">{timeAgo(sale.orderDate)}</p>
                     </div>
                     <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.class}`}>
                       <Icon size={11} /> {cfg.label}
@@ -118,20 +138,42 @@ export default function SellerEarnings() {
                   <div className="flex items-center gap-6 text-sm border-t border-third pt-4">
                     <div>
                       <p className="text-xs text-main/40 mb-0.5">Sale Price</p>
-                      <p className="font-semibold text-main">₦{earning.saleAmount.toLocaleString()}</p>
+                      <p className="font-semibold text-main">₦{moneyInNaira(sale.saleAmount).toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-xs text-main/40 mb-0.5">Platform Fee</p>
-                      <p className="font-semibold text-main/55">−₦{earning.platformFee.toLocaleString()}</p>
+                      <p className="font-semibold text-main/55">−₦{moneyInNaira(sale.platformFee).toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-xs text-main/40 mb-0.5">Your Payout</p>
-                      <p className="font-heading font-bold text-main">₦{earning.netAmount.toLocaleString()}</p>
+                      <p className="font-heading font-bold text-main">₦{moneyInNaira(sale.sellerPayout).toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
               )
             })}
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="text-xs font-semibold px-4 py-2 rounded-xl border border-third text-main disabled:opacity-40 hover:bg-white transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-xs text-main/50">Page {page} of {totalPages}</span>
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="text-xs font-semibold px-4 py-2 rounded-xl border border-third text-main disabled:opacity-40 hover:bg-white transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
 

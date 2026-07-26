@@ -151,6 +151,9 @@ export interface ListingResponse {
   stateId?: number
   areaId?: number
   location?: string | null
+  storeProfileId?: number | null
+  storeName?: string | null
+  storeSlug?: string | null
 }
 
 export interface SetListingDiscountRequest {
@@ -167,6 +170,17 @@ export interface PageLinks {
 
 export interface ListingResponsePagedResult {
   result?: ListingResponse[] | null
+  pageNumber?: number
+  pageSize?: number
+  totalCount?: number
+  totalPages?: number
+  hasPreviousPage?: boolean
+  hasNextPage?: boolean
+  links?: PageLinks
+}
+
+export interface PagedResult<T> {
+  result?: T[] | null
   pageNumber?: number
   pageSize?: number
   totalCount?: number
@@ -386,4 +400,124 @@ export interface BookRequestFilterParams {
   Status?: string
   PageNumber?: number
   PageSize?: number
+}
+
+/* ───────── Orders & seller payouts ───────── */
+
+export interface OrderDeliveryAddress {
+  fullName?: string | null
+  phone?: string | null
+  email?: string | null
+  street?: string | null
+  city?: string | null
+  state?: string | null
+}
+
+export interface OrderItemDto {
+  id: number
+  listingId: number
+  bookTitle: string
+  sellerEmail: string
+  sellerName?: string | null
+  coverImageFileName?: string | null
+  quantity: number
+  unitPrice: number
+  totalPrice: number
+  buyerPrice: number
+  sellerPayout: number
+  platformFee: number
+  markupAmount: number
+  commissionAmount: number
+}
+
+export interface OrderDto {
+  id: number
+  orderNumber: string
+  totalAmount: number
+  status: string
+  shippingAddress?: string | null
+  deliveryFee?: number | null
+  shippingStateId?: number | null
+  shippingAreaId?: number | null
+  shippingStateName?: string | null
+  shippingAreaName?: string | null
+  deliveryAddress?: OrderDeliveryAddress | null
+  orderDate: string
+  shippedDate?: string | null
+  deliveredDate?: string | null
+  userId: string
+  sellerEmail: string
+  sellerName?: string | null
+  baseAmount: number
+  sellerPayout: number
+  platformFee: number
+  markupTotal: number
+  commissionTotal: number
+  isSettled: boolean
+  settledAt?: string | null
+  items: OrderItemDto[]
+}
+
+/* ───────── Store profiles ───────── */
+
+export interface StoreProfileResponse {
+  id: number
+  userId: number
+  storeName: string
+  storeSlug: string
+  description?: string | null
+  city?: string | null
+  state?: string | null
+  isOnVacation: boolean
+  vacationMessage?: string | null
+}
+
+export interface PublicStoreProfileResponse {
+  storeName: string
+  storeSlug: string
+  description?: string | null
+  city?: string | null
+  state?: string | null
+  isOnVacation: boolean
+  vacationMessage?: string | null
+  sellerEmail: string
+  sellerName: string
+  memberSince?: string | null
+  booksSold: number
+}
+
+export interface UpdateStoreProfileRequest {
+  storeName: string
+  description?: string | null
+  city?: string | null
+  state?: string | null
+  isOnVacation: boolean
+  vacationMessage?: string | null
+}
+
+export interface PayoutSummaryResponse {
+  sellerEmail: string
+  totalEarned: number
+  totalPaidOut: number
+  pendingPayout: number
+  orderCount: number
+}
+
+export interface SellerSaleResponse {
+  orderId: number
+  orderNumber: string
+  bookTitle: string
+  buyerInitials: string
+  saleAmount: number
+  platformFee: number
+  sellerPayout: number
+  status: string
+  isSettled: boolean
+  orderDate: string
+  preferredSpeedafStationId?: number | null
+  preferredSpeedafStationName?: string | null
+  preferredSpeedafStationAddress?: string | null
+  sellerDropoffScheduledAt?: string | null
+  speedafBillCode?: string | null
+  labelUrl?: string | null
 }
