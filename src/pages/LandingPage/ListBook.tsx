@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Upload, Heart, BookOpen, Camera, DollarSign, CheckCircle, X, Loader2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Upload, Heart, BookOpen, Camera, DollarSign, CheckCircle, X, Loader2, Bell, Truck, Sparkles } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useSubmitListing } from '../../lib/api/listings/listings.hooks'
 import { CONDITIONS } from '../../data/sellerData'
@@ -14,24 +14,40 @@ import { FormControl, SelectBoxControl, TextareaControl, FileUpload, type Select
 
 const HOW_TO_STEPS = [
   {
+    step: 1,
+    title: 'List your book in minutes and start reaching readers across Nigeria.',
+    type: 'simple',
     icon: BookOpen,
-    title: 'Fill in Book Details',
-    desc: 'Add the title, author, genre, condition, and format of your book.',
   },
   {
-    icon: Camera,
-    title: 'Upload Photos',
-    desc: 'Take clear photos of the front cover, back cover, and any wear or marks.',
+    step: 2,
+    title: "You'll be notified immediately your book sells and be guided through the next steps.",
+    type: 'simple',
+    icon: Bell,
   },
   {
+    step: 3,
+    title: 'Depending on your listing, you can:',
+    type: 'options',
+    options: [
+      'drop the book off at our partner location nearest to you',
+      'or',
+      'meet the buyer for direct pickup from you'
+    ],
+    icon: Truck,
+  },
+  {
+    step: 4,
+    title: 'Once your order is completed, your earnings are sent directly to your bank account.',
+    type: 'simple',
     icon: DollarSign,
-    title: 'Set Your Price',
-    desc: 'Price your book fairly. We add a 10% buyer fee on top — you keep 90% of your listed price.',
   },
   {
-    icon: CheckCircle,
-    title: 'Submit for Review',
-    desc: "Hit 'Submit' and our team will review your listing. It usually goes live within 24 hours.",
+    step: 5,
+    title: 'You’re all set.',
+    subtitle: 'It only takes a few minutes to list your first book.',
+    type: 'final',
+    icon: Sparkles,
   },
 ]
 
@@ -295,71 +311,132 @@ export default function ListBook() {
 
       {/* How-to-list guide dialog */}
       <Dialog open={showGuide} onOpenChange={(open) => { if (!open) { setShowGuide(false); setGuideStep(0) } }}>
-        <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl [&>button:last-of-type]:hidden">
+        <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl border-0 shadow-2xl [&>button:last-of-type]:hidden">
           <DialogTitle className="sr-only">How to list a book</DialogTitle>
           <DialogDescription className="sr-only">A step-by-step guide to listing your book on Alakowe</DialogDescription>
 
-          {/* Coloured header */}
-          <div className="bg-main px-7 py-6 relative">
-            <DialogClose className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors rounded-sm focus:outline-none focus:ring-2 focus:ring-white/30">
+          {/* Coloured Header Banner */}
+          <div className="bg-gradient-to-r from-main to-main/90 px-7 py-6 relative text-white">
+            <DialogClose className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors rounded-full p-1 focus:outline-none">
               <X size={18} />
               <span className="sr-only">Close</span>
             </DialogClose>
-            <p className="text-white/55 text-xs font-semibold uppercase tracking-widest mb-1">
-              How to list a book
-            </p>
+            <div className="inline-flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider mb-2">
+              <Sparkles size={12} className="text-secondary" />
+              <span>Seller Guide</span>
+            </div>
             <h2 className="font-heading font-bold text-white text-xl leading-snug">
-              Here's how to get started
+              List Your Book on Alákòwé
             </h2>
           </div>
 
           {/* Step body */}
           <div className="px-7 pt-6 pb-2">
+            {/* Step progress pills */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-1.5">
                 {HOW_TO_STEPS.map((_, i) => (
                   <span
                     key={i}
-                    className={`block rounded-full transition-all ${i === guideStep ? 'w-6 h-2 bg-main' : 'w-2 h-2 bg-main/15'}`}
+                    className={`block rounded-full transition-all ${i === guideStep ? 'w-7 h-2 bg-secondary' : 'w-2 h-2 bg-main/15'}`}
                   />
                 ))}
               </div>
-              <span className="text-xs text-main/40 font-medium">
+              <span className="text-xs text-main/40 font-semibold">
                 Step {guideStep + 1} of {HOW_TO_STEPS.length}
               </span>
             </div>
 
-            <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mb-5">
-              <StepIcon size={28} className="text-secondary" />
+            {/* Illustration Frame */}
+            <div className="w-full h-32 bg-gradient-to-br from-violet-50/80 to-indigo-50/50 border border-violet-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center mb-6 relative overflow-hidden">
+              <div className="w-14 h-14 rounded-2xl bg-white border border-violet-100 shadow-sm flex items-center justify-center text-secondary mb-1">
+                {guideStep === 0 && <BookOpen size={28} />}
+                {guideStep === 1 && <Bell size={28} />}
+                {guideStep === 2 && <Truck size={28} />}
+                {guideStep === 3 && <DollarSign size={28} />}
+                {guideStep === 4 && <Sparkles size={28} />}
+              </div>
+              <span className="text-[11px] font-bold text-secondary uppercase tracking-wider">
+                {guideStep === 4 ? 'Ready to List' : `Step 0${guideStep + 1}`}
+              </span>
             </div>
-            <h3 className="font-heading font-bold text-main text-lg mb-2">{stepTitle}</h3>
-            <p className="text-sm text-main/55 leading-relaxed">{stepDesc}</p>
+
+            {/* Content text */}
+            {HOW_TO_STEPS[guideStep].type === 'final' ? (
+              <div className="text-center space-y-2 py-1">
+                <h3 className="font-heading font-bold text-main text-2xl">
+                  {HOW_TO_STEPS[guideStep].title}
+                </h3>
+                <p className="text-sm text-main/60 leading-relaxed max-w-xs mx-auto">
+                  {HOW_TO_STEPS[guideStep].subtitle}
+                </p>
+              </div>
+            ) : HOW_TO_STEPS[guideStep].type === 'options' ? (
+              <div className="space-y-3">
+                <h3 className="font-heading font-bold text-main text-base leading-snug">
+                  {HOW_TO_STEPS[guideStep].title}
+                </h3>
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2">
+                  <div className="flex items-start gap-2.5 text-xs text-main/80 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0 mt-1.5" />
+                    <span>drop the book off at our partner location nearest to you</span>
+                  </div>
+                  <div className="text-center text-[11px] font-bold text-secondary uppercase tracking-wider py-0.5">
+                    or
+                  </div>
+                  <div className="flex items-start gap-2.5 text-xs text-main/80 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0 mt-1.5" />
+                    <span>meet the buyer for direct pickup from you</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className="font-heading font-bold text-main text-base sm:text-lg leading-relaxed">
+                  {HOW_TO_STEPS[guideStep].title}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Footer nav */}
           <div className="px-7 py-5 flex items-center justify-between border-t border-main/8 mt-6">
-            <Button
-              variant="ghost"
-              onClick={() => setGuideStep(s => s - 1)}
-              disabled={guideStep === 0}
-              className="flex items-center gap-1.5 text-sm text-main/40 hover:text-main disabled:opacity-0 disabled:pointer-events-none h-auto p-0"
-            >
-              <ArrowLeft size={14} /> Back
-            </Button>
+            {guideStep > 0 ? (
+              <Button
+                variant="outline"
+                onClick={() => setGuideStep(s => s - 1)}
+                className="flex items-center gap-1.5 text-xs font-semibold text-main/70 border-main/15 hover:bg-main/5 rounded-xl px-4 py-2.5 h-auto"
+              >
+                <ArrowLeft size={14} /> Previous
+              </Button>
+            ) : <div />}
 
-            {isLastStep ? (
-              <DialogClose asChild>
-                <Button className="bg-main text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:bg-main/90 h-auto">
-                  Start listing
-                </Button>
-              </DialogClose>
-            ) : (
+            {guideStep < HOW_TO_STEPS.length - 1 ? (
               <Button
                 onClick={() => setGuideStep(s => s + 1)}
-                className="bg-main text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:bg-main/90 h-auto"
+                className="bg-secondary text-white text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-secondary/90 shadow-sm h-auto flex items-center gap-1.5"
               >
-                Next
+                <span>Next</span>
+                <ArrowRight size={14} />
               </Button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowGuide(false)
+                    navigate('/sell')
+                  }}
+                  className="text-xs font-semibold border-main/15 text-main hover:bg-main/5 rounded-xl px-4 py-2.5 h-auto"
+                >
+                  Learn More
+                </Button>
+                <DialogClose asChild>
+                  <Button className="bg-secondary text-white text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-secondary/90 shadow-sm h-auto">
+                    Start Listing
+                  </Button>
+                </DialogClose>
+              </div>
             )}
           </div>
         </DialogContent>
