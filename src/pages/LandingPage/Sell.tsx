@@ -1,274 +1,612 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
-  BookOpen,
+  Camera,
+  FileText,
+  Tag,
   Bell,
-  Package,
-  Banknote,
-  CheckCircle,
+  Truck,
+  PackageCheck,
+  MapPin,
+  CheckCircle2,
+  HelpCircle,
+  ArrowRight,
+  BookOpen,
   Sparkles,
-  ThumbsUp,
-  Check,
-  Minus,
-  AlertCircle
+  ShieldCheck,
+  Layers,
+  ChevronRight,
+  Info,
+  DollarSign
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { COVER_IMAGES } from '@/lib/covers'
-
-const steps = [
-  {
-    icon: BookOpen,
-    title: 'List your book',
-    desc: 'Fill out a short form. Title, condition, price, and a quick description. Add photos so buyers know what to expect.',
-  },
-  {
-    icon: Bell,
-    title: 'Get notified when it sells',
-    desc: "We'll email you the moment a buyer places an order. You'll have 48 hours to drop off or schedule a pickup.",
-  },
-  {
-    icon: Package,
-    title: 'Drop off or request pickup',
-    desc: 'Bring your book to the nearest ALÁKÒWÉ collection centre, or request a pickup for a small convenience fee.',
-  },
-  {
-    icon: Banknote,
-    title: 'Get paid',
-    desc: 'Once the buyer confirms delivery, your earnings are released directly to your bank account. No waiting, no hassle.',
-  },
-]
-
-const accepted = [
-  'African Fiction', 'Foreign Fiction', 'Romance', 'Thriller',
-  'Fantasy', 'Self Help', 'Business', 'Biography', 'Children', 'Academic',
-]
-
-const perks = [
-  { label: 'Free to list', desc: 'No upfront fees. We only earn when you do.' },
-  { label: 'Secure escrow', desc: "Buyer's payment is held until delivery is confirmed." },
-  { label: 'We handle logistics', desc: 'You drop off. We deliver. Simple.' },
-  { label: 'Fair pricing tools', desc: 'We flag listings that may be priced too high.' },
-]
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 
 export default function Sell() {
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState<'guide' | 'fulfillment' | 'conditions'>('guide')
+  const [modalContent, setModalContent] = useState<{ title: string; text: string } | null>(null)
+
+  function openLearnMore(title: string, text: string) {
+    setModalContent({ title, text })
+  }
+
+  const listBookUrl = user ? '/list' : '/login?redirect=/list'
 
   return (
-    <div className="bg-white">
+    <div className="bg-white min-h-screen">
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-10">
 
-      {/* ── Hero ── */}
-      <section className="bg-main text-white">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12 md:py-16">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-4">
-              Sell on ALÁKÒWÉ
-            </p>
-            <h1 className="font-heading font-bold text-4xl md:text-5xl leading-tight mb-6">
-              Your bookshelf is worth more than you think.
+        {/* ── Banner Card — replicated from RequestBook.tsx ── */}
+        <div className="bg-gradient-to-br from-violet-50/70 to-indigo-50/40 border border-violet-100/80 rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
+
+          {/* Icon Avatar */}
+          <div className="w-20 h-20 rounded-full bg-violet-100 border-4 border-white flex items-center justify-center shrink-0 shadow-sm">
+            <Tag size={30} className="text-secondary" />
+          </div>
+
+          {/* Header Text */}
+          <div className="flex-1 text-center md:text-left z-10 min-w-0">
+            <div className="inline-flex items-center gap-2 mb-2 bg-white/80 border border-violet-100 rounded-full px-3 py-1">
+              <Sparkles size={12} className="text-secondary shrink-0" />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-secondary">
+                The Pre-Listing Page
+              </span>
+            </div>
+
+            <h1 className="font-heading font-bold text-main text-2xl sm:text-3xl md:text-4xl leading-snug">
+              List your books in less than 5 minutes
             </h1>
-            <p className="text-white/60 text-base md:text-lg leading-relaxed mb-10 max-w-xl">
-              List your used books and earn from readers who'll love them as much as you did.
-              No fees to start.
+            <p className="text-xs sm:text-sm text-main/60 mt-2 max-w-lg">
+              Your bookshelf could be worth more than you think. Turn your pre-loved novels, textbooks, and non-fiction into cash on Alákòwé.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+
+            {/* CTA & Info pill */}
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-5">
               <Link
-                to={user ? '/list' : '/login?redirect=/list'}
-                className="inline-flex items-center justify-center gap-2 bg-secondary text-white font-semibold px-8 py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm"
+                to={listBookUrl}
+                className="bg-secondary text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-secondary/90 transition-colors shadow-sm inline-flex items-center gap-2"
               >
-                List Your Book
+                <span>List a Book</span>
+                <ArrowRight size={14} />
               </Link>
-              <Link
-                to="/how-it-works"
-                className="inline-flex items-center justify-center gap-2 border border-white/20 text-white/80 font-semibold px-8 py-4 rounded-xl hover:bg-white/8 transition-colors text-sm"
-              >
-                How it works
-              </Link>
+              <div className="inline-flex items-center gap-2 bg-white/70 border border-violet-100 rounded-full px-3.5 py-2">
+                <ShieldCheck size={13} className="text-secondary shrink-0" />
+                <span className="text-[11px] text-main/60 font-medium">
+                  Free listing &bull; Escrow protected payouts
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Decorative illustration — mirrors RequestBook storefront */}
+          <div className="absolute right-6 bottom-0 hidden lg:block select-none opacity-40 pointer-events-none z-0">
+            <svg width="220" height="110" viewBox="0 0 220 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="80" cy="50" r="30" stroke="#6B6FFF" strokeWidth="3" fill="#E8E8FF" />
+              <circle cx="80" cy="50" r="18" stroke="#6B6FFF" strokeWidth="2" fill="#F3F3FF" />
+              <line x1="103" y1="73" x2="125" y2="95" stroke="#6B6FFF" strokeWidth="4" strokeLinecap="round" />
+              <rect x="145" y="60" width="14" height="40" rx="2" fill="#E8E8FF" stroke="#6B6FFF" strokeWidth="2" />
+              <rect x="161" y="50" width="12" height="50" rx="2" fill="#F3F3FF" stroke="#6B6FFF" strokeWidth="2" />
+              <rect x="175" y="55" width="16" height="45" rx="2" fill="#E8E8FF" stroke="#6B6FFF" strokeWidth="2" />
+              <line x1="130" y1="100" x2="210" y2="100" stroke="#6B6FFF" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+          </div>
+        </div>
+
+        {/* ── Top Feature Pillars — PangoBooks replicated style ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 border border-blue-100/80 rounded-2xl p-5 flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-blue-100/80 text-blue-600 flex items-center justify-center shrink-0">
+              <DollarSign size={20} />
+            </div>
+            <div>
+              <h3 className="font-heading font-bold text-main text-sm">Earn Real Cash</h3>
+              <p className="text-xs text-main/55 mt-1 leading-relaxed">
+                Turn pre-loved books into money in your bank account or store credit for new reads.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-violet-50/50 to-purple-50/30 border border-violet-100/80 rounded-2xl p-5 flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-violet-100/80 text-violet-600 flex items-center justify-center shrink-0">
+              <Truck size={20} />
+            </div>
+            <div>
+              <h3 className="font-heading font-bold text-main text-sm">Simple Fulfillment</h3>
+              <p className="text-xs text-main/55 mt-1 leading-relaxed">
+                Choose drop-off at partner hubs, doorstep pickup, or direct buyer meetups.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-emerald-50/50 to-teal-50/30 border border-emerald-100/80 rounded-2xl p-5 flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-emerald-100/80 text-emerald-600 flex items-center justify-center shrink-0">
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <h3 className="font-heading font-bold text-main text-sm">Real Support & Escrow</h3>
+              <p className="text-xs text-main/55 mt-1 leading-relaxed">
+                Guaranteed escrow payments protect every seller and build buyer trust.
+              </p>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* ── How selling works ── */}
-      <section className="bg-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12">
-          <div className="text-center mb-14">
-            <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-3">
-              The Process
-            </p>
-            <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
-              Four steps to your first sale
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {steps.map(({ icon: Icon, title, desc }, i) => (
-              <div key={title} className="bg-white rounded-2xl p-6 border border-third relative">
-                <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
-                  <Icon size={18} className="text-secondary" />
-                </div>
-                <span className="absolute top-6 right-6 text-xs font-bold text-main/15 font-heading">
-                  0{i + 1}
-                </span>
-                <h3 className="font-heading font-bold text-main text-base mb-2">{title}</h3>
-                <p className="text-main/55 text-sm leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
+        {/* ── Navigation Tabs — replicated from RequestBook.tsx ── */}
+        <div className="flex border-b border-main/10 mb-8 overflow-x-auto">
+          {[
+            { id: 'guide', label: 'Pre-Listing Steps' },
+            { id: 'fulfillment', label: 'After Your Book Sells' },
+            { id: 'conditions', label: 'Book Conditions & FAQs' },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                className={`pb-3 px-5 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all -mb-px whitespace-nowrap ${
+                  isActive
+                    ? 'border-secondary text-main font-bold'
+                    : 'border-transparent text-main/45 hover:text-main'
+                }`}
+              >
+                {tab.label}
+              </button>
+            )
+          })}
         </div>
-      </section>
 
-      {/* ── What we accept ── */}
-      <section className="bg-white">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-3">
-                What We Accept
-              </p>
-              <h2 className="font-heading font-bold text-main text-3xl md:text-4xl mb-5">
-                Books readers actually want
+        {/* ── TAB 1: PRE-LISTING GUIDE ── */}
+        {activeTab === 'guide' && (
+          <div className="space-y-8">
+            <div className="text-center max-w-lg mx-auto mb-4">
+              <h2 className="font-heading font-bold text-main text-2xl sm:text-3xl">
+                List your books in 5 minutes
               </h2>
-              <p className="text-main/55 text-base leading-relaxed mb-8">
-                We focus on adult reading, the genres Nigerian readers are buying right now.
-                If your book is in readable condition, we'll list it.
+              <p className="text-xs sm:text-sm text-main/55 mt-1">
+                Follow these three simple tips to create clean, attractive listings that sell fast.
               </p>
-              <div className="flex flex-wrap gap-2 mb-8">
-                {accepted.map(genre => (
-                  <span
-                    key={genre}
-                    className="text-xs font-semibold text-main/70 bg-third border border-main/10 px-3 py-1.5 rounded-full"
-                  >
-                    {genre}
-                  </span>
-                ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Step 1: Snap your book */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between relative overflow-hidden">
+                <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-violet-50 text-secondary font-bold text-xs flex items-center justify-center">
+                  01
+                </div>
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-4">
+                    <Camera size={22} />
+                  </div>
+                  <h3 className="font-heading font-bold text-main text-lg mb-2">
+                    Snap your book
+                  </h3>
+                  <p className="text-xs text-main/60 leading-relaxed mb-4">
+                    Snap clear photos of the actual book, and don't hide marks or damage. Honest listings build trust and sell faster.
+                  </p>
+                </div>
+
+                {/* Mock phone preview illustration */}
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 mb-4 text-center">
+                  <div className="w-full h-24 bg-violet-100/60 rounded-lg border border-dashed border-violet-200 flex items-center justify-center text-xs text-secondary font-semibold gap-1.5">
+                    <Camera size={14} />
+                    <span>Clear Cover & Back Photo</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => openLearnMore(
+                    "Snap your book — Photography Tips",
+                    "Take photos under good natural lighting. Include the front cover, back cover, spine, and a sample page. If there are highlight marks, owner names, or corner folds, snap a clear close-up. Buyers appreciate full transparency!"
+                  )}
+                  className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
+                >
+                  <span>Learn more</span>
+                  <ChevronRight size={14} />
+                </button>
               </div>
-              <div className="bg-third border border-main/8 rounded-xl p-4">
-                <p className="text-xs font-semibold text-main mb-1">Condition we accept</p>
-                <div className="space-y-2 mt-2">
-                  <div className="flex items-center gap-2 text-sm text-main/55">
-                    <Sparkles size={14} className="text-secondary" />
-                    <span>Like New</span>
-                  </div>
 
-                  <div className="flex items-center gap-2 text-sm text-main/55">
-                    <ThumbsUp size={14} className="text-secondary" />
-                    <span>Very Good</span>
+              {/* Step 2: Write a clear condition note */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between relative overflow-hidden">
+                <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-violet-50 text-secondary font-bold text-xs flex items-center justify-center">
+                  02
+                </div>
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-4">
+                    <FileText size={22} />
                   </div>
+                  <h3 className="font-heading font-bold text-main text-lg mb-2">
+                    Write a clear condition note
+                  </h3>
+                  <p className="text-xs text-main/60 leading-relaxed mb-4">
+                    Tell buyers exactly what they'll receive. Mention highlights like annotations, missing pages, writing, or wear so there are no surprises after delivery.
+                  </p>
+                </div>
 
-                  <div className="flex items-center gap-2 text-sm text-main/55">
-                    <Check size={14} className="text-secondary" />
-                    <span>Good</span>
+                {/* Mock condition note preview */}
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 mb-4 space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-[11px] text-main/70 font-medium">
+                    <CheckCircle2 size={12} className="text-emerald-500 shrink-0" />
+                    <span>Note highlights & pen marks</span>
                   </div>
-
-                  <div className="flex items-center gap-2 text-sm text-main/55">
-                    <Minus size={14} className="text-secondary" />
-                    <span>Average</span>
+                  <div className="flex items-center gap-1.5 text-[11px] text-main/70 font-medium">
+                    <CheckCircle2 size={12} className="text-emerald-500 shrink-0" />
+                    <span>Mention page state & binding</span>
                   </div>
+                </div>
 
-                  <div className="flex items-center gap-2 text-sm text-main/55">
-                    <AlertCircle size={14} className="text-secondary" />
-                    <span>Below Average</span>
+                <button
+                  type="button"
+                  onClick={() => openLearnMore(
+                    "Write a clear condition note — Description Guide",
+                    "Clearly mention if the book contains pencil underlinings, ink inscriptions, or water stains. Accurate notes reduce return requests and earn you 5-star seller ratings."
+                  )}
+                  className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
+                >
+                  <span>Learn more</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+
+              {/* Step 3: Pricing your book */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between relative overflow-hidden">
+                <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-violet-50 text-secondary font-bold text-xs flex items-center justify-center">
+                  03
+                </div>
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-4">
+                    <Tag size={22} />
                   </div>
+                  <h3 className="font-heading font-bold text-main text-lg mb-2">
+                    Pricing your book
+                  </h3>
+                  <p className="text-xs text-main/60 leading-relaxed mb-4">
+                    A fair price helps your book sell faster. You can check what similar books are selling for and consider the book's condition before deciding your price.
+                  </p>
+                </div>
 
-                  <p className="text-xs text-main/40 mt-2">
-                    Be honest, our team inspects every book before delivery.
+                {/* Mock price preview */}
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 mb-4 text-center">
+                  <span className="text-xs text-main/50">Suggested market price:</span>
+                  <p className="font-heading font-bold text-main text-base text-secondary">₦2,500 - ₦4,000</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => openLearnMore(
+                    "Pricing your book — Smart Pricing Tips",
+                    "Compare your book against similar listings on Alákòwé. Price rare or clean books competitively. Offering reasonable prices attracts buyers quickly!"
+                  )}
+                  className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
+                >
+                  <span>Learn more</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB 2: FULFILLMENT & SALES ── */}
+        {activeTab === 'fulfillment' && (
+          <div className="space-y-8">
+            <div className="bg-gradient-to-r from-violet-500 to-indigo-600 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden">
+              <div className="max-w-xl">
+                <span className="text-[10px] font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full">
+                  Fulfillment & Payouts
+                </span>
+                <h2 className="font-heading font-bold text-2xl md:text-3xl mt-3">
+                  After your book sells
+                </h2>
+                <p className="text-white/80 text-xs sm:text-sm mt-2 leading-relaxed">
+                  From sale notification to packaging, delivery, and bank payout — we guide you every step of the way.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 1. You'll receive a notification */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-violet-100 text-secondary flex items-center justify-center shrink-0">
+                      <Bell size={18} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Step 1</span>
+                      <h3 className="font-heading font-bold text-main text-base">You'll receive a notification</h3>
+                    </div>
+                  </div>
+                  <p className="text-xs text-main/60 leading-relaxed mb-4">
+                    We'll send you an email and show the order in your account with clear instructions.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openLearnMore(
+                    "You'll receive a notification",
+                    "As soon as a buyer pays for your book, you'll receive an instant email notification and an order update in your Alákòwé account dashboard with complete buyer details and shipping label options."
+                  )}
+                  className="text-xs font-semibold text-secondary hover:underline flex items-center gap-1 w-fit"
+                >
+                  <span>Learn more</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+
+              {/* 2. Choose how to fulfil your order */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-violet-100 text-secondary flex items-center justify-center shrink-0">
+                      <Truck size={18} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Step 2</span>
+                      <h3 className="font-heading font-bold text-main text-base">Choose how to fulfil your order</h3>
+                    </div>
+                  </div>
+                  <p className="text-xs text-main/60 leading-relaxed mb-4">
+                    Depending on the delivery option you selected when listing, you'll either meet the buyer or drop the book off at one of our partner centres.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openLearnMore(
+                    "Choose how to fulfil your order",
+                    "You can select drop-off at a designated partner hub, home pickup via doorstep courier, or direct buyer meetup. Flexible choices ensure maximum convenience for every seller!"
+                  )}
+                  className="text-xs font-semibold text-secondary hover:underline flex items-center gap-1 w-fit"
+                >
+                  <span>Learn more</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+
+              {/* 3. Prepare your package */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-violet-100 text-secondary flex items-center justify-center shrink-0">
+                      <PackageCheck size={18} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Step 3</span>
+                      <h3 className="font-heading font-bold text-main text-base">Prepare your package</h3>
+                    </div>
+                  </div>
+                  <p className="text-xs text-main/60 leading-relaxed mb-4">
+                    A few minutes spent packaging your book properly helps protect it during delivery. Use a suitable envelope or box and keep the book secure inside.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openLearnMore(
+                    "Prepare your package",
+                    "Wrap the book securely using bubble wrap or sturdy cardboard envelopes. Ensure corners are protected against bends during transit."
+                  )}
+                  className="text-xs font-semibold text-secondary hover:underline flex items-center gap-1 w-fit"
+                >
+                  <span>Learn more</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+
+              {/* 4. Drop off or hand it over */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-violet-100 text-secondary flex items-center justify-center shrink-0">
+                      <MapPin size={18} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Step 4</span>
+                      <h3 className="font-heading font-bold text-main text-base">Drop off or hand it over</h3>
+                    </div>
+                  </div>
+                  <p className="text-xs text-main/60 leading-relaxed mb-4">
+                    If you're dropping off, simply choose your preferred partner location, generate your waybill, and hand over the package. If it's buyer pickup or home pickup, we'll guide you through those steps too.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openLearnMore(
+                    "Drop off or hand it over",
+                    "Generate your waybill code directly from your account, visit your chosen partner drop-off point, and hand over the package. Once confirmed, payment escrow releases automatically to your bank."
+                  )}
+                  className="text-xs font-semibold text-secondary hover:underline flex items-center gap-1 w-fit"
+                >
+                  <span>Learn more</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB 3: BOOK CONDITIONS & FAQS ── */}
+        {activeTab === 'conditions' && (
+          <div className="space-y-8">
+            <div className="text-center max-w-lg mx-auto mb-4">
+              <h2 className="font-heading font-bold text-main text-2xl sm:text-3xl">
+                Book Conditions
+              </h2>
+              <p className="text-xs sm:text-sm text-main/55 mt-1">
+                Guidelines on what you can sell and choosing the right condition label.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* What you can sell */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                <div>
+                  <div className="w-10 h-10 rounded-full bg-violet-100 text-secondary flex items-center justify-center mb-4">
+                    <BookOpen size={18} />
+                  </div>
+                  <h3 className="font-heading font-bold text-main text-base mb-2">
+                    What you can sell
+                  </h3>
+                  <p className="text-xs text-main/60 leading-relaxed mb-4">
+                    From novels, non-fiction, primary school textbooks, secondary school textbooks, children’s to university textbooks, many books can find a second reader—as long as they meet our listing guidelines.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openLearnMore(
+                    "What you can sell — Listing Guidelines",
+                    "You can sell novels, academic textbooks, fiction, non-fiction, children's storybooks, and exam preparation materials. Books must be complete without missing pages."
+                  )}
+                  className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
+                >
+                  <span>Learn more</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+
+              {/* Choosing the right condition */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                <div>
+                  <div className="w-10 h-10 rounded-full bg-violet-100 text-secondary flex items-center justify-center mb-4">
+                    <Layers size={18} />
+                  </div>
+                  <h3 className="font-heading font-bold text-main text-base mb-2">
+                    Choosing the right condition
+                  </h3>
+                  <p className="text-xs text-main/60 leading-relaxed mb-4">
+                    Whether your book is Like New or Well Loved, we have broken down book conditions into categories. All you have to do is choose the condition that best matches the current state of your book.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openLearnMore(
+                    "Choosing the right condition",
+                    "Condition categories range from New, Like New, Excellent, Good, to Fair. Selecting the accurate category manages buyer expectations and prevents disputes."
+                  )}
+                  className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
+                >
+                  <span>Learn more</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+
+              {/* Our quality standards */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                <div>
+                  <div className="w-10 h-10 rounded-full bg-violet-100 text-secondary flex items-center justify-center mb-4">
+                    <ShieldCheck size={18} />
+                  </div>
+                  <h3 className="font-heading font-bold text-main text-base mb-2">
+                    Our quality standards
+                  </h3>
+                  <p className="text-xs text-main/60 leading-relaxed mb-4">
+                    We appreciate when every listing accurately represents the book being sold. Clear photos and honest descriptions help keep Alákòwé a trusted marketplace for everyone.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openLearnMore(
+                    "Our quality standards",
+                    "We inspect books before final buyer delivery. Honest descriptions and clear photos ensure seamless verification and fast seller payouts."
+                  )}
+                  className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
+                >
+                  <span>Learn more</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+
+            {/* ── FAQ Section Card ── */}
+            <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 mt-8">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-violet-100 text-secondary flex items-center justify-center shrink-0">
+                  <HelpCircle size={24} />
+                </div>
+                <div>
+                  <h3 className="font-heading font-bold text-main text-lg">
+                    Frequently Asked Questions
+                  </h3>
+                  <p className="text-xs sm:text-sm text-main/60 mt-1 max-w-xl leading-relaxed">
+                    Still have questions? We've answered the ones sellers ask most—from listing and delivery to payments and account management.
                   </p>
                 </div>
               </div>
-            </div>
 
-            {/* Visual */}
-            <div className="grid grid-cols-3 gap-3">
-              {Object.values(COVER_IMAGES).slice(0, 9).map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt=""
-                  className="h-52 w-full object-cover rounded-2xl shadow-sm"
-                />
-              ))}
+              <Link
+                to="/faq"
+                className="shrink-0 bg-main text-white text-xs font-semibold px-5 py-3 rounded-xl hover:bg-main/90 transition-colors inline-flex items-center gap-2"
+              >
+                <span>Browse all FAQs</span>
+                <ArrowRight size={14} />
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
+        )}
 
-      {/* ── Perks ── */}
-      <section className="bg-third">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12">
-          <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-3">
-              Why Sell Here
-            </p>
-            <h2 className="font-heading font-bold text-main text-3xl md:text-4xl">
-              Built to make selling easy
+        {/* ── CTA BANNER AT BOTTOM ── */}
+        <div className="mt-12 bg-gradient-to-br from-main to-main/95 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden shadow-md">
+          <div className="max-w-xl mx-auto z-10 relative">
+            <h2 className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl mb-3">
+              Ready to start selling?
             </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {perks.map(({ label, desc }) => (
-              <div key={label} className="bg-white rounded-2xl p-5 border border-third">
-                <CheckCircle size={18} className="text-secondary mb-3" />
-                <p className="font-heading font-bold text-main text-sm mb-1">{label}</p>
-                <p className="text-main/50 text-xs leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Fees ── */}
-      <section className="bg-white">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-12">
-          <div className="max-w-2xl mx-auto text-center">
-            <p className="text-xs font-semibold text-secondary uppercase tracking-widest mb-3">
-              Pricing & Fees
+            <p className="text-white/80 text-sm md:text-base font-medium mb-2">
+              Your bookshelf could be worth more than you think.
             </p>
-            <h2 className="font-heading font-bold text-main text-3xl md:text-4xl mb-5">
-              Simple, transparent fees
-            </h2>
-            <p className="text-main/55 text-base leading-relaxed mb-10">
-              Listing is always free. ALÁKÒWÉ takes a <span className="font-semibold text-main">10% platform fee</span> only
-              when your book sells. You keep the rest.
+            <p className="text-white/60 text-xs sm:text-sm mb-8">
+              List your first book today and let it find its next reader.
             </p>
-            <div className="bg-third rounded-2xl border border-main/8 p-6 text-left">
-              {[
-                { label: 'Listing fee', value: 'Free' },
-                { label: 'Platform fee', value: '10% of sale price' },
-                { label: 'Pickup fee (optional)', value: 'Deducted from payout' },
-                { label: 'Payout method', value: 'Direct bank transfer' },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between py-3 border-b border-main/8 last:border-0 last:pb-0 first:pt-0">
-                  <span className="text-sm text-main/55">{label}</span>
-                  <span className="text-sm font-semibold text-main">{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ── CTA ── */}
-      <section className="bg-main text-white">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 py-16 text-center">
-          <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            Ready to list your first book?
-          </h2>
-          <p className="text-white/55 text-base mb-10 max-w-md mx-auto">
-            It takes less than 5 minutes. Your book could find a new home this week.
-          </p>
-          <Link
-            to={user ? '/list' : '/login?redirect=/list'}
-            className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-10 py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm"
-          >
-            List Your Book
-          </Link>
-          <p className="text-white/30 text-xs mt-5">
-            By listing, you agree to our{' '}
-            <Link to="/faq" className="underline hover:text-white/60 transition-colors">
-              seller terms
+            <Link
+              to={listBookUrl}
+              className="inline-flex items-center gap-2 bg-secondary text-white font-bold text-sm px-8 py-3.5 rounded-xl hover:bg-secondary/90 transition-transform active:scale-[0.98] shadow-sm uppercase tracking-wider"
+            >
+              <span>List a Book</span>
+              <ArrowRight size={16} />
             </Link>
+          </div>
+        </div>
+
+        {/* Footer info line */}
+        <div className="mt-8 text-center">
+          <p className="text-[10px] text-main/35">
+            Powered by{' '}
+            <Link to="/" className="font-semibold text-main/50 hover:text-secondary transition-colors">
+              Alakowe
+            </Link>
+            {' '}— Nigeria's peer-to-peer book marketplace
           </p>
         </div>
-      </section>
 
+      </div>
+
+      {/* ── Learn More Popup Modal ── */}
+      <Dialog open={!!modalContent} onOpenChange={(open) => !open && setModalContent(null)}>
+        <DialogContent className="max-w-md rounded-3xl border-0 shadow-2xl p-6 md:p-8">
+          <DialogTitle className="font-heading font-bold text-lg text-main flex items-center gap-2 mb-2">
+            <Info size={18} className="text-secondary" />
+            <span>{modalContent?.title}</span>
+          </DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm text-main/60 leading-relaxed mt-2">
+            {modalContent?.text}
+          </DialogDescription>
+          <div className="mt-6 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setModalContent(null)}
+              className="bg-main text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-main/90 transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

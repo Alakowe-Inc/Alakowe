@@ -1,7 +1,7 @@
-import { Link, useNavigate } from 'react-router-dom'
 import { PlusCircle, Users } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   useAllBookRequests,
   useJoinWaitlist,
@@ -13,19 +13,28 @@ export default function AllRequests() {
 
   const [showModal, setShowModal] = useState(false)
   const [activeTitle, setActiveTitle] = useState("")
+  const [joinedIds, setJoinedIds] = useState<string[]>([])
 
   const { data: requestList = [], isLoading } = useAllBookRequests(undefined, user?.email)
   const joinWaitlistMutation = useJoinWaitlist()
 
-  async function handleJoinQueue(requestId: string, title: string) {
+  async function handleJoinQueue(req: { id: string; title: string; author?: string; category?: string }) {
     if (!user) {
       navigate('/login?redirect=/my-requests')
       return
     }
-
     try {
-      await joinWaitlistMutation.mutateAsync({ requestId, buyerEmail: user.email })
-      setActiveTitle(title)
+      await joinWaitlistMutation.mutateAsync({
+        requestId: req.id,
+        buyerEmail: user.email,
+        title: req.title,
+        author: req.author ?? '',
+        category: req.category ?? '',
+        bookCondition: '',
+      })
+
+      setJoinedIds(prev => [...prev, req.id])
+      setActiveTitle(req.title)
       setShowModal(true)
       setTimeout(() => setShowModal(false), 2000)
     } catch {
@@ -108,66 +117,67 @@ export default function AllRequests() {
               <p className="text-main/50 text-sm">No book requests yet. Be the first to post one!</p>
             </div>
           ) : (
-            requestList.map(req => (
-              <div key={req.id} className="bg-white rounded-2xl border border-third p-5 flex flex-col gap-4">
+            requestList.map(req => {
+              const isJoined = req.isUserOnWaitlist || joinedIds.includes(req.id)
 
-                <div>
-                  <h3 className="font-heading font-bold text-main text-base">{req.title}</h3>
-                  {req.author && (
-                    <p className="text-xs text-main/45">{req.author}</p>
-                  )}
+              return (
+                <div key={req.id} className="bg-white rounded-2xl border border-third p-5 flex flex-col gap-4">
+
+                  <div>
+                    <h3 className="font-heading font-bold text-main text-base">{req.title}</h3>
+                    {req.author && (
+                      <p className="text-xs text-main/45">{req.author}</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 text-[11px]">
+                    <span className="font-semibold text-secondary">
+                      {req.waitlistCount || req.waitlist?.length || 1}
+                      {(req.waitlistCount || req.waitlist?.length || 1) === 1
+                        ? ' person needs this'
+                        : ' people need this'}
+                    </span>
+
+                    <span className="text-main/35">
+                      {formatTime(req.createdAt)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-1 border-t border-third">
+                    <button
+                      disabled={isJoined || joinWaitlistMutation.isPending}
+                      onClick={() => handleJoinQueue(req)}
+                      className={`text-[11px] font-semibold tracking-widest uppercase px-4 py-2 transition-colors rounded-full ${
+                        isJoined
+                          ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                          : 'bg-main text-white hover:bg-main/85'
+                      }`}
+                    >
+                      {isJoined ? "Joined" : "Join Waitlist"}
+                    </button>
+
+                    <button
+                      onClick={handleIHaveThis}
+                      className="text-[11px] font-semibold text-main/50 hover:text-secondary underline"
+                    >
+                      I have this
+                    </button>
+                  </div>
+
                 </div>
-
-                <div className="flex items-center gap-3 text-[11px]">
-                  <span className="font-semibold text-secondary">
-                    {req.waitlistCount || req.waitlist?.length || 1}
-                    {(req.waitlistCount || req.waitlist?.length || 1) === 1
-                      ? ' person needs this'
-                      : ' people need this'}
-                  </span>
-
-                  <span className="text-main/35">
-                    {formatTime(req.createdAt)}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-3 pt-1 border-t border-third">
-                  <button
-                    disabled={req.isUserOnWaitlist || joinWaitlistMutation.isPending}
-                    onClick={() => handleJoinQueue(req.id, req.title)}
-                    className={`text-[11px] font-semibold tracking-widest uppercase px-4 py-2 transition-colors rounded-full
-                    ${req.isUserOnWaitlist
-                      ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                      : 'bg-main text-white hover:bg-main/85'}`}
-                  >
-                    {req.isUserOnWaitlist ? "Joined" : "Join Waitlist"}
-                  </button>
-
-                  <button
-                    onClick={() => navigate(user ? '/list' : '/login?redirect=/list')}
-                    className="text-[11px] font-semibold text-main/50 hover:text-secondary underline"
-                  >
-                    I have this
-                  </button>
-                </div>
-
-              </div>
-            ))
+              )
+            })
           )}
         </div>
 
       </div>
 
-      {/* ✅ MODAL MUST BE INSIDE RETURN */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-[90%] text-center 
-            animate-[modalIn_.45s_cubic-bezier(.34,1.56,.64,1)]">
-            
-            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 
-              flex items-center justify-center
-              animate-[modalIn_.55s_cubic-bezier(.34,1.56,.64,1)]">
-                ✓
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-[90%] text-center animate-[modalIn_.45s_cubic-bezier(.34,1.56,.64,1)]">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center animate-[modalIn_.55s_cubic-bezier(.34,1.56,.64,1)]">
+              ✓
             </div>
 
             <h3 className="font-heading font-bold text-lg text-main mb-2">
@@ -175,9 +185,8 @@ export default function AllRequests() {
             </h3>
 
             <p className="text-sm text-main/60">
-              You'll be notified when this book becomes available.
+              {activeTitle ? `You've joined the waitlist for "${activeTitle}".` : "You'll be notified when this book becomes available."}
             </p>
-
           </div>
         </div>
       )}

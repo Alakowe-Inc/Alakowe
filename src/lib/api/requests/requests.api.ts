@@ -2,7 +2,20 @@ import client from "../client"
 import type {
   CreateBookRequestDto,
   BookRequestResponse,
+  BookRequestFilterParams,
 } from "../types"
+
+/**
+ * Returns all requested books for the public browse/request page.
+ * Ordered by most wanted (highest waitlist count) first.
+ * GET /api/v1/BookRequest
+ */
+export async function getAllBookRequestsApi(
+  params?: BookRequestFilterParams,
+): Promise<BookRequestResponse[]> {
+  const { data } = await client.get("/api/v1/BookRequest", { params })
+  return data as BookRequestResponse[]
+}
 
 /**
  * Creates a new book request or joins the waitlist of an existing request.
@@ -20,8 +33,8 @@ export async function submitBookRequestApi(
  * GET /api/v1/BookRequest/my-activity
  */
 export async function getMyBookActivityApi(): Promise<BookRequestResponse[]> {
-  const { data } = await client.get("/api/v1/BookRequest/my-activity")
-  return data as BookRequestResponse[]
+  const response = await client.get("/api/v1/BookRequest/my-activity")
+  return response.data
 }
 
 /**

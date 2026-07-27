@@ -193,6 +193,14 @@ function Home() {
             const result: React.ReactNode[] = []
             let promoIndex = 0
 
+            const pushPromo = (index: number) => {
+              const promo = promoInserts[index]
+              if (promo.id === 'bottomline') {
+                result.push(<BookRequestsSection key="looking-for-something" />)
+              }
+              result.push(<PromoInsert key={`promo-${index}`} promo={promo} />)
+            }
+
             validSections.forEach((section, idx) => {
               const listings = (section.listings ?? []).map(listingToBookDisplay)
               const filterKey = section.sectionType ?? "category"
@@ -217,18 +225,14 @@ function Home() {
 
               // After every 2 sections, insert a promo card
               if ((idx + 1) % 2 === 0 && promoIndex < promoInserts.length) {
-                result.push(
-                  <PromoInsert key={`promo-${promoIndex}`} promo={promoInserts[promoIndex]} />
-                )
+                pushPromo(promoIndex)
                 promoIndex++
               }
             })
 
             // If there are remaining promos after the last sections, append them
             while (promoIndex < promoInserts.length) {
-              result.push(
-                <PromoInsert key={`promo-${promoIndex}`} promo={promoInserts[promoIndex]} />
-              )
+              pushPromo(promoIndex)
               promoIndex++
             }
 
@@ -252,9 +256,6 @@ function Home() {
           </div>
         </div>
       </section>
-
-      {/* ── Looking for something? (Book Requests Section) ──────── */}
-      <BookRequestsSection />
 
       {/* ── Book Quotes ─────────────────────────────────────────── */}
       <section className="bg-white py-12 border-t border-b border-third">
