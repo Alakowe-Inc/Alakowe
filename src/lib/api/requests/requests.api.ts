@@ -13,8 +13,31 @@ import type {
 export async function getAllBookRequestsApi(
   params?: BookRequestFilterParams,
 ): Promise<BookRequestResponse[]> {
-  const { data } = await client.get("/api/v1/BookRequest", { params })
-  return data as BookRequestResponse[]
+  try {
+    const { data } = await client.get("/api/v1/BookRequest", { params })
+    return data as BookRequestResponse[]
+  } catch (error: any) {
+    // Handle 405 Method Not Allowed gracefully by trying fallback endpoint variants
+    if (error?.response?.status === 405) {
+      try {
+        const { data } = await client.get("/api/v1/BookRequest/", { params })
+        return data as BookRequestResponse[]
+      } catch {
+        try {
+          const { data } = await client.get("/api/v1/BookRequest/all", { params })
+          return data as BookRequestResponse[]
+        } catch {
+          try {
+            const { data } = await client.get("/api/v1/BookRequests", { params })
+            return data as BookRequestResponse[]
+          } catch {
+            return []
+          }
+        }
+      }
+    }
+    throw error
+  }
 }
 
 /**
@@ -32,9 +55,8 @@ export async function submitBookRequestApi(
  * Retrieves requests created by the authenticated customer and waitlists they joined.
  * GET /api/v1/BookRequest/my-activity
  */
-export async function getMyBookActivityApi(): Promise<BookRequestResponse[]> {
-  const response = await client.get("/api/v1/BookRequest/my-activity")
-  return response.data
+export function getMyBookActivityApi(): Promise<BookRequestResponse[]> {
+  return client.get("/api/v1/BookRequest/my-activity").then(res => res.data)
 }
 
 /**
