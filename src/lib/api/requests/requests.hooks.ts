@@ -34,24 +34,21 @@ export function useMyBookRequests(userEmail?: string) {
   return useQuery({
     queryKey: ["my-book-requests", userEmail],
     queryFn: async (): Promise<BookRequestResponse[]> => {
-      try {
-        const data = await getMyBookActivityApi()
-        if (Array.isArray(data)) return data
-        const anyData = data as any
-        if (anyData?.myWaitlists && Array.isArray(anyData.myWaitlists)) return anyData.myWaitlists
-        if (anyData?.myRequests && Array.isArray(anyData.myRequests)) return anyData.myRequests
-        if (anyData?.data && Array.isArray(anyData.data)) return anyData.data
-        if (anyData?.result && Array.isArray(anyData.result)) return anyData.result
-        if (anyData?.items && Array.isArray(anyData.items)) return anyData.items
-        if (anyData && typeof anyData === "object") {
-          const firstArray = Object.values(anyData).find(v => Array.isArray(v))
-          if (firstArray) return firstArray as BookRequestResponse[]
-        }
-        return []
-      } catch (error) {
-        console.warn("[useMyBookRequests] API call failed:", error)
-        return []
+      const data = await getMyBookActivityApi()
+      // API returns { myWaitlists: [...] }
+      if (Array.isArray(data)) return data
+      const anyData = data as any
+      if (anyData?.myWaitlists && Array.isArray(anyData.myWaitlists)) return anyData.myWaitlists
+      if (anyData?.myRequests && Array.isArray(anyData.myRequests)) return anyData.myRequests
+      if (anyData?.data && Array.isArray(anyData.data)) return anyData.data
+      if (anyData?.result && Array.isArray(anyData.result)) return anyData.result
+      if (anyData?.items && Array.isArray(anyData.items)) return anyData.items
+      // Last resort: find the first array value in the response
+      if (anyData && typeof anyData === "object") {
+        const firstArray = Object.values(anyData).find(v => Array.isArray(v))
+        if (firstArray) return firstArray as BookRequestResponse[]
       }
+      return []
     },
     enabled: !!userEmail,
     retry: false,
@@ -67,18 +64,13 @@ export function useAllBookRequests(params?: BookRequestFilterParams, userEmail?:
   return useQuery({
     queryKey: ["book-requests", params, userEmail],
     queryFn: async (): Promise<BookRequestResponse[]> => {
-      try {
-        const data = await getAllBookRequestsApi(params)
-        if (Array.isArray(data)) return data
-        const anyData = data as any
-        if (anyData && Array.isArray(anyData.data)) return anyData.data
-        if (anyData && Array.isArray(anyData.result)) return anyData.result
-        if (anyData && Array.isArray(anyData.items)) return anyData.items
-        return []
-      } catch (error) {
-        console.warn("[useAllBookRequests] API call failed:", error)
-        return []
-      }
+      const data = await getAllBookRequestsApi(params)
+      // API may return a wrapped object or a plain array
+      if (Array.isArray(data)) return data
+      const anyData = data as any
+      if (anyData && Array.isArray(anyData.data)) return anyData.data
+      if (anyData && Array.isArray(anyData.result)) return anyData.result
+      return []
     },
     retry: false,
   })
