@@ -65,13 +65,16 @@ export default function RequestBook() {
   const myRequests = Array.isArray(rawMyRequests) ? rawMyRequests : []
 
   const filteredRequests = useMemo(() => {
-    let list = allRequests
+    let list = allRequests.filter(r => {
+      const count = r.waitlistCount ?? r.waitlist?.length ?? 0
+      return count > 0 && (r.status || '').toLowerCase() !== 'closed'
+    })
     if (searchTerm.trim()) {
       const term = searchTerm.trim().toLowerCase()
       list = list.filter(r => r.title.toLowerCase().includes(term))
     }
     if (filter === 'most') {
-      return [...list].sort((a, b) => (b.waitlist?.length || b.waitlistCount || 0) - (a.waitlist?.length || a.waitlistCount || 0))
+      return [...list].sort((a, b) => (b.waitlistCount ?? b.waitlist?.length ?? 0) - (a.waitlistCount ?? a.waitlist?.length ?? 0))
     }
     return [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   }, [allRequests, filter, searchTerm])
@@ -123,11 +126,14 @@ export default function RequestBook() {
     }
   }
 
+  const [loadingRequestId, setLoadingRequestId] = useState<string | null>(null)
+
   async function handleJoinWaitlist(request: typeof allRequests[0]) {
     if (!user) {
       navigate('/login?redirect=/request-book')
       return
     }
+    setLoadingRequestId(request.id)
     try {
       await joinWaitlist.mutateAsync({
         requestId: request.id,
@@ -139,6 +145,8 @@ export default function RequestBook() {
       })
     } catch {
       // handled
+    } finally {
+      setLoadingRequestId(null)
     }
   }
 
@@ -147,10 +155,13 @@ export default function RequestBook() {
       navigate('/login?redirect=/request-book')
       return
     }
+    setLoadingRequestId(requestId)
     try {
       await leaveWaitlist.mutateAsync({ requestId, buyerEmail: user.email })
     } catch {
       // handled
+    } finally {
+      setLoadingRequestId(null)
     }
   }
 
@@ -364,7 +375,7 @@ export default function RequestBook() {
             ) : (
               <div className="grid grid-cols-1 gap-4">
                 {filteredRequests.map((request) => {
-                  const waitlistCount = request.waitlist?.length || request.waitlistCount || 1
+                  const waitlistCount = request.waitlistCount ?? request.waitlist?.length ?? 0
                   const isJoined = request.isUserOnWaitlist || request.waitlist?.includes(user?.email || '')
                   return (
                     <div key={request.id} className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -418,7 +429,7 @@ export default function RequestBook() {
                         </p>
 
                         <button
-                          disabled={joinWaitlist.isPending || leaveWaitlist.isPending}
+                          disabled={!!loadingRequestId}
                           onClick={() => {
                             if (isJoined) {
                               handleLeaveWaitlist(request.id)
@@ -437,10 +448,10 @@ export default function RequestBook() {
                             <>
                               <span className="group-hover:hidden">✓ Joined</span>
                               <span className="hidden group-hover:inline">
-                                {leaveWaitlist.isPending ? 'Leaving...' : 'Leave Waitlist'}
+                                {loadingRequestId === request.id ? 'Leaving...' : 'Leave Waitlist'}
                               </span>
                             </>
-                          ) : joinWaitlist.isPending ? (
+                          ) : loadingRequestId === request.id ? (
                             'Joining...'
                           ) : (
                             'Join Waitlist'
@@ -600,12 +611,12 @@ export default function RequestBook() {
 
                         {!isClosed && isOnWaitlist && (
                           <button
-                            disabled={leaveWaitlist.isPending}
+                            disabled={!!loadingRequestId}
                             onClick={() => handleLeaveWaitlist(req.id)}
                             className="px-4 py-2 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 text-xs font-semibold transition-all flex items-center gap-1.5"
                           >
                             <XCircle size={13} />
-                            {leaveWaitlist.isPending ? 'Leaving...' : 'Leave Waitlist'}
+                            {loadingRequestId === req.id ? 'Leaving...' : 'Leave Waitlist'}
                           </button>
                         )}
                       </div>

@@ -224,7 +224,12 @@ export function removeFromWaitlist(
   if (!target || !target.waitlist) return false
 
   target.waitlist = target.waitlist.filter(e => e.trim().toLowerCase() !== cleanEmail)
-  all[target.id] = target
+
+  if (target.waitlist.length === 0) {
+    delete all[target.id]
+  } else {
+    all[target.id] = target
+  }
   localStorage.setItem(REQUESTS_KEY, JSON.stringify(all))
   return true
 }
