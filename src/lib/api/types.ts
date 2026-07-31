@@ -372,6 +372,7 @@ export interface LandingPageResponse {
 /* ───────── Book Requests ───────── */
 
 export interface CreateBookRequestDto {
+  
   title?: string | null
   author?: string | null
   category?: string | null
@@ -379,24 +380,34 @@ export interface CreateBookRequestDto {
 }
 
 export interface BookRequestResponse {
-  id: string
-  buyerEmail: string
+  // The API may return id as number or string
+  id: string | number
+  buyerEmail?: string | null
   title: string
   author?: string | null
+  // Category can come as `category`, `genre`, or `categoryName`
+  category?: string | null
   genre?: string | null
+  // Condition can come as `condition`, `bookCondition`
   condition?: string | null
-  maxPrice?: number
-  notes?: string | null
-  status: "open" | "matched" | "closed"
-  createdAt: string
+  bookCondition?: string | null
+  // Status from the API ("open", "matched", "closed", "Pending", etc.)
+  status?: string | null
+  // The API returns `dateCreated`; `createdAt` is kept for backward compat
+  dateCreated?: string | null
+  createdAt?: string | null
+  // joinedAt is the date a user joined the waitlist
+  joinedAt?: string | null
   waitlist?: string[] | null
   waitlistCount?: number
+  // API returns `isWaitlisted`; `isUserOnWaitlist` kept for backward compat
+  isWaitlisted?: boolean | null
   isUserOnWaitlist?: boolean
 }
 
 export interface BookRequestFilterParams {
   Title?: string
-  Genre?: string
+  category?: string
   Status?: string
   PageNumber?: number
   PageSize?: number

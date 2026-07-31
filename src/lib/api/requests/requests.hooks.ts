@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { withMock } from "../use-mock"
 import {
-  getAllBookRequestsApi,
   submitBookRequestApi,
   getMyBookActivityApi,
+  getAllBookRequestsApi,
   leaveWaitlistApi,
 } from "./requests.api"
 import type {
@@ -10,18 +11,67 @@ import type {
   BookRequestResponse,
   BookRequestFilterParams,
 } from "../types"
+import {
+  saveRequest,
+  getBuyerRequests,
+  generateRequestId,
+  closeRequest,
+} from "../../../data/requestData"
+
+function getSharedRequests(): BookRequestResponse[] {
+  try {
+    const raw = localStorage.getItem("alakowe_requests")
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Object.values(parsed) as BookRequestResponse[]
+  } catch {
+    return []
+  }
+}
 
 /**
- * Submit a new book request or join an existing request waitlist.
- * Uses POST /api/v1/BookRequest under the hood.
+ * Submit a new book request.
+ * Uses POST /api/v1/BookRequest under the hood (via withMock).
  */
 export function useSubmitBookRequest() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (body: CreateBookRequestDto) => submitBookRequestApi(body),
+    mutationFn: (body: CreateBookRequestDto & { buyerEmail?: string }) => {
+      const mockResult: BookRequestResponse = {
+        id: generateRequestId(),
+        buyerEmail: body.buyerEmail ?? "",
+        title: body.title ?? "",
+        author: body.author ?? "",
+        category: body.category ?? "",
+        condition: body.bookCondition ?? "",
+        status: "open",
+        createdAt: new Date().toISOString(),
+        dateCreated: new Date().toISOString(),
+        waitlist: body.buyerEmail ? [body.buyerEmail] : [],
+        waitlistCount: 1,
+        isUserOnWaitlist: true,
+        isWaitlisted: true,
+      }
+
+      saveRequest({
+        id: String(mockResult.id),
+        buyerEmail: mockResult.buyerEmail ?? "",
+        title: mockResult.title,
+        author: mockResult.author ?? "",
+        category: mockResult.category ?? "",
+        condition: mockResult.condition ?? "",
+        status: mockResult.status ?? "open",
+        createdAt: mockResult.createdAt ?? new Date().toISOString(),
+        waitlist: mockResult.waitlist ?? [],
+      })
+
+      return withMock(mockResult, () => submitBookRequestApi(body))
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["book-requests"] })
       queryClient.invalidateQueries({ queryKey: ["my-book-requests"] })
+      queryClient.invalidateQueries({ queryKey: ["allBookRequests"] })
+      queryClient.invalidateQueries({ queryKey: ["myBookRequests"] })
     },
   })
 }
@@ -33,117 +83,122 @@ export function useSubmitBookRequest() {
 export function useMyBookRequests(userEmail?: string) {
   return useQuery({
     queryKey: ["my-book-requests", userEmail],
-    queryFn: async (): Promise<BookRequestResponse[]> => {
-      const data = await getMyBookActivityApi()
-      // API returns { myWaitlists: [...] }
-      if (Array.isArray(data)) return data
-      const anyData = data as any
-      if (anyData?.myWaitlists && Array.isArray(anyData.myWaitlists)) return anyData.myWaitlists
-      if (anyData?.myRequests && Array.isArray(anyData.myRequests)) return anyData.myRequests
-      if (anyData?.data && Array.isArray(anyData.data)) return anyData.data
-      if (anyData?.result && Array.isArray(anyData.result)) return anyData.result
-      if (anyData?.items && Array.isArray(anyData.items)) return anyData.items
-      // Last resort: find the first array value in the response
-      if (anyData && typeof anyData === "object") {
-        const firstArray = Object.values(anyData).find(v => Array.isArray(v))
-        if (firstArray) return firstArray as BookRequestResponse[]
-      }
-      return []
+    queryFn: () => {
+      const mockList: BookRequestResponse[] = userEmail
+        ? getBuyerRequests(userEmail).map((r) => ({
+            ...r,
+            waitlistCount: r.waitlist?.length || 1,
+            isUserOnWaitlist: r.waitlist?.includes(userEmail) || true,
+            isWaitlisted: r.waitlist?.includes(userEmail) || true,
+            dateCreated: r.createdAt,
+          }))
+        : []
+      return withMock(mockList, () => getMyBookActivityApi())
     },
     enabled: !!userEmail,
-    retry: false,
   })
 }
 
 /**
- * Fetch ALL open book requests (community-wide).
- * Uses GET /api/v1/BookRequest.
- * Ordered by most wanted (highest waitlist count) first.
+ * Fetch ALL open book requests (community-wide) from GET /api/v1/BookRequest.
  */
 export function useAllBookRequests(params?: BookRequestFilterParams, userEmail?: string) {
   return useQuery({
     queryKey: ["book-requests", params, userEmail],
-    queryFn: async (): Promise<BookRequestResponse[]> => {
-      const data = await getAllBookRequestsApi(params)
-      // API may return a wrapped object or a plain array
-      if (Array.isArray(data)) return data
-      const anyData = data as any
-      if (anyData && Array.isArray(anyData.data)) return anyData.data
-      if (anyData && Array.isArray(anyData.result)) return anyData.result
-      return []
+    queryFn: async () => {
+      const all = getSharedRequests()
+      const mockList: BookRequestResponse[] = all
+        .filter((r) => r.status === "open")
+        .map((r) => ({
+          ...r,
+          waitlistCount: r.waitlist?.length || 1,
+          isUserOnWaitlist: userEmail ? r.waitlist?.includes(userEmail) ?? false : false,
+          isWaitlisted: userEmail ? r.waitlist?.includes(userEmail) ?? false : false,
+          dateCreated: r.createdAt,
+        }))
+      return withMock(mockList, () => getAllBookRequestsApi(params))
     },
-    retry: false,
   })
 }
 
 /**
- * Join the waitlist for an existing book request or submit request.
- * Uses POST /api/v1/BookRequest.
+ * Join the waitlist for an existing book request.
+ * Uses POST /api/v1/BookRequest endpoint.
  */
 export function useJoinWaitlist() {
   const queryClient = useQueryClient()
+
   return useMutation({
-    mutationFn: async ({
-      title,
-      author,
-      category,
-      bookCondition,
-    }: {
-      requestId?: string
-      buyerEmail?: string
-      title?: string
-      author?: string
-      category?: string
-      bookCondition?: string
-    }) => {
-      return submitBookRequestApi({
-        title: title ?? "",
-        author: author ?? "",
-        category: category ?? "",
-        bookCondition: bookCondition ?? "",
-      })
+    mutationFn: (body: CreateBookRequestDto & { requestId?: string | number; buyerEmail?: string | null }) => {
+      const mockResult: BookRequestResponse = {
+        id: body.requestId ? String(body.requestId) : generateRequestId(),
+        buyerEmail: body.buyerEmail ?? "",
+        title: body.title ?? "",
+        author: body.author ?? "",
+        category: body.category ?? "",
+        condition: body.bookCondition ?? "",
+        status: "open",
+        createdAt: new Date().toISOString(),
+        dateCreated: new Date().toISOString(),
+        waitlist: body.buyerEmail ? [body.buyerEmail] : [],
+        waitlistCount: 1,
+        isUserOnWaitlist: true,
+        isWaitlisted: true,
+      }
+      return withMock(mockResult, () => submitBookRequestApi(body))
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["book-requests"] })
       queryClient.invalidateQueries({ queryKey: ["my-book-requests"] })
+      queryClient.invalidateQueries({ queryKey: ["allBookRequests"] })
+      queryClient.invalidateQueries({ queryKey: ["myBookRequests"] })
     },
   })
 }
 
 /**
- * Leave a waitlist for a book request.
- * Uses POST /api/v1/BookRequest/{id}/leave.
+ * Leave the waitlist for a book request.
+ * Uses POST /api/v1/BookRequest/{id}/leave endpoint.
  */
 export function useLeaveWaitlist() {
   const queryClient = useQueryClient()
+
   return useMutation({
-    mutationFn: async ({ requestId }: { requestId: string; buyerEmail?: string }) => {
-      return leaveWaitlistApi(requestId)
+    mutationFn: async ({ requestId }: { requestId: string | number; buyerEmail?: string | null }) => {
+      return withMock(undefined, () => leaveWaitlistApi(String(requestId)))
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["book-requests"] })
       queryClient.invalidateQueries({ queryKey: ["my-book-requests"] })
+      queryClient.invalidateQueries({ queryKey: ["allBookRequests"] })
+      queryClient.invalidateQueries({ queryKey: ["myBookRequests"] })
     },
   })
 }
 
 /**
- * Close / fulfill a book request.
+ * Close / fulfil a book request.
  */
 export function useCloseBookRequest() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (requestId: string) => {
-      try {
-        await leaveWaitlistApi(requestId)
-      } catch {
-        // ignore
+      closeRequest(requestId)
+      const mockResult: BookRequestResponse = {
+        id: requestId,
+        buyerEmail: "",
+        title: "",
+        status: "closed",
+        createdAt: new Date().toISOString(),
+        dateCreated: new Date().toISOString(),
       }
-      return Promise.resolve()
+      return mockResult
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["book-requests"] })
       queryClient.invalidateQueries({ queryKey: ["my-book-requests"] })
+      queryClient.invalidateQueries({ queryKey: ["allBookRequests"] })
+      queryClient.invalidateQueries({ queryKey: ["myBookRequests"] })
     },
   })
 }

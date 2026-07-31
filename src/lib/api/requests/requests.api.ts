@@ -6,15 +6,25 @@ import type {
 } from "../types"
 
 /**
- * Returns all requested books for the public browse/request page.
- * Ordered by most wanted (highest waitlist count) first.
+ * Returns all requested books for the public browse/request page from the API.
  * GET /api/v1/BookRequest
  */
 export async function getAllBookRequestsApi(
   params?: BookRequestFilterParams,
 ): Promise<BookRequestResponse[]> {
-  const { data } = await client.get("/api/v1/BookRequest", { params })
-  return data as BookRequestResponse[]
+  const response = await client.get("/api/v1/BookRequest", { params })
+  const data = response.data
+  if (Array.isArray(data)) return data as BookRequestResponse[]
+  if (data && typeof data === 'object') {
+    if (Array.isArray(data.data)) return data.data as BookRequestResponse[]
+    if (Array.isArray(data.result)) return data.result as BookRequestResponse[]
+    if (Array.isArray(data.items)) return data.items as BookRequestResponse[]
+    if (Array.isArray(data.requests)) return data.requests as BookRequestResponse[]
+    if (Array.isArray(data.bookRequests)) return data.bookRequests as BookRequestResponse[]
+    const firstArray = Object.values(data).find((val) => Array.isArray(val))
+    if (firstArray) return firstArray as BookRequestResponse[]
+  }
+  return []
 }
 
 /**
@@ -34,7 +44,18 @@ export async function submitBookRequestApi(
  */
 export async function getMyBookActivityApi(): Promise<BookRequestResponse[]> {
   const response = await client.get("/api/v1/BookRequest/my-activity")
-  return response.data
+  const data = response.data
+  if (Array.isArray(data)) return data as BookRequestResponse[]
+  if (data && typeof data === 'object') {
+    if (Array.isArray(data.myWaitlists)) return data.myWaitlists as BookRequestResponse[]
+    if (Array.isArray(data.data)) return data.data as BookRequestResponse[]
+    if (Array.isArray(data.result)) return data.result as BookRequestResponse[]
+    if (Array.isArray(data.items)) return data.items as BookRequestResponse[]
+    if (Array.isArray(data.requests)) return data.requests as BookRequestResponse[]
+    const firstArray = Object.values(data).find((val) => Array.isArray(val))
+    if (firstArray) return firstArray as BookRequestResponse[]
+  }
+  return []
 }
 
 /**
@@ -42,7 +63,7 @@ export async function getMyBookActivityApi(): Promise<BookRequestResponse[]> {
  * POST /api/v1/BookRequest/{id}/leave
  */
 export async function leaveWaitlistApi(
-  requestId: string,
+  requestId: string | number,
 ): Promise<void> {
   await client.post(`/api/v1/BookRequest/${requestId}/leave`)
 }
