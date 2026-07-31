@@ -140,7 +140,7 @@ export const books: Book[] = [
     slug: 'the-famished-road',
     title: 'The Famished Road',
     author: 'Ben Okri',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Fair',
     conditionNotes: 'Torn back cover corner, water stain on first 10 pages, heavy underlining',
@@ -164,7 +164,7 @@ export const books: Book[] = [
     slug: 'stay-with-me',
     title: 'Stay With Me',
     author: 'Ayobami Adeyemi',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Like New',
     conditionNotes: 'Like new, no visible wear',
@@ -188,7 +188,7 @@ export const books: Book[] = [
     slug: 'atomic-habits',
     title: 'Atomic Habits',
     author: 'James Clear',
-    genre: 'Self Help',
+    category: 'Self Help',
 
     condition: 'Good',
     conditionNotes: 'Slight yellowing on edges',
@@ -215,7 +215,7 @@ export const books: Book[] = [
     slug: 'the-alchemist',
     title: 'The Alchemist',
     author: 'Paulo Coelho',
-    genre: 'Foreign Fiction',
+    category: 'Foreign Fiction',
 
     condition: 'Good',
     conditionNotes: 'Minor spine crease, small ink mark on page 34',

@@ -12,12 +12,12 @@ function IconInstagram() {
     </svg>
   )
 }
-function IconX() {
+function IconEmail() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" width={18} height={18}>
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      <path d="M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5zm2 0v.01L12 12l8-6.99V5H4zm16 14V7.51l-7.4 6.48a1 1 0 0 1-1.2 0L4 7.51V19h16z" />
     </svg>
-  )
+  );
 }
 function IconFacebook() {
   return (
@@ -28,9 +28,9 @@ function IconFacebook() {
 }
 
 const socialLinks = [
-  { Icon: IconInstagram, label: 'Instagram' },
-  { Icon: IconX, label: 'X (Twitter)' },
-  { Icon: IconFacebook, label: 'Facebook' },
+  { Icon: IconInstagram, label: 'Instagram', href: 'https://www.instagram.com/the_alakowe?igsh=ODJkcjd6cXh1bWNs&utm_source=qr' },
+  { Icon: IconFacebook, label: 'Facebook', href: 'https://www.facebook.com/share/1BhTzfqmYv/?mibextid=wwXIfr' },
+  { Icon: IconEmail, label: ' Email', href: 'igsh=ODJkcjd6cXh1bWNs&utm_source=qr' },
 ]
 
 function Footer() {
@@ -52,13 +52,15 @@ function Footer() {
                 />
               </Link>
               <p className="text-sm text-white/50 leading-relaxed mb-6">
-                Read it. Love it. Pass it on.
+                A new way to read.
               </p>
               <div className="flex items-center gap-4">
-                {socialLinks.map(({ Icon, label }) => (
+                {socialLinks.map(({ Icon, label, href }) => (
                   <a
                     key={label}
-                    href="#"
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label={label}
                     className="text-white/40 hover:text-secondary transition-colors"
                   >
@@ -76,8 +78,9 @@ function Footer() {
               <ul className="space-y-3">
                 {[
                   { label: 'Browse Books', to: '/browse' },
-                  { label: 'Sell a Book', to: '/sell' },
-                  { label: 'How it Works', to: '/how-it-works' },
+                  { label: 'Sell Books', to: '/sell' },
+                  { label: 'Request Books', to: '/requests' },
+                  { label: 'View our Drop-off Centers', to: '/' },
                 ].map(({ label, to }) => (
                   <li key={to}>
                     <Link to={to} className="text-sm text-white/50 hover:text-secondary transition-colors">
@@ -95,6 +98,7 @@ function Footer() {
               </h4>
               <ul className="space-y-3">
                 {[
+                  { label: 'How It Works', to: '/how-it-works' },
                   { label: 'FAQ', to: '/faq' },
                   { label: 'Contact Us', to: '/contact' },
                   { label: 'Terms & Conditions', to: '/terms' },
@@ -115,7 +119,7 @@ function Footer() {
                 Stay in the loop
               </h4>
               <p className="text-sm text-white/50 mb-5 leading-relaxed">
-                New arrivals, reading tips, and updates — straight to your inbox.
+                New arrivals, reading tips, and updates straight to your inbox.
               </p>
               <form onSubmit={e => e.preventDefault()} className="flex flex-col gap-3">
                 <Input

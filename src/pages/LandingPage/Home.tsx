@@ -470,18 +470,18 @@ function Home() {
               Start Today
             </p>
             <h2 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-5">
-              Ready to find your next read?
+              Ready to find the next reader for your book?
             </h2>
-            <p className="text-white/55 text-sm leading-relaxed">
+            {/* <p className="text-white/55 text-sm leading-relaxed">
               Discover affordable used books from readers across Nigeria. Buy, sell, and keep great stories moving.
-            </p>
+            </p> */}
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
-              to="/browse"
+              to="/sell"
               className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-xl"
             >
-              Browse Books
+              List a Book
             </Link>
             <Link
               to="/login"

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Bell, BookOpen, Users, Clock, AlertCircle, XCircle } from 'lucide-react'
+import { Bell, BookOpen, Users, Clock, AlertCircle, XCircle, ChevronDown } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { CONDITIONS, GENRES } from '../../data/sellerData'
 import { FormControl, SelectBoxControl, type SelectOption } from '@/components/ui/form-controls'
@@ -43,6 +43,34 @@ function Field({ label, required, hint, error, children }: {
 const inputClass = (err?: boolean) =>
   `w-full border rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus:border-secondary transition-colors bg-white ${err ? 'border-red-400' : 'border-main/15'}`
 
+/* Helper to format dates nicely */
+// Reads dateCreated (actual API field) first, falls back to createdAt
+function getDate(r: { dateCreated?: string | null; createdAt?: string | null }): string {
+  return r.dateCreated || r.createdAt || ''
+}
+
+function formatDate(dateStr?: string | null): string {
+  if (!dateStr) return '—'
+  try {
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return '—'
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  } catch {
+    return '—'
+  }
+}
+
+// Reads isWaitlisted (actual API field) first, falls back to isUserOnWaitlist
+function getIsJoined(
+  r: { isWaitlisted?: boolean | null; isUserOnWaitlist?: boolean; waitlist?: string[] | null },
+  email?: string
+): boolean {
+  if (r.isWaitlisted != null) return Boolean(r.isWaitlisted)
+  if (r.isUserOnWaitlist != null) return Boolean(r.isUserOnWaitlist)
+  if (email && r.waitlist) return r.waitlist.includes(email)
+  return false
+}
+
 export default function RequestBook() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -56,27 +84,46 @@ export default function RequestBook() {
   const [filter, setFilter] = useState<'most' | 'recent'>('most')
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Public requested books API (GET /api/v1/BookRequest - ordered by most wanted first)
+  // Public requested books API (GET /api/v1/BookRequest)
   const { data: rawAllRequests, isLoading: loadingRequests } = useAllBookRequests(undefined, user?.email)
   const allRequests = Array.isArray(rawAllRequests) ? rawAllRequests : []
 
-  // My Requests API (GET /api/v1/BookRequest/my-activity - only current user's requests & waitlists)
+  // My Requests API (GET /api/v1/BookRequest/my-activity)
   const { data: rawMyRequests, isLoading: loadingMyRequests, error: myRequestsError } = useMyBookRequests(user?.email)
   const myRequests = Array.isArray(rawMyRequests) ? rawMyRequests : []
 
+  /* Filter and Sort logic for Requested Books */
   const filteredRequests = useMemo(() => {
     let list = allRequests.filter(r => {
       const count = r.waitlistCount ?? r.waitlist?.length ?? 0
       return count > 0 && (r.status || '').toLowerCase() !== 'closed'
     })
+
     if (searchTerm.trim()) {
       const term = searchTerm.trim().toLowerCase()
-      list = list.filter(r => r.title.toLowerCase().includes(term))
+      list = list.filter(r =>
+        r.title.toLowerCase().includes(term) || (r.author || '').toLowerCase().includes(term)
+      )
     }
+
     if (filter === 'most') {
-      return [...list].sort((a, b) => (b.waitlistCount ?? b.waitlist?.length ?? 0) - (a.waitlistCount ?? a.waitlist?.length ?? 0))
+      // Sort by waitlistCount descending — highest number of waiting readers first
+      return [...list].sort((a, b) => {
+        const countA = a.waitlistCount ?? a.waitlist?.length ?? 0
+        const countB = b.waitlistCount ?? b.waitlist?.length ?? 0
+        return countB - countA
+      })
     }
-    return [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
+    // Recently requested — sort by dateCreated descending (newest first)
+    return [...list].sort((a, b) => {
+      const tA = new Date(getDate(a)).getTime()
+      const tB = new Date(getDate(b)).getTime()
+      if (isNaN(tA) && isNaN(tB)) return 0
+      if (isNaN(tA)) return 1
+      if (isNaN(tB)) return -1
+      return tB - tA
+    })
   }, [allRequests, filter, searchTerm])
 
   const [errors, setErrors] = useState<Partial<FormState>>({})
@@ -84,7 +131,6 @@ export default function RequestBook() {
   const submitRequest = useSubmitBookRequest()
   const joinWaitlist = useJoinWaitlist()
   const leaveWaitlist = useLeaveWaitlist()
-
 
   function set(field: keyof FormState) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -101,7 +147,6 @@ export default function RequestBook() {
     if (!form.category) e.category = 'Please select a category'
     return e
   }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!user) {
@@ -111,12 +156,12 @@ export default function RequestBook() {
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setErrors({})
-
     try {
       await submitRequest.mutateAsync({
         title: form.title.trim(),
         author: form.author.trim(),
         category: form.category,
+        buyerEmail: user.email,
         bookCondition: form.condition,
       })
       setForm(empty)
@@ -133,14 +178,12 @@ export default function RequestBook() {
       navigate('/login?redirect=/request-book')
       return
     }
-    setLoadingRequestId(request.id)
+    setLoadingRequestId(String(request.id))
     try {
       await joinWaitlist.mutateAsync({
-        requestId: request.id,
-        buyerEmail: user.email,
         title: request.title,
         author: request.author || '',
-        category: request.genre || '',
+        category: request.genre || request.category || '',
         bookCondition: request.condition || '',
       })
     } catch {
@@ -150,12 +193,12 @@ export default function RequestBook() {
     }
   }
 
-  async function handleLeaveWaitlist(requestId: string) {
+  async function handleLeaveWaitlist(requestId: string | number) {
     if (!user) {
       navigate('/login?redirect=/request-book')
       return
     }
-    setLoadingRequestId(requestId)
+    setLoadingRequestId(String(requestId))
     try {
       await leaveWaitlist.mutateAsync({ requestId, buyerEmail: user.email })
     } catch {
@@ -164,8 +207,6 @@ export default function RequestBook() {
       setLoadingRequestId(null)
     }
   }
-
-
 
   return (
     <div className="bg-white min-h-screen">
@@ -197,7 +238,7 @@ export default function RequestBook() {
             </div>
           </div>
 
-          {/* Decorative illustration — mirrors storefront */}
+          {/* Decorative illustration */}
           <div className="absolute right-8 bottom-0 hidden lg:block select-none opacity-40 pointer-events-none z-0">
             <svg width="200" height="100" viewBox="0 0 220 110" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="80" cy="50" r="30" stroke="#6B6FFF" strokeWidth="3" fill="#E8E8FF" />
@@ -207,15 +248,31 @@ export default function RequestBook() {
               <rect x="161" y="50" width="12" height="50" rx="2" fill="#F3F3FF" stroke="#6B6FFF" strokeWidth="2" />
               <rect x="175" y="55" width="16" height="45" rx="2" fill="#E8E8FF" stroke="#6B6FFF" strokeWidth="2" />
               <line x1="130" y1="100" x2="210" y2="100" stroke="#6B6FFF" strokeWidth="3" strokeLinecap="round" />
-              <circle cx="50" cy="20" r="3" fill="#6B6FFF" opacity="0.5" />
-              <circle cx="130" cy="15" r="2" fill="#6B6FFF" opacity="0.4" />
-              <circle cx="170" cy="25" r="2.5" fill="#6B6FFF" opacity="0.3" />
             </svg>
           </div>
         </div>
 
-        {/* Divider nav line — 3 Tabs */}
-        <div className="flex border-b border-main/10 mb-8 overflow-x-auto">
+        {/* ── Mobile View Dropdown Tab Selector ── */}
+        <div className="block sm:hidden mb-6">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-main/50 mb-1.5 block">
+            Select View:
+          </label>
+          <div className="relative">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value as typeof activeTab)}
+              className="w-full bg-white border border-main/20 rounded-xl px-4 py-3 text-xs font-bold text-main appearance-none outline-none focus:border-secondary transition-colors shadow-sm pr-10"
+            >
+              <option value="requests">📚 REQUESTED BOOKS ({allRequests.length})</option>
+              <option value="form">✍️ BOOK REQUEST FORM</option>
+              <option value="my-requests">👤 MY REQUESTS {user ? `(${myRequests.length})` : ''}</option>
+            </select>
+            <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-main/50 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* ── Desktop Horizontal Tabs ── */}
+        <div className="hidden sm:flex border-b border-main/10 mb-8 overflow-x-auto">
           {[
             { id: 'requests', label: `Requested Books${allRequests.length > 0 ? ` (${allRequests.length})` : ''}` },
             { id: 'form', label: 'Book Request Form' },
@@ -316,7 +373,7 @@ export default function RequestBook() {
           </form>
         )}
 
-        {/* TAB 2: REQUESTED BOOKS (GET /api/v1/BookRequest - Public) */}
+        {/* TAB 2: REQUESTED BOOKS */}
         {activeTab === 'requests' && (
           <div className="space-y-6">
             {/* Search and Filter Bar */}
@@ -327,7 +384,7 @@ export default function RequestBook() {
                 </p>
                 <FormControl
                   type="text"
-                  placeholder="Search requested books by title..."
+                  placeholder="Search requested books by title or author..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   style={inputClass()}
@@ -336,28 +393,28 @@ export default function RequestBook() {
 
               {/* Filter options */}
               <div className="flex items-center gap-2 self-start sm:self-end">
-                <span className="text-xs font-semibold text-main/50 uppercase tracking-wider">Filter:</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-main/40">Sort By:</span>
                 <button
                   type="button"
                   onClick={() => setFilter('most')}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                  className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 ${
                     filter === 'most'
-                      ? 'bg-secondary text-white'
+                      ? 'bg-secondary text-white shadow-sm'
                       : 'bg-main/5 text-main/60 hover:bg-main/10'
                   }`}
                 >
-                  Most Requested
+                  <span>Most Requested</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setFilter('recent')}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                  className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 ${
                     filter === 'recent'
-                      ? 'bg-secondary text-white'
+                      ? 'bg-secondary text-white shadow-sm'
                       : 'bg-main/5 text-main/60 hover:bg-main/10'
                   }`}
                 >
-                  Recently Requested
+                  <span>Recently Requested</span>
                 </button>
               </div>
             </div>
@@ -365,6 +422,7 @@ export default function RequestBook() {
             {/* List */}
             {loadingRequests ? (
               <div className="text-center py-20">
+                <div className="inline-block w-6 h-6 border-2 border-secondary/30 border-t-secondary rounded-full animate-spin mb-3" />
                 <p className="text-main/50 text-sm">Loading book requests...</p>
               </div>
             ) : filteredRequests.length === 0 ? (
@@ -376,7 +434,11 @@ export default function RequestBook() {
               <div className="grid grid-cols-1 gap-4">
                 {filteredRequests.map((request) => {
                   const waitlistCount = request.waitlistCount ?? request.waitlist?.length ?? 0
-                  const isJoined = request.isUserOnWaitlist || request.waitlist?.includes(user?.email || '')
+                  const isJoined = getIsJoined(request, user?.email)
+                  const categoryName = request.genre || request.category || 'General'
+                  const conditionName = request.condition || request.bookCondition || 'Any Condition'
+                  const createdDate = formatDate(getDate(request))
+
                   return (
                     <div key={request.id} className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
                       {/* Request Header */}
@@ -384,7 +446,7 @@ export default function RequestBook() {
                         <div className="flex-1 min-w-0">
                           <h3 className="font-heading font-bold text-main text-lg">{request.title}</h3>
                           {request.author && (
-                            <p className="text-xs text-main/55 mt-0.5">{request.author}</p>
+                            <p className="text-xs text-main/55 mt-0.5">by {request.author}</p>
                           )}
                         </div>
                       </div>
@@ -392,40 +454,29 @@ export default function RequestBook() {
                       {/* Request Details Grid */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 pb-4 border-b border-main/8">
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-1">Genre</p>
-                          <p className="text-xs text-main font-medium">{request.genre || 'N/A'}</p>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-1">Category</p>
+                          <p className="text-xs text-main font-medium">{categoryName}</p>
                         </div>
-                        {request.condition && (
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-1">Min. Condition</p>
-                            <p className="text-xs text-main font-medium">{request.condition}</p>
-                          </div>
-                        )}
-                        {request.maxPrice ? (
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-1">Max Budget</p>
-                            <p className="text-xs text-main font-medium">₦{request.maxPrice.toLocaleString()}</p>
-                          </div>
-                        ) : null}
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-1">Min. Condition</p>
+                          <p className="text-xs text-main font-medium">{conditionName}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-1">Requested On</p>
+                          <p className="text-xs text-main font-medium">{createdDate}</p>
+                        </div>
                         <div>
                           <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-1">Waiting</p>
                           <div className="flex items-center gap-1">
                             <Users size={12} className="text-main/40" />
-                            <p className="text-xs text-main font-semibold">{waitlistCount}</p>
+                            <p className="text-xs text-main font-semibold">{waitlistCount} {waitlistCount === 1 ? 'reader' : 'readers'}</p>
                           </div>
                         </div>
                       </div>
 
-                      {request.notes && (
-                        <div className="mb-4 pb-4 border-b border-main/8">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-2">Notes</p>
-                          <p className="text-xs text-main/70 leading-relaxed">{request.notes}</p>
-                        </div>
-                      )}
-
                       <div className="flex items-center justify-between">
                         <p className="text-[10px] text-main/40">
-                          Requested {new Date(request.createdAt).toLocaleDateString('en-NG')}
+                          Requested on {createdDate}
                         </p>
 
                         <button
@@ -466,7 +517,7 @@ export default function RequestBook() {
           </div>
         )}
 
-        {/* TAB 3: MY REQUESTS (GET /api/v1/BookRequest/my-activity - User's Own Requests & Waitlists) */}
+        {/* TAB 3: MY REQUESTS */}
         {activeTab === 'my-requests' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-main/8">
@@ -541,7 +592,13 @@ export default function RequestBook() {
                   const statusLower = (req.status || '').toLowerCase()
                   const isClosed = statusLower === 'closed'
                   const isMatched = statusLower === 'matched'
-                  const isOnWaitlist = req.isUserOnWaitlist ?? true
+                  const isOnWaitlist = req.isWaitlisted != null ? Boolean(req.isWaitlisted) : (req.isUserOnWaitlist ?? true)
+
+                  const categoryName = req.genre || req.category || 'General'
+                  const conditionName = req.condition || req.bookCondition || 'Any Condition'
+
+                  const createdDate = formatDate(getDate(req))
+                  const joinedDate = req.joinedAt ? formatDate(req.joinedAt) : createdDate
 
                   return (
                     <div key={req.id} className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -577,36 +634,30 @@ export default function RequestBook() {
                         </div>
                       </div>
 
-                      {/* Details row */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                        {req.genre && (
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">Genre</p>
-                            <p className="text-xs text-main font-medium">{req.genre}</p>
-                          </div>
-                        )}
-                        {req.condition && (
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">Condition</p>
-                            <p className="text-xs text-main font-medium">{req.condition}</p>
-                          </div>
-                        )}
-                        {req.maxPrice ? (
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">Max Budget</p>
-                            <p className="text-xs text-main font-medium">₦{req.maxPrice.toLocaleString()}</p>
-                          </div>
-                        ) : null}
+                      {/* Details Grid: Category, Condition, First Requested, Joined Date */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4 bg-slate-50/70 border border-slate-100 rounded-xl p-3.5">
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">Requested</p>
-                          <p className="text-xs text-main font-medium">{new Date(req.createdAt).toLocaleDateString('en-NG')}</p>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">Category</p>
+                          <p className="text-xs text-main font-semibold">{categoryName}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">Condition</p>
+                          <p className="text-xs text-main font-semibold">{conditionName}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">First Requested</p>
+                          <p className="text-xs text-main font-medium">{createdDate}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">Date Joined</p>
+                          <p className="text-xs text-main font-medium">{joinedDate}</p>
                         </div>
                       </div>
 
                       {/* Action footer */}
                       <div className="flex items-center justify-between pt-3 border-t border-main/8">
                         <p className="text-[11px] text-main/40">
-                          {isOwner ? 'You created this request' : 'You joined this waitlist'}
+                          {isOwner ? `Created on ${createdDate}` : `Joined waitlist on ${joinedDate}`}
                         </p>
 
                         {!isClosed && isOnWaitlist && (
