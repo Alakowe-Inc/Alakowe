@@ -93,7 +93,7 @@ export default function BookRequestsSection({ }: BookRequestsSectionProps) {
       } else {
         container.scrollBy({ left: 280, behavior: 'smooth' })
       }
-    }, 3500)
+    }, 1000)
 
     return () => clearInterval(interval)
   }, [isPaused, items.length])
