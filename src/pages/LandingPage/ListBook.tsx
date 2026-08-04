@@ -3,9 +3,16 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Upload, Heart, BookOpen, Camera, DollarSign, CheckCircle, X, Loader2, Bell, Truck, Sparkles, HelpCircle } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useSubmitListing } from '../../lib/api/listings/listings.hooks'
+import { useSellerStoreProfile } from '../../lib/api/store/store.hooks'
 import { CONDITIONS } from '../../data/sellerData'
 import type { BookCondition } from '../../lib/api/types'
 import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
+import {
+  clearListingDraft,
+  dataUrlToFile,
+  loadListingDraft,
+  saveListingDraft,
+} from '../../lib/listingDraft'
 import { useCategories } from '../../lib/api/categories/categories.hooks'
 import { useStates, useAreasByState } from '../../lib/api/location/location.hooks'
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog'
@@ -113,6 +120,7 @@ function Field({ label, required, error, children }: {
 export default function ListBook() {
   const { user } = useAuth()
   const submitListing = useSubmitListing()
+  const { data: storeProfile } = useSellerStoreProfile(!!user)
   const { data: categories } = useCategories()
   const { data: states } = useStates()
   const [selectedStateId, setSelectedStateId] = useState<number>(0)
@@ -127,6 +135,8 @@ export default function ListBook() {
   const [showGuide, setShowGuide] = useState(false)
   const [showConditionGuide, setShowConditionGuide] = useState(false)
   const [guideStep, setGuideStep] = useState(0)
+  const [savingDraft, setSavingDraft] = useState(false)
+  const [draftPhotosNote, setDraftPhotosNote] = useState<string | null>(null)
   const previewUrls = useRef<string[]>([])
 
   const basePrice = parseFloat(form.price) || 0
@@ -137,16 +147,86 @@ export default function ListBook() {
   const payoutAmount = Math.max(0, effectivePrice - platformFee)
 
   useEffect(() => {
-    setShowGuide(true)
+    const draft = loadListingDraft()
+    if (!draft || draft.kind !== 'create') {
+      setShowGuide(true)
+      return
+    }
+
+    setShowGuide(false)
+    setForm({ ...empty, ...draft.form })
+    setSelectedStateId(Number(draft.form.stateId) || 0)
+
+    if (draft.photosOmitted) {
+      setDraftPhotosNote('Your photos could not be restored from the draft. Please add them again.')
+    }
+
+    if (draft.photos.length === 0) return
+
+    let cancelled = false
+    ;(async () => {
+      try {
+        const entries: PhotoEntry[] = []
+        for (const p of draft.photos) {
+          const file = await dataUrlToFile(p.dataUrl, p.name)
+          const preview = URL.createObjectURL(file)
+          previewUrls.current.push(preview)
+          entries.push({ file, preview, isCover: p.isCover })
+        }
+        if (!cancelled) {
+          if (entries.length > 0 && !entries.some((e) => e.isCover)) {
+            entries[0].isCover = true
+          }
+          setPhotos(entries)
+        }
+      } catch {
+        if (!cancelled) {
+          setDraftPhotosNote('Your photos could not be restored from the draft. Please add them again.')
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  const { icon: StepIcon, title: stepTitle, desc: stepDesc } = HOW_TO_STEPS[guideStep]
+  const fulfillmentOption = storeProfile?.fulfillmentOption ?? 'Courier'
+  const fulfillmentCopy =
+    fulfillmentOption === 'Pickup'
+      ? {
+          label: 'Buyer pickup',
+          hint: 'Buyers collect from your address.',
+        }
+      : fulfillmentOption === 'Both'
+        ? {
+            label: 'Delivery or pickup',
+            hint: 'Buyers choose at checkout. Delivery means you drop off at a Speedaf station after the sale.',
+          }
+        : {
+            label: 'Alákòwé delivery',
+            hint: 'After a sale, you drop the book at a Speedaf station.',
+          }
+
   const isLastStep = guideStep === HOW_TO_STEPS.length - 1
 
   useEffect(() => {
     const urls = previewUrls.current
     return () => urls.forEach(u => URL.revokeObjectURL(u))
   }, [])
+
+  async function goToDeliverySettings() {
+    setSavingDraft(true)
+    try {
+      await saveListingDraft({
+        form,
+        photos: photos.map((p) => ({ file: p.file, isCover: p.isCover })),
+      })
+      navigate('/account#delivery')
+    } finally {
+      setSavingDraft(false)
+    }
+  }
 
   function set(field: keyof FormState) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -217,6 +297,7 @@ export default function ListBook() {
       }
       return updated
     })
+    setDraftPhotosNote(null)
     e.target.value = ''
   }
 
@@ -309,6 +390,7 @@ export default function ListBook() {
         stateId: Number(form.stateId),
         areaId: Number(form.areaId),
       })
+      clearListingDraft()
       navigate(`/listing-submitted?id=${result.id}`)
     } catch {
       setErrors({ title: 'Failed to submit listing. Please try again.' })
@@ -672,8 +754,34 @@ export default function ListBook() {
               Set a fair price. Listings priced too high may be flagged during review.
             </p>
 
+feature/landing
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-              <Field label="PRICE (₦)" required error={errors.price}>
+              <Field label="PRICE (₦)" required error={errors.price}
+          {/* Delivery option from store settings */}
+          <div className="bg-white rounded-2xl border border-third p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-main/45 mb-1">
+                How buyers get this book
+              </p>
+              <p className="text-sm font-semibold text-main">{fulfillmentCopy.label}</p>
+              <p className="text-xs text-main/50 mt-1 leading-relaxed">{fulfillmentCopy.hint}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void goToDeliverySettings()}
+              disabled={savingDraft}
+              className="text-xs font-semibold text-secondary hover:underline shrink-0 disabled:opacity-60"
+            >
+              {savingDraft ? 'Saving draft…' : 'Change delivery settings →'}
+            </button>
+          </div>
+
+          {/* Pricing */}
+          <div className="bg-white rounded-2xl border border-third p-6">
+            <h2 className="font-heading font-bold text-main text-base mb-1">Pricing</h2>
+            <p className="text-xs text-main/45 mb-4">Set a fair price.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Price (₦)" required error={errors.price}>dev
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-semibold select-none">
                     ₦
@@ -705,12 +813,56 @@ export default function ListBook() {
                 </div>
               </Field>
             </div>
-
+                feature/landing
             {/* Payout Breakdown Box */}
             <div className="bg-[#F8F9FC] border border-main/8 rounded-2xl p-5 space-y-3">
               <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-main/60 font-medium">Listed price (what buyer pays)</span>
                 <span className="text-main font-bold">₦{listedPrice.toLocaleString()}</span>
+
+          {/* Photos */}
+          <div className="bg-white rounded-2xl border border-third p-6">
+            <h2 className="font-heading font-bold text-main text-base mb-1">Photos</h2>
+            <p className="text-xs text-main/45 mb-4">Upload 3–5 photos. Tap a thumbnail to set it as the cover.</p>
+            {draftPhotosNote && <p className="text-xs text-amber-700 mb-3">{draftPhotosNote}</p>}
+            {photoError && <p className="text-xs text-red-500 mb-3">{photoError}</p>}
+            {photos.length < 5 && (
+              <FileUpload
+                id="book-photos"
+                label="Click to upload photos"
+                hint="PNG, JPG up to 5MB each"
+                icon={Upload}
+                multiple
+                accept=".jpg,.jpeg,.png"
+                onChange={handlePhotos}
+                disabled={uploading}
+                style="border-main/15 py-8 hover:border-secondary/40 hover:bg-transparent bg-transparent"
+              />
+            )}
+            {photos.length > 0 && (
+              <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                {photos.map((p, i) => (
+                  <div key={p.preview} className="relative group aspect-[3/4] rounded-xl overflow-hidden border border-main/10">
+                    <img src={p.preview} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => removePhoto(i)}
+                      className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      disabled={uploading}>
+                      <X size={14} />
+                    </button>
+                    {p.isCover ? (
+                      <span className="absolute bottom-1 left-1 bg-secondary text-white text-[10px] font-semibold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                        <CheckCircle size={10} /> Cover
+                      </span>
+                    ) : (
+                      <button type="button" onClick={() => setCover(i)}
+                        className="absolute bottom-1 left-1 bg-black/40 text-white text-[10px] font-medium px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                        disabled={uploading}>
+                        Make Cover
+                      </button>
+                    )}
+                  </div>
+                ))}
+                dev
               </div>
               <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-main/60 font-medium">Alakowe fee (10%)</span>

@@ -1,18 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
-import { useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft, MapPin } from 'lucide-react'
 import { useCart } from '../../../context/CartContext'
 import { useCheckout } from '../../../context/CheckoutContext'
-import {
-  useStartCheckout,
-} from '../../../lib/api/checkout/checkout.hooks'
+import { useStartCheckout } from '../../../lib/api/checkout/checkout.hooks'
 import { useValidateCart } from '../../../lib/api/cart/cart.hooks'
 import {
   useCreateShippingAddress,
   useShippingAddresses,
 } from '../../../lib/api/shipping-addresses/shipping-addresses.hooks'
 import { useAreasByState, useStates } from '../../../lib/api/location/location.hooks'
+import type { CartItemDisplay } from '../../../lib/api/adapters'
+import type { OrderFulfillmentType, SellerFulfillmentChoice, StoreFulfillmentOption } from '../../../lib/api/types'
 import { FormControl, SelectBoxControl, RadioControl, type SelectOption } from '@/components/ui/form-controls'
 import { cn } from '@/lib/utils'
 
@@ -54,12 +53,57 @@ type ContactErrors = {
   phone?: string
 }
 
+type SellerGroup = {
+  sellerEmail: string
+  storeName?: string
+  fulfillmentOption: StoreFulfillmentOption
+  pickupAddressLine?: string
+  pickupCity?: string
+  pickupState?: string
+  items: CartItemDisplay[]
+}
+
+type SellerChoice = {
+  fulfillmentType: OrderFulfillmentType
+  pickupDates: string[]
+}
+
+function formatLocalIsoDate(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function nextSevenDays(): { iso: string; label: string }[] {
+  const days: { iso: string; label: string }[] = []
+  const now = new Date()
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i)
+    days.push({
+      iso: formatLocalIsoDate(d),
+      label: d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }),
+    })
+  }
+  return days
+}
+
+function pickupMapsUrl(line?: string, city?: string, state?: string): string | null {
+  const query = [line, city, state].filter(Boolean).join(', ')
+  if (!query) return null
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+}
+
+function defaultTypeForOption(opt: StoreFulfillmentOption): OrderFulfillmentType {
+  if (opt === 'Pickup') return 'Pickup'
+  return 'Courier'
+}
+
 function ShippingDetails() {
   const { items, removeFromCart } = useCart()
   const checkout = useCheckout()
   const startCheckout = useStartCheckout()
   const validateCart = useValidateCart()
-  const queryClient = useQueryClient()
   const navigate = useNavigate()
 
   const { data: savedAddresses } = useShippingAddresses()
@@ -70,17 +114,70 @@ function ShippingDetails() {
   )
 
   const savedOptions = savedAddresses ?? []
+  const dayOptions = useMemo(() => nextSevenDays(), [])
 
   const [errors, setErrors] = useState<ContactErrors>({})
+  const [pickupDateErrors, setPickupDateErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [validationLoading, setValidationLoading] = useState(false)
   const [validationDone, setValidationDone] = useState(false)
   const [validationAttempt, setValidationAttempt] = useState(0)
+  const [sellerChoices, setSellerChoices] = useState<Record<string, SellerChoice>>({})
 
   const itemSignature = useMemo(
     () => items.map((i) => `${i.listingId}:${i.quantity}`).sort().join('|'),
     [items]
   )
+
+  const sellerGroups = useMemo((): SellerGroup[] => {
+    const map = new Map<string, CartItemDisplay[]>()
+    for (const item of items) {
+      const key = item.sellerEmail?.trim() || 'unknown'
+      const list = map.get(key) ?? []
+      list.push(item)
+      map.set(key, list)
+    }
+    return Array.from(map.entries()).map(([sellerEmail, groupItems]) => {
+      const first = groupItems[0]
+      return {
+        sellerEmail,
+        storeName: first?.storeName,
+        fulfillmentOption: first?.fulfillmentOption ?? 'Courier',
+        pickupAddressLine: first?.pickupAddressLine,
+        pickupCity: first?.pickupCity,
+        pickupState: first?.pickupState,
+        items: groupItems,
+      }
+    })
+  }, [items])
+
+  useEffect(() => {
+    setSellerChoices((prev) => {
+      const next: Record<string, SellerChoice> = {}
+      for (const g of sellerGroups) {
+        const existing = prev[g.sellerEmail]
+        const locked = defaultTypeForOption(g.fulfillmentOption)
+        if (g.fulfillmentOption === 'Both') {
+          next[g.sellerEmail] = {
+            fulfillmentType: existing?.fulfillmentType === 'Pickup' ? 'Pickup' : 'Courier',
+            pickupDates: existing?.pickupDates ?? [],
+          }
+        } else {
+          next[g.sellerEmail] = {
+            fulfillmentType: locked,
+            pickupDates: locked === 'Pickup' ? (existing?.pickupDates ?? []) : [],
+          }
+        }
+      }
+      return next
+    })
+  }, [sellerGroups])
+
+  const needsCourier = sellerGroups.some((g) => {
+    const choice = sellerChoices[g.sellerEmail]
+    const type = choice?.fulfillmentType ?? defaultTypeForOption(g.fulfillmentOption)
+    return type === 'Courier'
+  })
 
   const subtotal = items.reduce((sum, item) => sum + item.buyerPrice * item.quantity, 0)
 
@@ -162,8 +259,64 @@ function ShippingDetails() {
   }
 
   function setContact(field: keyof typeof checkout.contactForm) {
-    return (e: React.ChangeEvent<HTMLInputElement>) =>
-      checkout.setContactForm((p) => ({ ...p, [field]: e.target.value }))
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      checkout.setContactForm((p) => ({ ...p, [field]: value }))
+      if (errors[field]) {
+        setErrors((prev) => {
+          const next = { ...prev }
+          delete next[field]
+          return next
+        })
+      }
+    }
+  }
+
+  function setChoiceType(sellerEmail: string, fulfillmentType: OrderFulfillmentType) {
+    setSellerChoices((prev) => ({
+      ...prev,
+      [sellerEmail]: {
+        fulfillmentType,
+        pickupDates: fulfillmentType === 'Pickup' ? (prev[sellerEmail]?.pickupDates ?? []) : [],
+      },
+    }))
+    if (fulfillmentType !== 'Pickup') {
+      setPickupDateErrors((prev) => {
+        if (!prev[sellerEmail]) return prev
+        const next = { ...prev }
+        delete next[sellerEmail]
+        return next
+      })
+    }
+  }
+
+  function togglePickupDate(sellerEmail: string, iso: string) {
+    setSellerChoices((prev) => {
+      const current = prev[sellerEmail] ?? { fulfillmentType: 'Pickup' as const, pickupDates: [] }
+      const has = current.pickupDates.includes(iso)
+      const pickupDates = has
+        ? current.pickupDates.filter((d) => d !== iso)
+        : [...current.pickupDates, iso]
+
+      return {
+        ...prev,
+        [sellerEmail]: {
+          ...current,
+          fulfillmentType: 'Pickup',
+          pickupDates,
+        },
+      }
+    })
+
+    setPickupDateErrors((errs) => {
+      if (!errs[sellerEmail]) return errs
+      const next = { ...errs }
+      delete next[sellerEmail]
+      return next
+    })
+    if (checkout.errorBanner?.toLowerCase().includes('pickup day')) {
+      checkout.setErrorBanner(null)
+    }
   }
 
   async function handleProceed() {
@@ -176,13 +329,26 @@ function ShippingDetails() {
     setErrors({})
     checkout.setErrorBanner(null)
 
-    if (checkout.addressMode === 'saved') {
-      if (typeof checkout.selectedShippingAddressId !== 'number') {
-        checkout.setErrorBanner('Shipping address is missing. Please review and try again.')
-        return
+    const nextPickupErrors: Record<string, string> = {}
+    for (const g of sellerGroups) {
+      const choice = sellerChoices[g.sellerEmail]
+      const type = choice?.fulfillmentType ?? defaultTypeForOption(g.fulfillmentOption)
+      if (type === 'Pickup' && (choice?.pickupDates.length ?? 0) < 1) {
+        nextPickupErrors[g.sellerEmail] = 'Select at least one preferred pickup day.'
       }
-    } else {
-      if (
+    }
+    setPickupDateErrors(nextPickupErrors)
+    if (Object.keys(nextPickupErrors).length > 0) {
+      return
+    }
+
+    if (needsCourier) {
+      if (checkout.addressMode === 'saved') {
+        if (typeof checkout.selectedShippingAddressId !== 'number') {
+          checkout.setErrorBanner('Shipping address is missing. Please review and try again.')
+          return
+        }
+      } else if (
         typeof checkout.newStateId !== 'number' ||
         typeof checkout.newAreaId !== 'number' ||
         !checkout.newAddressLine.trim()
@@ -195,35 +361,50 @@ function ShippingDetails() {
     setLoading(true)
 
     try {
-      let shippingAddressId: number | undefined
+      const sellerFulfillments: SellerFulfillmentChoice[] = sellerGroups.map((g) => {
+        const choice = sellerChoices[g.sellerEmail]
+        const fulfillmentType =
+          choice?.fulfillmentType ?? defaultTypeForOption(g.fulfillmentOption)
+        return {
+          sellerEmail: g.sellerEmail,
+          fulfillmentType,
+          pickupDates: fulfillmentType === 'Pickup' ? (choice?.pickupDates ?? []) : undefined,
+        }
+      })
 
-      if (checkout.addressMode === 'saved') {
-        shippingAddressId = checkout.selectedShippingAddressId as number
-      } else {
-        const created = await createShippingAddress.mutateAsync({
-          label: `${checkout.contactForm.fullName.split(' ')[0] || 'Delivery'}`,
-          stateId: checkout.newStateId as number,
-          areaId: checkout.newAreaId as number,
-          addressLine: checkout.newAddressLine,
-          isDefault: true,
-        })
-        shippingAddressId = created?.id
-      }
+      let shippingAddressId = 0
 
-      if (!shippingAddressId) {
-        checkout.setErrorBanner('Shipping address is missing. Please review and try again.')
-        return
+      if (needsCourier) {
+        if (checkout.addressMode === 'saved') {
+          shippingAddressId = checkout.selectedShippingAddressId as number
+        } else {
+          const created = await createShippingAddress.mutateAsync({
+            label: `${checkout.contactForm.fullName.split(' ')[0] || 'Delivery'}`,
+            stateId: checkout.newStateId as number,
+            areaId: checkout.newAreaId as number,
+            addressLine: checkout.newAddressLine,
+            isDefault: true,
+          })
+          shippingAddressId = created?.id ?? 0
+        }
+
+        if (!shippingAddressId) {
+          checkout.setErrorBanner('Shipping address is missing. Please review and try again.')
+          return
+        }
       }
 
       const session = await startCheckout.mutateAsync({
         shippingAddressId,
-        shippingStateId: typeof checkout.newStateId === 'number' ? checkout.newStateId : null,
-        shippingAreaId: typeof checkout.newAreaId === 'number' ? checkout.newAreaId : null,
-        shippingAddress: checkout.addressMode === 'new' ? checkout.newAddressLine : null,
+        shippingStateId: needsCourier && typeof checkout.newStateId === 'number' ? checkout.newStateId : null,
+        shippingAreaId: needsCourier && typeof checkout.newAreaId === 'number' ? checkout.newAreaId : null,
+        shippingAddress:
+          needsCourier && checkout.addressMode === 'new' ? checkout.newAddressLine : null,
         cartItemIds: items.map((i) => i.id),
         deliveryFullName: checkout.contactForm.fullName || null,
         deliveryPhoneNumber: checkout.contactForm.phone || null,
         deliveryEmail: checkout.contactForm.email || null,
+        sellerFulfillments,
       })
 
       const sessionId = session?.sessionId ?? null
@@ -254,11 +435,9 @@ function ShippingDetails() {
         <h1 className="font-heading font-bold text-main text-3xl mb-8">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left */}
           <div className="lg:col-span-2 flex flex-col gap-6">
-            {/* User information */}
             <div className="bg-white rounded-2xl border border-third p-6">
-              <h2 className="font-heading font-bold text-main text-lg mb-5">User Information</h2>
+              <h2 className="font-heading font-bold text-main text-lg mb-5">Contact</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
@@ -295,98 +474,243 @@ function ShippingDetails() {
               </div>
             </div>
 
-            {/* Shipping address */}
             <div className="bg-white rounded-2xl border border-third p-6">
-              <h2 className="font-heading font-bold text-main text-lg mb-5">Shipping Address</h2>
+              <h2 className="font-heading font-bold text-main text-lg mb-5">Fulfillment</h2>
+              <div className="flex flex-col gap-4">
+                {sellerGroups.map((g) => {
+                  const choice = sellerChoices[g.sellerEmail]
+                  const type =
+                    choice?.fulfillmentType ?? defaultTypeForOption(g.fulfillmentOption)
+                  const mapsUrl = pickupMapsUrl(
+                    g.pickupAddressLine,
+                    g.pickupCity,
+                    g.pickupState
+                  )
+                  const addressText = [g.pickupAddressLine, g.pickupCity, g.pickupState]
+                    .filter(Boolean)
+                    .join(', ')
 
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-4 flex-wrap">
-                  <RadioControl
-                    name="addressMode"
-                    checked={checkout.addressMode === 'saved'}
-                    onChange={() => checkout.setAddressMode('saved')}
-                    label={{ exist: true, text: 'Use saved address', style: 'text-sm' }}
-                  />
+                  return (
+                    <div
+                      key={g.sellerEmail}
+                      className="rounded-2xl border border-third bg-third/40 p-4"
+                    >
+                      <p className="font-heading font-bold text-main text-base">
+                        {g.storeName?.trim() || g.sellerEmail}
+                      </p>
+                      <p className="text-xs text-main/50 mt-1 leading-relaxed">
+                        {g.items.map((i) => i.title).join(' · ')}
+                      </p>
 
-                  <RadioControl
-                    name="addressMode"
-                    checked={checkout.addressMode === 'new'}
-                    onChange={() => checkout.setAddressMode('new')}
-                    label={{ exist: true, text: 'Enter a new address', style: 'text-sm' }}
-                  />
-                </div>
+                      {g.fulfillmentOption === 'Courier' && (
+                        <p className="text-sm text-main/70 mt-3">Alákòwé delivery</p>
+                      )}
 
-                {checkout.addressMode === 'saved' ? (
-                  <Field label="Choose address">
-                    <SelectBoxControl
-                      placeholder="Select shipping address"
-                      options={savedOptions.map((a) => ({
-                        label: `${a.label ?? 'Address'}${a.stateName ? ` (${a.stateName})` : ''}`,
-                        value: a.id ?? '',
-                      }))}
-                      value={
-                        checkout.selectedShippingAddressId
-                          ? savedOptions
-                              .map((a) => ({
-                                label: `${a.label ?? 'Address'}${a.stateName ? ` (${a.stateName})` : ''}`,
-                                value: a.id ?? '',
-                              }))
-                              .find((o) => o.value === checkout.selectedShippingAddressId) ?? null
-                          : null
-                      }
-                      onChange={(option: SelectOption) => checkout.setSelectedShippingAddressId(Number(option.value))}
-                      style={selectClass(false)}
-                    />
-                  </Field>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="State">
-                      <SelectBoxControl
-                        placeholder="Select state"
-                        options={(statesQuery.data ?? []).map((s) => ({ label: s.name, value: s.id }))}
-                        value={
-                          typeof checkout.newStateId === 'number'
-                            ? (statesQuery.data ?? []).map((s) => ({ label: s.name, value: s.id })).find((o) => o.value === checkout.newStateId) ?? null
-                            : null
-                        }
-                        onChange={(option: SelectOption) => checkout.setNewStateId(Number(option.value))}
-                        style={selectClass(false)}
-                      />
-                    </Field>
+                      {g.fulfillmentOption === 'Pickup' && (
+                        <div className="mt-3 space-y-1">
+                          <p className="text-sm font-semibold text-main">
+                            This seller's books are pickup only
+                          </p>
+                          <p className="text-xs text-main/55 leading-relaxed">
+                            You'll collect from the seller's pickup address below. No delivery fee for this seller.
+                            After you complete the order, you'll get the seller's contact info to arrange pickup.
+                          </p>
+                        </div>
+                      )}
 
-                    <Field label="Area">
-                      <SelectBoxControl
-                        placeholder="Select area"
-                        options={(areasQuery.data ?? []).map((a) => ({ label: a.name, value: a.id }))}
-                        value={
-                          typeof checkout.newAreaId === 'number'
-                            ? (areasQuery.data ?? []).map((a) => ({ label: a.name, value: a.id })).find((o) => o.value === checkout.newAreaId) ?? null
-                            : null
-                        }
-                        onChange={(option: SelectOption) => checkout.setNewAreaId(Number(option.value))}
-                        disabled={typeof checkout.newStateId !== 'number'}
-                        style={selectClass(false)}
-                      />
-                    </Field>
+                      {g.fulfillmentOption === 'Both' && (
+                        <div className="flex items-center gap-4 flex-wrap mt-3">
+                          <RadioControl
+                            name={`fulfill-${g.sellerEmail}`}
+                            checked={type === 'Courier'}
+                            onChange={() => setChoiceType(g.sellerEmail, 'Courier')}
+                            label={{ exist: true, text: 'Deliver', style: 'text-sm' }}
+                          />
+                          <RadioControl
+                            name={`fulfill-${g.sellerEmail}`}
+                            checked={type === 'Pickup'}
+                            onChange={() => setChoiceType(g.sellerEmail, 'Pickup')}
+                            label={{ exist: true, text: 'Pickup', style: 'text-sm' }}
+                          />
+                        </div>
+                      )}
 
-                    <div className="sm:col-span-2">
-                      <Field label="Address line">
-                        <FormControl
-                          type="text"
-                          placeholder="e.g. 12 Broad Street, Flat 3"
-                          value={checkout.newAddressLine}
-                          onChange={(e) => checkout.setNewAddressLine(e.target.value)}
-                          style={inputClass(false)}
-                        />
-                      </Field>
+                      {g.fulfillmentOption === 'Both' && type === 'Courier' && (
+                        <p className="text-sm text-main/70 mt-3">Alákòwé delivery</p>
+                      )}
+
+                      {type === 'Pickup' && (
+                          <div className="mt-3 space-y-3">
+                            {addressText && (
+                              <div>
+                                <p className="text-xs font-semibold text-main/50 uppercase tracking-wider mb-1">
+                                  Pickup address
+                                </p>
+                                <p className="text-sm text-main/70">{addressText}</p>
+                                {mapsUrl && (
+                                  <a
+                                    href={mapsUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs font-semibold text-secondary mt-1 hover:underline"
+                                  >
+                                    <MapPin size={11} /> View on Maps
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                            <div>
+                              <p className="text-xs font-semibold text-main/50 uppercase tracking-wider mb-2">
+                                Preferred pickup days
+                              </p>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                {dayOptions.map((day) => {
+                                  const selected = (choice?.pickupDates ?? []).includes(day.iso)
+                                  return (
+                                    <button
+                                      key={day.iso}
+                                      type="button"
+                                      onClick={() => togglePickupDate(g.sellerEmail, day.iso)}
+                                      className={cn(
+                                        'rounded-xl border px-2.5 py-2 text-xs font-semibold transition-colors',
+                                        selected
+                                          ? 'border-main bg-main text-white'
+                                          : pickupDateErrors[g.sellerEmail]
+                                            ? 'border-red-400 bg-white text-main'
+                                            : 'border-third bg-white text-main hover:border-main/30'
+                                      )}
+                                    >
+                                      {day.label}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                              {pickupDateErrors[g.sellerEmail] ? (
+                                <p className="text-xs text-red-500 mt-2">
+                                  {pickupDateErrors[g.sellerEmail]}
+                                </p>
+                              ) : (
+                                <p className="text-[11px] text-main/40 mt-2">
+                                  Select at least one day
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
                     </div>
-                  </div>
-                )}
+                  )
+                })}
               </div>
             </div>
+
+            {needsCourier && (
+              <div className="bg-white rounded-2xl border border-third p-6">
+                <h2 className="font-heading font-bold text-main text-lg mb-5">Shipping Address</h2>
+
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <RadioControl
+                      name="addressMode"
+                      checked={checkout.addressMode === 'saved'}
+                      onChange={() => checkout.setAddressMode('saved')}
+                      label={{ exist: true, text: 'Use saved address', style: 'text-sm' }}
+                    />
+
+                    <RadioControl
+                      name="addressMode"
+                      checked={checkout.addressMode === 'new'}
+                      onChange={() => checkout.setAddressMode('new')}
+                      label={{ exist: true, text: 'Enter a new address', style: 'text-sm' }}
+                    />
+                  </div>
+
+                  {checkout.addressMode === 'saved' ? (
+                    <Field label="Choose address">
+                      <SelectBoxControl
+                        placeholder="Select shipping address"
+                        options={savedOptions.map((a) => ({
+                          label: `${a.label ?? 'Address'}${a.stateName ? ` (${a.stateName})` : ''}`,
+                          value: a.id ?? '',
+                        }))}
+                        value={
+                          checkout.selectedShippingAddressId
+                            ? savedOptions
+                                .map((a) => ({
+                                  label: `${a.label ?? 'Address'}${a.stateName ? ` (${a.stateName})` : ''}`,
+                                  value: a.id ?? '',
+                                }))
+                                .find((o) => o.value === checkout.selectedShippingAddressId) ?? null
+                            : null
+                        }
+                        onChange={(option: SelectOption) =>
+                          checkout.setSelectedShippingAddressId(Number(option.value))
+                        }
+                        style={selectClass(false)}
+                      />
+                    </Field>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Field label="State">
+                        <SelectBoxControl
+                          placeholder="Select state"
+                          options={(statesQuery.data ?? []).map((s) => ({
+                            label: s.name,
+                            value: s.id,
+                          }))}
+                          value={
+                            typeof checkout.newStateId === 'number'
+                              ? (statesQuery.data ?? [])
+                                  .map((s) => ({ label: s.name, value: s.id }))
+                                  .find((o) => o.value === checkout.newStateId) ?? null
+                              : null
+                          }
+                          onChange={(option: SelectOption) =>
+                            checkout.setNewStateId(Number(option.value))
+                          }
+                          style={selectClass(false)}
+                        />
+                      </Field>
+
+                      <Field label="Area">
+                        <SelectBoxControl
+                          placeholder="Select area"
+                          options={(areasQuery.data ?? []).map((a) => ({
+                            label: a.name,
+                            value: a.id,
+                          }))}
+                          value={
+                            typeof checkout.newAreaId === 'number'
+                              ? (areasQuery.data ?? [])
+                                  .map((a) => ({ label: a.name, value: a.id }))
+                                  .find((o) => o.value === checkout.newAreaId) ?? null
+                              : null
+                          }
+                          onChange={(option: SelectOption) =>
+                            checkout.setNewAreaId(Number(option.value))
+                          }
+                          disabled={typeof checkout.newStateId !== 'number'}
+                          style={selectClass(false)}
+                        />
+                      </Field>
+
+                      <div className="sm:col-span-2">
+                        <Field label="Address line">
+                          <FormControl
+                            type="text"
+                            placeholder="e.g. 12 Broad Street, Flat 3"
+                            value={checkout.newAddressLine}
+                            onChange={(e) => checkout.setNewAddressLine(e.target.value)}
+                            style={inputClass(false)}
+                          />
+                        </Field>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Right */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl border border-third p-6 lg:sticky lg:top-24">
               <h2 className="font-heading font-bold text-main text-lg mb-5">Order Summary</h2>
@@ -445,13 +769,15 @@ function ShippingDetails() {
 
               <button
                 type="button"
-                onClick={handleProceed}
+                onClick={handleProceed}feature/landing
                 disabled={
                   loading ||
                   validationLoading ||
                   !validationDone
                 }
-                className="w-full bg-secondary text-white font-semibold py-4 rounded-full hover:bg-secondary/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full bg-secondary text-white font-semibold py-4 rounded-full hover:bg-secondary/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowe
+                disabled={loading || validationLoading || !validationDone}
+                className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"dev
               >
                 {loading
                   ? 'Processing…'
@@ -463,7 +789,9 @@ function ShippingDetails() {
               </button>
 
               <p className="text-xs text-main/35 text-center mt-3 leading-relaxed">
-                Delivery fee will be calculated on the next page
+                {needsCourier
+                  ? 'Delivery fee will be calculated on the next page'
+                  : 'No delivery fee for pickup-only orders'}
               </p>
             </div>
           </div>

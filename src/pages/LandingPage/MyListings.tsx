@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { PlusCircle, Pencil, BookOpen, TrendingUp, ShoppingBag, Wallet, Share2, Check, Tag, ThumbsDown, MapPin } from 'lucide-react'
 import { useState } from 'react'
-import { useAuth } from '../../context/AuthContext'
 import { useMyListings, useMyListingSummary, useSetDiscount } from '../../lib/api/listings/listings.hooks'
+import { useSellerStoreProfile } from '../../lib/api/store/store.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import { formatPrice } from '../../lib/utils'
 
@@ -22,16 +22,17 @@ function StatCard({ icon: Icon, label, value, sub }: {
 }
 
 export default function MyListings() {
-  const { user } = useAuth()
   const { data: pagedResult } = useMyListings()
   const { data: summary } = useMyListingSummary()
+  const { data: storeProfile } = useSellerStoreProfile()
   const listings = pagedResult?.result ?? []
   const [copied, setCopied] = useState(false)
   const [discountId, setDiscountId] = useState<number | null>(null)
   const setDiscount = useSetDiscount()
 
-  const storeUrl = user
-    ? `${window.location.origin}/store/${encodeURIComponent(user.email)}`
+  const storeSlug = storeProfile?.storeSlug ?? ''
+  const storeUrl = storeSlug
+    ? `${window.location.origin}/store/${storeSlug}`
     : ''
 
   function copyStoreLink() {
@@ -92,7 +93,7 @@ export default function MyListings() {
           <div className="mt-3 bg-third rounded-xl px-4 py-2.5 text-xs text-main/50 font-mono break-all flex items-center justify-between gap-4">
             <span className="truncate">{storeUrl}</span>
             <Link
-              to={`/store/${encodeURIComponent(user?.email || '')}`}
+              to={`/store/${encodeURIComponent(storeSlug)}`}
               className="text-xs font-semibold text-secondary hover:underline shrink-0"
             >
               Visit Store &rarr;

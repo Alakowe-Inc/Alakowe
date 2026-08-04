@@ -1,12 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Heart, Upload, X, CheckCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useListing, useEditListing } from '../../lib/api/listings/listings.hooks'
+import { useSellerStoreProfile } from '../../lib/api/store/store.hooks'
 import { GENRES, CONDITIONS } from '../../data/sellerData'
 import type { BookCondition } from '../../lib/api/types'
 import { useStates, useAreasByState } from '../../lib/api/location/location.hooks'
 import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
+import {
+  clearListingDraft,
+  dataUrlToFile,
+  loadListingDraft,
+  saveEditListingDraft,
+} from '../../lib/listingDraft'
 import { FormControl, SelectBoxControl, TextareaControl, FileUpload, type SelectOption } from '@/components/ui/form-controls'
 
 type FormState = {
@@ -42,6 +49,7 @@ export default function EditListing() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { data: listing } = useListing(Number(id))
+  const { data: storeProfile } = useSellerStoreProfile(!!user)
   const editListing = useEditListing()
   const { data: states } = useStates()
   const [selectedStateId, setSelectedStateId] = useState<number>(0)
@@ -53,42 +61,109 @@ export default function EditListing() {
   const [coverIndex, setCoverIndex] = useState(0)
   const [newPhotos, setNewPhotos] = useState<NewPhotoEntry[]>([])
   const [photoError, setPhotoError] = useState('')
+  const [draftPhotosNote, setDraftPhotosNote] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState('')
+  const [savingDraft, setSavingDraft] = useState(false)
+  const hydratedForId = useRef<number | null>(null)
+
+  const fulfillmentOption = storeProfile?.fulfillmentOption ?? 'Courier'
+  const fulfillmentCopy =
+    fulfillmentOption === 'Pickup'
+      ? {
+          label: 'Buyer pickup',
+          hint: 'Buyers collect from your address.',
+        }
+      : fulfillmentOption === 'Both'
+        ? {
+            label: 'Delivery or pickup',
+            hint: 'Buyers choose at checkout. Delivery means you drop off at a Speedaf station after the sale.',
+          }
+        : {
+            label: 'Alákòwé delivery',
+            hint: 'After a sale, you drop the book at a Speedaf station.',
+          }
 
   useEffect(() => {
-    if (listing) {
-      const stateId = listing.stateId ? String(listing.stateId) : ''
-      const areaId = listing.areaId ? String(listing.areaId) : ''
-      setForm({
-        title: listing.title ?? '',
-        author: listing.author ?? '',
-        genre: listing.categoryName ?? '',
-        condition: listing.bookCondition ?? '',
-        conditionDetail: listing.conditionDetail ?? '',
-        description: listing.description ?? '',
-        price: String(Math.round((listing.price ?? 0) / 100)),
-        discount: listing.discount != null ? String(listing.discount) : '0',
-        loveNote: listing.loveNote ?? '',
-        stateId,
-        areaId,
-      })
-      if (listing.stateId) setSelectedStateId(listing.stateId)
-      const imgs: string[] = []
-      if (listing.coverImageFileName) imgs.push(listing.coverImageFileName)
-      if (listing.imageFileNames) imgs.push(...listing.imageFileNames.filter(Boolean))
-      setExistingImages(imgs)
+    if (!listing || !id) return
+    const listingId = Number(id)
+    if (!Number.isFinite(listingId) || hydratedForId.current === listingId) return
+    hydratedForId.current = listingId
+
+    const draft = loadListingDraft()
+    if (draft?.kind === 'edit' && draft.listingId === listingId) {
+      setForm(draft.form)
+      setExistingImages(draft.existingImages)
+      setCoverIndex(draft.coverIndex)
+      setSelectedStateId(Number(draft.form.stateId) || 0)
+      if (draft.photosOmitted) {
+        setDraftPhotosNote('Newly added photos could not be restored from the draft. Please add them again if needed.')
+      }
+      if (draft.newPhotos.length > 0) {
+        void (async () => {
+          try {
+            const entries: NewPhotoEntry[] = []
+            for (const p of draft.newPhotos) {
+              const file = await dataUrlToFile(p.dataUrl, p.name)
+              entries.push({ file, preview: URL.createObjectURL(file) })
+            }
+            setNewPhotos(entries)
+          } catch {
+            setDraftPhotosNote('Newly added photos could not be restored from the draft. Please add them again if needed.')
+          }
+        })()
+      }
+      return
     }
-  }, [listing])
+
+    const stateId = listing.stateId ? String(listing.stateId) : ''
+    const areaId = listing.areaId ? String(listing.areaId) : ''
+    setForm({
+      title: listing.title ?? '',
+      author: listing.author ?? '',
+      genre: listing.categoryName ?? '',
+      condition: listing.bookCondition ?? '',
+      conditionDetail: listing.conditionDetail ?? '',
+      description: listing.description ?? '',
+      price: String(Math.round((listing.price ?? 0) / 100)),
+      discount: listing.discount != null ? String(listing.discount) : '0',
+      loveNote: listing.loveNote ?? '',
+      stateId,
+      areaId,
+    })
+    if (listing.stateId) setSelectedStateId(listing.stateId)
+    const imgs: string[] = []
+    if (listing.coverImageFileName) imgs.push(listing.coverImageFileName)
+    if (listing.imageFileNames) imgs.push(...listing.imageFileNames.filter(Boolean))
+    setExistingImages(imgs)
+  }, [listing, id])
 
   const notFound = !id || (!listing && !form)
 
+feature/landing
   const basePrice = parseFloat(form?.price ?? '0') || 0
   const discountPercent = parseFloat(form?.discount ?? '0') || 0
   const effectivePrice = Math.max(0, basePrice * (1 - discountPercent / 100))
   const listedPrice = Math.round(effectivePrice * 1.10)
   const platformFee = Math.round(effectivePrice * 0.10)
   const payoutAmount = Math.max(0, effectivePrice - platformFee)
+  async function goToDeliverySettings() {
+    if (!form || !id) return
+    setSavingDraft(true)
+    try {
+      await saveEditListingDraft({
+        listingId: Number(id),
+        form,
+        existingImages,
+        coverIndex,
+        newPhotos: newPhotos.map((p) => ({ file: p.file })),
+      })
+      navigate('/account#delivery')
+    } finally {
+      setSavingDraft(false)
+    }
+  }
+dev
 
   function set(field: keyof FormState) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -144,6 +219,7 @@ export default function EditListing() {
       preview: URL.createObjectURL(f),
     }))
     setNewPhotos(prev => [...prev, ...entries])
+    setDraftPhotosNote(null)
     e.target.value = ''
   }
 
@@ -236,6 +312,7 @@ export default function EditListing() {
         stateId: Number(form.stateId),
         areaId: Number(form.areaId),
       })
+      clearListingDraft()
       navigate('/my-listings')
     } catch {
       setErrors({ title: 'Failed to save. Please try again.' })
@@ -341,9 +418,29 @@ export default function EditListing() {
             </div>
           </div>
 
+          {/* Delivery option from store settings */}
+          <div className="bg-white rounded-2xl border border-third p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-main/45 mb-1">
+                How buyers get this book
+              </p>
+              <p className="text-sm font-semibold text-main">{fulfillmentCopy.label}</p>
+              <p className="text-xs text-main/50 mt-1 leading-relaxed">{fulfillmentCopy.hint}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void goToDeliverySettings()}
+              disabled={savingDraft}
+              className="text-xs font-semibold text-secondary hover:underline shrink-0 disabled:opacity-60"
+            >
+              {savingDraft ? 'Saving draft…' : 'Change delivery settings →'}
+            </button>
+          </div>
+
           <div className="bg-white rounded-2xl border border-third p-6">
             <h2 className="font-heading font-bold text-main text-base mb-1">Photos</h2>
             <p className="text-xs text-main/45 mb-4">Upload up to 5 photos. Tap a thumbnail to set it as the cover.</p>
+            {draftPhotosNote && <p className="text-xs text-amber-700 mb-3">{draftPhotosNote}</p>}
             {photoError && <p className="text-xs text-red-500 mb-3">{photoError}</p>}
             {totalImages < 5 && (
               <FileUpload

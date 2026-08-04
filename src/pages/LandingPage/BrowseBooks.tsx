@@ -193,8 +193,7 @@ function BrowseBooks() {
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8 mb-10">
                 {paginated.map(book => (
-                  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-                  <BookCard key={book.id} book={book as any} />
+                  <BookCard key={book.id} book={book} />
                 ))}
               </div>
 

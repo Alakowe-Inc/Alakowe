@@ -121,6 +121,9 @@ export interface LoginResponse {
   tokenExpiresAt?: string | null
 }
 
+export type StoreFulfillmentOption = "Courier" | "Pickup" | "Both"
+export type OrderFulfillmentType = "Courier" | "Pickup"
+
 export interface ListingResponse {
   id?: number
   title?: string | null
@@ -151,6 +154,13 @@ export interface ListingResponse {
   stateId?: number
   areaId?: number
   location?: string | null
+  storeProfileId?: number | null
+  storeName?: string | null
+  storeSlug?: string | null
+  fulfillmentOption?: StoreFulfillmentOption
+  pickupAddressLine?: string | null
+  pickupCity?: string | null
+  pickupState?: string | null
 }
 
 export interface SetListingDiscountRequest {
@@ -176,6 +186,17 @@ export interface ListingResponsePagedResult {
   links?: PageLinks
 }
 
+export interface PagedResult<T> {
+  result?: T[] | null
+  pageNumber?: number
+  pageSize?: number
+  totalCount?: number
+  totalPages?: number
+  hasPreviousPage?: boolean
+  hasNextPage?: boolean
+  links?: PageLinks
+}
+
 export interface CartItemResponse {
   id?: number
   listingId?: number
@@ -187,6 +208,13 @@ export interface CartItemResponse {
   buyerPrice: number
   quantity?: number
   isPublished?: boolean
+  sellerEmail?: string | null
+  storeName?: string | null
+  storeSlug?: string | null
+  fulfillmentOption?: StoreFulfillmentOption
+  pickupAddressLine?: string | null
+  pickupCity?: string | null
+  pickupState?: string | null
 }
 
 export interface CartResponse {
@@ -221,8 +249,17 @@ export interface CheckoutSessionItemResponse {
 
 export interface SellerGroupResponse {
   sellerEmail?: string | null
+  storeName?: string | null
+  storeSlug?: string | null
+  allowedFulfillmentOption?: StoreFulfillmentOption
+  selectedFulfillmentType?: OrderFulfillmentType
+  pickupAddressLine?: string | null
+  pickupCity?: string | null
+  pickupState?: string | null
+  pickupDates?: string[] | null
   items?: CheckoutSessionItemResponse[] | null
   subtotal?: number
+  deliveryFee?: number
 }
 
 export interface CheckoutSessionResponse {
@@ -230,12 +267,21 @@ export interface CheckoutSessionResponse {
   status?: string | null
   totalAmount?: number
   deliveryFee?: number | null
-  shippingStateId?: number
-  shippingAreaId?: number
+  shippingStateId?: number | null
+  shippingAreaId?: number | null
   shippingAddress?: string | null
+  deliveryFullName?: string | null
+  deliveryPhoneNumber?: string | null
+  deliveryEmail?: string | null
   expiresAt?: string
   isExpired?: boolean
   sellerGroups?: SellerGroupResponse[] | null
+}
+
+export interface SellerFulfillmentChoice {
+  sellerEmail: string
+  fulfillmentType: OrderFulfillmentType
+  pickupDates?: string[]
 }
 
 export interface OrderResponse {
@@ -332,6 +378,7 @@ export interface CheckoutStartRequest {
   deliveryFullName?: string | null
   deliveryPhoneNumber?: string | null
   deliveryEmail?: string | null
+  sellerFulfillments: SellerFulfillmentChoice[]
 }
 
 export interface MyListingSummaryResponse {
@@ -398,4 +445,147 @@ export interface BookRequestFilterParams {
   Status?: string
   PageNumber?: number
   PageSize?: number
+}
+
+/* ───────── Orders & seller payouts ───────── */
+
+export interface OrderDeliveryAddress {
+  fullName?: string | null
+  phone?: string | null
+  email?: string | null
+  street?: string | null
+  city?: string | null
+  state?: string | null
+}
+
+export interface OrderItemDto {
+  id: number
+  listingId: number
+  bookTitle: string
+  sellerEmail: string
+  sellerName?: string | null
+  coverImageFileName?: string | null
+  quantity: number
+  unitPrice: number
+  totalPrice: number
+  buyerPrice: number
+  sellerPayout: number
+  platformFee: number
+  markupAmount: number
+  commissionAmount: number
+}
+
+export interface OrderDto {
+  id: number
+  orderNumber: string
+  totalAmount: number
+  status: string
+  shippingAddress?: string | null
+  deliveryFee?: number | null
+  shippingStateId?: number | null
+  shippingAreaId?: number | null
+  shippingStateName?: string | null
+  shippingAreaName?: string | null
+  deliveryAddress?: OrderDeliveryAddress | null
+  orderDate: string
+  shippedDate?: string | null
+  deliveredDate?: string | null
+  userId: string
+  sellerEmail: string
+  sellerName?: string | null
+  baseAmount: number
+  sellerPayout: number
+  platformFee: number
+  markupTotal: number
+  commissionTotal: number
+  isSettled: boolean
+  settledAt?: string | null
+  fulfillmentType?: OrderFulfillmentType | string | null
+  pickupCode?: string | null
+  pickupPreferredDates?: string[] | null
+  pickupAddress?: string | null
+  items: OrderItemDto[]
+}
+
+/* ───────── Store profiles ───────── */
+
+export interface StoreProfileResponse {
+  id: number
+  userId: number
+  storeName: string
+  storeSlug: string
+  description?: string | null
+  city?: string | null
+  state?: string | null
+  isOnVacation: boolean
+  vacationMessage?: string | null
+  fulfillmentOption: StoreFulfillmentOption
+  pickupAddressLine?: string | null
+  pickupCity?: string | null
+  pickupState?: string | null
+  pickupConsentGiven: boolean
+}
+
+export interface PublicStoreProfileResponse {
+  storeName: string
+  storeSlug: string
+  description?: string | null
+  city?: string | null
+  state?: string | null
+  isOnVacation: boolean
+  vacationMessage?: string | null
+  sellerEmail: string
+  sellerName: string
+  memberSince?: string | null
+  booksSold: number
+  fulfillmentOption: StoreFulfillmentOption
+  pickupAddressLine?: string | null
+  pickupCity?: string | null
+  pickupState?: string | null
+}
+
+export interface UpdateStoreProfileRequest {
+  storeName: string
+  description?: string | null
+  city?: string | null
+  state?: string | null
+  isOnVacation: boolean
+  vacationMessage?: string | null
+  fulfillmentOption: StoreFulfillmentOption
+  pickupAddressLine?: string | null
+  pickupCity?: string | null
+  pickupState?: string | null
+  pickupConsentGiven: boolean
+}
+
+export interface PayoutSummaryResponse {
+  sellerEmail: string
+  totalEarned: number
+  totalPaidOut: number
+  pendingPayout: number
+  orderCount: number
+}
+
+export interface SellerSaleResponse {
+  orderId: number
+  orderNumber: string
+  bookTitle: string
+  bookTitles?: string[] | null
+  buyerInitials: string
+  saleAmount: number
+  platformFee: number
+  sellerPayout: number
+  status: string
+  isSettled: boolean
+  orderDate: string
+  preferredSpeedafStationId?: number | null
+  preferredSpeedafStationName?: string | null
+  preferredSpeedafStationAddress?: string | null
+  sellerDropoffScheduledAt?: string | null
+  speedafBillCode?: string | null
+  labelUrl?: string | null
+  fulfillmentType?: OrderFulfillmentType | string
+  pickupCode?: string | null
+  pickupPreferredDates?: string[] | null
+  pickupAddress?: string | null
 }

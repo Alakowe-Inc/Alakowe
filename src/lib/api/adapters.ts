@@ -1,4 +1,4 @@
-import type { ListingResponse, CartItemResponse, CartResponse } from "./types"
+import type { ListingResponse, CartItemResponse, CartResponse, StoreFulfillmentOption } from "./types"
 
 const COVER_COLORS = ["#C8A97E", "#2E4057", "#6B4E3E", "#8B4513", "#4A6FA5", "#7C5C4D", "#9B6B43", "#5D7A5D"]
 
@@ -25,6 +25,11 @@ export interface BookDisplay {
   description: string
   loveNote?: string
   sellerName: string
+  sellerSlug?: string
+  fulfillmentOption?: StoreFulfillmentOption
+  pickupAddressLine?: string
+  pickupCity?: string
+  pickupState?: string
   isbn?: string
   categoryId?: number
   location?: string
@@ -57,6 +62,11 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     description: listing.description ?? "",
     loveNote: listing.loveNote ?? undefined,
     sellerName: listing.createdBy ?? "Seller",
+    sellerSlug: listing.storeSlug ?? undefined,
+    fulfillmentOption: listing.fulfillmentOption ?? "Courier",
+    pickupAddressLine: listing.pickupAddressLine ?? undefined,
+    pickupCity: listing.pickupCity ?? undefined,
+    pickupState: listing.pickupState ?? undefined,
     isbn: listing.isbn ?? undefined,
     categoryId: listing.categoryId,
     location: listing.location || undefined,
@@ -74,6 +84,13 @@ export interface CartItemDisplay {
   buyerPrice: number
   quantity: number
   isbn?: string
+  sellerEmail?: string
+  storeName?: string
+  storeSlug?: string
+  fulfillmentOption?: StoreFulfillmentOption
+  pickupAddressLine?: string
+  pickupCity?: string
+  pickupState?: string
 }
 
 export function cartItemToDisplay(item: CartItemResponse): CartItemDisplay {
@@ -88,6 +105,13 @@ export function cartItemToDisplay(item: CartItemResponse): CartItemDisplay {
     buyerPrice: Math.round((item.buyerPrice ?? 0) / 100),
     quantity: item.quantity ?? 1,
     isbn: item.isbn ?? undefined,
+    sellerEmail: item.sellerEmail ?? undefined,
+    storeName: item.storeName ?? undefined,
+    storeSlug: item.storeSlug ?? undefined,
+    fulfillmentOption: item.fulfillmentOption ?? "Courier",
+    pickupAddressLine: item.pickupAddressLine ?? undefined,
+    pickupCity: item.pickupCity ?? undefined,
+    pickupState: item.pickupState ?? undefined,
   }
 }
 
