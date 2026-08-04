@@ -8,6 +8,9 @@ function Cart() {
   const { items, addToCart, removeFromCart, clearCart } = useCart()
 
   const subtotal = items.reduce((sum, item) => sum + item.buyerPrice * item.quantity, 0)
+  const allPickupOnly =
+    items.length > 0 && items.every((item) => item.fulfillmentOption === 'Pickup')
+  const hasPickupOnly = items.some((item) => item.fulfillmentOption === 'Pickup')
 
   if (items.length === 0) {
     return (
@@ -99,6 +102,9 @@ function Cart() {
                   </div>
 
                   <p className="text-main/50 text-sm mb-1">by {item.author}</p>
+                  {item.fulfillmentOption === 'Pickup' && (
+                    <p className="text-xs font-semibold text-secondary mb-1">Pickup only</p>
+                  )}
 
                   <div className="flex items-center justify-between mt-4">
                     {/* Quantity control */}
@@ -161,7 +167,11 @@ function Cart() {
                   </span>
                 </div>
                 <p className="text-xs text-main/40 mt-2">
-                  Delivery fee calculated at checkout
+                  {allPickupOnly
+                    ? 'No delivery fee. These books are pickup only.'
+                    : hasPickupOnly
+                      ? 'Some books are pickup only. Delivery fee is calculated at checkout for delivered items.'
+                      : 'Delivery fee calculated at checkout'}
                 </p>
               </div>
 

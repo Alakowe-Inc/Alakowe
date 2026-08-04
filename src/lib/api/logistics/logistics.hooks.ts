@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
+  confirmSellerPickupApi,
   getOrderShipmentsApi,
   getSpeedafStationsApi,
   scheduleSellerDropoffApi,
@@ -26,6 +27,17 @@ export function useScheduleSellerDropoff() {
   return useMutation({
     mutationFn: ({ orderId, speedafStationId }: { orderId: number; speedafStationId: number }) =>
       scheduleSellerDropoffApi(orderId, speedafStationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["seller", "sales"] })
+    },
+  })
+}
+
+export function useConfirmSellerPickup() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ orderId, code }: { orderId: number; code: string }) =>
+      confirmSellerPickupApi(orderId, code),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seller", "sales"] })
     },

@@ -134,12 +134,15 @@ export function normalizeSellerSaleStatus(sale: {
   status?: string | null
   isSettled?: boolean
   preferredSpeedafStationId?: number | null
+  fulfillmentType?: string | null
 }): SellerSaleDisplayStatus {
   if (sale.isSettled) return "confirmed"
 
+  const isPickup = (sale.fulfillmentType ?? "").toLowerCase() === "pickup"
   const step = normalizeOrderStatus(sale.status)
 
   if (
+    !isPickup &&
     sale.preferredSpeedafStationId &&
     (step === "awaiting_seller" || step === "payment_received")
   ) {
@@ -184,7 +187,38 @@ export function sellerDisplayName(item: {
   return item.sellerEmail?.trim() || "Seller"
 }
 
+export function isPickupOrder(order: {
+  fulfillmentType?: string | null
+}): boolean {
+  return (order.fulfillmentType ?? "").toLowerCase() === "pickup"
+}
+
+export function formatPickupPreferredDates(dates?: string[] | null): string {
+  if (!dates?.length) return ""
+  return dates
+    .map((d) => {
+      const parsed = new Date(d)
+      if (Number.isNaN(parsed.getTime())) return d
+      return parsed.toLocaleDateString("en-NG", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      })
+    })
+    .join("; ")
+}
+
+export function pickupMapsUrl(address?: string | null): string | null {
+  const query = address?.trim()
+  if (!query) return null
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+}
+
 export function formatOrderShippingAddress(order: OrderDto): string {
+  if (isPickupOrder(order)) {
+    return order.pickupAddress?.trim() || "Pickup address on order"
+  }
+
   const address = order.deliveryAddress
   const parts = [
     address?.street?.trim() || order.shippingAddress?.trim(),
@@ -193,6 +227,36 @@ export function formatOrderShippingAddress(order: OrderDto): string {
   ].filter(Boolean) as string[]
 
   return parts.length > 0 ? parts.join(", ") : "Address on order"
+}
+
+export function orderStatusLabel(
+  status: DisplayOrderStatus,
+  fulfillmentType?: string | null,
+): string {
+  if (isPickupOrder({ fulfillmentType })) {
+    if (status === "awaiting_seller") return "Ready for pickup"
+    if (status === "delivered") return "Picked up"
+    if (status === "confirmed") return "Pickup confirmed"
+  }
+  return ORDER_STATUS_LABELS[status]
+}
+
+export function orderStatusDescription(
+  status: DisplayOrderStatus,
+  fulfillmentType?: string | null,
+): string {
+  if (isPickupOrder({ fulfillmentType })) {
+    if (status === "awaiting_seller") {
+      return "Show your pickup code to the seller when you collect the book."
+    }
+    if (status === "delivered") {
+      return "The seller confirmed you collected the book."
+    }
+    if (status === "confirmed") {
+      return "This pickup order is complete."
+    }
+  }
+  return ORDER_STATUS_DESCRIPTIONS[status]
 }
 
 export function getOrderDeliveryAddress(order: OrderDto): {

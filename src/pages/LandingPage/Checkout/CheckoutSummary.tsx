@@ -1,11 +1,65 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Package, Shield, Clock } from 'lucide-react'
+import { ArrowLeft, Package, Shield, Clock, MapPin, Phone } from 'lucide-react'
 import { useCheckout } from '../../../context/CheckoutContext'
 import { usePayCheckout, useCancelCheckout } from '../../../lib/api/checkout/checkout.hooks'
 import { getCheckoutSessionApi } from '../../../lib/api/checkout/checkout.api'
 import { formatPrice } from '../../../lib/utils'
 import PaystackPop from '@paystack/inline-js'
+
+const COURIER_STEPS = [
+  {
+    Icon: Package,
+    label: 'Seller drops off',
+    desc: 'The seller brings your book to our nearest collection centre within 48 hours.',
+  },
+  {
+    Icon: Shield,
+    label: 'We inspect & process',
+    desc: 'Our team checks the book quality and prepares your order for dispatch.',
+  },
+  {
+    Icon: Clock,
+    label: 'We deliver to you',
+    desc: 'Your book is on its way. Estimated delivery: 3-7 business days.',
+  },
+] as const
+
+const PICKUP_STEPS = [
+  {
+    Icon: Package,
+    label: 'Seller prepares your book',
+    desc: 'The seller gets your book ready at their pickup address.',
+  },
+  {
+    Icon: Phone,
+    label: 'You get their contact',
+    desc: 'After payment, you receive the seller\'s phone number to arrange collection.',
+  },
+  {
+    Icon: MapPin,
+    label: 'You pick up',
+    desc: 'Collect the book on one of your preferred days and show your pickup code.',
+  },
+] as const
+
+const MIXED_STEPS = [
+  {
+    Icon: Package,
+    label: 'Delivery orders',
+    desc: 'Sellers drop off at a Speedaf station. We inspect, then deliver to you in about 3-7 business days.',
+  },
+  {
+    Icon: MapPin,
+    label: 'Pickup orders',
+    desc: 'You\'ll get the seller\'s contact after payment. Collect with your pickup code on a preferred day.',
+  },
+  {
+    Icon: Shield,
+    label: 'Payment stays protected',
+    desc: 'Your payment is held until the order is completed for each fulfillment type.',
+  },
+] as const
 
 function CheckoutSummary() {
   const checkout = useCheckout()
@@ -36,7 +90,23 @@ function CheckoutSummary() {
   const subtotal = ((session.totalAmount ?? 0) / 100) - deliveryFee
   const total = (session.totalAmount ?? 0) / 100
 
-  const allItems = (session.sellerGroups ?? []).flatMap((g) => g.items ?? [])
+  const sellerGroups = session.sellerGroups ?? []
+  const fulfillmentTypes = sellerGroups.map(
+    (g) => g.selectedFulfillmentType ?? 'Courier',
+  )
+  const hasCourier = fulfillmentTypes.some((t) => t === 'Courier')
+  const hasPickup = fulfillmentTypes.some((t) => t === 'Pickup')
+  const fulfillmentMode =
+    hasCourier && hasPickup ? 'mixed' : hasPickup ? 'pickup' : 'courier'
+
+  const howItWorks =
+    fulfillmentMode === 'pickup'
+      ? { title: 'How Pickup Works', steps: PICKUP_STEPS }
+      : fulfillmentMode === 'mixed'
+        ? { title: 'How Fulfillment Works', steps: MIXED_STEPS }
+        : { title: 'How Delivery Works', steps: COURIER_STEPS }
+
+  const allItems = sellerGroups.flatMap((g) => g.items ?? [])
 
   async function initiatePayment(sessionId: string) {
     const paymentInit = await payCheckout.mutateAsync(sessionId)
@@ -70,7 +140,6 @@ function CheckoutSummary() {
         return
       }
 
-      // accessCode missing — session may be stale, validate before retrying
       if (result.reason === 'no_access_code') {
         const refreshedSession = await getCheckoutSessionApi(sessionId)
 
@@ -80,7 +149,6 @@ function CheckoutSummary() {
           return
         }
 
-        // Session still active but pay returned no access code — retry once
         const retry = await initiatePayment(sessionId)
         if (retry.success) {
           navigate('/checkout/processing')
@@ -89,7 +157,6 @@ function CheckoutSummary() {
         }
       }
     } catch {
-      // API call itself threw — validate session before deciding next step
       try {
         const refreshedSession = await getCheckoutSessionApi(sessionId)
 
@@ -99,7 +166,6 @@ function CheckoutSummary() {
           return
         }
 
-        // Session is still active — retry payment
         const retry = await initiatePayment(sessionId)
         if (retry.success) {
           navigate('/checkout/processing')
@@ -130,9 +196,7 @@ function CheckoutSummary() {
         <h1 className="font-heading font-bold text-main text-3xl mb-8">Checkout Summary</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left */}
           <div className="lg:col-span-2 flex flex-col gap-6">
-            {/* Order items */}
             <div className="bg-white rounded-2xl border border-third p-6">
               <h2 className="font-heading font-bold text-main text-lg mb-5">Order Summary</h2>
 
@@ -156,29 +220,12 @@ function CheckoutSummary() {
               </div>
             </div>
 
-            {/* How delivery works */}
             <div className="bg-white rounded-2xl border border-third p-6">
               <h2 className="font-heading font-bold text-main text-lg mb-5">
-                How Delivery Works
+                {howItWorks.title}
               </h2>
               <div className="flex flex-col gap-5">
-                {([
-                  {
-                    Icon: Package,
-                    label: 'Seller drops off',
-                    desc: 'The seller brings your book to our nearest collection centre within 48 hours.',
-                  },
-                  {
-                    Icon: Shield,
-                    label: 'We inspect & process',
-                    desc: 'Our team checks the book quality and prepares your order for dispatch.',
-                  },
-                  {
-                    Icon: Clock,
-                    label: 'We deliver to you',
-                    desc: 'Your book is on its way. Estimated delivery: 3–7 business days.',
-                  },
-                ] as const).map(({ Icon, label, desc }) => (
+                {howItWorks.steps.map(({ Icon, label, desc }) => (
                   <div key={label} className="flex items-start gap-4">
                     <div className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
                       <Icon size={16} className="text-secondary" />
@@ -193,7 +240,6 @@ function CheckoutSummary() {
             </div>
           </div>
 
-          {/* Right */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl border border-third p-6 lg:sticky lg:top-24">
               <h2 className="font-heading font-bold text-main text-lg mb-5">Payment Summary</h2>
@@ -212,9 +258,15 @@ function CheckoutSummary() {
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-main/55">Delivery</span>
+                  <span className="text-main/55">
+                    {fulfillmentMode === 'pickup' ? 'Pickup' : 'Delivery'}
+                  </span>
                   <span className="font-medium text-main">
-                    {deliveryFee > 0 ? formatPrice(deliveryFee) : 'Free'}
+                    {deliveryFee > 0
+                      ? formatPrice(deliveryFee)
+                      : fulfillmentMode === 'pickup'
+                        ? 'No fee'
+                        : 'Free'}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-bold mt-1">
@@ -223,7 +275,6 @@ function CheckoutSummary() {
                 </div>
               </div>
 
-              {/* Payment method */}
               <div className="mb-6">
                 <div className="flex items-center gap-3 border border-secondary/40 bg-secondary/5 rounded-xl px-4 py-3.5">
                   <div className="w-4 h-4 rounded-full border-2 border-secondary flex items-center justify-center shrink-0">
@@ -233,8 +284,11 @@ function CheckoutSummary() {
                   <span className="ml-auto text-xs text-main/40 font-medium">via Paystack</span>
                 </div>
                 <p className="text-xs text-main/40 mt-3 leading-relaxed">
-                  Your payment is held securely in escrow and only released to the seller after you
-                  confirm delivery.
+                  {fulfillmentMode === 'pickup'
+                    ? 'Your payment is held securely until the seller confirms pickup with your code.'
+                    : fulfillmentMode === 'mixed'
+                      ? 'Your payment is held securely until each part of your order is completed.'
+                      : 'Your payment is held securely in escrow and only released to the seller after you confirm delivery.'}
                 </p>
               </div>
 

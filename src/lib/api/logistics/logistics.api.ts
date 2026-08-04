@@ -68,3 +68,27 @@ export async function scheduleSellerDropoffApi(
   })
   return data as ScheduleSellerDropoffResponse
 }
+
+export interface ConfirmSellerPickupResponse {
+  orderId: number
+  orderNumber: string
+  bookTitle?: string
+  status?: string
+}
+
+export async function confirmSellerPickupApi(
+  orderId: number,
+  code: string,
+): Promise<ConfirmSellerPickupResponse> {
+  const { data } = await client.post(`/api/v1/seller/orders/${orderId}/confirm-pickup`, {
+    code,
+  })
+  // API currently returns ApiResponse<bool>; normalize for the modal.
+  if (data === true) {
+    return { orderId, status: "Delivered" }
+  }
+  if (data && typeof data === "object") {
+    return data as ConfirmSellerPickupResponse
+  }
+  return { orderId, status: "Delivered" }
+}

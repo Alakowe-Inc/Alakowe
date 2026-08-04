@@ -5,6 +5,7 @@ import { useSellerSales } from '../../lib/api/orders/orders.hooks'
 import { moneyInNaira, normalizeSellerSaleStatus, type SellerSaleDisplayStatus } from '../../lib/orders'
 import type { SellerSaleResponse } from '../../lib/api/types'
 import { ScheduleDropoffModal } from './ScheduleDropoffModal'
+import { ConfirmPickupModal } from './ConfirmPickupModal'
 
 const STATUS_CONFIG: Record<SellerSaleDisplayStatus, { label: string; class: string; icon: React.ElementType }> = {
   awaiting_seller: {
@@ -48,6 +49,22 @@ function timeAgo(iso: string): string {
   return 'Just now'
 }
 
+function isPickupSale(sale: SellerSaleResponse): boolean {
+  return (sale.fulfillmentType ?? '').toLowerCase() === 'pickup'
+}
+
+function formatPickupDates(dates?: string[] | null): string | null {
+  if (!dates?.length) return null
+  return dates
+    .map((iso) => {
+      const [y, m, d] = iso.split('-').map(Number)
+      if (!y || !m || !d) return iso
+      const date = new Date(y, m - 1, d)
+      return date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+    })
+    .join(', ')
+}
+
 const PAGE_SIZE = 10
 
 export default function SellerOrders() {
@@ -56,6 +73,11 @@ export default function SellerOrders() {
   const sales = data?.result ?? []
   const totalPages = data?.totalPages ?? 1
   const [schedulingSale, setSchedulingSale] = useState<SellerSaleResponse | null>(null)
+  const [pickupSale, setPickupSale] = useState<SellerSaleResponse | null>(null)
+
+  const awaitingSales = sales.filter((s) => normalizeSellerSaleStatus(s) === 'awaiting_seller')
+  const hasPickupAwaiting = awaitingSales.some(isPickupSale)
+  const hasCourierAwaiting = awaitingSales.some((s) => !isPickupSale(s))
 
   return (
     <div className="bg-third min-h-screen">
@@ -79,13 +101,17 @@ export default function SellerOrders() {
           </div>
         )}
 
-        {sales.some(s => normalizeSellerSaleStatus(s) === 'awaiting_seller') && (
+        {awaitingSales.length > 0 && (
           <div className="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-xl px-5 py-4 mb-6">
             <AlertCircle size={16} className="text-yellow-600 shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-yellow-800">You have books to drop off</p>
+              <p className="text-sm font-semibold text-yellow-800">You have orders that need action</p>
               <p className="text-xs text-yellow-700 mt-0.5">
-                Choose a Speedaf station near you so Alákọ̀wé can prepare your drop-off details.
+                {hasCourierAwaiting && hasPickupAwaiting
+                  ? 'Schedule a Speedaf drop-off for delivery orders, or confirm pickup when the buyer collects.'
+                  : hasPickupAwaiting
+                    ? 'Confirm pickup when the buyer collects their book and shows you the code.'
+                    : 'Choose a Speedaf station near you so Alákọ̀wé can prepare your drop-off details.'}
               </p>
             </div>
           </div>
@@ -109,6 +135,9 @@ export default function SellerOrders() {
               const status = normalizeSellerSaleStatus(sale)
               const cfg = STATUS_CONFIG[status]
               const Icon = cfg.icon
+              const pickup = isPickupSale(sale)
+              const pickupDatesLabel = formatPickupDates(sale.pickupPreferredDates)
+
               return (
                 <div key={sale.orderId} className="bg-white rounded-2xl border border-third p-5">
                   <div className="flex items-start justify-between gap-4 mb-4">
@@ -119,23 +148,40 @@ export default function SellerOrders() {
                       <p className="text-xs text-main/45 mt-0.5">
                         Order {sale.orderNumber} · Buyer: {sale.buyerInitials} · {timeAgo(sale.orderDate)}
                       </p>
-                      {sale.preferredSpeedafStationName && (
-                        <p className="text-xs text-main/50 mt-1">
-                          Drop-off: <span className="font-semibold text-main">{sale.preferredSpeedafStationName}</span>
-                          {sale.speedafBillCode ? (
-                            <span className="text-main/40"> · Waybill {sale.speedafBillCode}</span>
-                          ) : null}
-                        </p>
-                      )}
-                      {sale.labelUrl && (
-                        <a
-                          href={sale.labelUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-block text-xs font-semibold text-secondary mt-1 hover:underline"
-                        >
-                          View / print label
-                        </a>
+                      {pickup ? (
+                        <>
+                          {sale.pickupAddress && (
+                            <p className="text-xs text-main/50 mt-1">
+                              Pickup: <span className="font-semibold text-main">{sale.pickupAddress}</span>
+                            </p>
+                          )}
+                          {pickupDatesLabel && (
+                            <p className="text-xs text-main/45 mt-0.5">
+                              Preferred days: {pickupDatesLabel}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {sale.preferredSpeedafStationName && (
+                            <p className="text-xs text-main/50 mt-1">
+                              Drop-off: <span className="font-semibold text-main">{sale.preferredSpeedafStationName}</span>
+                              {sale.speedafBillCode ? (
+                                <span className="text-main/40"> · Waybill {sale.speedafBillCode}</span>
+                              ) : null}
+                            </p>
+                          )}
+                          {sale.labelUrl && (
+                            <a
+                              href={sale.labelUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-block text-xs font-semibold text-secondary mt-1 hover:underline"
+                            >
+                              View / print label
+                            </a>
+                          )}
+                        </>
                       )}
                     </div>
                     <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.class}`}>
@@ -158,13 +204,23 @@ export default function SellerOrders() {
                     </div>
                     {status === 'awaiting_seller' && (
                       <div className="ml-auto">
-                        <button
-                          type="button"
-                          onClick={() => setSchedulingSale(sale)}
-                          className="bg-main text-white font-semibold text-xs px-4 py-2 rounded-xl hover:bg-main/90 transition-colors"
-                        >
-                          Schedule Drop-off
-                        </button>
+                        {pickup ? (
+                          <button
+                            type="button"
+                            onClick={() => setPickupSale(sale)}
+                            className="bg-main text-white font-semibold text-xs px-4 py-2 rounded-xl hover:bg-main/90 transition-colors"
+                          >
+                            Mark as picked up
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setSchedulingSale(sale)}
+                            className="bg-main text-white font-semibold text-xs px-4 py-2 rounded-xl hover:bg-main/90 transition-colors"
+                          >
+                            Schedule Drop-off
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -203,6 +259,14 @@ export default function SellerOrders() {
         open={!!schedulingSale}
         onOpenChange={(open) => {
           if (!open) setSchedulingSale(null)
+        }}
+      />
+
+      <ConfirmPickupModal
+        sale={pickupSale}
+        open={!!pickupSale}
+        onOpenChange={(open) => {
+          if (!open) setPickupSale(null)
         }}
       />
     </div>

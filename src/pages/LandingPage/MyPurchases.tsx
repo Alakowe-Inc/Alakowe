@@ -3,9 +3,10 @@ import { Package, Truck, CheckCircle, Clock, AlertCircle, ShoppingBag } from 'lu
 import { useCart } from '../../lib/api/cart/cart.hooks'
 import { useOrdersByUser } from '../../lib/api/orders/orders.hooks'
 import {
-  ORDER_STATUS_LABELS,
   formatOrderShippingAddress,
+  isPickupOrder,
   normalizeOrderStatus,
+  orderStatusLabel,
   orderTotalInNaira,
   sellerDisplayName,
   type DisplayOrderStatus,
@@ -81,6 +82,7 @@ export default function MyPurchases() {
               const status = normalizeOrderStatus(order.status)
               const cfg = STATUS_CONFIG[status]
               const Icon = cfg.icon
+              const pickup = isPickupOrder(order)
               return (
                 <div key={order.id} className="bg-white rounded-2xl border border-third p-5">
 
@@ -96,9 +98,17 @@ export default function MyPurchases() {
                       <p className="text-xs text-main/45 mt-0.5">
                         {Array.from(new Set(order.items.map(i => sellerDisplayName(i)))).join(', ')}
                       </p>
+                      {pickup && order.pickupCode && (
+                        <p className="text-xs text-main/55 mt-1">
+                          Pickup code:{' '}
+                          <span className="font-mono font-semibold tracking-wider text-main">
+                            {order.pickupCode}
+                          </span>
+                        </p>
+                      )}
                     </div>
                     <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.class}`}>
-                      <Icon size={11} /> {ORDER_STATUS_LABELS[status]}
+                      <Icon size={11} /> {orderStatusLabel(status, order.fulfillmentType)}
                     </span>
                   </div>
 
@@ -130,7 +140,7 @@ export default function MyPurchases() {
                         <p className="font-heading font-bold text-main">₦{orderTotalInNaira(order).toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-main/40 mb-0.5">Delivery to</p>
+                        <p className="text-xs text-main/40 mb-0.5">{pickup ? 'Pickup at' : 'Delivery to'}</p>
                         <p className="font-semibold text-main text-xs">{formatOrderShippingAddress(order)}</p>
                       </div>
                     </div>
