@@ -104,7 +104,7 @@ export default function AllRequests() {
 
           <Link
             to="/request-book"
-            className="flex items-center gap-2 bg-main text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-main/90 transition-colors text-sm shrink-0"
+            className="flex items-center gap-2 bg-secondary text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm shrink-0"
           >
             <PlusCircle size={15} /> Post a Request
           </Link>
@@ -150,7 +150,7 @@ export default function AllRequests() {
                       className={`text-[11px] font-semibold tracking-widest uppercase px-4 py-2 transition-colors rounded-full ${
                         isJoined
                           ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                          : 'bg-main text-white hover:bg-main/85'
+                          : 'bg-secondary text-white hover:bg-secondary/85'
                       }`}
                     >
                       {isJoined ? "Joined" : "Join Waitlist"}

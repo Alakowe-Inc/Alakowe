@@ -50,7 +50,7 @@ function OrderStatusPage() {
           </p>
           <Link
             to="/browse"
-            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-main/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-secondary/90 transition-colors"
           >
             Browse Books
           </Link>
@@ -84,7 +84,7 @@ function OrderStatusPage() {
           <div className="flex flex-col gap-3">
             <Link
               to="/browse"
-              className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm text-center"
+              className="w-full bg-secondary text-white font-semibold py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm text-center"
             >
               Browse More Books
             </Link>
@@ -217,7 +217,7 @@ function OrderStatusPage() {
                   <button
                     onClick={handleConfirmDelivery}
                     disabled={confirming}
-                    className="flex-1 bg-main text-white font-semibold py-3 rounded-xl text-sm hover:bg-main/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="flex-1 bg-secondary text-white font-semibold py-3 rounded-xl text-sm hover:bg-secondary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {confirming ? 'Confirming…' : '✓  Yes, all good'}
                   </button>

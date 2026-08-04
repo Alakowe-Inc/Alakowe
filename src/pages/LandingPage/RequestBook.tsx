@@ -222,9 +222,7 @@ export default function RequestBook() {
 
           {/* Header Text */}
           <div className="flex-1 text-center md:text-left z-10 min-w-0">
-            <h1 className="font-heading font-bold text-main text-2xl sm:text-3xl leading-snug">
-              Request a Book
-            </h1>
+            
             <p className="text-xs sm:text-sm text-main/55 mt-1.5 max-w-md">
               Can't find what you're looking for? Submit a request and we'll notify you when a matching book is listed.
             </p>
@@ -357,7 +355,7 @@ export default function RequestBook() {
                 <button
                   type="submit"
                   disabled={submitRequest.isPending}
-                  className="w-full bg-main text-white font-semibold py-3.5 rounded-xl hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full bg-secondary text-white font-semibold py-3.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {submitRequest.isPending ? 'Submitting…' : 'Submit Request'}
                 </button>
@@ -545,7 +543,7 @@ export default function RequestBook() {
                 </p>
                 <button
                   onClick={() => navigate('/login?redirect=/request-book')}
-                  className="bg-main text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-main/90 transition-colors uppercase tracking-wider"
+                  className="bg-secondary text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-secondary/90 transition-colors uppercase tracking-wider"
                 >
                   Log In
                 </button>
@@ -598,7 +596,8 @@ export default function RequestBook() {
                   const conditionName = req.condition || req.bookCondition || 'Any Condition'
 
                   const createdDate = formatDate(getDate(req))
-                  const joinedDate = req.joinedAt ? formatDate(req.joinedAt) : createdDate
+                  // API returns dateJoined — use it; fall back to joinedAt, then createdDate
+                  const joinedDate = formatDate(req.dateJoined || req.joinedAt) || createdDate
 
                   return (
                     <div key={req.id} className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow">

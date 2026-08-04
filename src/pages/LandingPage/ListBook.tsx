@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Upload, Heart, BookOpen, Camera, DollarSign, CheckCircle, X, Loader2, Bell, Truck, Sparkles } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Upload, Heart, BookOpen, Camera, DollarSign, CheckCircle, X, Loader2, Bell, Truck, Sparkles, HelpCircle } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useSubmitListing } from '../../lib/api/listings/listings.hooks'
 import { CONDITIONS } from '../../data/sellerData'
@@ -61,6 +61,8 @@ type FormState = {
   title: string
   author: string
   genre: string
+  subGenre: string
+  pageCount: string
   condition: string
   quantity: string
   format: string
@@ -77,6 +79,8 @@ const empty: FormState = {
   title: '',
   author: '',
   genre: '',
+  subGenre: '',
+  pageCount: '',
   condition: '',
   quantity: '1',
   format: '',
@@ -121,8 +125,16 @@ export default function ListBook() {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState('')
   const [showGuide, setShowGuide] = useState(false)
+  const [showConditionGuide, setShowConditionGuide] = useState(false)
   const [guideStep, setGuideStep] = useState(0)
   const previewUrls = useRef<string[]>([])
+
+  const basePrice = parseFloat(form.price) || 0
+  const discountPercent = parseFloat(form.discount) || 0
+  const effectivePrice = Math.max(0, basePrice * (1 - discountPercent / 100))
+  const listedPrice = Math.round(effectivePrice * 1.10)
+  const platformFee = Math.round(effectivePrice * 0.10)
+  const payoutAmount = Math.max(0, effectivePrice - platformFee)
 
   useEffect(() => {
     setShowGuide(true)
@@ -414,7 +426,7 @@ export default function ListBook() {
             {guideStep < HOW_TO_STEPS.length - 1 ? (
               <Button
                 onClick={() => setGuideStep(s => s + 1)}
-                className="bg-secondary text-white text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-secondary/90 shadow-sm h-auto flex items-center gap-1.5"
+                className="bg-primary text-primary-foreground text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-primary/90 shadow-sm h-auto flex items-center gap-1.5"
               >
                 <span>Next</span>
                 <ArrowRight size={14} />
@@ -432,12 +444,51 @@ export default function ListBook() {
                   Learn More
                 </Button>
                 <DialogClose asChild>
-                  <Button className="bg-secondary text-white text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-secondary/90 shadow-sm h-auto">
+                  <Button className="bg-primary text-primary-foreground text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-primary/90 shadow-sm h-auto">
                     Start Listing
                   </Button>
                 </DialogClose>
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Condition Guide Dialog */}
+      <Dialog open={showConditionGuide} onOpenChange={setShowConditionGuide}>
+        <DialogContent className="max-w-lg rounded-3xl p-6">
+          <DialogTitle className="font-heading font-bold text-main text-xl mb-1">
+            Understanding Book Conditions
+          </DialogTitle>
+          <DialogDescription className="text-xs text-main/55 mb-4">
+            How we classify books on Alákòwé to help buyers buy with confidence.
+          </DialogDescription>
+          <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+              <span className="font-bold text-xs text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded mr-2">New</span>
+              <p className="text-xs text-main/70 mt-1">Brand new, unread, perfect condition with no missing pages or marks.</p>
+            </div>
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+              <span className="font-bold text-xs text-violet-700 bg-violet-100 px-2 py-0.5 rounded mr-2">Like New</span>
+              <p className="text-xs text-main/70 mt-1">Looks unread. May have tiny shelf wear, but no writing or folded pages.</p>
+            </div>
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+              <span className="font-bold text-xs text-blue-700 bg-blue-100 px-2 py-0.5 rounded mr-2">Excellent</span>
+              <p className="text-xs text-main/70 mt-1">Lightly read with minimal cover wear. Spine intact and pages clean.</p>
+            </div>
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+              <span className="font-bold text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded mr-2">Good</span>
+              <p className="text-xs text-main/70 mt-1">Shows normal reading wear, minor creases on cover or spine, or light notes/highlighting.</p>
+            </div>
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+              <span className="font-bold text-xs text-rose-700 bg-rose-100 px-2 py-0.5 rounded mr-2">Fair / Poor</span>
+              <p className="text-xs text-main/70 mt-1">Well-read with noticeable wear, water spots, or heavy annotations, but complete and readable.</p>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end">
+            <Button onClick={() => setShowConditionGuide(false)} className="bg-primary text-primary-foreground text-xs font-bold px-6 py-2.5 rounded-xl">
+              Got it
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -460,119 +511,10 @@ export default function ListBook() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
-          {/* Book Details */}
-          <div className="bg-white rounded-2xl border border-third p-6">
-            <h2 className="font-heading font-bold text-main text-base mb-5">Book Details</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="sm:col-span-2">
-                <Field label="Book Title" required error={errors.title}>
-                  <FormControl type="text" placeholder="e.g. Things Fall Apart" value={form.title}
-                    onChange={set('title')} style={inputClass(!!errors.title)} />
-                </Field>
-              </div>
-              <Field label="Author" required error={errors.author}>
-                <FormControl type="text" placeholder="e.g. Chinua Achebe" value={form.author}
-                  onChange={set('author')} style={inputClass(!!errors.author)} />
-              </Field>
-              <Field label="Category" required error={errors.genre}>
-                <SelectBoxControl
-                  placeholder="Select category"
-                  options={categories?.map(c => ({ label: c.name, value: c.id })) ?? []}
-                  value={categories?.map(c => ({ label: c.name, value: c.id })).find(o => String(o.value) === form.genre) ?? null}
-                  onChange={setSelect('genre')}
-                  style={inputClass(!!errors.genre)}
-                />
-              </Field>
-              <Field label="Condition" required error={errors.condition}>
-                <SelectBoxControl
-                  placeholder="Select condition"
-                  options={CONDITIONS.map(c => ({ label: c, value: c }))}
-                  value={CONDITIONS.map(c => ({ label: c, value: c })).find(o => o.value === form.condition) ?? null}
-                  onChange={setSelect('condition')}
-                  style={inputClass(!!errors.condition)}
-                />
-              </Field>
-              <Field label="Quantity" required>
-                <FormControl type="number" min="1" placeholder="e.g. 2" value={form.quantity}
-                  onChange={set('quantity')} style={inputClass()} />
-              </Field>
-              <Field label="Format" required>
-                <SelectBoxControl
-                  placeholder="Select format"
-                  options={[{ label: 'Hardcover', value: 'Hardcover' }, { label: 'Paperback', value: 'Paperback' }]}
-                  value={form.format ? { label: form.format, value: form.format } : null}
-                  onChange={setSelect('format')}
-                  style={inputClass()}
-                />
-              </Field>
-              <Field label="State" required error={errors.stateId}>
-                <SelectBoxControl
-                  placeholder="Select state"
-                  options={states?.map(s => ({ label: s.name, value: s.id })) ?? []}
-                  value={states?.map(s => ({ label: s.name, value: s.id })).find(o => String(o.value) === form.stateId) ?? null}
-                  onChange={setSelect('stateId')}
-                  style={inputClass(!!errors.stateId)}
-                />
-              </Field>
-              <Field label="Area" required error={errors.areaId}>
-                <SelectBoxControl
-                  placeholder={selectedStateId ? 'Select area' : 'Select state first'}
-                  options={areas?.map(a => ({ label: a.name, value: a.id })) ?? []}
-                  value={areas?.map(a => ({ label: a.name, value: a.id })).find(o => String(o.value) === form.areaId) ?? null}
-                  onChange={setSelect('areaId')}
-                  disabled={!selectedStateId}
-                  style={inputClass(!!errors.areaId)}
-                />
-              </Field>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="bg-white rounded-2xl border border-third p-6">
-            <h2 className="font-heading font-bold text-main text-base mb-1">Declare Book Condition</h2>
-            <p className="text-xs text-main/45 mb-4">Be honest about its condition and any marks or damages.</p>
-            <Field label="Condition" required error={errors.description}>
-              <TextareaControl placeholder="e.g. There's a small crease on the spine and a few pencil marks in chapter 3."
-                value={form.conditionNotes} onChange={set('conditionNotes')} rows={5}
-                style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
-            </Field>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-third p-6">
-            <h2 className="font-heading font-bold text-main text-base mb-1">Book Overview</h2>
-            <p className="text-xs text-main/45 mb-4">Provide a brief overview of the book.</p>
-            <Field label="Description" required error={errors.description}>
-              <TextareaControl value={form.description} onChange={set('description')} rows={5}
-                style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
-            </Field>
-          </div>
-
-          {/* Pricing */}
-          <div className="bg-white rounded-2xl border border-third p-6">
-            <h2 className="font-heading font-bold text-main text-base mb-1">Pricing</h2>
-            <p className="text-xs text-main/45 mb-4">Set a fair price.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Price (₦)" required error={errors.price}>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-medium">₦</span>
-                  <FormControl type="number" min="100" placeholder="e.g. 3000" value={form.price}
-                    onChange={set('price')} style={`${inputClass(!!errors.price)} pl-8`} />
-                </div>
-              </Field>
-              <Field label="Discount (%)" error={errors.discount}>
-                <div className="relative">
-                  <FormControl type="number" min="0" max="50" placeholder="0" value={form.discount}
-                    onChange={set('discount')} style={`${inputClass(!!errors.discount)} pr-8`} />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-main/40">%</span>
-                </div>
-              </Field>
-            </div>
-          </div>
-
-          {/* Photos */}
+          {/* 1. Photos */}
           <div className="bg-white rounded-2xl border border-third p-6">
             <h2 className="font-heading font-bold text-main text-base mb-1">Photos</h2>
-            <p className="text-xs text-main/45 mb-4">Upload 3–5 photos. Tap a thumbnail to set it as the cover.</p>
+            <p className="text-xs text-main/45 mb-4">Upload 3–5 photos of your book. Tap a thumbnail to set it as the cover.</p>
             {photoError && <p className="text-xs text-red-500 mb-3">{photoError}</p>}
             {photos.length < 5 && (
               <FileUpload
@@ -620,7 +562,179 @@ export default function ListBook() {
             )}
           </div>
 
-          {/* Love Note */}
+          {/* 2. Book Details */}
+          <div className="bg-white rounded-2xl border border-third p-6">
+            <h2 className="font-heading font-bold text-main text-base mb-5">Book Details</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="sm:col-span-2">
+                <Field label="Book Title" required error={errors.title}>
+                  <FormControl type="text" placeholder="e.g. Things Fall Apart" value={form.title}
+                    onChange={set('title')} style={inputClass(!!errors.title)} />
+                </Field>
+              </div>
+              <Field label="Author" required error={errors.author}>
+                <FormControl type="text" placeholder="e.g. Chinua Achebe" value={form.author}
+                  onChange={set('author')} style={inputClass(!!errors.author)} />
+              </Field>
+
+              {/* Category, Genre, No. of Pages placed together */}
+              <Field label="Category" required error={errors.genre}>
+                <SelectBoxControl
+                  placeholder="Select category"
+                  options={categories?.map(c => ({ label: c.name, value: c.id })) ?? []}
+                  value={categories?.map(c => ({ label: c.name, value: c.id })).find(o => String(o.value) === form.genre) ?? null}
+                  onChange={setSelect('genre')}
+                  style={inputClass(!!errors.genre)}
+                />
+              </Field>
+              <Field label="Genre">
+                <FormControl type="text" placeholder="e.g. Historical Fiction" value={form.subGenre}
+                  onChange={set('subGenre')} style={inputClass()} />
+              </Field>
+              <Field label="No. of Pages">
+                <FormControl type="number" min="1" placeholder="e.g. 215" value={form.pageCount}
+                  onChange={set('pageCount')} style={inputClass()} />
+              </Field>
+
+              <Field label="Quantity" required>
+                <FormControl type="number" min="1" placeholder="e.g. 1" value={form.quantity}
+                  onChange={set('quantity')} style={inputClass()} />
+              </Field>
+              <Field label="Format" required>
+                <SelectBoxControl
+                  placeholder="Select format"
+                  options={[{ label: 'Hardcover', value: 'Hardcover' }, { label: 'Paperback', value: 'Paperback' }]}
+                  value={form.format ? { label: form.format, value: form.format } : null}
+                  onChange={setSelect('format')}
+                  style={inputClass()}
+                />
+              </Field>
+              <Field label="State" required error={errors.stateId}>
+                <SelectBoxControl
+                  placeholder="Select state"
+                  options={states?.map(s => ({ label: s.name, value: s.id })) ?? []}
+                  value={states?.map(s => ({ label: s.name, value: s.id })).find(o => String(o.value) === form.stateId) ?? null}
+                  onChange={setSelect('stateId')}
+                  style={inputClass(!!errors.stateId)}
+                />
+              </Field>
+              <Field label="Area" required error={errors.areaId}>
+                <SelectBoxControl
+                  placeholder={selectedStateId ? 'Select area' : 'Select state first'}
+                  options={areas?.map(a => ({ label: a.name, value: a.id })) ?? []}
+                  value={areas?.map(a => ({ label: a.name, value: a.id })).find(o => String(o.value) === form.areaId) ?? null}
+                  onChange={setSelect('areaId')}
+                  disabled={!selectedStateId}
+                  style={inputClass(!!errors.areaId)}
+                />
+              </Field>
+            </div>
+          </div>
+
+          {/* 3. Declare Book Condition */}
+          <div className="bg-white rounded-2xl border border-third p-6">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <h2 className="font-heading font-bold text-main text-base">Declare Book Condition</h2>
+              <button
+                type="button"
+                onClick={() => setShowConditionGuide(true)}
+                className="text-xs font-semibold text-secondary hover:underline flex items-center gap-1 focus:outline-none"
+              >
+                <HelpCircle size={14} />
+                <span>Learn more</span>
+              </button>
+            </div>
+            <p className="text-xs text-main/45 mb-4">Be honest about its condition and any marks or damages.</p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <Field label="Condition Grade" required error={errors.condition}>
+                <SelectBoxControl
+                  placeholder="Select condition"
+                  options={CONDITIONS.map(c => ({ label: c, value: c }))}
+                  value={CONDITIONS.map(c => ({ label: c, value: c })).find(o => o.value === form.condition) ?? null}
+                  onChange={setSelect('condition')}
+                  style={inputClass(!!errors.condition)}
+                />
+              </Field>
+            </div>
+
+            <Field label="Condition Notes / Defects">
+              <TextareaControl placeholder="e.g. There's a small crease on the spine and a few pencil marks in chapter 3."
+                value={form.conditionNotes} onChange={set('conditionNotes')} rows={4}
+                style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
+            </Field>
+          </div>
+
+          {/* 4. Pricing */}
+          <div className="bg-white rounded-2xl border border-third p-6 sm:p-7">
+            <h2 className="font-heading font-bold text-main text-lg sm:text-xl mb-1">Pricing</h2>
+            <p className="text-xs text-main/50 mb-5">
+              Set a fair price. Listings priced too high may be flagged during review.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+              <Field label="PRICE (₦)" required error={errors.price}>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-semibold select-none">
+                    ₦
+                  </span>
+                  <FormControl
+                    type="number"
+                    min="100"
+                    placeholder="3000"
+                    value={form.price}
+                    onChange={set('price')}
+                    style={`${inputClass(!!errors.price)} pl-9 rounded-2xl focus:ring-1 focus:ring-secondary`}
+                  />
+                </div>
+              </Field>
+              <Field label="DISCOUNT (%)" error={errors.discount}>
+                <div className="relative">
+                  <FormControl
+                    type="number"
+                    min="0"
+                    max="50"
+                    placeholder="0"
+                    value={form.discount}
+                    onChange={set('discount')}
+                    style={`${inputClass(!!errors.discount)} pr-10 rounded-2xl focus:ring-1 focus:ring-secondary`}
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-medium select-none">
+                    %
+                  </span>
+                </div>
+              </Field>
+            </div>
+
+            {/* Payout Breakdown Box */}
+            <div className="bg-[#F8F9FC] border border-main/8 rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-main/60 font-medium">Listed price (what buyer pays)</span>
+                <span className="text-main font-bold">₦{listedPrice.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-main/60 font-medium">Alakowe fee (10%)</span>
+                <span className="text-main/50 font-medium">-₦{platformFee.toLocaleString()}</span>
+              </div>
+              <hr className="border-t border-main/10 my-1" />
+              <div className="flex items-center justify-between text-xs sm:text-sm pt-0.5">
+                <span className="text-main font-bold">Your payout</span>
+                <span className="text-main font-bold text-base">₦{payoutAmount.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 5. Book Synopsis */}
+          <div className="bg-white rounded-2xl border border-third p-6">
+            <h2 className="font-heading font-bold text-main text-base mb-1">Book Synopsis</h2>
+            <p className="text-xs text-main/45 mb-4">Provide a clear synopsis/description of the book so buyers know what to expect.</p>
+            <Field label="Synopsis" required error={errors.description}>
+              <TextareaControl value={form.description} onChange={set('description')} rows={5} placeholder="Describe the storyline, theme, or summary of the book..."
+                style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
+            </Field>
+          </div>
+
+          {/* 6. Love Note */}
           <div className="bg-secondary/6 border border-secondary/20 rounded-2xl p-6">
             <div className="flex items-center gap-2 mb-1">
               <Heart size={15} className="text-secondary" />
@@ -635,7 +749,7 @@ export default function ListBook() {
           </div>
 
           <button type="submit" disabled={submitListing.isPending || uploading}
-            className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-secondary hover:bg-secondary/90 text-white font-semibold py-4 rounded-xl transition-colors text-xs uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {uploading ? 'Uploading…' : submitListing.isPending ? 'Submitting…' : 'Submit Listing for Review'}
           </button>

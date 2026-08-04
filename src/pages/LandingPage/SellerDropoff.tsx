@@ -195,7 +195,7 @@ export default function SellerDropoff() {
 
           <Link
             to="/my-sales"
-            className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm text-center block"
+            className="w-full bg-secondary text-white font-semibold py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm text-center block"
           >
             Back to My Sales
           </Link>
@@ -370,7 +370,7 @@ export default function SellerDropoff() {
             (method === 'dropoff' && !selectedCentre) ||
             (method === 'pickup' && !selectedSlot)
           }
-          className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-secondary text-white font-semibold py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting
             ? 'Confirming…'

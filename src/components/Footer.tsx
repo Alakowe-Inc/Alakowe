@@ -35,12 +35,12 @@ const socialLinks = [
 
 function Footer() {
   return (
-    <footer className="bg-main text-white">
+    <footer className="bg-secondary text-white">
 
       {/* ── Main columns ────────────────────────────────────────── */}
-      <div className="border-t border-white/10">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 pt-14 pb-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+      <div>
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 pt-8 pb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-6">
 
             {/* Brand */}
             <div>
@@ -48,13 +48,13 @@ function Footer() {
                 <img
                   src={logo}
                   alt="Alakowé"
-                  className="h-8 w-auto object-contain mb-4"
+                  className="h-7 w-auto object-contain mb-3"
                 />
               </Link>
-              <p className="text-sm text-white/50 leading-relaxed mb-6">
+              <p className="text-xs text-white/60 leading-relaxed mb-4 font-medium">
                 A new way to read.
               </p>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 {socialLinks.map(({ Icon, label, href }) => (
                   <a
                     key={label}
@@ -62,7 +62,7 @@ function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={label}
-                    className="text-white/40 hover:text-secondary transition-colors"
+                    className="text-white/50 hover:text-white transition-colors"
                   >
                     <Icon />
                   </a>
@@ -72,18 +72,18 @@ function Footer() {
 
             {/* Explore */}
             <div>
-              <h4 className="font-heading font-semibold text-xs tracking-[0.2em] uppercase mb-5 text-white/60">
+              <h4 className="font-heading font-bold text-[11px] tracking-[0.15em] uppercase mb-3 text-white/70">
                 Explore
               </h4>
-              <ul className="space-y-3">
+              <ul className="space-y-2">
                 {[
                   { label: 'Browse Books', to: '/browse' },
                   { label: 'Sell Books', to: '/sell' },
                   { label: 'Request Books', to: '/requests' },
                   { label: 'View our Drop-off Centers', to: '/' },
-                ].map(({ label, to }) => (
-                  <li key={to}>
-                    <Link to={to} className="text-sm text-white/50 hover:text-secondary transition-colors">
+                ].map(({ label, to }, idx) => (
+                  <li key={`${to}-${idx}`}>
+                    <Link to={to} className="text-xs text-main/70 hover:text-main font-medium transition-colors">
                       {label}
                     </Link>
                   </li>
@@ -93,10 +93,10 @@ function Footer() {
 
             {/* Help */}
             <div>
-              <h4 className="font-heading font-semibold text-xs tracking-[0.2em] uppercase mb-5 text-white/60">
+              <h4 className="font-heading font-bold text-[11px] tracking-[0.15em] uppercase mb-3 text-main">
                 Help
               </h4>
-              <ul className="space-y-3">
+              <ul className="space-y-2">
                 {[
                   { label: 'How It Works', to: '/how-it-works' },
                   { label: 'FAQ', to: '/faq' },
@@ -105,7 +105,7 @@ function Footer() {
                   { label: 'Privacy Policy', to: '/privacy' },
                 ].map(({ label, to }) => (
                   <li key={to}>
-                    <Link to={to} className="text-sm text-white/50 hover:text-secondary transition-colors">
+                    <Link to={to} className="text-xs text-main/70 hover:text-main font-medium transition-colors">
                       {label}
                     </Link>
                   </li>
@@ -113,23 +113,23 @@ function Footer() {
               </ul>
             </div>
 
-            {/* Newsletter — frosted glass, matches quotes section cards */}
-            <div className="p-6 rounded-lg bg-white/10 backdrop-blur-md border border-white/15">
-              <h4 className="font-heading font-semibold text-xs tracking-[0.2em] uppercase mb-4 text-white/60">
+            {/* Newsletter — compact card */}
+            <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15">
+              <h4 className="font-heading font-bold text-[11px] tracking-[0.15em] uppercase mb-2 text-white/80">
                 Stay in the loop
               </h4>
-              <p className="text-sm text-white/50 mb-5 leading-relaxed">
+              <p className="text-xs text-white/60 mb-3 leading-relaxed">
                 New arrivals, reading tips, and updates straight to your inbox.
               </p>
-              <form onSubmit={e => e.preventDefault()} className="flex flex-col gap-3">
+              <form onSubmit={e => e.preventDefault()} className="flex flex-col gap-2">
                 <Input
                   type="email"
                   placeholder="your@email.com"
-                  className="bg-white/10 border-white/15 rounded-xl h-auto px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-secondary"
+                  className="bg-white/10 border-white/20 rounded-xl h-auto px-3 py-2 text-xs text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:border-white"
                 />
                 <Button
                   type="submit"
-                  className="bg-secondary text-main font-semibold text-sm rounded-xl h-auto px-4 py-2.5 hover:bg-secondary/80"
+                  className="bg-white text-secondary font-semibold text-xs rounded-xl h-auto px-3 py-2 hover:bg-white/90 shadow-xs"
                 >
                   Subscribe
                 </Button>
@@ -137,11 +137,11 @@ function Footer() {
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-white/30">
+          <div className="border-t border-white/15 pt-4 flex flex-col md:flex-row items-center justify-between gap-2">
+            <p className="text-[11px] text-white/40">
               © {new Date().getFullYear()} Alákọ̀wé. All rights reserved.
             </p>
-            <p className="text-xs text-white/30">Made with love for Nigerian readers.</p>
+            <p className="text-[11px] text-white/40">Made with love for Nigerian readers.</p>
           </div>
         </div>
       </div>

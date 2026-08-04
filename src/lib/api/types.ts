@@ -382,7 +382,8 @@ export interface BookRequestResponse {
   // The API returns `dateCreated`; `createdAt` is kept for backward compat
   dateCreated?: string | null
   createdAt?: string | null
-  // joinedAt is the date a user joined the waitlist
+  // joinedAt / dateJoined is the date a user joined the waitlist (my-activity API returns dateJoined)
+  dateJoined?: string | null
   joinedAt?: string | null
   waitlist?: string[] | null
   waitlistCount?: number

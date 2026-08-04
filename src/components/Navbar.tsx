@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { Search, ShoppingBag, Menu, X } from 'lucide-react'
 import { UserIcon } from '@heroicons/react/24/outline'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
-import logo from '../assets/media/logos/logo.png'
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import logoWhite from '../assets/media/logos/logo white.png'
+import logoColor from '../assets/media/logos/logo.png'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -17,10 +18,11 @@ import { Sheet, SheetClose, SheetContent, SheetTitle } from '@/components/ui/she
 import { FormControl } from '@/components/ui/form-controls'
 
 const navLinks = [
-  { label: 'Sell', to: '/sell' },
-  { label: 'Buy', to: '/browse' },
-  { label: 'How it works', to: '/how-it-works' },
-  { label: 'Contact', to: '/contact' },
+  { label: 'Browse Books', to: '/browse' },
+  { label: 'List Books', to: '/list' },
+  { label: 'Requests', to: '/request-book' },
+  { label: 'How It Works', to: '/how-it-works' },
+  { label: 'About Us', to: '/contact' },
 ]
 
 function Navbar() {
@@ -32,6 +34,9 @@ function Navbar() {
   const { count } = useCart()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const isHomePage = location.pathname === '/'
 
   function handleLogout() {
     logout()
@@ -62,61 +67,69 @@ function Navbar() {
 
   return (
     <>
-      <header className="w-full border-b border-third bg-fourth sticky top-0 z-50">
-        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 h-16 flex items-center justify-between gap-4">
+      <header
+        className={
+          isHomePage
+            ? 'absolute top-0 left-0 right-0 z-50 bg-transparent text-white'
+            : 'sticky top-0 left-0 right-0 z-50 bg-secondary text-white shadow-sm'
+        }
+      >
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-12 h-20 flex items-center justify-between gap-4">
 
           {/* Mobile + tablet — hamburger */}
           <button
-            className="lg:hidden text-main"
+            className="lg:hidden text-white"
             aria-label="Toggle menu"
             onClick={() => setMenuOpen(true)}
           >
             <Menu size={22} />
           </button>
 
-          {/* Desktop — nav links */}
-          <nav className="hidden lg:flex items-center gap-6">
+          {/* Left / Logo */}
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <img
+              src={logoWhite}
+              alt="Alákòwé"
+              className="h-7 md:h-8 w-auto object-contain"
+            />
+          </Link>
+
+          {/* Center/Right — Nav Links */}
+          <nav className="hidden lg:flex items-center gap-8 ml-auto mr-6">
             {navLinks.map(({ label, to }) => (
               <NavLink
                 key={to}
                 to={to}
-                className="text-xs uppercase tracking-widest font-medium text-main hover:text-secondary transition-colors whitespace-nowrap"
+                className={({ isActive }) =>
+                  `text-xs font-semibold transition-colors whitespace-nowrap ${
+                    isActive
+                      ? 'text-white font-bold'
+                      : 'text-white/80 hover:text-white'
+                  }`
+                }
               >
                 {label}
               </NavLink>
             ))}
           </nav>
 
-          {/* Center — logo */}
-          <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-            <img src={logo} alt="Alakowé" className="h-5 md:h-6 w-auto object-contain" />
-          </Link>
-
-          {/* Right — icons */}
-          <div className="flex items-center gap-5 ml-auto">
+          {/* Right — Search + Login / Sign up action buttons */}
+          <div className="flex items-center gap-4 shrink-0">
             <button
               aria-label="Search"
-              className="lg:hidden text-main hover:text-secondary transition-colors"
-              onClick={() => { focusOnOpenRef.current = true; setMenuOpen(true) }}
+              className="text-white/80 hover:text-white transition-colors p-1"
+              onClick={() => setDesktopSearchOpen((v) => !v)}
             >
-              <Search size={20} />
-            </button>
-            <button
-              aria-label="Search"
-              className="hidden lg:block text-main hover:text-secondary transition-colors"
-              onClick={() => setDesktopSearchOpen(v => !v)}
-            >
-              <Search size={20} />
+              <Search size={18} />
             </button>
 
-            {/* Desktop only — account dropdown */}
-            <div className="hidden lg:block">
-              {user ? (
+            {user ? (
+              <div className="hidden lg:block">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
                       aria-label="Account"
-                      className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white text-xs font-bold uppercase hover:bg-secondary/85 transition-colors outline-none"
+                      className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-bold uppercase hover:bg-white/30 transition-colors outline-none border border-white/30"
                     >
                       {user.email[0]}
                     </button>
@@ -148,28 +161,43 @@ function Navbar() {
                       ))}
                     </div>
                     <DropdownMenuSeparator className="bg-third" />
-                    <div className="py-1">
-                      <DropdownMenuItem
-                        onClick={handleLogout}
-                        className="px-4 py-2.5 text-sm text-red-500 cursor-pointer rounded-none focus:bg-red-50 focus:text-red-500"
-                      >
-                        Log out
-                      </DropdownMenuItem>
-                    </div>
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="px-4 py-3 text-sm text-red-600 font-semibold cursor-pointer rounded-none"
+                    >
+                      Sign out
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              ) : (
-                <Link to="/login" aria-label="Account" className="text-main hover:text-secondary transition-colors">
-                  <UserIcon className="w-5 h-5" />
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-3">
+                <Link
+                  to="/login"
+                  className="border border-white/60 hover:bg-white/10 text-white text-xs font-bold px-5 py-2 rounded-xl transition-colors"
+                >
+                  Log in
                 </Link>
-              )}
-            </div>
+                <Link
+                  to="/signup"
+                  className="bg-white hover:bg-white/90 text-[#2c305c] text-xs font-bold px-5 py-2 rounded-xl transition-colors shadow-sm"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
 
             {/* Cart */}
-            <Link to="/cart" aria-label="Cart" className="relative flex items-center gap-1 text-main hover:text-secondary transition-colors">
+            <Link
+              to="/cart"
+              aria-label="Cart"
+              className="relative flex items-center gap-1 text-white hover:text-white/80 transition-colors"
+            >
               <ShoppingBag size={20} />
               {count > 0 && (
-                <span className="absolute -top-2 -right-2 bg-secondary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span
+                  className="absolute -top-2 -right-2 bg-white text-[#2c305c] text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
+                >
                   {count > 99 ? '99+' : count}
                 </span>
               )}
@@ -218,7 +246,7 @@ function Navbar() {
               </button>
             </SheetClose>
             <Link to="/" onClick={() => setMenuOpen(false)}>
-              <img src={logo} alt="Alakowé" className="h-5 w-auto object-contain" />
+              <img src={logoWhite} alt="Alákòwé" className="h-5 w-auto object-contain" />
             </Link>
             <div className="w-5" />
           </div>

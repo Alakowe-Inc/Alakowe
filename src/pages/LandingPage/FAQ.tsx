@@ -195,7 +195,7 @@ function FAQ() {
     <div>
 
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="bg-main text-white h-[40vh] min-h-[320px] flex items-center justify-center py-12">
+      <section className="bg-secondary text-white h-[40vh] min-h-[320px] flex items-center justify-center py-12">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-12 w-full text-center">
           <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-3">
             Help Centre

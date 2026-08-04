@@ -61,7 +61,7 @@ export default function MyListings() {
             <p className="text-main/50 text-sm mt-1">Books you've listed on Alakowe</p>
           </div>
           <Link to="/list"
-            className="flex items-center gap-2 bg-main text-white font-semibold px-5 py-2.5 rounded-full hover:bg-main/90 transition-colors text-sm"
+            className="flex items-center gap-2 bg-secondary text-white font-semibold px-5 py-2.5 rounded-full hover:bg-secondary/90 transition-colors text-sm"
           >
             <PlusCircle size={15} /> List a Book
           </Link>
@@ -83,7 +83,7 @@ export default function MyListings() {
               <p className="text-xs text-main/50 mt-0.5">Share this link with buyers so they can browse all your live books</p>
             </div>
             <button onClick={copyStoreLink}
-              className="flex items-center gap-2 bg-main text-white font-semibold text-xs px-4 py-2.5 rounded-full hover:bg-main/90 transition-colors shrink-0"
+              className="flex items-center gap-2 bg-secondary text-white font-semibold text-xs px-4 py-2.5 rounded-full hover:bg-secondary/90 transition-colors shrink-0"
             >
               {copied ? <Check size={13} /> : <Share2 size={13} />}
               {copied ? 'Copied!' : 'Copy Link'}
@@ -111,7 +111,7 @@ export default function MyListings() {
               You haven't listed any books yet. Start turning your shelf into earnings.
             </p>
             <Link to="/list"
-              className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-full text-sm hover:bg-main/90 transition-colors"
+              className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-6 py-3 rounded-full text-sm hover:bg-secondary/90 transition-colors"
             >
               <PlusCircle size={15} /> List Your First Book
             </Link>

@@ -133,7 +133,7 @@ export default function SellerOrders() {
                       <div className="ml-auto">
                         <Link
                           to={`/my-sales/${order.id}/dropoff`}
-                          className="bg-main text-white font-semibold text-xs px-4 py-2 rounded-xl hover:bg-main/90 transition-colors"
+                          className="bg-secondary text-white font-semibold text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors"
                         >
                           Schedule Drop-off
                         </Link>

@@ -356,7 +356,7 @@ export default function ShippingAddresses() {
                     deleteMutation.isPending ||
                     setDefaultMutation.isPending
                   }
-                  className="bg-main text-white font-semibold py-3.5 px-6 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="bg-secondary text-white font-semibold py-3.5 px-6 rounded-full hover:bg-secondary/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {editingId ? (updateMutation.isPending ? 'Saving…' : 'Save Changes') : createMutation.isPending ? 'Saving…' : 'Save Address'}
                 </button>

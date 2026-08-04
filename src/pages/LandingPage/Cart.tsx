@@ -22,7 +22,7 @@ function Cart() {
           </p>
           <Link
             to="/browse"
-            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-xl hover:bg-main/90 transition-colors text-sm"
+            className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-6 py-3 rounded-xl hover:bg-secondary/90 transition-colors text-sm"
           >
             Browse Books
           </Link>
@@ -167,7 +167,7 @@ function Cart() {
 
               <Link
                 to="/checkout"
-                className="block w-full bg-main text-white font-semibold py-3.5 rounded-xl hover:bg-main/90 transition-colors text-sm mb-3 text-center"
+                className="block w-full bg-secondary text-white font-semibold py-3.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm mb-3 text-center"
               >
                 Proceed to Checkout
               </Link>
