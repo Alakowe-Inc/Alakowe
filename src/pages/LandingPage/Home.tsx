@@ -1,7 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
   ShoppingCart,
   BookOpen,
   BookPlus,
@@ -10,17 +13,25 @@ import {
   Shield,
   Truck,
 } from 'lucide-react'
-import { bookQuotes } from '../../data/mockData'
+import { books as mockBooks } from '../../data/mockData'
 import BookCarousel from '../../components/BookCarousel'
 import BookCard from '../../components/BookCard'
 import { useLandingPage } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import BookRequestsSection from '../../components/BookRequestsSection'
 import heroImage2 from '../../assets/media/images/banny2.png'
-import heroImage3 from '../../assets/media/images/banny3.png'
+import heroImage3 from '../../assets/media/images/image2.jpeg'
 
 /* ── Promo Insert Cards ─────────────────────────────────────────── */
 const promoInserts = [
+  {
+    id: 'what-does-alakowe-mean',
+    accentColor: 'bg-emerald-50/70 border-emerald-100',
+    question: 'What does Alákòwé mean?',
+    answer: `Alákòwé (pronounced ah-lah-koh-we) is a Yoruba word meaning "one who writes" or "a learned person." Around here, we believe readers deserve a marketplace built just for them, where books, independent booksellers, and readers come together to share knowledge.`,
+    buttonLabel: 'Learn More',
+    buttonTo: '/how-it-works',
+  },
   {
     id: 'sell-why',
     accentColor: 'bg-emerald-50/70 border-emerald-100',
@@ -47,7 +58,7 @@ const promoInserts = [
   },
   {
     id: 'who-buying-from',
-    accentColor: 'bg-amber-50/60 border-amber-100',
+    accentColor: 'bg-sky-50/60 border-sky-100',
     question: 'Who am I buying from on Alákòwé?',
     answer: `From readers just like you. Every book on Alákòwé comes from someone's shelf: students, teachers, parents, collectors, and fellow book lovers who believe every great book deserves another reader.`,
     buttonLabel: 'Browse Books',
@@ -55,7 +66,7 @@ const promoInserts = [
   },
   {
     id: 'bottomline',
-    accentColor: 'bg-rose-50/50 border-rose-100',
+    accentColor: 'bg-teal-50/60 border-teal-100',
     question: 'Our bottomline',
     answer: `Every order matters. We're committed to making sure buyers receive the books they paid for and sellers get paid for the books they sell. If you ever have a question or concern, our team — made up of real humans — is here to help.`,
     buttonLabel: 'Contact Us',
@@ -103,64 +114,147 @@ function PromoInsert({ promo }: { promo: typeof promoInserts[0] }) {
 
 function Home() {
   const [activeQuoteIndex, setActiveQuoteIndex] = useState(0)
-  const [howItWorksTab, setHowItWorksTab] = useState<'buy' | 'sell'>('buy')
+  const [howItWorksTab, setHowItWorksTab] = useState<'buy' | 'sell'>('sell')
 
   const { data: landingPage, isLoading: sectionsLoading } = useLandingPage()
   const sections = landingPage?.sections ?? []
 
+  // Extract real seller love notes from listings + fallback seller notes
+  const sellerLoveNotes = useMemo(() => {
+    const list: Array<{
+      id: string
+      quote: string
+      bookTitle: string
+      sellerName: string
+    }> = []
+
+    sections.forEach(section => {
+      (section.listings ?? []).forEach(listing => {
+        if (listing.loveNote && listing.loveNote.trim()) {
+          list.push({
+            id: String(listing.id ?? Math.random()),
+            quote: listing.loveNote.trim(),
+            bookTitle: listing.title ?? 'Untitled Book',
+            sellerName: listing.createdBy ?? 'Seller',
+          })
+        }
+      })
+    })
+
+    // Supplement with seller love notes from listed books
+    mockBooks.forEach(b => {
+      if (b.loveNote && !list.some(n => n.bookTitle === b.title)) {
+        list.push({
+          id: b.id,
+          quote: b.loveNote,
+          bookTitle: b.title,
+          sellerName: b.sellerName || 'Verified Seller',
+        })
+      }
+    })
+
+    return list
+  }, [sections])
+
+  // Hero image auto-change state (toggles every 1 second)
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0)
+
   useEffect(() => {
-    // no-op: hero is static per breakpoint (mobile vs desktop)
+    const timer = setInterval(() => {
+      setCurrentHeroIndex((prev) => (prev === 0 ? 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
   }, [])
+
+  const heroImages = [heroImage2, heroImage3]
 
   return (
     <div>
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="relative w-full h-[60vh] min-h-[460px] flex flex-col overflow-hidden">
+      <section className="relative w-full min-h-[560px] md:min-h-[620px] lg:min-h-[680px] bg-[#6c74ad] flex flex-col justify-between overflow-hidden text-white px-6 sm:px-10 lg:px-16 pt-24 md:pt-28 lg:pt-32 pb-10">
 
-        {/* Background images: mobile uses banny3, desktop uses banny2 */}
-        <img
-          src={heroImage3}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 lg:hidden"
-        />
-        <img
-          src={heroImage2}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 hidden lg:block"
-        />
+        {/* Dynamic Background Image with Smooth 1-second Fade */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {heroImages.map((img, idx) => (
+            <img
+              key={idx}
+              src={img}
+              alt=""
+              aria-hidden
+              className={`absolute inset-0 w-full h-full object-cover object-right-bottom transition-opacity duration-500 ease-in-out ${
+                idx === currentHeroIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          ))}
+        </div>
 
-        {/* Uniform dark overlay */}
-        <div className="absolute inset-0 bg-main/50" />
+        {/* Hero Content Container */}
+        <div className="relative z-10 max-w-7xl w-full mx-auto flex-1 flex flex-col justify-center py-6">
+          <div className="max-w-xl">
+            {/* Tagline */}
+            <p className="text-white/80 text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] mb-4">
+              BUY, SELL & REQUEST BOOKS
+            </p>
 
-        {/* Centered content */}
-        <div className="relative flex-1 flex flex-col items-center justify-center text-center px-5 sm:px-8">
-          <p className="text-white/70 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] mb-4 sm:mb-5">
-            Nigeria's Trusted Used Books Marketplace
-          </p>
+            {/* Main Headline */}
+            <h1 className="font-heading font-extrabold text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.08] tracking-tight mb-6">
+              Where books <br />
+              find new readers.
+            </h1>
 
-          <h1 className="font-heading font-bold text-white uppercase leading-none mb-4 sm:mb-5 text-3xl sm:text-5xl md:text-6xl xl:text-7xl max-w-xs sm:max-w-xl md:max-w-3xl">
-            Buy, Sell & Request Used Books
-          </h1>
+            {/* Decorative underline */}
+            <div className="w-12 h-1 bg-white/40 rounded-full mb-8" />
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-            <Link
-              to="/browse"
-              className="w-full sm:w-auto inline-flex justify-center items-center border border-white text-white font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white hover:text-main transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase rounded-xl"
-            >
-              Browse Books
-            </Link>
-            <Link
-              to="/list"
-              className="w-full sm:w-auto inline-flex justify-center items-center border border-white bg-white text-main font-semibold px-8 sm:px-10 py-3 sm:py-3.5 hover:bg-white/85 transition-all duration-200 text-[11px] sm:text-xs tracking-widest uppercase rounded-xl"
-            >
-              List a Book
-            </Link>
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                to="/browse"
+                className="bg-[#c3c6ff] hover:bg-[#b0b4ff] text-[#2c305c] font-bold px-8 py-3.5 rounded-2xl text-sm transition-colors shadow-sm"
+              >
+                Browse
+              </Link>
+              <Link
+                to="/list"
+                className="border border-white/70 hover:bg-white/10 text-white font-bold px-8 py-3.5 rounded-2xl text-sm transition-colors"
+              >
+                List Books
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* Static hero per breakpoint (no pagination dots) */}
+        {/* Bottom Feature Badges Bar */}
+        <div className="relative z-10 max-w-7xl w-full mx-auto pt-8 border-t border-white/15 grid grid-cols-1 sm:grid-cols-3 gap-6 text-white/90">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center shrink-0 bg-white/10">
+              <BookOpen size={18} className="text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white leading-tight">Built only</p>
+              <p className="text-xs font-bold text-white leading-tight">for readers</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center shrink-0 bg-white/10">
+              <Shield size={18} className="text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white leading-tight">Secure</p>
+              <p className="text-xs font-bold text-white leading-tight">payments</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center shrink-0 bg-white/10">
+              <Truck size={18} className="text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white leading-tight">Nationwide</p>
+              <p className="text-xs font-bold text-white leading-tight">delivery & pickup</p>
+            </div>
+          </div>
+        </div>
       </section>
 
 
@@ -180,6 +274,9 @@ function Home() {
             <div className="py-12 text-center text-main/40 text-sm">Loading collections...</div>
           )}
 
+          {/* First promo insert before image cards */}
+          <PromoInsert promo={promoInserts[0]} />
+
           {(() => {
             // Filter out empty sections first
             const validSections = sections.filter(
@@ -191,7 +288,7 @@ function Home() {
               tag: <span className="text-amber-500">☆</span>,
             }
             const result: React.ReactNode[] = []
-            let promoIndex = 0
+            let promoIndex = 1
 
             const pushPromo = (index: number) => {
               const promo = promoInserts[index]
@@ -257,78 +354,142 @@ function Home() {
         </div>
       </section>
 
-      {/* ── Book Quotes ─────────────────────────────────────────── */}
-      <section className="bg-white py-12 border-t border-b border-third">
+      {/* ── Love Notes from Our Sellers ─────────────────────────────────────────── */}
+      <section className="bg-[#FAF9F6] py-14 border-t border-b border-third overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           {/* Header */}
-          <div className="mb-8 text-left">
-            <h2 className="font-heading font-bold text-main text-3xl">
-              Notes from the pages
-            </h2>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+            <div>
+
+              <h2 className="font-heading font-bold text-main text-2xl sm:text-3xl md:text-4xl">
+                Love Notes from Our Sellers
+              </h2>
+              <p className="text-xs sm:text-sm text-main/60 mt-1 max-w-xl">
+                Real notes written by sellers when listing a book for the next reader.
+              </p>
+            </div>
+
+            {/* Desktop Controls */}
+            {sellerLoveNotes.length > 3 && (
+              <div className="hidden sm:flex items-center gap-2">
+                <button
+                  onClick={() => setActiveQuoteIndex(prev => (prev === 0 ? sellerLoveNotes.length - 1 : prev - 1))}
+                  className="w-9 h-9 rounded-full border border-main/15 bg-white flex items-center justify-center text-main/50 hover:text-main hover:border-main/40 transition-colors shadow-sm"
+                  aria-label="Previous note"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={() => setActiveQuoteIndex(prev => (prev === sellerLoveNotes.length - 1 ? 0 : prev + 1))}
+                  className="w-9 h-9 rounded-full border border-main/15 bg-white flex items-center justify-center text-main/50 hover:text-main hover:border-main/40 transition-colors shadow-sm"
+                  aria-label="Next note"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Cards Grid / Carousel */}
+          {/* Cards Carousel */}
           <div className="relative">
-            {/* On desktop: show all three cards in a grid */}
-            <div className="hidden lg:grid grid-cols-3 gap-8">
-              {bookQuotes.map((item, idx) => (
+            {/* Desktop Grid (3 cards per view) */}
+            <div className="hidden lg:grid grid-cols-3 gap-6">
+              {sellerLoveNotes.slice(activeQuoteIndex, activeQuoteIndex + 3).concat(
+                sellerLoveNotes.slice(0, Math.max(0, (activeQuoteIndex + 3) - sellerLoveNotes.length))
+              ).slice(0, 3).map((item) => (
                 <div
-                  key={idx}
-                  className="relative bg-[#FFFDF0] pt-12 pb-8 px-8 rounded-lg shadow-[0_10px_25px_-5px_rgba(23,33,49,0.05)] flex flex-col min-h-[220px] transition-transform duration-300 hover:-translate-y-1"
+                  key={item.id}
+                  className="relative bg-secondary/10 pt-10 pb-6 px-6 rounded-2xl border border-secondary/20 shadow-[0_4px_20px_-4px_rgba(23,33,49,0.06)] flex flex-col justify-between min-h-[240px] transition-all duration-300 hover:-translate-y-1"
                 >
                   {/* Tape decoration */}
-                  <div className="absolute -top-2 w-14 h-4 bg-slate-400/20 rounded-[3px] shadow-sm border border-white/20 left-1/2 -translate-x-1/2" />
+                  <div className="absolute -top-2.5 w-16 h-5 bg-secondary/25 rounded-[3px] shadow-xs border border-white/50 left-1/2 -translate-x-1/2" />
 
-                  {/* Quote text (handwritten) */}
-                  <p className="font-handwritten text-[24px] text-main/90 leading-relaxed font-medium mb-8">
-                    "{item.quote}"
-                  </p>
+                  <div>
+                    {/* Book title tag */}
+                    <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-secondary bg-secondary/15 border border-secondary/25 rounded-md px-2.5 py-1 mb-4 max-w-full truncate">
+                      <BookOpen size={12} className="shrink-0 text-secondary" />
+                      <span className="truncate">{item.bookTitle}</span>
+                    </div>
 
-                  {/* Author */}
-                  <p className="font-heading font-bold text-xs text-main mt-auto self-start">
-                    {item.author}
-                  </p>
+                    {/* Quote text (handwritten) */}
+                    <p className="font-handwritten text-[22px] sm:text-[24px] text-main/90 leading-relaxed font-medium mb-6">
+                      "{item.quote}"
+                    </p>
+                  </div>
+
+                  {/* Seller info */}
+                  <div className="pt-4 border-t border-secondary/15 flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm relative">
+                      {item.sellerName.charAt(0).toUpperCase()}
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-rose-500 rounded-full border border-white flex items-center justify-center">
+                        <Heart size={8} className="fill-white text-white" />
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-heading font-bold text-xs text-main truncate">
+                        {item.sellerName}
+                      </p>
+                      <p className="text-[10px] text-main/45 font-medium">Verified Seller</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* On mobile/tablet: show only the active card with slider dots */}
+            {/* Mobile Card Display */}
             <div className="lg:hidden flex flex-col items-center">
-              <div className="w-full max-w-md relative bg-[#FFFDF0] pt-12 pb-8 px-8 rounded-lg shadow-[0_10px_25px_-5px_rgba(23,33,49,0.05)] flex flex-col min-h-[220px]">
-                {/* Tape decoration */}
-                <div className="absolute -top-2 w-14 h-4 bg-slate-400/20 rounded-[3px] shadow-sm border border-white/20 left-1/2 -translate-x-1/2" />
+              {sellerLoveNotes.length > 0 && (() => {
+                const item = sellerLoveNotes[activeQuoteIndex % sellerLoveNotes.length]
+                return (
+                  <div className="w-full max-w-md relative bg-secondary/10 pt-10 pb-6 px-6 rounded-2xl border border-secondary/20 shadow-[0_4px_20px_-4px_rgba(23,33,49,0.06)] flex flex-col justify-between min-h-[230px]">
+                    {/* Tape decoration */}
+                    <div className="absolute -top-2.5 w-16 h-5 bg-secondary/25 rounded-[3px] shadow-xs border border-white/50 left-1/2 -translate-x-1/2" />
 
-                {/* Quote text (handwritten) */}
-                <p className="font-handwritten text-[24px] text-main/90 leading-relaxed font-medium mb-8">
-                  "{bookQuotes[activeQuoteIndex].quote}"
-                </p>
+                    <div>
+                      {/* Book title tag */}
+                      <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-secondary bg-secondary/15 border border-secondary/25 rounded-md px-2.5 py-1 mb-4 max-w-full truncate">
+                        <BookOpen size={12} className="shrink-0 text-secondary" />
+                        <span className="truncate">{item.bookTitle}</span>
+                      </div>
 
-                {/* Author */}
-                <p className="font-heading font-bold text-xs text-main mt-auto self-start">
-                  {bookQuotes[activeQuoteIndex].author}
-                </p>
-              </div>
+                      {/* Quote text (handwritten) */}
+                      <p className="font-handwritten text-[22px] sm:text-[24px] text-main/90 leading-relaxed font-medium mb-6">
+                        "{item.quote}"
+                      </p>
+                    </div>
+
+                    {/* Seller info */}
+                    <div className="pt-4 border-t border-secondary/15 flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm relative">
+                        {item.sellerName.charAt(0).toUpperCase()}
+                        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-rose-500 rounded-full border border-white flex items-center justify-center">
+                          <Heart size={8} className="fill-white text-white" />
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-heading font-bold text-xs text-main truncate">
+                          {item.sellerName}
+                        </p>
+                        <p className="text-[10px] text-main/45 font-medium">Verified Seller</p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
 
               {/* Mobile pagination dots */}
-              <div className="flex gap-2.5 mt-8">
-                {bookQuotes.map((_, idx) => (
+              <div className="flex gap-2 mt-6">
+                {sellerLoveNotes.slice(0, 6).map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveQuoteIndex(idx)}
-                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                      activeQuoteIndex === idx ? 'bg-main w-5' : 'bg-main/20'
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      activeQuoteIndex === idx ? 'bg-secondary w-6' : 'bg-main/20 w-2'
                     }`}
-                    aria-label={`Go to quote ${idx + 1}`}
+                    aria-label={`Go to note ${idx + 1}`}
                   />
                 ))}
               </div>
-            </div>
-
-            {/* Desktop pagination dots matching mockup layout */}
-            <div className="hidden lg:flex items-center justify-center gap-2 mt-8">
-              <span className="w-2.5 h-2.5 rounded-full bg-main" />
-              <span className="w-2.5 h-2.5 rounded-full bg-main/20" />
-              <span className="w-2.5 h-2.5 rounded-full bg-main/20" />
             </div>
           </div>
         </div>
@@ -463,32 +624,36 @@ function Home() {
 
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section className="bg-main py-16">
-        <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center text-center gap-8">
-          <div>
-            <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">
-              Start Today
-            </p>
-            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-5">
-              Ready to find the next reader for your book?
-            </h2>
-            {/* <p className="text-white/55 text-sm leading-relaxed">
-              Discover affordable used books from readers across Nigeria. Buy, sell, and keep great stories moving.
-            </p> */}
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link
-              to="/sell"
-              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-xl"
-            >
-              List a Book
-            </Link>
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-xl"
-            >
-              Create Account
-            </Link>
+      <section className="py-8 bg-white border-t border-third">
+        <div className="max-w-5xl mx-auto px-4 md:px-6">
+          <div className="rounded-2xl bg-secondary text-white px-6 py-6 sm:px-8 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm border border-secondary/20">
+            <div className="min-w-0 flex-1">
+              <p className="text-white/60 text-[11px] font-semibold uppercase tracking-widest mb-1.5">
+                Start Today
+              </p>
+              <h3 className="font-heading font-bold text-white text-lg sm:text-xl md:text-2xl leading-snug">
+                Ready to find the next reader for your book?
+              </h3>
+              <p className="text-xs sm:text-sm text-white/70 leading-relaxed mt-1 max-w-xl">
+                List your books in minutes and join a community where great books keep moving.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 shrink-0 self-start sm:self-center">
+              <Link
+                to="/list"
+                className="inline-flex items-center justify-center gap-1.5 bg-[#c3c6ff] hover:bg-white text-secondary font-bold px-5 py-2.5 text-xs sm:text-sm transition-colors rounded-xl shadow-xs"
+              >
+                <span>List a Book</span>
+                <span className="text-sm">&rarr;</span>
+              </Link>
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center gap-1.5 border border-white/30 hover:bg-white/10 text-white font-semibold px-5 py-2.5 text-xs sm:text-sm transition-colors rounded-xl"
+              >
+                Create Account
+              </Link>
+            </div>
           </div>
         </div>
       </section>

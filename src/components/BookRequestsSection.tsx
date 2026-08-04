@@ -228,10 +228,10 @@ export default function BookRequestsSection({ }: BookRequestsSectionProps) {
             return (
               <div
                 key={item.id}
-                className="shrink-0 w-[78vw] sm:w-[42vw] md:w-[28vw] lg:w-[calc((100%-4*1rem)/5)] group"
+                className="shrink-0 w-[68vw] max-w-[260px] sm:max-w-none sm:w-[42vw] md:w-[28vw] lg:w-[calc((100%-4*1rem)/5)] group"
               >
                 {/* White Card Container */}
-                <div className="bg-white border border-gray-200/70 rounded-2xl p-5 flex flex-col justify-between min-h-[260px] shadow-[0_2px_14px_rgba(0,0,0,0.03)] hover:shadow-md transition-all duration-200 relative">
+                <div className="bg-white border border-gray-200/70 rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[230px] sm:min-h-[260px] shadow-[0_2px_14px_rgba(0,0,0,0.03)] hover:shadow-md transition-all duration-200 relative">
 
                   {/* Top Pinned Yellow Sticky Badge */}
                   <div>

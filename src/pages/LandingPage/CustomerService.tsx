@@ -139,7 +139,7 @@ export default function CustomerService() {
           </div>
           <Link
             to="/faq"
-            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-xl hover:bg-main/90 transition-colors text-sm shrink-0"
+            className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-6 py-3 rounded-xl hover:bg-secondary/90 transition-colors text-sm shrink-0"
           >
             View FAQ
           </Link>

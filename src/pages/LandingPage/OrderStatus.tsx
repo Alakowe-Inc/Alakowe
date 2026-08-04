@@ -42,7 +42,7 @@ function OrderStatusPage() {
           </p>
           <Link
             to="/browse"
-            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-main/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-secondary/90 transition-colors"
           >
             Browse Books
           </Link>
@@ -53,8 +53,38 @@ function OrderStatusPage() {
 
   if (isLoading || !order) {
     return (
+feature/landing
+      <div className="bg-third min-h-screen flex items-center justify-center px-4 py-16">
+        <div className="max-w-md w-full text-center">
+          <div className="w-20 h-20 rounded-full bg-secondary/12 flex items-center justify-center mx-auto mb-6">
+            <span className="text-4xl">📚</span>
+          </div>
+          <h1 className="font-heading font-bold text-main text-2xl mb-3">We're glad you love it!</h1>
+          <p className="text-main/55 text-sm mb-8 leading-relaxed">
+            You've helped a book find a new home.
+          </p>
+          <div className="bg-white rounded-2xl border border-third p-4 mb-7 text-left">
+            <p className="text-xs font-semibold text-main/40 uppercase tracking-wider mb-1">Order</p>
+            <p className="font-heading font-bold text-main">{order.id}</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <Link
+              to="/browse"
+              className="w-full bg-secondary text-white font-semibold py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm text-center"
+            >
+              Browse More Books
+            </Link>
+            <Link
+              to="/contact"
+              className="w-full text-center text-sm text-main/50 hover:text-main transition-colors font-medium py-2"
+            >
+              Leave a note for the seller
+            </Link>
+          </div>
+        </div>
       <div className="bg-third min-h-screen flex items-center justify-center px-4">
         <p className="text-main/50 text-sm">Loading order…</p>
+        dev
       </div>
     )
   }
@@ -178,6 +208,35 @@ function OrderStatusPage() {
                 })}
               </div>
             </div>
+            feature/landing
+
+            {/* Delivery confirmation prompt */}
+            {isDelivered && (
+              <div className="bg-white rounded-2xl border border-secondary/25 p-6">
+                <h3 className="font-heading font-bold text-main text-base mb-2">
+                  Did you receive your book?
+                </h3>
+                <p className="text-main/55 text-sm mb-5 leading-relaxed">
+                  Please confirm once you've received your order so we can release payment to the seller.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={handleConfirmDelivery}
+                    disabled={confirming}
+                    className="flex-1 bg-secondary text-white font-semibold py-3 rounded-xl text-sm hover:bg-secondary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {confirming ? 'Confirming…' : '✓  Yes, all good'}
+                  </button>
+                  <Link
+                    to={`/order/${orderId}/dispute`}
+                    className="flex-1 border border-main/20 text-main font-semibold py-3 rounded-xl text-sm hover:bg-main/5 transition-colors text-center"
+                  >
+                    ⚠  There's an issue
+                  </Link>
+                </div>
+              </div>
+            )}
+        dev
           </div>
 
           <div className="md:col-span-2 flex flex-col gap-4">

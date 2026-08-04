@@ -140,6 +140,13 @@ export default function EditListing() {
 
   const notFound = !id || (!listing && !form)
 
+feature/landing
+  const basePrice = parseFloat(form?.price ?? '0') || 0
+  const discountPercent = parseFloat(form?.discount ?? '0') || 0
+  const effectivePrice = Math.max(0, basePrice * (1 - discountPercent / 100))
+  const listedPrice = Math.round(effectivePrice * 1.10)
+  const platformFee = Math.round(effectivePrice * 0.10)
+  const payoutAmount = Math.max(0, effectivePrice - platformFee)
   async function goToDeliverySettings() {
     if (!form || !id) return
     setSavingDraft(true)
@@ -156,6 +163,7 @@ export default function EditListing() {
       setSavingDraft(false)
     }
   }
+dev
 
   function set(field: keyof FormState) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -480,21 +488,61 @@ export default function EditListing() {
             )}
           </div>
 
-          <div className="bg-white rounded-2xl border border-third p-6">
-            <h2 className="font-heading font-bold text-main text-base mb-4">Pricing</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Price (₦)" required error={errors.price}>
+          <div className="bg-white rounded-2xl border border-third p-6 sm:p-7">
+            <h2 className="font-heading font-bold text-main text-lg sm:text-xl mb-1">Pricing</h2>
+            <p className="text-xs text-main/50 mb-5">
+              Set a fair price. Listings priced too high may be flagged during review.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+              <Field label="PRICE (₦)" required error={errors.price}>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-medium">₦</span>
-                  <FormControl type="number" min="100" value={form.price} onChange={set('price')} style={`${inputClass(!!errors.price)} pl-8`} />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-semibold select-none">
+                    ₦
+                  </span>
+                  <FormControl
+                    type="number"
+                    min="100"
+                    placeholder="3000"
+                    value={form.price}
+                    onChange={set('price')}
+                    style={`${inputClass(!!errors.price)} pl-9 rounded-2xl focus:ring-1 focus:ring-secondary`}
+                  />
                 </div>
               </Field>
-              <Field label="Discount (%)" error={errors.discount}>
+              <Field label="DISCOUNT (%)" error={errors.discount}>
                 <div className="relative">
-                  <FormControl type="number" min="0" max="50" value={form.discount} onChange={set('discount')} style={`${inputClass(!!errors.discount)} pr-8`} />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-main/40">%</span>
+                  <FormControl
+                    type="number"
+                    min="0"
+                    max="50"
+                    placeholder="0"
+                    value={form.discount}
+                    onChange={set('discount')}
+                    style={`${inputClass(!!errors.discount)} pr-10 rounded-2xl focus:ring-1 focus:ring-secondary`}
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-medium select-none">
+                    %
+                  </span>
                 </div>
               </Field>
+            </div>
+
+            {/* Payout Breakdown Box */}
+            <div className="bg-[#F8F9FC] border border-main/8 rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-main/60 font-medium">Listed price (what buyer pays)</span>
+                <span className="text-main font-bold">₦{listedPrice.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-main/60 font-medium">Alakowe fee (10%)</span>
+                <span className="text-main/50 font-medium">-₦{platformFee.toLocaleString()}</span>
+              </div>
+              <hr className="border-t border-main/10 my-1" />
+              <div className="flex items-center justify-between text-xs sm:text-sm pt-0.5">
+                <span className="text-main font-bold">Your payout</span>
+                <span className="text-main font-bold text-base">₦{payoutAmount.toLocaleString()}</span>
+              </div>
             </div>
           </div>
 
@@ -509,7 +557,7 @@ export default function EditListing() {
           </div>
 
           <button type="submit" disabled={editListing.isPending || uploading}
-            className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-secondary text-white font-semibold py-4 rounded-full hover:bg-secondary/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {uploading ? 'Uploading…' : editListing.isPending ? 'Saving…' : 'Save Changes'}
           </button>

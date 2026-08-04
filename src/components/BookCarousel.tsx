@@ -32,7 +32,7 @@ function BookCarousel({ label, icon, seeAllLink = '/browse', children }: BookCar
         <div className="flex items-center gap-2 md:gap-3">
           <Link
             to={seeAllLink}
-            className="text-xs font-semibold text-secondary hover:underline underline-offset-2 hidden sm:block"
+            className="text-xs font-semibold text-secondary hover:underline underline-offset-2"
           >
             See all
           </Link>

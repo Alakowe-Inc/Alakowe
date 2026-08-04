@@ -541,7 +541,7 @@ export default function Sell() {
 
               <Link
                 to="/faq"
-                className="shrink-0 bg-main text-white text-xs font-semibold px-5 py-3 rounded-xl hover:bg-main/90 transition-colors inline-flex items-center gap-2"
+                className="shrink-0 bg-secondary text-white text-xs font-semibold px-5 py-3 rounded-xl hover:bg-secondary/90 transition-colors inline-flex items-center gap-2"
               >
                 <span>Browse all FAQs</span>
                 <ArrowRight size={14} />
@@ -600,7 +600,7 @@ export default function Sell() {
             <button
               type="button"
               onClick={() => setModalContent(null)}
-              className="bg-main text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-main/90 transition-colors"
+              className="bg-secondary text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-secondary/90 transition-colors"
             >
               Got it
             </button>

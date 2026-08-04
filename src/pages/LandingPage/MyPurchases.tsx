@@ -71,7 +71,7 @@ export default function MyPurchases() {
             </p>
             <Link
               to="/browse"
-              className="inline-block bg-main text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-main/90 transition-colors"
+              className="inline-block bg-secondary text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-secondary/90 transition-colors"
             >
               Browse Books
             </Link>

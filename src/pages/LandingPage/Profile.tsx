@@ -575,7 +575,7 @@ export default function Profile() {
 
           <Button
             type="submit"
-            className="w-full bg-main text-white font-semibold h-auto py-4 rounded-xl hover:bg-main/90 transition-colors text-sm"
+            className="w-full bg-secondary text-white font-semibold h-auto py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm"
           >
             Save Changes
           </Button>
@@ -653,7 +653,7 @@ export default function Profile() {
 
               <Button
                 type="submit"
-                className="w-full bg-main text-white font-semibold h-auto py-3.5 rounded-xl hover:bg-main/90 transition-colors text-sm"
+                className="w-full bg-secondary text-white font-semibold h-auto py-3.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm"
               >
                 Update Password
               </Button>

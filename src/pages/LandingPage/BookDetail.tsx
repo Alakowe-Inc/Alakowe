@@ -314,7 +314,7 @@ function BookDetail() {
               {/* Action Buttons */}
               <button
                 onClick={() => addToCart(Number(id))}
-                className="w-full bg-main hover:bg-main/90 text-white font-semibold py-2.5 rounded-xl text-xs transition-colors mb-2.5 flex items-center justify-center gap-2"
+                className="w-full bg-main hover:bg-secondary/90 text-white font-semibold py-2.5 rounded-xl text-xs transition-colors mb-2.5 flex items-center justify-center gap-2"
               >
                 Buy this copy
               </button>

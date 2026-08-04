@@ -120,7 +120,7 @@ function PaymentSuccess() {
           {orderId && (
             <Link
               to={`/order/${orderId}`}
-              className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm text-center flex items-center justify-center gap-2"
+              className="w-full bg-secondary text-white font-semibold py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm text-center flex items-center justify-center gap-2"
             >
               View Order Status
             </Link>

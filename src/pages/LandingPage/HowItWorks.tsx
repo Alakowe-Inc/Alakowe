@@ -174,7 +174,7 @@ export default function HowItWorks() {
             onClick={() => setSelectedCategory(null)}
             className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
               selectedCategory === null && !searchQuery
-                ? 'bg-main text-white shadow-sm'
+                ? 'bg-secondary text-white shadow-sm'
                 : 'bg-white text-main/70 border border-main/15 hover:border-main/40'
             }`}
           >

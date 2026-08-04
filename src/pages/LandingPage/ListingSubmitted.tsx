@@ -37,7 +37,7 @@ export default function ListingSubmitted() {
         <div className="flex flex-col gap-3">
           <Link
             to="/my-listings"
-            className="w-full bg-main text-white font-semibold py-4 rounded-xl hover:bg-main/90 transition-colors text-sm text-center flex items-center justify-center gap-2"
+            className="w-full bg-secondary text-white font-semibold py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm text-center flex items-center justify-center gap-2"
           >
             <ListChecks size={16} /> View My Listings
           </Link>

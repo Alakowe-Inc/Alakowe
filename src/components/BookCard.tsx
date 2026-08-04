@@ -79,7 +79,7 @@ function BookCard({ book }: BookCardProps) {
             className={`absolute top-3 left-3 z-10 text-[9px] font-semibold tracking-wider rounded-full uppercase px-2.5 py-1 ${
               book.badge === 'Best Value'
                 ? 'bg-secondary/90 text-white'
-                : 'bg-main text-white'
+                : 'bg-secondary text-white'
             }`}
           >
             {book.badge}

@@ -168,15 +168,6 @@ function BrowseBooks() {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={handleRequestBook}
-              className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-secondary hover:text-secondary/80 transition-colors"
-            >
-              <Plus size={13} />
-              <span className="hidden sm:inline">Request a Book</span>
-              <span className="sm:hidden">Request</span>
-            </button>
-
-            <button
               onClick={openFilters}
               className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-main hover:text-secondary transition-colors"
             >
@@ -206,38 +197,58 @@ function BrowseBooks() {
                 ))}
               </div>
 
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-8">
-                  <button
-                    onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                    disabled={page === 1}
-                    className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                  >
-                    <CaretLeftIcon size={14} weight="bold" />
-                  </button>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+              {/* ── Bottom Bar: Pagination + Request a Book Button ── */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mt-12 pt-6 border-t border-main/10">
+                {/* Pagination Controls */}
+                {totalPages > 1 ? (
+                  <div className="flex items-center gap-2">
                     <button
-                      key={n}
-                      onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                      className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${n === page
-                        ? 'bg-main text-white'
-                        : 'border border-main/15 text-main/50 hover:border-main/40 hover:text-main'
-                        }`}
+                      onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                      disabled={page === 1}
+                      className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      aria-label="Previous page"
                     >
-                      {n}
+                      <CaretLeftIcon size={14} weight="bold" />
                     </button>
-                  ))}
 
-                  <button
-                    onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                    disabled={page === totalPages}
-                    className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                  >
-                    <CaretRightIcon size={14} weight="bold" />
-                  </button>
-                </div>
-              )}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                      <button
+                        key={n}
+                        onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                        className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${n === page
+                          ? 'bg-secondary text-white'
+                          : 'border border-main/15 text-main/50 hover:border-main/40 hover:text-main'
+                          }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+
+                    <button
+                      onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                      disabled={page === totalPages}
+                      className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      aria-label="Next page"
+                    >
+                      <CaretRightIcon size={14} weight="bold" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-xs text-main/40 font-medium">
+                    Showing all {filtered.length} books
+                  </div>
+                )}
+
+                {/* Request a Book Button */}
+                <button
+                  type="button"
+                  onClick={handleRequestBook}
+                  className="bg-secondary hover:bg-secondary/90 text-white font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow flex items-center gap-2 shrink-0"
+                >
+                  <Plus size={15} />
+                  <span>Request a Book</span>
+                </button>
+              </div>
             </>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-3xl border border-third p-8 shadow-sm">
@@ -250,7 +261,7 @@ function BrowseBooks() {
               </p>
               <Link
                 to={query ? `/request-book?title=${encodeURIComponent(query)}` : '/request-book'}
-                className="inline-flex items-center gap-2 bg-main text-white font-semibold text-xs px-6 py-3.5 rounded-xl hover:bg-main/90 transition-all shadow-sm"
+                className="inline-flex items-center gap-2 bg-secondary text-white font-semibold text-xs px-6 py-3.5 rounded-xl hover:bg-secondary/90 transition-all shadow-sm"
               >
                 Request this Book {query ? `"${query}"` : ''} &rarr;
               </Link>
@@ -287,13 +298,13 @@ function BrowseBooks() {
             {hasFilters && (
               <div className="px-8 pb-4 flex flex-wrap gap-2 shrink-0">
                 {genre !== 'All' && (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-main text-white px-3 py-1.5 rounded-full">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-secondary text-white px-3 py-1.5 rounded-full">
                     {genre}
                     <button onClick={() => setGenre('All')} className="hover:opacity-70 transition-opacity"><X size={10} /></button>
                   </span>
                 )}
                 {condition !== 'All' && (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-main text-white px-3 py-1.5 rounded-full">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-secondary text-white px-3 py-1.5 rounded-full">
                     {condition}
                     <button onClick={() => setCondition('All')} className="hover:opacity-70 transition-opacity"><X size={10} /></button>
                   </span>
@@ -373,6 +384,7 @@ function BrowseBooks() {
                 </div>
               </div>
             </div>
+            
 
             {/* Footer */}
             <div className="px-8 pt-4 pb-4 shrink-0 flex items-center gap-3">
@@ -384,7 +396,7 @@ function BrowseBooks() {
               </button>
               <button
                 onClick={closeFilters}
-                className="flex-1 bg-main text-white py-4 text-xs font-semibold uppercase tracking-[0.2em] hover:bg-main/90 transition-colors rounded-xl"
+                className="flex-1 bg-secondary text-white py-4 text-xs font-semibold uppercase tracking-[0.2em] hover:bg-secondary/90 transition-colors rounded-xl"
               >
                 Show {filtered.length} {filtered.length === 1 ? 'Result' : 'Results'}
               </button>

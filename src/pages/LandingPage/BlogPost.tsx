@@ -14,7 +14,7 @@ function BlogPost() {
         <p className="text-main/50 text-sm mb-8">This article doesn't exist or may have been removed.</p>
         <Link
           to="/blog"
-          className="inline-flex items-center gap-2 bg-main text-white font-semibold text-xs uppercase tracking-widest px-7 py-3 rounded-xl hover:bg-main/85 transition-colors"
+          className="inline-flex items-center gap-2 bg-secondary text-white font-semibold text-xs uppercase tracking-widest px-7 py-3 rounded-xl hover:bg-secondary/85 transition-colors"
         >
           <ArrowLeft size={14} /> Back to Blog
         </Link>
@@ -26,7 +26,7 @@ function BlogPost() {
     <div className="min-h-screen bg-white">
 
       {/* Hero */}
-      <div className="bg-main text-white py-12 px-4">
+      <div className="bg-secondary text-white py-12 px-4">
         <div className="max-w-3xl mx-auto">
           <Link
             to="/blog"
@@ -122,7 +122,7 @@ function BlogPost() {
         </h2>
         <Link
           to="/browse"
-          className="inline-flex items-center gap-2 bg-main text-white font-semibold text-xs uppercase tracking-widest px-8 py-3.5 rounded-xl hover:bg-main/85 transition-colors"
+          className="inline-flex items-center gap-2 bg-secondary text-white font-semibold text-xs uppercase tracking-widest px-8 py-3.5 rounded-xl hover:bg-secondary/85 transition-colors"
         >
           Browse Books
         </Link>

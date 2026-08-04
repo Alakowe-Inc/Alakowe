@@ -302,7 +302,7 @@ export default function MyListingDetail() {
                     <button
                       onClick={handleSaveDiscount}
                       disabled={setDiscount.isPending}
-                      className="bg-main text-white text-xs font-semibold px-3 py-2 rounded-xl hover:bg-main/90 transition-colors disabled:opacity-50"
+                      className="bg-secondary text-white text-xs font-semibold px-3 py-2 rounded-xl hover:bg-secondary/90 transition-colors disabled:opacity-50"
                     >
                       Save
                     </button>
@@ -333,7 +333,7 @@ export default function MyListingDetail() {
               <div className="flex flex-col gap-2">
                 <Link
                   to={`/my-listings/${listing.id}/edit`}
-                  className="flex items-center gap-2 bg-main text-white font-semibold text-sm px-4 py-3 rounded-xl hover:bg-main/90 transition-colors justify-center"
+                  className="flex items-center gap-2 bg-secondary text-white font-semibold text-sm px-4 py-3 rounded-xl hover:bg-secondary/90 transition-colors justify-center"
                 >
                   <Pencil size={15} /> Edit Listing
                 </Link>
