@@ -194,12 +194,63 @@ function BookDetail() {
 
               {activeTab === 'shipping' && (
                 <div className="text-[11px] text-main/60 leading-relaxed space-y-2">
-                  <p>
-                    ALÁKÒWÉ manages the entire logistics process. From seller collection and quality inspection to doorstep delivery, we ensure a secure transaction.
-                  </p>
-                  <p>
-                    All purchases are covered under our Buyer Protection policy. If the book differs significantly from the description, report the issue within 12 hours of delivery for a full refund.
-                  </p>
+                  {book.fulfillmentOption === 'Pickup' ? (
+                    <>
+                      <p className="font-semibold text-main">Pickup only</p>
+                      <p>
+                        Collect this book from the seller. Their contact details are sent after you pay.
+                      </p>
+                      {(book.pickupAddressLine || book.pickupCity) && (
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                            [book.pickupAddressLine, book.pickupCity, book.pickupState].filter(Boolean).join(', '),
+                          )}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 font-semibold text-secondary hover:underline"
+                        >
+                          <MapPin size={11} />
+                          View pickup location
+                        </a>
+                      )}
+                    </>
+                  ) : book.fulfillmentOption === 'Both' ? (
+                    <>
+                      <p>You choose at checkout:</p>
+                      <p>
+                        <span className="font-semibold text-main">Pickup</span>
+                        {' '}at the seller&apos;s place (contact after payment)
+                        {(book.pickupAddressLine || book.pickupCity) && (
+                          <>
+                            {' · '}
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                [book.pickupAddressLine, book.pickupCity, book.pickupState].filter(Boolean).join(', '),
+                              )}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="font-semibold text-secondary hover:underline"
+                            >
+                              see location
+                            </a>
+                          </>
+                        )}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-main">Alákòwé delivery</span>
+                        {' '}with our protected logistics flow (delivery fee applies).
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p>
+                        ALÁKÒWÉ manages the entire logistics process. From seller collection and quality inspection to doorstep delivery, we ensure a secure transaction.
+                      </p>
+                      <p>
+                        All purchases are covered under our Buyer Protection policy. If the book differs significantly from the description, report the issue within 12 hours of delivery for a full refund.
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
             </div>

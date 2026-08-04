@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { User, CreditCard, AlertTriangle, Check, KeyRound, Eye, EyeOff, MapPin } from 'lucide-react'
+import { User, CreditCard, AlertTriangle, Check, KeyRound, Eye, EyeOff, MapPin, Truck } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { savePublicSellerProfile } from '../../data/sellerData'
 import { useSellerStoreProfile, useUpdateSellerStoreProfile } from '../../lib/api/store/store.hooks'
+import type { StoreFulfillmentOption } from '../../lib/api/types'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -77,15 +78,34 @@ const selectClass = cn(
   'focus:ring-0 focus:ring-offset-0 focus-visible:ring-0',
 )
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+  error,
+  required,
+}: {
+  label: string
+  children: React.ReactNode
+  error?: string
+  required?: boolean
+}) {
   return (
     <div>
       <label className="text-xs font-semibold text-main/50 uppercase tracking-wider mb-1.5 block">
         {label}
+        {required ? <span className="text-red-500"> *</span> : null}
       </label>
       {children}
+      {error ? <p className="text-xs text-red-500 mt-1.5">{error}</p> : null}
     </div>
   )
+}
+
+type PickupFieldErrors = {
+  addressLine?: string
+  city?: string
+  state?: string
+  consent?: string
 }
 
 export default function Profile() {
@@ -98,6 +118,13 @@ export default function Profile() {
   const { data: store } = useSellerStoreProfile(!!user)
   const updateStore = useUpdateSellerStoreProfile()
 
+  const [fulfillmentOption, setFulfillmentOption] = useState<StoreFulfillmentOption>('Courier')
+  const [pickupAddressLine, setPickupAddressLine] = useState('')
+  const [pickupCity, setPickupCity] = useState('')
+  const [pickupState, setPickupState] = useState('')
+  const [pickupConsent, setPickupConsent] = useState(false)
+  const [pickupErrors, setPickupErrors] = useState<PickupFieldErrors>({})
+
   // Hydrate the form with the seller's saved storefront values (bio/location)
   // from the backend, falling back to whatever is already in the form.
   useEffect(() => {
@@ -108,6 +135,17 @@ export default function Profile() {
       city: p.city || store.city || '',
       state: p.state || store.state || '',
     }))
+    setFulfillmentOption(store.fulfillmentOption ?? 'Courier')
+    setPickupAddressLine(store.pickupAddressLine ?? '')
+    setPickupCity(store.pickupCity ?? store.city ?? '')
+    setPickupState(store.pickupState ?? store.state ?? '')
+    setPickupConsent(store.pickupConsentGiven ?? false)
+  }, [store])
+
+  useEffect(() => {
+    if (window.location.hash === '#delivery') {
+      document.getElementById('delivery')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }, [store])
 
   const [pwOpen, setPwOpen] = useState(false)
@@ -134,8 +172,43 @@ export default function Profile() {
     }
   }
 
+  function scrollToDelivery() {
+    document.getElementById('delivery')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  function validatePickupFields(): boolean {
+    if (fulfillmentOption !== 'Pickup' && fulfillmentOption !== 'Both') {
+      setPickupErrors({})
+      return true
+    }
+
+    const next: PickupFieldErrors = {}
+    if (!pickupAddressLine.trim()) {
+      next.addressLine = 'Enter your pickup street address.'
+    }
+    if (!pickupCity.trim()) {
+      next.city = 'Enter your pickup city.'
+    }
+    if (!pickupState.trim()) {
+      next.state = 'Select your pickup state.'
+    }
+    if (!pickupConsent) {
+      next.consent = 'Confirm you understand your address and phone will be shared.'
+    }
+
+    setPickupErrors(next)
+    return Object.keys(next).length === 0
+  }
+
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
+
+    if (!validatePickupFields()) {
+      setSaved(false)
+      scrollToDelivery()
+      return
+    }
+
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile))
     savePublicSellerProfile({
       email: user!.email,
@@ -156,6 +229,11 @@ export default function Profile() {
       state: profile.state || null,
       isOnVacation: store?.isOnVacation ?? false,
       vacationMessage: store?.vacationMessage ?? null,
+      fulfillmentOption,
+      pickupAddressLine: pickupAddressLine || null,
+      pickupCity: pickupCity || null,
+      pickupState: pickupState || null,
+      pickupConsentGiven: pickupConsent,
     })
     setSaved(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -290,6 +368,155 @@ export default function Profile() {
                 </Field>
               </div>
             </div>
+          </div>
+
+          {/* ── How buyers get your books ── */}
+          <div id="delivery" className="bg-white rounded-2xl border border-third p-6 scroll-mt-24">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                <Truck size={15} className="text-secondary" />
+              </div>
+              <h2 className="font-heading font-bold text-main text-base">How buyers get your books</h2>
+            </div>
+            <p className="text-xs text-main/45 mb-5 leading-relaxed">
+              This applies to every book you list. Change it anytime. Existing orders keep the option chosen at checkout.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+              {([
+                {
+                  value: 'Courier' as const,
+                  title: 'Alákòwé delivery',
+                  desc: 'Drop off at a Speedaf station. We handle the rest.',
+                },
+                {
+                  value: 'Pickup' as const,
+                  title: 'Buyer pickup',
+                  desc: 'Buyers come to your pickup address.',
+                },
+                {
+                  value: 'Both' as const,
+                  title: 'Either works',
+                  desc: 'Buyers choose delivery or pickup at checkout.',
+                },
+              ]).map((opt) => {
+                const active = fulfillmentOption === opt.value
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      setSaved(false)
+                      setFulfillmentOption(opt.value)
+                      if (opt.value === 'Courier') setPickupErrors({})
+                    }}
+                    className={cn(
+                      'text-left rounded-xl border p-4 transition-colors',
+                      active
+                        ? 'border-secondary bg-secondary/5 ring-1 ring-secondary/30'
+                        : 'border-main/10 hover:border-main/25',
+                    )}
+                  >
+                    <p className="text-sm font-semibold text-main mb-1">{opt.title}</p>
+                    <p className="text-[11px] text-main/50 leading-relaxed">{opt.desc}</p>
+                  </button>
+                )
+              })}
+            </div>
+
+            {(fulfillmentOption === 'Pickup' || fulfillmentOption === 'Both') && (
+              <div className="space-y-4 rounded-xl border border-main/10 bg-main/[0.02] p-4">
+                <p className="text-xs font-semibold text-main/60 uppercase tracking-wider">Pickup address</p>
+                <Field label="Street address" required error={pickupErrors.addressLine}>
+                  <Input
+                    type="text"
+                    placeholder="e.g. 12 Admiralty Way, Lekki Phase 1"
+                    value={pickupAddressLine}
+                    onChange={(e) => {
+                      setSaved(false)
+                      setPickupAddressLine(e.target.value)
+                      if (pickupErrors.addressLine) {
+                        setPickupErrors((prev) => ({ ...prev, addressLine: undefined }))
+                      }
+                    }}
+                    className={cn(inputClass, pickupErrors.addressLine && 'border-red-400')}
+                    aria-invalid={!!pickupErrors.addressLine}
+                  />
+                </Field>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="City" required error={pickupErrors.city}>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Lagos"
+                      value={pickupCity}
+                      onChange={(e) => {
+                        setSaved(false)
+                        setPickupCity(e.target.value)
+                        if (pickupErrors.city) {
+                          setPickupErrors((prev) => ({ ...prev, city: undefined }))
+                        }
+                      }}
+                      className={cn(inputClass, pickupErrors.city && 'border-red-400')}
+                      aria-invalid={!!pickupErrors.city}
+                    />
+                  </Field>
+                  <Field label="State" required error={pickupErrors.state}>
+                    <Select
+                      value={pickupState}
+                      onValueChange={(v) => {
+                        setSaved(false)
+                        setPickupState(v)
+                        if (pickupErrors.state) {
+                          setPickupErrors((prev) => ({ ...prev, state: undefined }))
+                        }
+                      }}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          selectClass,
+                          !pickupState && 'text-main/30',
+                          pickupErrors.state && 'border-red-400',
+                        )}
+                        aria-invalid={!!pickupErrors.state}
+                      >
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {NIGERIAN_STATES.map((s) => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </div>
+                <div>
+                  <label className="flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={pickupConsent}
+                      onChange={(e) => {
+                        setSaved(false)
+                        setPickupConsent(e.target.checked)
+                        if (pickupErrors.consent) {
+                          setPickupErrors((prev) => ({ ...prev, consent: undefined }))
+                        }
+                      }}
+                      className={cn(
+                        'mt-0.5 rounded border-main/30',
+                        pickupErrors.consent && 'outline outline-1 outline-red-400',
+                      )}
+                      aria-invalid={!!pickupErrors.consent}
+                    />
+                    <span className="text-xs text-main/65 leading-relaxed">
+                      I understand my pickup address will show on my listings, and my phone number will be shared with buyers after they pay.
+                    </span>
+                  </label>
+                  {pickupErrors.consent ? (
+                    <p className="text-xs text-red-500 mt-1.5 ml-6">{pickupErrors.consent}</p>
+                  ) : null}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Payout Info ── */}
