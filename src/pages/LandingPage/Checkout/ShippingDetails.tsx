@@ -769,15 +769,13 @@ function ShippingDetails() {
 
               <button
                 type="button"
-                onClick={handleProceed}feature/landing
+                onClick={handleProceed}
                 disabled={
                   loading ||
                   validationLoading ||
                   !validationDone
                 }
-                className="w-full bg-secondary text-white font-semibold py-4 rounded-full hover:bg-secondary/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowe
-                disabled={loading || validationLoading || !validationDone}
-                className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"dev
+                className="w-full bg-secondary text-white font-semibold py-4 rounded-full hover:bg-secondary/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading
                   ? 'Processing…'

@@ -53,38 +53,8 @@ function OrderStatusPage() {
 
   if (isLoading || !order) {
     return (
-feature/landing
-      <div className="bg-third min-h-screen flex items-center justify-center px-4 py-16">
-        <div className="max-w-md w-full text-center">
-          <div className="w-20 h-20 rounded-full bg-secondary/12 flex items-center justify-center mx-auto mb-6">
-            <span className="text-4xl">📚</span>
-          </div>
-          <h1 className="font-heading font-bold text-main text-2xl mb-3">We're glad you love it!</h1>
-          <p className="text-main/55 text-sm mb-8 leading-relaxed">
-            You've helped a book find a new home.
-          </p>
-          <div className="bg-white rounded-2xl border border-third p-4 mb-7 text-left">
-            <p className="text-xs font-semibold text-main/40 uppercase tracking-wider mb-1">Order</p>
-            <p className="font-heading font-bold text-main">{order.id}</p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <Link
-              to="/browse"
-              className="w-full bg-secondary text-white font-semibold py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm text-center"
-            >
-              Browse More Books
-            </Link>
-            <Link
-              to="/contact"
-              className="w-full text-center text-sm text-main/50 hover:text-main transition-colors font-medium py-2"
-            >
-              Leave a note for the seller
-            </Link>
-          </div>
-        </div>
       <div className="bg-third min-h-screen flex items-center justify-center px-4">
         <p className="text-main/50 text-sm">Loading order…</p>
-        dev
       </div>
     )
   }
