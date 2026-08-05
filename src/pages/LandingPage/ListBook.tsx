@@ -747,16 +747,6 @@ export default function ListBook() {
             </Field>
           </div>
 
-          {/* 4. Pricing */}
-          <div className="bg-white rounded-2xl border border-third p-6 sm:p-7">
-            <h2 className="font-heading font-bold text-main text-lg sm:text-xl mb-1">Pricing</h2>
-            <p className="text-xs text-main/50 mb-5">
-              Set a fair price. Listings priced too high may be flagged during review.
-            </p>
-
-feature/landing
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-              <Field label="PRICE (₦)" required error={errors.price}
           {/* Delivery option from store settings */}
           <div className="bg-white rounded-2xl border border-third p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="min-w-0">
@@ -781,7 +771,7 @@ feature/landing
             <h2 className="font-heading font-bold text-main text-base mb-1">Pricing</h2>
             <p className="text-xs text-main/45 mb-4">Set a fair price.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Price (₦)" required error={errors.price}>dev
+              <Field label="Price (₦)" required error={errors.price}>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-main/40 font-semibold select-none">
                     ₦
@@ -813,12 +803,23 @@ feature/landing
                 </div>
               </Field>
             </div>
-                feature/landing
             {/* Payout Breakdown Box */}
-            <div className="bg-[#F8F9FC] border border-main/8 rounded-2xl p-5 space-y-3">
+            <div className="bg-[#F8F9FC] border border-main/8 rounded-2xl p-5 space-y-3 mt-4">
               <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-main/60 font-medium">Listed price (what buyer pays)</span>
                 <span className="text-main font-bold">₦{listedPrice.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-main/60 font-medium">Alakowe fee (10%)</span>
+                <span className="text-main/50 font-medium">-₦{platformFee.toLocaleString()}</span>
+              </div>
+              <hr className="border-t border-main/10 my-1" />
+              <div className="flex items-center justify-between text-xs sm:text-sm pt-0.5">
+                <span className="text-main font-bold">Your payout</span>
+                <span className="text-main font-bold text-base">₦{payoutAmount.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
 
           {/* Photos */}
           <div className="bg-white rounded-2xl border border-third p-6">
@@ -862,18 +863,8 @@ feature/landing
                     )}
                   </div>
                 ))}
-                dev
               </div>
-              <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="text-main/60 font-medium">Alakowe fee (10%)</span>
-                <span className="text-main/50 font-medium">-₦{platformFee.toLocaleString()}</span>
-              </div>
-              <hr className="border-t border-main/10 my-1" />
-              <div className="flex items-center justify-between text-xs sm:text-sm pt-0.5">
-                <span className="text-main font-bold">Your payout</span>
-                <span className="text-main font-bold text-base">₦{payoutAmount.toLocaleString()}</span>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* 5. Book Synopsis */}
