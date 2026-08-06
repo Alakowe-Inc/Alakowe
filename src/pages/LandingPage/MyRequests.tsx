@@ -130,6 +130,17 @@ export default function MyRequests() {
                   {req.condition && <span>Min: {req.condition}</span>}
                 </div>
 
+                {req.buyerEmail !== user?.email && (
+                  <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-3">
+                    <Bell size={14} className="text-blue-600 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-blue-800">
+                        You have joined the waitlist for this book
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {req.status === 'matched' && (
                   <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-3">
                     <BookOpen size={14} className="text-green-600 shrink-0" />

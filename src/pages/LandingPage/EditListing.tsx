@@ -259,6 +259,7 @@ dev
     if (!form.author.trim()) e.author = 'Author is required'
     if (!form.genre) e.genre = 'Please select a genre'
     if (!form.condition) e.condition = 'Please select a condition'
+    if (!form.conditionDetail.trim()) e.conditionDetail = 'Condition detail is required'
     if (!form.description.trim() || form.description.length < 20)
       e.description = 'Description must be at least 20 characters'
     const price = parseFloat(form.price)
@@ -405,7 +406,7 @@ dev
           <div className="bg-white rounded-2xl border border-third p-6">
             <h2 className="font-heading font-bold text-main text-base mb-1">Declare Book Condition</h2>
             <p className="text-xs text-main/45 mb-4">Be honest about its condition and any marks or damages.</p>
-            <Field label="Condition Details">
+            <Field label="Condition Details" required error={errors.conditionDetail}>
               <TextareaControl value={form.conditionDetail} onChange={set('conditionDetail')} rows={3}
                 placeholder="e.g. There's a small crease on the spine and a few pencil marks in chapter 3."
                 style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
@@ -551,6 +552,9 @@ dev
               <Heart size={15} className="text-secondary" />
               <h2 className="font-heading font-bold text-main text-base">Love Note</h2>
             </div>
+            <p className="text-xs text-main/45 mb-4">
+              leave a short personal message for the next buyer of your book.
+            </p>
             <TextareaControl value={form.loveNote} onChange={set('loveNote')} rows={3}
               placeholder="A message to the next reader…"
               style="border border-secondary/25 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />

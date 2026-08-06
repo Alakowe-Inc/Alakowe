@@ -51,6 +51,38 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+      <style>{`
+        :root {
+          --toastify-color-light: #6B6FFF;
+          --toastify-text-color-light: #ffffff;
+          --toastify-color-progress-light: rgba(255,255,255,0.4);
+          --toastify-icon-color-success: #ffffff;
+          --toastify-icon-color-error: #ffffff;
+          --toastify-icon-color-info: #ffffff;
+          --toastify-icon-color-warning: #ffffff;
+        }
+        .Toastify__toast {
+          background: #6B6FFF !important;
+          color: #ffffff !important;
+          border-radius: 12px !important;
+          font-family: inherit !important;
+          box-shadow: 0 8px 24px rgba(107,111,255,0.35) !important;
+        }
+        .Toastify__toast-body {
+          font-size: 0.875rem !important;
+          font-weight: 500 !important;
+          color: #ffffff !important;
+        }
+        .Toastify__close-button {
+          color: rgba(255,255,255,0.8) !important;
+        }
+        .Toastify__progress-bar {
+          background: rgba(255,255,255,0.4) !important;
+        }
+        .Toastify__toast-icon svg {
+          fill: #ffffff !important;
+        }
+      `}</style>
       <ToastContainer position="top-right" autoClose={3000} />
       <AuthProvider>
         <CartProvider>

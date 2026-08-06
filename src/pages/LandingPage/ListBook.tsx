@@ -324,6 +324,7 @@ export default function ListBook() {
     if (!form.author.trim()) e.author = 'Author is required'
     if (!form.genre) e.genre = 'Please select a genre'
     if (!form.condition) e.condition = 'Please select a condition'
+    if (!form.conditionNotes.trim()) e.conditionNotes = 'Condition note is required'
     if (!form.description.trim() || form.description.length < 20)
       e.description = 'Description must be at least 20 characters'
     const price = parseFloat(form.price)
@@ -410,13 +411,13 @@ export default function ListBook() {
           <DialogDescription className="sr-only">A step-by-step guide to listing your book on Alakowe</DialogDescription>
 
           {/* Coloured Header Banner */}
-          <div className="bg-gradient-to-r from-main to-main/90 px-7 py-6 relative text-white">
-            <DialogClose className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors rounded-full p-1 focus:outline-none">
+          <div className="px-7 py-6 relative text-white" style={{ background: 'linear-gradient(135deg, #6B6FFF 0%, #8B8FFF 100%)' }}>
+            <DialogClose className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors rounded-full p-1 focus:outline-none">
               <X size={18} />
               <span className="sr-only">Close</span>
             </DialogClose>
-            <div className="inline-flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider mb-2">
-              <Sparkles size={12} className="text-secondary" />
+            <div className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider mb-2">
+              <Sparkles size={12} className="text-white" />
               <span>Seller Guide</span>
             </div>
             <h2 className="font-heading font-bold text-white text-xl leading-snug">
@@ -432,7 +433,8 @@ export default function ListBook() {
                 {HOW_TO_STEPS.map((_, i) => (
                   <span
                     key={i}
-                    className={`block rounded-full transition-all ${i === guideStep ? 'w-7 h-2 bg-secondary' : 'w-2 h-2 bg-main/15'}`}
+                    className={`block rounded-full transition-all ${i === guideStep ? 'w-7 h-2' : 'w-2 h-2 bg-main/15'}`}
+                    style={i === guideStep ? { background: '#6B6FFF' } : {}}
                   />
                 ))}
               </div>
@@ -442,15 +444,15 @@ export default function ListBook() {
             </div>
 
             {/* Illustration Frame */}
-            <div className="w-full h-32 bg-gradient-to-br from-violet-50/80 to-indigo-50/50 border border-violet-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center mb-6 relative overflow-hidden">
-              <div className="w-14 h-14 rounded-2xl bg-white border border-violet-100 shadow-sm flex items-center justify-center text-secondary mb-1">
+            <div className="w-full h-32 rounded-2xl p-4 flex flex-col items-center justify-center text-center mb-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(107,111,255,0.08) 0%, rgba(139,143,255,0.05) 100%)', border: '1px solid rgba(107,111,255,0.18)' }}>
+              <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-1" style={{ border: '1.5px solid rgba(107,111,255,0.2)', color: '#6B6FFF' }}>
                 {guideStep === 0 && <BookOpen size={28} />}
                 {guideStep === 1 && <Bell size={28} />}
                 {guideStep === 2 && <Truck size={28} />}
                 {guideStep === 3 && <DollarSign size={28} />}
                 {guideStep === 4 && <Sparkles size={28} />}
               </div>
-              <span className="text-[11px] font-bold text-secondary uppercase tracking-wider">
+              <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#6B6FFF' }}>
                 {guideStep === 4 ? 'Ready to List' : `Step 0${guideStep + 1}`}
               </span>
             </div>
@@ -470,16 +472,16 @@ export default function ListBook() {
                 <h3 className="font-heading font-bold text-main text-base leading-snug">
                   {HOW_TO_STEPS[guideStep].title}
                 </h3>
-                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2">
+                <div className="rounded-2xl p-4 space-y-2" style={{ background: 'rgba(107,111,255,0.05)', border: '1px solid rgba(107,111,255,0.15)' }}>
                   <div className="flex items-start gap-2.5 text-xs text-main/80 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0 mt-1.5" />
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ background: '#6B6FFF' }} />
                     <span>drop the book off at our partner location nearest to you</span>
                   </div>
-                  <div className="text-center text-[11px] font-bold text-secondary uppercase tracking-wider py-0.5">
+                  <div className="text-center text-[11px] font-bold uppercase tracking-wider py-0.5" style={{ color: '#6B6FFF' }}>
                     or
                   </div>
                   <div className="flex items-start gap-2.5 text-xs text-main/80 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0 mt-1.5" />
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ background: '#6B6FFF' }} />
                     <span>meet the buyer for direct pickup from you</span>
                   </div>
                 </div>
@@ -508,7 +510,8 @@ export default function ListBook() {
             {guideStep < HOW_TO_STEPS.length - 1 ? (
               <Button
                 onClick={() => setGuideStep(s => s + 1)}
-                className="bg-primary text-primary-foreground text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-primary/90 shadow-sm h-auto flex items-center gap-1.5"
+                className="text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-sm h-auto flex items-center gap-1.5 hover:opacity-90 transition-opacity"
+                style={{ background: '#6B6FFF' }}
               >
                 <span>Next</span>
                 <ArrowRight size={14} />
@@ -526,7 +529,7 @@ export default function ListBook() {
                   Learn More
                 </Button>
                 <DialogClose asChild>
-                  <Button className="bg-primary text-primary-foreground text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-primary/90 shadow-sm h-auto">
+                  <Button className="text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-sm h-auto hover:opacity-90 transition-opacity" style={{ background: '#6B6FFF' }}>
                     Start Listing
                   </Button>
                 </DialogClose>
@@ -740,7 +743,7 @@ export default function ListBook() {
               </Field>
             </div>
 
-            <Field label="Condition Notes / Defects">
+            <Field label="Condition Notes / Defects" required error={errors.conditionNotes}>
               <TextareaControl placeholder="e.g. There's a small crease on the spine and a few pencil marks in chapter 3."
                 value={form.conditionNotes} onChange={set('conditionNotes')} rows={4}
                 style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
@@ -821,51 +824,7 @@ export default function ListBook() {
             </div>
           </div>
 
-          {/* Photos */}
-          <div className="bg-white rounded-2xl border border-third p-6">
-            <h2 className="font-heading font-bold text-main text-base mb-1">Photos</h2>
-            <p className="text-xs text-main/45 mb-4">Upload 3–5 photos. Tap a thumbnail to set it as the cover.</p>
-            {draftPhotosNote && <p className="text-xs text-amber-700 mb-3">{draftPhotosNote}</p>}
-            {photoError && <p className="text-xs text-red-500 mb-3">{photoError}</p>}
-            {photos.length < 5 && (
-              <FileUpload
-                id="book-photos"
-                label="Click to upload photos"
-                hint="PNG, JPG up to 5MB each"
-                icon={Upload}
-                multiple
-                accept=".jpg,.jpeg,.png"
-                onChange={handlePhotos}
-                disabled={uploading}
-                style="border-main/15 py-8 hover:border-secondary/40 hover:bg-transparent bg-transparent"
-              />
-            )}
-            {photos.length > 0 && (
-              <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                {photos.map((p, i) => (
-                  <div key={p.preview} className="relative group aspect-[3/4] rounded-xl overflow-hidden border border-main/10">
-                    <img src={p.preview} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
-                    <button type="button" onClick={() => removePhoto(i)}
-                      className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      disabled={uploading}>
-                      <X size={14} />
-                    </button>
-                    {p.isCover ? (
-                      <span className="absolute bottom-1 left-1 bg-secondary text-white text-[10px] font-semibold px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                        <CheckCircle size={10} /> Cover
-                      </span>
-                    ) : (
-                      <button type="button" onClick={() => setCover(i)}
-                        className="absolute bottom-1 left-1 bg-black/40 text-white text-[10px] font-medium px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                        disabled={uploading}>
-                        Make Cover
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+
 
           {/* 5. Book Synopsis */}
           <div className="bg-white rounded-2xl border border-third p-6">
@@ -884,7 +843,7 @@ export default function ListBook() {
               <h2 className="font-heading font-bold text-main text-base">Love Note to the Next Reader</h2>
             </div>
             <p className="text-xs text-main/45 mb-4">
-              Leave a personal message for whoever buys this book.
+              leave a short personal message for the next buyer of your book.
             </p>
             <TextareaControl placeholder="e.g. This book changed how I see the world…" value={form.loveNote}
               onChange={set('loveNote')} rows={3}

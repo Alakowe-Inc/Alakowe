@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "react-toastify"
 import { withMock } from "../use-mock"
 import {
   submitBookRequestApi,
@@ -84,14 +85,17 @@ export function useMyBookRequests(userEmail?: string) {
   return useQuery({
     queryKey: ["my-book-requests", userEmail],
     queryFn: () => {
+      const all = getSharedRequests()
       const mockList: BookRequestResponse[] = userEmail
-        ? getBuyerRequests(userEmail).map((r) => ({
-            ...r,
-            waitlistCount: r.waitlist?.length || 1,
-            isUserOnWaitlist: r.waitlist?.includes(userEmail) || true,
-            isWaitlisted: r.waitlist?.includes(userEmail) || true,
-            dateCreated: r.createdAt,
-          }))
+        ? all
+            .filter((r) => r.buyerEmail === userEmail || r.waitlist?.includes(userEmail))
+            .map((r) => ({
+              ...r,
+              waitlistCount: r.waitlist?.length || 1,
+              isUserOnWaitlist: r.waitlist?.includes(userEmail) ?? false,
+              isWaitlisted: r.waitlist?.includes(userEmail) ?? false,
+              dateCreated: r.createdAt,
+            }))
         : []
       return withMock(mockList, () => getMyBookActivityApi())
     },
@@ -145,9 +149,10 @@ export function useJoinWaitlist() {
         isUserOnWaitlist: true,
         isWaitlisted: true,
       }
-      return withMock(mockResult, () => submitBookRequestApi(body))
+      return withMock(mockResult, () => submitBookRequestApi(body, { skipSuccessToast: true }))
     },
     onSuccess: () => {
+      toast.success('You have joined the waitlist for this book.')
       queryClient.invalidateQueries({ queryKey: ["book-requests"] })
       queryClient.invalidateQueries({ queryKey: ["my-book-requests"] })
       queryClient.invalidateQueries({ queryKey: ["allBookRequests"] })

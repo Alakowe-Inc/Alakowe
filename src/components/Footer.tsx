@@ -83,7 +83,7 @@ function Footer() {
                   { label: 'View our Drop-off Centers', to: '/' },
                 ].map(({ label, to }, idx) => (
                   <li key={`${to}-${idx}`}>
-                    <Link to={to} className="text-xs text-main/70 hover:text-main font-medium transition-colors">
+                    <Link to={to} className="text-xs text-white/70 hover:text-white font-medium transition-colors">
                       {label}
                     </Link>
                   </li>
@@ -93,7 +93,7 @@ function Footer() {
 
             {/* Help */}
             <div>
-              <h4 className="font-heading font-bold text-[11px] tracking-[0.15em] uppercase mb-3 text-main">
+              <h4 className="font-heading font-bold text-[11px] tracking-[0.15em] uppercase mb-3 text-white/70">
                 Help
               </h4>
               <ul className="space-y-2">
@@ -105,7 +105,7 @@ function Footer() {
                   { label: 'Privacy Policy', to: '/privacy' },
                 ].map(({ label, to }) => (
                   <li key={to}>
-                    <Link to={to} className="text-xs text-main/70 hover:text-main font-medium transition-colors">
+                    <Link to={to} className="text-xs text-white/70 hover:text-white font-medium transition-colors">
                       {label}
                     </Link>
                   </li>
