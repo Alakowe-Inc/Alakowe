@@ -181,9 +181,10 @@ function Home() {
               src={img}
               alt=""
               aria-hidden
-              className={`absolute inset-0 w-full h-full object-cover object-right-bottom transition-opacity duration-500 ease-in-out ${
+              className={`absolute inset-0 w-full h-full object-cover object-right-bottom sm:object-right-bottom transition-opacity duration-500 ease-in-out ${
                 idx === currentHeroIndex ? 'opacity-100' : 'opacity-0'
               }`}
+              style={{ objectPosition: '85% 100%' }}
             />
           ))}
         </div>
@@ -203,28 +204,63 @@ function Home() {
             </h1>
 
             {/* Decorative underline */}
-            <div className="w-12 h-1 bg-white/40 rounded-full mb-8" />
+            <div className="w-12 h-1 bg-[#c3c6ff] rounded-full mb-8" />
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <Link
                 to="/browse"
-                className="bg-[#c3c6ff] hover:bg-[#b0b4ff] text-[#2c305c] font-bold px-8 py-3.5 rounded-2xl text-sm transition-colors shadow-sm"
+                className="bg-[#c3c6ff] hover:bg-[#b0b4ff] text-[#2c305c] font-bold px-6 py-3.5 rounded-xl text-sm transition-colors shadow-sm w-[200px] sm:w-auto flex items-center justify-between sm:justify-center gap-4"
               >
-                Browse
+                <span>Browse</span>
+                <span className="text-lg sm:hidden">&rarr;</span>
               </Link>
               <Link
                 to="/list"
-                className="border border-white/70 hover:bg-white/10 text-white font-bold px-8 py-3.5 rounded-2xl text-sm transition-colors"
+                className="border border-white/70 hover:bg-white/10 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-colors w-[200px] sm:w-auto flex items-center justify-between sm:justify-center gap-4"
               >
-                List Books
+                <span>List Books</span>
+                <span className="text-lg sm:hidden">&rarr;</span>
               </Link>
+            </div>
+            
+            {/* Mobile Feature Badges (Stacked on the left) */}
+            <div className="sm:hidden flex flex-col gap-5 mt-10 w-[200px]">
+              <div className="flex items-center gap-3.5 border-b border-white/20 pb-5">
+                <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center shrink-0 bg-white/10">
+                  <BookOpen size={18} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white leading-tight">Built only</p>
+                  <p className="text-xs font-bold text-white leading-tight">for readers</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3.5 border-b border-white/20 pb-5">
+                <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center shrink-0 bg-white/10">
+                  <Shield size={18} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white leading-tight">Secure</p>
+                  <p className="text-xs font-bold text-white leading-tight">payments</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3.5 pb-2">
+                <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center shrink-0 bg-white/10">
+                  <Truck size={18} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white leading-tight">Nationwide</p>
+                  <p className="text-xs font-bold text-white leading-tight">delivery & pickup</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Feature Badges Bar */}
-        <div className="relative z-10 max-w-7xl w-full mx-auto pt-8 border-t border-white/15 grid grid-cols-1 sm:grid-cols-3 gap-6 text-white/90">
+        {/* Bottom Feature Badges Bar (Desktop Only) */}
+        <div className="hidden sm:grid relative z-10 max-w-7xl w-full mx-auto pt-8 border-t border-white/15 grid-cols-3 gap-6 text-white/90">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center shrink-0 bg-white/10">
               <BookOpen size={18} className="text-white" />
@@ -355,7 +391,7 @@ function Home() {
       </section>
 
       {/* ── Love Notes from Our Sellers ─────────────────────────────────────────── */}
-      <section className="bg-[#FAF9F6] py-14 border-t border-b border-third overflow-hidden">
+      <section className="bg-white py-14 border-t border-b border-third overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">

@@ -174,10 +174,10 @@ function BookDetail() {
               {activeTab === 'details' && (
                 <div className="space-y-3">
                   {[
-                    { icon: BookOpen, label: 'Format', value: book.format },
                     { icon: FolderOpen, label: 'Category', value: book.genre },
-                    { icon: CheckCircle2, label: 'Condition', value: book.condition },
-                    { icon: Barcode, label: 'ISBN', value: book.isbn },
+                    { icon: BookOpen, label: 'Genre', value: book.genre }, // Fallback to genre for now
+                    { icon: BookOpen, label: 'Format', value: book.format },
+                    { icon: FileText, label: 'No of Pages', value: 'N/A' }, // Placeholder for pages
                   ]
                     .filter((item) => !!item.value)
                     .map(({ icon: Icon, label, value }) => (
@@ -249,6 +249,9 @@ function BookDetail() {
                       <p>
                         All purchases are covered under our Buyer Protection policy. If the book differs significantly from the description, report the issue within 12 hours of delivery for a full refund.
                       </p>
+                      <Link to="/shipping" className="inline-block mt-2 text-xs font-semibold text-secondary hover:underline px-3 py-1.5 border border-secondary/20 rounded-lg hover:bg-secondary/5 transition-colors">
+                        Learn more
+                      </Link>
                     </>
                   )}
                 </div>
@@ -314,12 +317,6 @@ function BookDetail() {
               {/* Action Buttons */}
               <button
                 onClick={() => addToCart(Number(id))}
-                className="w-full bg-main hover:bg-secondary/90 text-white font-semibold py-2.5 rounded-xl text-xs transition-colors mb-2.5 flex items-center justify-center gap-2"
-              >
-                Buy this copy
-              </button>
-              <button
-                onClick={() => addToCart(Number(id))}
                 className="w-full border border-main/20 hover:bg-main/5 text-main font-semibold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 bg-white"
               >
                 <ShoppingCart size={14} />
@@ -368,9 +365,9 @@ function BookDetail() {
             </div>
 
             {/* Handwritten Seller Sticky Note */}
-            <div className="relative bg-[#FFFDF0] pt-8 pb-4 px-5 rounded-2xl shadow-sm border border-[#f7f4d7] flex flex-col min-h-[130px] overflow-hidden">
+            <div className="relative bg-[#F9F9F9] pt-8 pb-4 px-5 rounded-2xl shadow-sm border border-[#EEEEEE] flex flex-col min-h-[130px] overflow-hidden">
               {/* Tape decoration */}
-              <div className="absolute -top-1 w-14 h-4 bg-slate-400/20 rounded-[3px] shadow-sm border border-white/20 left-1/2 -translate-x-1/2" />
+              <div className="absolute -top-1 w-14 h-4 bg-slate-300/40 rounded-[3px] shadow-sm border border-white/40 left-1/2 -translate-x-1/2" />
               <p className="text-[9px] font-semibold uppercase tracking-widest text-main/40 mb-2">
                 A note from the seller
               </p>

@@ -33,8 +33,9 @@ export async function getAllBookRequestsApi(
  */
 export async function submitBookRequestApi(
   body: CreateBookRequestDto,
+  config?: import('axios').AxiosRequestConfig
 ): Promise<BookRequestResponse> {
-  const { data } = await client.post("/api/v1/BookRequest", body)
+  const { data } = await client.post("/api/v1/BookRequest", body, config)
   return data as BookRequestResponse
 }
 

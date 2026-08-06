@@ -239,14 +239,13 @@ function BrowseBooks() {
                   </div>
                 )}
 
-                {/* Request a Book Button */}
+                {/* Request a Book Link */}
                 <button
                   type="button"
                   onClick={handleRequestBook}
-                  className="bg-secondary hover:bg-secondary/90 text-white font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow flex items-center gap-2 shrink-0"
+                  className="text-xs sm:text-sm font-semibold text-secondary hover:underline transition-all text-left"
                 >
-                  <Plus size={15} />
-                  <span>Request a Book</span>
+                  Can't find what you're looking for, click here to request for it
                 </button>
               </div>
             </>

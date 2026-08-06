@@ -115,13 +115,7 @@ function Navbar() {
 
           {/* Right — Search + Login / Sign up action buttons */}
           <div className="flex items-center gap-4 shrink-0">
-            <button
-              aria-label="Search"
-              className="text-white/80 hover:text-white transition-colors p-1"
-              onClick={() => setDesktopSearchOpen((v) => !v)}
-            >
-              <Search size={18} />
-            </button>
+           
 
             {user ? (
               <div className="hidden lg:block">
