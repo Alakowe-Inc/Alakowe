@@ -21,6 +21,8 @@ import { listingToBookDisplay } from '../../lib/api/adapters'
 import BookRequestsSection from '../../components/BookRequestsSection'
 import heroImage2 from '../../assets/media/images/banny2.png'
 import heroImage3 from '../../assets/media/images/image2.jpeg'
+import heroImageMobile2 from '../../assets/media/images/banny3.png'
+import heroImageMobile3 from '../../assets/media/images/images3.jpeg'
 
 /* ── Promo Insert Cards ─────────────────────────────────────────── */
 const promoInserts = [
@@ -167,21 +169,37 @@ function Home() {
   }, [])
 
   const heroImages = [heroImage2, heroImage3]
+  const heroImagesMobile = [heroImageMobile2, heroImageMobile3]
 
   return (
     <div>
       {/* ── Hero ───────────────────────────────────────────────── */}
       <section className="relative w-full min-h-[560px] md:min-h-[620px] lg:min-h-[680px] bg-[#6c74ad] flex flex-col justify-between overflow-hidden text-white px-6 sm:px-10 lg:px-16 pt-24 md:pt-28 lg:pt-32 pb-10">
 
-        {/* Dynamic Background Image with Smooth 1-second Fade */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Dynamic Background Image with Smooth 1-second Fade (Desktop) */}
+        <div className="hidden sm:block absolute inset-0 pointer-events-none overflow-hidden">
           {heroImages.map((img, idx) => (
             <img
               key={idx}
               src={img}
               alt=""
               aria-hidden
-              className={`absolute inset-0 w-full h-full object-cover object-right-bottom sm:object-right-bottom transition-opacity duration-500 ease-in-out ${
+              className={`absolute inset-0 w-full h-full object-cover object-right-bottom transition-opacity duration-500 ease-in-out ${
+                idx === currentHeroIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Dynamic Background Image with Smooth 1-second Fade (Mobile) */}
+        <div className="sm:hidden absolute inset-0 pointer-events-none overflow-hidden">
+          {heroImagesMobile.map((img, idx) => (
+            <img
+              key={idx}
+              src={img}
+              alt=""
+              aria-hidden
+              className={`absolute inset-0 w-full h-full object-cover object-right-bottom transition-opacity duration-500 ease-in-out ${
                 idx === currentHeroIndex ? 'opacity-100' : 'opacity-0'
               }`}
               style={{ objectPosition: '85% 100%' }}
