@@ -121,7 +121,7 @@ export default function Profile() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
-  const profileKey = user ? `alakowe_profile_${user.id ?? user.email}` : null
+  const profileKey = user ? `alakowe_profile_${user.userId ?? user.email}` : null
 
   const [profile, setProfile] = useState<ProfileData>(defaultProfile)
   const [saved, setSaved] = useState(false)
@@ -142,18 +142,8 @@ export default function Profile() {
       setProfile(defaultProfile)
       return
     }
-    const loaded = loadProfile(user!.id ?? user!.email)
-    
-    // Auto-populate with current login user details if not yet saved
-    if (!loaded.fullName && user) {
-      loaded.fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim()
-    }
-    if (!loaded.username && user) {
-      loaded.username = user.email.split('@')[0]
-    }
-    
-    setProfile(loaded)
-  }, [profileKey, user])
+    setProfile(loadProfile(user!.userId ?? user!.email))
+  }, [profileKey])
 
   // Hydrate from API — API is always the source of truth for store/reading fields.
   // Only fall back to localStorage values for fields not covered by the store API
@@ -162,6 +152,9 @@ export default function Profile() {
     if (!store) return
     setProfile(p => ({
       ...p,
+      phone: store.phoneNumber || store.phone || p.phone || '',
+      fullName: store.fullName || p.fullName || '',
+      username: store.userName || store.username || p.username || '',
       bio: store.description || p.bio || '',
       city: store.city || p.city || '',
       state: store.state || p.state || '',
@@ -284,7 +277,9 @@ export default function Profile() {
 
   function handleDeleteAccount() {
     logout()
-    localStorage.removeItem(PROFILE_KEY)
+    if (profileKey) {
+      localStorage.removeItem(profileKey)
+    }
     navigate('/')
   }
 
