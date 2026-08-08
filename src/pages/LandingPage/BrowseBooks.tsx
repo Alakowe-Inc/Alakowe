@@ -245,7 +245,8 @@ function BrowseBooks() {
                   onClick={handleRequestBook}
                   className="text-xs sm:text-sm font-semibold text-secondary hover:underline transition-all text-left"
                 >
-                  Can't find what you're looking for, click here to request for it
+                Looking for title but didn't find it? .
+                Make a request for it here. 
                 </button>
               </div>
             </>

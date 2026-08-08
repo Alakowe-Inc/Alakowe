@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(AUTH_KEY)
     localStorage.removeItem('token')
     setUser(null)
-    queryClient.removeQueries({ queryKey: ['cart'] })
+    queryClient.clear()
   }
 
   return (

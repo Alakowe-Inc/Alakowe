@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { MapPin, ShoppingBag, User } from 'lucide-react'
+import { MapPin, ShoppingBag, User, Truck, Calendar } from 'lucide-react'
 import { useListings } from '../../lib/api/listings/listings.hooks'
 import { usePublicStoreBySlug } from '../../lib/api/store/store.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
@@ -135,112 +135,135 @@ export default function SellerStorefront() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start">
-            
-            {/* About Card Content */}
-            <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-3.5 mb-5">
-                <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
-                  <User size={18} className="text-secondary" />
-                </div>
-                <div>
-                  <h3 className="font-heading font-bold text-main text-lg">About {displayName}</h3>
-                </div>
-              </div>
-
+          <div>
+            {/* About Me Card */}
+            <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm mb-6">
+              <h3 className="font-heading font-bold text-main text-lg mb-3">About Me</h3>
               {isStoreLoading ? (
                 <p className="text-xs text-main/40">Loading…</p>
               ) : store?.description ? (
-                <p className="text-xs sm:text-sm text-main/70 leading-relaxed max-w-2xl">
+                <p className="text-sm text-main/80 leading-relaxed max-w-3xl">
                   {store.description}
                 </p>
               ) : (
-                <p className="text-xs text-main/35 italic">
+                <p className="text-sm text-main/35 italic">
                   This seller hasn't added a description yet.
                 </p>
               )}
-
-              {location && (
-                <div className="flex items-center gap-1.5 mt-6 text-xs sm:text-sm text-main font-medium">
-                  <MapPin size={13} className="text-secondary shrink-0" />
-                  <span>{location}</span>
-                </div>
-              )}
             </div>
 
-            {/* Statistics Card Panel */}
-            <div className="border border-main/10 rounded-2xl bg-white p-5 shadow-sm space-y-5">
-              
-              {/* Books Sold */}
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-secondary/5 flex items-center justify-center shrink-0 text-secondary">
-                  <ShoppingBag size={16} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline justify-between">
-                    <span className="font-bold text-main text-sm">{store?.booksSold ?? 0}</span>
-                    <span className="text-[9px] text-main/40 font-medium">Across</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              {/* Reading Profile Card */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm">
+                <h3 className="font-heading font-bold text-main text-lg mb-6">Reading Profile</h3>
+                
+                <div className="space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-main/5 pb-4 gap-2">
+                    <span className="text-sm text-main/60">Currently Reading</span>
+                    <span className="text-sm font-medium text-secondary text-left sm:text-right">{store?.currentlyReading || "—"}</span>
                   </div>
-                  <div className="flex items-baseline justify-between text-xs text-main/55">
-                    <span>Books sold</span>
-                    <span>Alákòwé</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-main/5 pb-4 gap-2">
+                    <span className="text-sm text-main/60">Favourite Book</span>
+                    <span className="text-sm font-medium text-secondary text-left sm:text-right">{store?.favouriteBook || "—"}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-main/5 pb-4 gap-2">
+                    <span className="text-sm text-main/60">Favourite Author</span>
+                    <span className="text-sm font-medium text-secondary text-left sm:text-right">{store?.favouriteAuthor || "—"}</span>
+                  </div>
+                  <div className="border-b border-main/5 pb-4">
+                    <span className="text-sm text-main/60 block mb-3">Reads Mostly</span>
+                    <div className="flex flex-wrap gap-2">
+                      {((store?.readMostly || store?.mostlyRead)?.split(',') || []).filter(Boolean).length > 0 ? (
+                        ((store?.readMostly || store?.mostlyRead)?.split(',') || []).filter(Boolean).map((tag: string) => (
+                          <span key={tag} className="bg-secondary/10 text-main text-xs font-medium px-3 py-1.5 rounded-full">
+                            {tag.trim()}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-sm text-main/40">—</span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-sm text-main/60 block mb-3">Hobbies Beyond Reading</span>
+                    <div className="flex flex-wrap gap-2">
+                      {(store?.hobbies?.split(',') || []).filter(Boolean).length > 0 ? (
+                        (store?.hobbies?.split(',') || []).filter(Boolean).map((tag: string) => (
+                          <span key={tag} className="bg-secondary/10 text-main text-xs font-medium px-3 py-1.5 rounded-full">
+                            {tag.trim()}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-sm text-main/40">—</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {location && (
-                <>
-                  <div className="h-px bg-main/5" />
+              {/* Marketplace Card Panel */}
+              <div className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm space-y-6">
+                <h3 className="font-heading font-bold text-main text-lg mb-6">Marketplace</h3>
 
-                  {/* Location */}
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-9 h-9 rounded-full bg-secondary/5 flex items-center justify-center shrink-0 text-secondary">
-                      <MapPin size={16} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="font-bold text-main text-xs block truncate">{location}</span>
-                      <span className="text-[9px] text-main/40 block mt-0.5">Location</span>
-                    </div>
+                {/* Books Sold */}
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-secondary/5 flex items-center justify-center shrink-0 text-secondary">
+                    <ShoppingBag size={18} />
                   </div>
-                </>
-              )}
-
-              {memberSince && (
-                <>
-                  <div className="h-px bg-main/5" />
-
-                  {/* Member Since */}
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-9 h-9 rounded-full bg-secondary/5 flex items-center justify-center shrink-0 text-secondary">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="font-bold text-main text-xs block">{memberSince}</span>
-                      <span className="text-[9px] text-main/40 block mt-0.5">Member since</span>
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs text-main/60 block mb-0.5">Books Sold</span>
+                    <span className="font-bold text-main text-sm block">{store?.booksSold ?? 15} books</span>
                   </div>
-                </>
-              )}
+                </div>
 
+                <div className="h-px bg-main/5" />
+
+                {/* Preferred Fulfilment */}
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-secondary/5 flex items-center justify-center shrink-0 text-secondary">
+                    <Truck size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs text-main/60 block mb-0.5">Preferred Fulfilment</span>
+                    <span className="font-bold text-main text-sm block">
+                      {store?.fulfillmentOption === 'Both' ? 'Delivery & Pickup' : (store?.fulfillmentOption || 'Delivery & Pickup')}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="h-px bg-main/5" />
+
+                {/* Member Since */}
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-secondary/5 flex items-center justify-center shrink-0 text-secondary">
+                    <Calendar size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs text-main/60 block mb-0.5">Member Since</span>
+                    <span className="font-bold text-main text-sm block">{memberSince || 'May 2026'}</span>
+                  </div>
+                </div>
+
+                {location && (
+                  <>
+                    <div className="h-px bg-main/5" />
+
+                    {/* Location */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-secondary/5 flex items-center justify-center shrink-0 text-secondary">
+                        <MapPin size={18} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs text-main/60 block mb-0.5">Location</span>
+                        <span className="font-bold text-main text-sm block">{location}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-
           </div>
         )}
-
-        <div className="mt-12 text-center">
-          <p className="text-[10px] text-main/35">
-            Powered by{' '}
-            <Link to="/" className="font-semibold text-main/50 hover:text-secondary transition-colors">
-              Alakowe
-            </Link>
-            {' '}— Nigeria's peer-to-peer book marketplace
-          </p>
-        </div>
       </div>
     </div>
   )

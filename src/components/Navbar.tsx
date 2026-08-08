@@ -22,7 +22,7 @@ const navLinks = [
   { label: 'List Books', to: '/list' },
   { label: 'Requests', to: '/request-book' },
   { label: 'How It Works', to: '/how-it-works' },
-  { label: 'About Us', to: '/contact' },
+  { label: 'Contact Us', to: '/contact' },
 ]
 
 function Navbar() {
