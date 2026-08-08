@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { User, CreditCard, AlertTriangle, Check, KeyRound, Eye, EyeOff, MapPin, Truck } from 'lucide-react'
+import { User, CreditCard, AlertTriangle, Check, KeyRound, Eye, EyeOff, MapPin, Truck, BookOpen } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { savePublicSellerProfile } from '../../data/sellerData'
 import { useSellerStoreProfile, useUpdateSellerStoreProfile } from '../../lib/api/store/store.hooks'
@@ -40,7 +40,6 @@ const NIGERIAN_BANKS = [
   'Unity Bank', 'Wema Bank', 'Zenith Bank',
 ]
 
-const PROFILE_KEY = 'alakowe_profile'
 
 interface ProfileData {
   fullName: string
@@ -52,21 +51,31 @@ interface ProfileData {
   bankName: string
   accountNumber: string
   accountName: string
+  currentlyReading: string
+  favouriteBook: string
+  favouriteAuthor: string
+  readMostly: string
+  hobbies: string
 }
 
 const defaultProfile: ProfileData = {
   fullName: '', phone: '', city: '', state: '',
   bio: '', bankName: '', accountNumber: '', accountName: '',
+  currentlyReading: '', favouriteBook: '', favouriteAuthor: '',
+  readMostly: '', hobbies: '',
 }
 
-function loadProfile(): ProfileData {
+function loadProfile(userId: string | number): ProfileData {
   try {
-    const raw = localStorage.getItem(PROFILE_KEY)
+    const key = `alakowe_profile_${userId}`
+    const raw = localStorage.getItem(key)
     return raw ? { ...defaultProfile, ...JSON.parse(raw) } : defaultProfile
   } catch {
     return defaultProfile
   }
 }
+
+
 
 const inputClass = cn(
   'rounded-xl h-auto py-3 text-sm text-main placeholder:text-main/30 bg-white border-main/15',
@@ -112,7 +121,9 @@ export default function Profile() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
-  const [profile, setProfile] = useState<ProfileData>(loadProfile)
+  const profileKey = user ? `alakowe_profile_${user.id ?? user.email}` : null
+
+  const [profile, setProfile] = useState<ProfileData>(defaultProfile)
   const [saved, setSaved] = useState(false)
 
   const { data: store } = useSellerStoreProfile(!!user)
@@ -125,15 +136,40 @@ export default function Profile() {
   const [pickupConsent, setPickupConsent] = useState(false)
   const [pickupErrors, setPickupErrors] = useState<PickupFieldErrors>({})
 
-  // Hydrate the form with the seller's saved storefront values (bio/location)
-  // from the backend, falling back to whatever is already in the form.
+  // When the user changes (login/logout/switch), reset form and load from their own localStorage slot
+  useEffect(() => {
+    if (!profileKey) {
+      setProfile(defaultProfile)
+      return
+    }
+    const loaded = loadProfile(user!.id ?? user!.email)
+    
+    // Auto-populate with current login user details if not yet saved
+    if (!loaded.fullName && user) {
+      loaded.fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim()
+    }
+    if (!loaded.username && user) {
+      loaded.username = user.email.split('@')[0]
+    }
+    
+    setProfile(loaded)
+  }, [profileKey, user])
+
+  // Hydrate from API — API is always the source of truth for store/reading fields.
+  // Only fall back to localStorage values for fields not covered by the store API
+  // (e.g. bankName, accountNumber, phone).
   useEffect(() => {
     if (!store) return
     setProfile(p => ({
       ...p,
-      bio: p.bio || store.description || '',
-      city: p.city || store.city || '',
-      state: p.state || store.state || '',
+      bio: store.description || p.bio || '',
+      city: store.city || p.city || '',
+      state: store.state || p.state || '',
+      currentlyReading: store.currentlyReading || '',
+      favouriteBook: store.favouriteBook || '',
+      favouriteAuthor: store.favouriteAuthor || '',
+      readMostly: store.readMostly || store.mostlyRead || '',
+      hobbies: store.hobbies || '',
     }))
     setFulfillmentOption(store.fulfillmentOption ?? 'Courier')
     setPickupAddressLine(store.pickupAddressLine ?? '')
@@ -209,7 +245,9 @@ export default function Profile() {
       return
     }
 
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile))
+    if (profileKey) {
+      localStorage.setItem(profileKey, JSON.stringify(profile))
+    }
     savePublicSellerProfile({
       email: user!.email,
       fullName: profile.fullName,
@@ -234,6 +272,11 @@ export default function Profile() {
       pickupCity: pickupCity || null,
       pickupState: pickupState || null,
       pickupConsentGiven: pickupConsent,
+      currentlyReading: profile.currentlyReading || null,
+      favouriteBook: profile.favouriteBook || null,
+      favouriteAuthor: profile.favouriteAuthor || null,
+      readMostly: profile.readMostly || null,
+      hobbies: profile.hobbies || null,
     })
     setSaved(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -354,6 +397,66 @@ export default function Profile() {
                       ))}
                     </SelectContent>
                   </Select>
+                </Field>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Reading Info ── */}
+          <div className="bg-white rounded-2xl border border-third p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                <BookOpen size={15} className="text-secondary" />
+              </div>
+              <h2 className="font-heading font-bold text-main text-base">Reading info</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Currently Reading">
+                <Input
+                  type="text"
+                  placeholder="e.g. Things Fall Apart"
+                  value={profile.currentlyReading}
+                  onChange={set('currentlyReading')}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Favourite Book">
+                <Input
+                  type="text"
+                  placeholder="e.g. Half of a Yellow Sun"
+                  value={profile.favouriteBook}
+                  onChange={set('favouriteBook')}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Favourite Author">
+                <Input
+                  type="text"
+                  placeholder="e.g. Chinua Achebe"
+                  value={profile.favouriteAuthor}
+                  onChange={set('favouriteAuthor')}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Read mostly">
+                <Input
+                  type="text"
+                  placeholder="e.g. Fiction, Sci-Fi"
+                  value={profile.readMostly}
+                  onChange={set('readMostly')}
+                  className={inputClass}
+                />
+              </Field>
+              <div className="sm:col-span-2">
+                <Field label="Hobbies Beyond Reading">
+                  <Input
+                    type="text"
+                    placeholder="e.g. Hiking, Cooking"
+                    value={profile.hobbies}
+                    onChange={set('hobbies')}
+                    className={inputClass}
+                  />
                 </Field>
               </div>
               <div className="sm:col-span-2">

@@ -548,15 +548,14 @@ dev
           </div>
 
           <div className="bg-secondary/6 border border-secondary/20 rounded-2xl p-6">
-            <div className="flex items-center gap-2 mb-3">
+            <h2 className="font-heading font-bold text-main text-base flex items-center gap-2 mb-1">
               <Heart size={15} className="text-secondary" />
-              <h2 className="font-heading font-bold text-main text-base">Love Note</h2>
-            </div>
+              Love Note to the Next Reader
+            </h2>
             <p className="text-xs text-main/45 mb-4">
               leave a short personal message for the next buyer of your book.
             </p>
-            <TextareaControl value={form.loveNote} onChange={set('loveNote')} rows={3}
-              placeholder="A message to the next reader…"
+            <TextareaControl placeholder="leave a short personal message for the next buyer of your book" value={form.loveNote} onChange={set('loveNote')} rows={3}
               style="border border-secondary/25 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
           </div>
 

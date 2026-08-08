@@ -845,7 +845,7 @@ export default function ListBook() {
             <p className="text-xs text-main/45 mb-4">
               leave a short personal message for the next buyer of your book.
             </p>
-            <TextareaControl placeholder="e.g. This book changed how I see the world…" value={form.loveNote}
+            <TextareaControl placeholder="leave a short personal message for the next buyer of your book" value={form.loveNote}
               onChange={set('loveNote')} rows={3}
               style="border border-secondary/25 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
           </div>

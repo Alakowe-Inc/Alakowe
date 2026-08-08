@@ -19,10 +19,8 @@ import BookCard from '../../components/BookCard'
 import { useLandingPage } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import BookRequestsSection from '../../components/BookRequestsSection'
-import heroImage2 from '../../assets/media/images/banny2.png'
-import heroImage3 from '../../assets/media/images/image2.jpeg'
-import heroImageMobile2 from '../../assets/media/images/banny3.png'
-import heroImageMobile3 from '../../assets/media/images/images3.jpeg'
+import heroImageDesktop from '../../assets/media/images/image2.jpeg'
+import heroImageMobile from '../../assets/media/images/images3.jpeg'
 
 /* ── Promo Insert Cards ─────────────────────────────────────────── */
 const promoInserts = [
@@ -168,8 +166,49 @@ function Home() {
     return () => clearInterval(timer)
   }, [])
 
-  const heroImages = [heroImage2, heroImage3]
-  const heroImagesMobile = [heroImageMobile2, heroImageMobile3]
+  const heroImages = [heroImageDesktop, heroImageDesktop]
+  const heroImagesMobile = [heroImageMobile, heroImageMobile]
+
+  const mobileLoveNotesScrollRef = useRef<HTMLDivElement>(null)
+  const [isMobileNotesPaused, setIsMobileNotesPaused] = useState(false)
+
+  // Continuous infinite scroll for mobile Love Notes
+  useEffect(() => {
+    const container = mobileLoveNotesScrollRef.current
+    if (!container || isMobileNotesPaused || sellerLoveNotes.length <= 1) return
+
+    let animationId: number
+    let lastTime: number | null = null
+    const speed = 35 // pixels per second
+    let accumulator = 0
+
+    const scrollStep = (timestamp: number) => {
+      if (!lastTime) lastTime = timestamp
+      const deltaTime = timestamp - lastTime
+      lastTime = timestamp
+
+      if (container) {
+        // We render the list 3 times, so one original set is 1/3 of the scrollWidth
+        const singleSetWidth = container.scrollWidth / 3
+        
+        accumulator += (speed * deltaTime) / 1000
+        
+        if (accumulator >= 1) {
+          const pixelsToScroll = Math.floor(accumulator)
+          accumulator -= pixelsToScroll
+          container.scrollLeft += pixelsToScroll
+        }
+        
+        if (container.scrollLeft >= singleSetWidth) {
+          container.scrollLeft -= singleSetWidth
+        }
+      }
+      animationId = requestAnimationFrame(scrollStep)
+    }
+
+    animationId = requestAnimationFrame(scrollStep)
+    return () => cancelAnimationFrame(animationId)
+  }, [isMobileNotesPaused, sellerLoveNotes.length])
 
   return (
     <div>
@@ -207,25 +246,28 @@ function Home() {
           ))}
         </div>
 
+        {/* Dark Overlay to make the image slightly darker */}
+        <div className="absolute inset-0 bg-black/40 pointer-events-none"></div>
+
         {/* Hero Content Container */}
         <div className="relative z-10 max-w-7xl w-full mx-auto flex-1 flex flex-col justify-center py-6">
-          <div className="max-w-xl">
+          <div className="max-w-xl pt-64 sm:pt-0">
             {/* Tagline */}
-            <p className="text-white/80 text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] mb-4">
+            <p className="text-white/80 text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] mb-2 sm:mb-5">
               BUY, SELL & REQUEST BOOKS
             </p>
 
             {/* Main Headline */}
-            <h1 className="font-heading font-extrabold text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.08] tracking-tight mb-6">
+            <h1 className="font-heading font-extrabold text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.08] tracking-tight mb-3 sm:mb-6">
               Where books <br />
               find new readers.
             </h1>
 
             {/* Decorative underline */}
-            <div className="w-12 h-1 bg-[#c3c6ff] rounded-full mb-8" />
+            <div className="w-12 h-1 bg-[#c3c6ff] rounded-full mb-4 sm:mb-8" />
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
               <Link
                 to="/browse"
                 className="bg-[#c3c6ff] hover:bg-[#b0b4ff] text-[#2c305c] font-bold px-6 py-3.5 rounded-xl text-sm transition-colors shadow-sm w-[200px] sm:w-auto flex items-center justify-between sm:justify-center gap-4"
@@ -243,8 +285,8 @@ function Home() {
             </div>
             
             {/* Mobile Feature Badges (Stacked on the left) */}
-            <div className="sm:hidden flex flex-col gap-5 mt-10 w-[200px]">
-              <div className="flex items-center gap-3.5 border-b border-white/20 pb-5">
+            <div className="sm:hidden flex flex-col gap-3 mt-5 w-[200px]">
+              <div className="flex items-center gap-3.5 border-b border-white/20 pb-3">
                 <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center shrink-0 bg-white/10">
                   <BookOpen size={18} className="text-white" />
                 </div>
@@ -254,7 +296,7 @@ function Home() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3.5 border-b border-white/20 pb-5">
+              <div className="flex items-center gap-3.5 border-b border-white/20 pb-3">
                 <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center shrink-0 bg-white/10">
                   <Shield size={18} className="text-white" />
                 </div>
@@ -453,10 +495,10 @@ function Home() {
               ).slice(0, 3).map((item) => (
                 <div
                   key={item.id}
-                  className="relative bg-secondary/10 pt-10 pb-6 px-6 rounded-2xl border border-secondary/20 shadow-[0_4px_20px_-4px_rgba(23,33,49,0.06)] flex flex-col justify-between min-h-[240px] transition-all duration-300 hover:-translate-y-1"
+                  className="relative bg-[#F9F9F9] pt-10 pb-6 px-6 rounded-2xl border border-[#EEEEEE] shadow-[0_4px_20px_-4px_rgba(23,33,49,0.06)] flex flex-col justify-between min-h-[240px] transition-all duration-300 hover:-translate-y-1"
                 >
                   {/* Tape decoration */}
-                  <div className="absolute -top-2.5 w-16 h-5 bg-secondary/25 rounded-[3px] shadow-xs border border-white/50 left-1/2 -translate-x-1/2" />
+                  <div className="absolute -top-2.5 w-16 h-5 bg-slate-300/40 rounded-[3px] shadow-sm border border-white/40 left-1/2 -translate-x-1/2" />
 
                   <div>
                     {/* Book title tag */}
@@ -472,7 +514,7 @@ function Home() {
                   </div>
 
                   {/* Seller info */}
-                  <div className="pt-4 border-t border-secondary/15 flex items-center gap-2.5">
+                  <div className="pt-4 border-t border-[#EEEEEE] flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm relative">
                       {item.sellerName.charAt(0).toUpperCase()}
                       <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-rose-500 rounded-full border border-white flex items-center justify-center">
@@ -490,14 +532,23 @@ function Home() {
               ))}
             </div>
 
-            {/* Mobile Card Display */}
-            <div className="lg:hidden flex flex-col items-center">
-              {sellerLoveNotes.length > 0 && (() => {
-                const item = sellerLoveNotes[activeQuoteIndex % sellerLoveNotes.length]
-                return (
-                  <div className="w-full max-w-md relative bg-secondary/10 pt-10 pb-6 px-6 rounded-2xl border border-secondary/20 shadow-[0_4px_20px_-4px_rgba(23,33,49,0.06)] flex flex-col justify-between min-h-[230px]">
+            {/* Mobile Card Display (Continuous Scroll) */}
+            <div className="lg:hidden w-full overflow-hidden">
+              <div 
+                ref={mobileLoveNotesScrollRef}
+                onMouseEnter={() => setIsMobileNotesPaused(true)}
+                onMouseLeave={() => setIsMobileNotesPaused(false)}
+                onTouchStart={() => setIsMobileNotesPaused(true)}
+                onTouchEnd={() => setIsMobileNotesPaused(false)}
+                className="flex gap-4 overflow-x-auto py-4 px-4 scrollbar-none [ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-full"
+              >
+                {sellerLoveNotes.length > 0 ? [...sellerLoveNotes, ...sellerLoveNotes, ...sellerLoveNotes].map((item, idx) => (
+                  <div 
+                    key={`${item.id}-${idx}`}
+                    className="w-[85vw] max-w-sm shrink-0 relative bg-[#F9F9F9] pt-10 pb-6 px-6 rounded-2xl border border-[#EEEEEE] shadow-[0_4px_20px_-4px_rgba(23,33,49,0.06)] flex flex-col justify-between min-h-[230px]"
+                  >
                     {/* Tape decoration */}
-                    <div className="absolute -top-2.5 w-16 h-5 bg-secondary/25 rounded-[3px] shadow-xs border border-white/50 left-1/2 -translate-x-1/2" />
+                    <div className="absolute -top-2.5 w-16 h-5 bg-slate-300/40 rounded-[3px] shadow-sm border border-white/40 left-1/2 -translate-x-1/2" />
 
                     <div>
                       {/* Book title tag */}
@@ -507,13 +558,13 @@ function Home() {
                       </div>
 
                       {/* Quote text (handwritten) */}
-                      <p className="font-handwritten text-[22px] sm:text-[24px] text-main/90 leading-relaxed font-medium mb-6">
+                      <p className="font-handwritten text-[22px] sm:text-[24px] text-main/90 leading-relaxed font-medium mb-6 whitespace-normal">
                         "{item.quote}"
                       </p>
                     </div>
 
                     {/* Seller info */}
-                    <div className="pt-4 border-t border-secondary/15 flex items-center gap-2.5">
+                    <div className="pt-4 border-t border-[#EEEEEE] flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm relative">
                         {item.sellerName.charAt(0).toUpperCase()}
                         <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-rose-500 rounded-full border border-white flex items-center justify-center">
@@ -528,21 +579,7 @@ function Home() {
                       </div>
                     </div>
                   </div>
-                )
-              })()}
-
-              {/* Mobile pagination dots */}
-              <div className="flex gap-2 mt-6">
-                {sellerLoveNotes.slice(0, 6).map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveQuoteIndex(idx)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      activeQuoteIndex === idx ? 'bg-secondary w-6' : 'bg-main/20 w-2'
-                    }`}
-                    aria-label={`Go to note ${idx + 1}`}
-                  />
-                ))}
+                )) : null}
               </div>
             </div>
           </div>

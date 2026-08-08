@@ -514,6 +514,9 @@ export interface StoreProfileResponse {
   userId: number
   storeName: string
   storeSlug: string
+  fullName?: string | null
+  username?: string | null
+  phone?: string | null
   description?: string | null
   city?: string | null
   state?: string | null
@@ -524,6 +527,12 @@ export interface StoreProfileResponse {
   pickupCity?: string | null
   pickupState?: string | null
   pickupConsentGiven: boolean
+  currentlyReading?: string | null
+  favouriteBook?: string | null
+  favouriteAuthor?: string | null
+  mostlyRead?: string | null
+  readMostly?: string | null
+  hobbies?: string | null
 }
 
 export interface PublicStoreProfileResponse {
@@ -542,6 +551,12 @@ export interface PublicStoreProfileResponse {
   pickupAddressLine?: string | null
   pickupCity?: string | null
   pickupState?: string | null
+  currentlyReading?: string | null
+  favouriteBook?: string | null
+  favouriteAuthor?: string | null
+  mostlyRead?: string | null
+  readMostly?: string | null
+  hobbies?: string | null
 }
 
 export interface UpdateStoreProfileRequest {
@@ -556,6 +571,11 @@ export interface UpdateStoreProfileRequest {
   pickupCity?: string | null
   pickupState?: string | null
   pickupConsentGiven: boolean
+  currentlyReading?: string | null
+  favouriteBook?: string | null
+  favouriteAuthor?: string | null
+  readMostly?: string | null
+  hobbies?: string | null
 }
 
 export interface PayoutSummaryResponse {

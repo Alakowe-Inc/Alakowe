@@ -61,7 +61,7 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     format: listing.format ?? undefined,
     description: listing.description ?? "",
     loveNote: listing.loveNote ?? undefined,
-    sellerName: listing.createdBy ?? "Seller",
+    sellerName: listing.storeName || (listing.createdBy ? listing.createdBy.split('@')[0] : "Seller"),
     sellerSlug: listing.storeSlug ?? undefined,
     fulfillmentOption: listing.fulfillmentOption ?? "Courier",
     pickupAddressLine: listing.pickupAddressLine ?? undefined,

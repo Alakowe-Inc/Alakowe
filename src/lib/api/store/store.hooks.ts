@@ -11,6 +11,7 @@ export function usePublicStoreBySlug(slug: string) {
     queryKey: ["store", "public", slug.toLowerCase()],
     queryFn: () => getPublicStoreBySlugApi(slug),
     enabled: !!slug,
+    retry: false,
   })
 }
 
@@ -19,6 +20,7 @@ export function useSellerStoreProfile(enabled = true) {
     queryKey: ["store", "mine"],
     queryFn: getSellerStoreProfileApi,
     enabled,
+    retry: false,
   })
 }
 

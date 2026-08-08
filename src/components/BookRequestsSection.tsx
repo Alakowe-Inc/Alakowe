@@ -78,24 +78,42 @@ export default function BookRequestsSection({ }: BookRequestsSectionProps) {
       return currentCount > 0
     })
 
-  // Auto-scroll every 3.5s unless hovered
+  // Continuous infinite scroll
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container || isPaused || items.length <= 1) return
 
-    const interval = setInterval(() => {
-      if (!container) return
-      const maxScroll = container.scrollWidth - container.clientWidth
-      if (maxScroll <= 0) return
+    let animationId: number
+    let lastTime: number | null = null
+    const speed = 40 // pixels per second
+    let accumulator = 0
 
-      if (container.scrollLeft >= maxScroll - 10) {
-        container.scrollTo({ left: 0, behavior: 'smooth' })
-      } else {
-        container.scrollBy({ left: 280, behavior: 'smooth' })
+    const scrollStep = (timestamp: number) => {
+      if (!lastTime) lastTime = timestamp
+      const deltaTime = timestamp - lastTime
+      lastTime = timestamp
+
+      if (container) {
+        // We rendered the list 3 times, so one original set is 1/3 of the scrollWidth
+        const singleSetWidth = container.scrollWidth / 3
+        
+        accumulator += (speed * deltaTime) / 1000
+        
+        if (accumulator >= 1) {
+          const pixelsToScroll = Math.floor(accumulator)
+          accumulator -= pixelsToScroll
+          container.scrollLeft += pixelsToScroll
+        }
+        
+        if (container.scrollLeft >= singleSetWidth) {
+          container.scrollLeft -= singleSetWidth
+        }
       }
-    }, 1000)
+      animationId = requestAnimationFrame(scrollStep)
+    }
 
-    return () => clearInterval(interval)
+    animationId = requestAnimationFrame(scrollStep)
+    return () => cancelAnimationFrame(animationId)
   }, [isPaused, items.length])
 
   function scroll(direction: 'left' | 'right') {
@@ -218,16 +236,16 @@ export default function BookRequestsSection({ }: BookRequestsSectionProps) {
           ref={scrollContainerRef}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          className="flex gap-4 overflow-x-auto scroll-smooth py-3 px-1 scrollbar-none [ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex gap-4 overflow-x-auto py-3 px-1 scrollbar-none [ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {items.map((item) => {
+          {[...items, ...items, ...items].map((item, idx) => {
             const count = countsMap[item.id] ?? item.requestCount
             const isJoined = joinedMap[item.id] || item.isUserJoined
             const isLoading = loadingItemId === item.id
 
             return (
               <div
-                key={item.id}
+                key={`${item.id}-${idx}`}
                 className="shrink-0 w-[68vw] max-w-[260px] sm:max-w-none sm:w-[42vw] md:w-[28vw] lg:w-[calc((100%-4*1rem)/5)] group"
               >
                 {/* White Card Container */}
