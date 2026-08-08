@@ -516,7 +516,9 @@ export interface StoreProfileResponse {
   storeSlug: string
   fullName?: string | null
   username?: string | null
+  userName?: string | null
   phone?: string | null
+  phoneNumber?: string | null
   description?: string | null
   city?: string | null
   state?: string | null
@@ -539,6 +541,10 @@ export interface PublicStoreProfileResponse {
   storeName: string
   storeSlug: string
   description?: string | null
+  username?: string | null
+  userName?: string | null
+  phone?: string | null
+  phoneNumber?: string | null
   city?: string | null
   state?: string | null
   isOnVacation: boolean
