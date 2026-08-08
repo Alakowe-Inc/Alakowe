@@ -156,18 +156,8 @@ function Home() {
     return list
   }, [sections])
 
-  // Hero image auto-change state (toggles every 1 second)
-  const [currentHeroIndex, setCurrentHeroIndex] = useState(0)
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentHeroIndex((prev) => (prev === 0 ? 1 : 0))
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
-
-  const heroImages = [heroImageDesktop, heroImageDesktop]
-  const heroImagesMobile = [heroImageMobile, heroImageMobile]
+  const heroImages = [heroImageDesktop]
+  const heroImagesMobile = [heroImageMobile]
 
   const mobileLoveNotesScrollRef = useRef<HTMLDivElement>(null)
   const [isMobileNotesPaused, setIsMobileNotesPaused] = useState(false)
@@ -223,9 +213,7 @@ function Home() {
               src={img}
               alt=""
               aria-hidden
-              className={`absolute inset-0 w-full h-full object-cover object-right-bottom transition-opacity duration-500 ease-in-out ${
-                idx === currentHeroIndex ? 'opacity-100' : 'opacity-0'
-              }`}
+              className="absolute inset-0 w-full h-full object-cover object-right-bottom"
             />
           ))}
         </div>
@@ -238,9 +226,7 @@ function Home() {
               src={img}
               alt=""
               aria-hidden
-              className={`absolute inset-0 w-full h-full object-cover object-right-bottom transition-opacity duration-500 ease-in-out ${
-                idx === currentHeroIndex ? 'opacity-100' : 'opacity-0'
-              }`}
+              className="absolute inset-0 w-full h-full object-cover object-right-bottom"
               style={{ objectPosition: '85% 100%' }}
             />
           ))}
