@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
-import { CheckCircle, Circle, ExternalLink, MapPin, Package } from 'lucide-react'
+import { CheckCircle, Circle, ExternalLink, MapPin, Package, Copy, ClipboardCheck } from 'lucide-react'
+import { useState } from 'react'
 import {
   ORDER_STATUSES,
   formatPickupPreferredDates,
@@ -16,6 +17,50 @@ import {
 } from '../../lib/orders'
 import { useOrder } from '../../lib/api/orders/orders.hooks'
 import { formatPrice } from '../../lib/utils'
+
+const SPEEDAF_TRACKING_URL = 'https://speedaf.com/cn-en/send-parcel'
+
+function WaybillFootnote({
+  waybillNumber,
+  label,
+}: {
+  waybillNumber: string | null
+  label: string
+}) {
+  if (!waybillNumber) return null
+
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(waybillNumber)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="mt-2.5 ml-12 text-xs text-main/50 flex items-center gap-2 flex-wrap">
+      <span className="font-medium">{label}:</span>
+      <code className="bg-main/5 px-2 py-0.5 rounded font-mono text-main">{waybillNumber}</code>
+      <button
+        onClick={handleCopy}
+        className="text-secondary hover:text-secondary/80 transition-colors p-1"
+        aria-label={copied ? 'Copied' : 'Copy waybill number'}
+      >
+        {copied ? <ClipboardCheck size={14} /> : <Copy size={14} />}
+      </button>
+      <a
+        href={SPEEDAF_TRACKING_URL}
+        target="_blank"
+        rel="noreferrer"
+        className="text-secondary hover:text-secondary/80 transition-colors flex items-center gap-1"
+        aria-label="Track on Speedaf"
+      >
+        <ExternalLink size={12} />
+        <span className="underline">Track</span>
+      </a>
+    </div>
+  )
+}
 
 const PICKUP_TIMELINE: DisplayOrderStatus[] = [
   'payment_received',
@@ -42,7 +87,7 @@ function OrderStatusPage() {
           </p>
           <Link
             to="/browse"
-            className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-secondary/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-main/90 transition-colors"
           >
             Browse Books
           </Link>
@@ -172,41 +217,18 @@ function OrderStatusPage() {
                         {isComplete && (
                           <p className="text-xs text-green-600/70 mt-0.5">Completed</p>
                         )}
+                        {step === 'in_transit_to_hub' && (
+                          <WaybillFootnote waybillNumber={order.inboundWaybillNumber} label="Inbound Waybill" />
+                        )}
+                        {step === 'dispatched' && (
+                          <WaybillFootnote waybillNumber={order.outboundWaybillNumber} label="Outbound Waybill" />
+                        )}
                       </div>
                     </div>
                   )
                 })}
               </div>
             </div>
-            feature/landing
-
-            {/* Delivery confirmation prompt */}
-            {isDelivered && (
-              <div className="bg-white rounded-2xl border border-secondary/25 p-6">
-                <h3 className="font-heading font-bold text-main text-base mb-2">
-                  Did you receive your book?
-                </h3>
-                <p className="text-main/55 text-sm mb-5 leading-relaxed">
-                  Please confirm once you've received your order so we can release payment to the seller.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    onClick={handleConfirmDelivery}
-                    disabled={confirming}
-                    className="flex-1 bg-secondary text-white font-semibold py-3 rounded-xl text-sm hover:bg-secondary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {confirming ? 'Confirming…' : '✓  Yes, all good'}
-                  </button>
-                  <Link
-                    to={`/order/${orderId}/dispute`}
-                    className="flex-1 border border-main/20 text-main font-semibold py-3 rounded-xl text-sm hover:bg-main/5 transition-colors text-center"
-                  >
-                    ⚠  There's an issue
-                  </Link>
-                </div>
-              </div>
-            )}
-        dev
           </div>
 
           <div className="md:col-span-2 flex flex-col gap-4">

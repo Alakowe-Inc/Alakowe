@@ -505,6 +505,8 @@ export interface OrderDto {
   pickupPreferredDates?: string[] | null
   pickupAddress?: string | null
   items: OrderItemDto[]
+  inboundWaybillNumber: string | null
+  outboundWaybillNumber: string | null
 }
 
 /* ───────── Store profiles ───────── */
