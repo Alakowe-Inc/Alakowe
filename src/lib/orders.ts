@@ -15,7 +15,7 @@ export const ORDER_STATUS_LABELS: Record<DisplayOrderStatus, string> = {
   payment_received: "Payment Received",
   awaiting_seller: "Awaiting Seller Action",
   dropoff_scheduled: "Drop-off Scheduled",
-  in_transit_to_hub: "In Transit to Alakowe",
+  in_transit_to_hub: "Dropped Off",
   received_by_alakowe: "Book Received by Alakowe",
   processing: "Order Processing",
   dispatched: "Dispatched",

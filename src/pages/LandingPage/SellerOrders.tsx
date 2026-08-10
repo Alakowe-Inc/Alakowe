@@ -204,14 +204,6 @@ export default function SellerOrders() {
                     </div>
                     {status === 'awaiting_seller' && (
                       <div className="ml-auto">
-                        feature/landing
-                        <Link
-                          to={`/my-sales/${order.id}/dropoff`}
-                          className="bg-secondary text-white font-semibold text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors"
-                        >
-                          Schedule Drop-off
-                        </Link>
-=
                         {pickup ? (
                           <button
                             type="button"
@@ -229,7 +221,6 @@ export default function SellerOrders() {
                             Schedule Drop-off
                           </button>
                         )}
-dev
                       </div>
                     )}
                   </div>
