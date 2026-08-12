@@ -1,5 +1,5 @@
 import client from "../client"
-import type { OrderDto, PagedResult, PayoutSummaryResponse, SellerSaleResponse } from "../types"
+import type { OrderDto, PagedResult, PayoutRequestResponse, PayoutSummaryResponse, SellerSaleResponse } from "../types"
 
 export async function getOrdersByUserApi(userId: string): Promise<OrderDto[]> {
   const { data } = await client.get(`/api/v1/orders/user/${encodeURIComponent(userId)}`)
@@ -9,6 +9,25 @@ export async function getOrdersByUserApi(userId: string): Promise<OrderDto[]> {
 export async function getOrderByIdApi(orderId: number): Promise<OrderDto> {
   const { data } = await client.get(`/api/v1/orders/${orderId}`)
   return data as OrderDto
+}
+
+export interface ConfirmDeliveryRequest {
+  confirm: boolean
+  note?: string | null
+}
+
+export interface ConfirmDeliveryResponse {
+  orderId: number
+  orderNumber: string
+  status: string
+}
+
+export async function confirmOrderDeliveryApi(
+  orderId: number,
+  payload: ConfirmDeliveryRequest,
+): Promise<ConfirmDeliveryResponse> {
+  const { data } = await client.post(`/api/v1/orders/${orderId}/confirm-delivery`, payload)
+  return data as ConfirmDeliveryResponse
 }
 
 export async function getSellerPayoutSummaryApi(): Promise<PayoutSummaryResponse> {
@@ -24,4 +43,9 @@ export async function getSellerSalesApi(
     params: { pageNumber, pageSize },
   })
   return data as PagedResult<SellerSaleResponse>
+}
+
+export async function requestSellerPayoutApi(orderId: number): Promise<PayoutRequestResponse> {
+  const { data } = await client.post("/api/v1/seller/payout-requests", { orderId })
+  return data as PayoutRequestResponse
 }

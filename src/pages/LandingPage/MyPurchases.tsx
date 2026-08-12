@@ -22,6 +22,7 @@ const STATUS_CONFIG: Record<DisplayOrderStatus, { class: string; icon: React.Ele
   dispatched:          { class: 'bg-secondary/8 text-secondary border border-secondary/20', icon: Truck },
   delivered:           { class: 'bg-orange-50 text-orange-700 border border-orange-200', icon: Package },
   confirmed:           { class: 'bg-green-50 text-green-700 border border-green-200',    icon: CheckCircle },
+  disputed:            { class: 'bg-red-50 text-red-700 border border-red-200',          icon: AlertCircle },
 }
 
 function timeAgo(iso: string): string {

@@ -394,7 +394,7 @@ export interface LandingPageSectionResponse {
   id?: number
   title?: string | null
   sectionType?: string | null
-  filterParam?: any
+  filterParam?: Record<string, unknown> | null
   listings?: ListingResponse[] | null
 }
 
@@ -475,6 +475,14 @@ export interface OrderItemDto {
   commissionAmount: number
 }
 
+export interface OrderStatusEventResponse {
+  id: number
+  status: string
+  note?: string | null
+  occurredAt?: string | null
+  by?: string | null
+}
+
 export interface OrderDto {
   id: number
   orderNumber: string
@@ -507,6 +515,7 @@ export interface OrderDto {
   items: OrderItemDto[]
   inboundWaybillNumber: string | null
   outboundWaybillNumber: string | null
+  statusEvents?: OrderStatusEventResponse[] | null
 }
 
 /* ───────── Store profiles ───────── */
@@ -594,6 +603,24 @@ export interface PayoutSummaryResponse {
   orderCount: number
 }
 
+export interface PayoutRequestResponse {
+  id: number
+  requestNumber: string
+  orderId: number
+  orderNumber: string
+  sellerEmail: string
+  sellerName: string
+  amount: number
+  status: string
+  requestedAt: string
+  bankName: string
+  accountName: string
+  accountNumber: string
+  approvedAt?: string | null
+  paidAt?: string | null
+  note?: string | null
+}
+
 export interface SellerSaleResponse {
   orderId: number
   orderNumber: string
@@ -605,6 +632,7 @@ export interface SellerSaleResponse {
   sellerPayout: number
   status: string
   isSettled: boolean
+  payoutRequested: boolean
   orderDate: string
   preferredSpeedafStationId?: number | null
   preferredSpeedafStationName?: string | null
