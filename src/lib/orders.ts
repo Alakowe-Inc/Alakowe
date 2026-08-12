@@ -10,6 +10,7 @@ export type DisplayOrderStatus =
   | "dispatched"
   | "delivered"
   | "confirmed"
+  | "disputed"
 
 export const ORDER_STATUS_LABELS: Record<DisplayOrderStatus, string> = {
   payment_received: "Payment Received",
@@ -21,6 +22,7 @@ export const ORDER_STATUS_LABELS: Record<DisplayOrderStatus, string> = {
   dispatched: "Dispatched",
   delivered: "Delivered",
   confirmed: "Delivery Confirmed",
+  disputed: "Dispute Open",
 }
 
 export const ORDER_STATUS_DESCRIPTIONS: Record<DisplayOrderStatus, string> = {
@@ -33,6 +35,7 @@ export const ORDER_STATUS_DESCRIPTIONS: Record<DisplayOrderStatus, string> = {
   dispatched: "Your book is on its way to you.",
   delivered: "Your book has been delivered.",
   confirmed: "Delivery has been confirmed.",
+  disputed: "A dispute has been opened for this order. Your payment stays in escrow until it's resolved.",
 }
 
 export const ORDER_STATUSES: DisplayOrderStatus[] = [
@@ -45,6 +48,7 @@ export const ORDER_STATUSES: DisplayOrderStatus[] = [
   "dispatched",
   "delivered",
   "confirmed",
+  "disputed",
 ]
 
 /** Backend uses PascalCase (e.g. OutForDelivery); timeline keys use snake_case. */
@@ -101,6 +105,9 @@ export function normalizeOrderStatus(status?: string | null): DisplayOrderStatus
 
     case "delivered":
       return "delivered"
+
+    case "disputed":
+      return "disputed"
 
     case "delivery_confirmed":
     case "completed":

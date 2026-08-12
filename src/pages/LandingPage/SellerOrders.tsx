@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Clock, CheckCircle, Truck, Package, AlertCircle } from 'lucide-react'
-import { useSellerSales } from '../../lib/api/orders/orders.hooks'
+import { ArrowLeft, Clock, CheckCircle, Truck, Package, AlertCircle, Wallet } from 'lucide-react'
+import { useRequestSellerPayout, useSellerSales } from '../../lib/api/orders/orders.hooks'
 import { moneyInNaira, normalizeSellerSaleStatus, type SellerSaleDisplayStatus } from '../../lib/orders'
 import type { SellerSaleResponse } from '../../lib/api/types'
 import { ScheduleDropoffModal } from './ScheduleDropoffModal'
@@ -74,6 +74,7 @@ export default function SellerOrders() {
   const totalPages = data?.totalPages ?? 1
   const [schedulingSale, setSchedulingSale] = useState<SellerSaleResponse | null>(null)
   const [pickupSale, setPickupSale] = useState<SellerSaleResponse | null>(null)
+  const requestPayout = useRequestSellerPayout()
 
   const awaitingSales = sales.filter((s) => normalizeSellerSaleStatus(s) === 'awaiting_seller')
   const hasPickupAwaiting = awaitingSales.some(isPickupSale)
@@ -219,6 +220,26 @@ export default function SellerOrders() {
                             className="bg-main text-white font-semibold text-xs px-4 py-2 rounded-xl hover:bg-main/90 transition-colors"
                           >
                             Schedule Drop-off
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {status === 'confirmed' && !sale.isSettled && (
+                      <div className="ml-auto">
+                        {sale.payoutRequested ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-main/40">
+                            <Clock size={13} /> Payout requested
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => requestPayout.mutate(sale.orderId)}
+                            disabled={requestPayout.isPending}
+                            className="inline-flex items-center gap-1.5 bg-green-600 text-white font-semibold text-xs px-4 py-2 rounded-xl hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            <Wallet size={13} />
+                            {requestPayout.isPending ? 'Requesting…' : 'Request payout'}
                           </button>
                         )}
                       </div>

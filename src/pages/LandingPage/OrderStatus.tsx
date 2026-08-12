@@ -1,8 +1,8 @@
-import { useParams, Link } from 'react-router-dom'
-import { CheckCircle, Circle, ExternalLink, MapPin, Package, Copy, ClipboardCheck } from 'lucide-react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { CheckCircle, Circle, ExternalLink, MapPin, Package, Copy, ClipboardCheck, ShieldAlert } from 'lucide-react'
 import { useState } from 'react'
 import {
-  ORDER_STATUSES,
+  backendStatusKey,
   formatPickupPreferredDates,
   getOrderDeliveryAddress,
   isPickupOrder,
@@ -13,10 +13,11 @@ import {
   orderTotalInNaira,
   pickupMapsUrl,
   sellerDisplayName,
-  type DisplayOrderStatus,
 } from '../../lib/orders'
-import { useOrder } from '../../lib/api/orders/orders.hooks'
+import { useConfirmOrderDelivery, useOrder } from '../../lib/api/orders/orders.hooks'
+import { useAuth } from '../../context/AuthContext'
 import { formatPrice } from '../../lib/utils'
+import type { OrderDto, OrderStatusEventResponse } from '../../lib/api/types'
 
 const SPEEDAF_TRACKING_URL = 'https://speedaf.com/cn-en/send-parcel'
 
@@ -27,9 +28,9 @@ function WaybillFootnote({
   waybillNumber: string | null
   label: string
 }) {
-  if (!waybillNumber) return null
-
   const [copied, setCopied] = useState(false)
+
+  if (!waybillNumber) return null
 
   const handleCopy = () => {
     navigator.clipboard.writeText(waybillNumber)
@@ -62,17 +63,65 @@ function WaybillFootnote({
   )
 }
 
-const PICKUP_TIMELINE: DisplayOrderStatus[] = [
-  'payment_received',
-  'awaiting_seller',
-  'delivered',
-  'confirmed',
-]
+type EventNote = { waybillNumber?: string; courier?: string; leg?: string; reason?: string }
+
+function parseEventNote(note?: string | null): EventNote | null {
+  if (!note) return null
+  try {
+    const parsed = JSON.parse(note)
+    if (parsed && typeof parsed === 'object') return parsed as EventNote
+    return null
+  } catch {
+    return null
+  }
+}
+
+function formatTimestamp(iso: string): string {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return ''
+  const day = date.toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })
+  const time = date.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })
+  return `${day}, ${time}`
+}
+
+function ConfirmDeliveryCard({ order }: { order: OrderDto }) {
+  const confirm = useConfirmOrderDelivery()
+  const navigate = useNavigate()
+
+  return (
+    <div className="bg-white rounded-2xl border border-secondary/25 shadow-sm px-5 py-6 mb-8">
+      <h2 className="font-heading font-bold text-main text-base mb-1">Confirm your delivery</h2>
+      <p className="text-sm text-main/55 mb-5">
+        Did you receive your book? Confirming closes the order and releases the seller's payout.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button
+          type="button"
+          onClick={() => confirm.mutate({ orderId: order.id, confirm: true })}
+          disabled={confirm.isPending}
+          className="flex-1 bg-secondary text-white font-semibold text-sm py-3 rounded-xl hover:bg-secondary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {confirm.isPending ? 'Confirming…' : 'Yes, I received my book'}
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(`/order/${order.id}/dispute`)}
+          disabled={confirm.isPending}
+          className="flex-1 inline-flex items-center justify-center gap-2 border border-main/15 text-main font-semibold text-sm py-3 rounded-xl hover:border-red-300 hover:text-red-600 transition-colors disabled:opacity-60"
+        >
+          <ShieldAlert size={15} className="text-red-500" />
+          Report a problem
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function OrderStatusPage() {
   const { orderId } = useParams<{ orderId: string }>()
   const numericOrderId = Number(orderId)
   const { data: order, isLoading, error } = useOrder(numericOrderId)
+  const { user } = useAuth()
 
   if (!Number.isInteger(numericOrderId) || error) {
     return (
@@ -108,15 +157,15 @@ function OrderStatusPage() {
   const delivery = getOrderDeliveryAddress(order)
   const cityState = [delivery.city, delivery.state].filter(Boolean).join(', ')
   const pickup = isPickupOrder(order)
-  const timelineStatuses = pickup ? PICKUP_TIMELINE : ORDER_STATUSES
-  const timelineStatus: DisplayOrderStatus = timelineStatuses.includes(status)
-    ? status
-    : pickup
-      ? 'awaiting_seller'
-      : status
-  const currentIndex = Math.max(0, timelineStatuses.indexOf(timelineStatus))
   const pickupDatesLabel = formatPickupPreferredDates(order.pickupPreferredDates)
   const pickupMaps = pickupMapsUrl(order.pickupAddress)
+  const isBuyer = !!user?.userId && user.userId === String(order.userId)
+
+  const events: OrderStatusEventResponse[] = order.statusEvents?.length ? order.statusEvents : []
+  const timeline: OrderStatusEventResponse[] =
+    events.length > 0
+      ? events
+      : [{ id: 0, status: order.status, occurredAt: order.orderDate }]
 
   return (
     <div className="bg-third min-h-screen">
@@ -149,7 +198,7 @@ function OrderStatusPage() {
           <p className="text-main/55 text-sm mt-0.5">
             {orderStatusDescription(status, order.fulfillmentType)}
           </p>
-          {pickup && order.pickupCode && status !== 'delivered' && status !== 'confirmed' && (
+          {pickup && order.pickupCode && status !== 'delivered' && status !== 'confirmed' && status !== 'disputed' && (
             <p className="mt-3 text-sm text-main">
               Your pickup code:{' '}
               <span className="font-mono font-bold tracking-widest text-lg">{order.pickupCode}</span>
@@ -157,19 +206,46 @@ function OrderStatusPage() {
           )}
         </div>
 
+        {status === 'delivered' && isBuyer && (
+          <ConfirmDeliveryCard order={order} />
+        )}
+
+        {status === 'confirmed' && (
+          <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-4 mb-8 flex items-start gap-3">
+            <CheckCircle size={16} className="text-green-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-green-800">
+              This order is complete. Thank you for buying on Alákò̩wé!
+            </p>
+          </div>
+        )}
+
+        {status === 'disputed' && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl px-5 py-4 mb-8 flex items-start gap-3">
+            <ShieldAlert size={16} className="text-red-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-red-800 leading-relaxed">
+              A dispute has been opened for this order. Your payment is held in escrow while we
+              investigate — we'll get back to you within 24–48 hours.
+            </p>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
 
           <div className="md:col-span-3 flex flex-col gap-4">
             <div className="bg-white rounded-2xl border border-third p-6">
               <h2 className="font-heading font-bold text-main text-base mb-6">Order Timeline</h2>
               <div>
-                {timelineStatuses.map((step, i) => {
-                  const isComplete = i < currentIndex
-                  const isActive = i === currentIndex
-                  const isLast = i === timelineStatuses.length - 1
+                {timeline.map((evt, i) => {
+                  const isLast = i === timeline.length - 1
+                  const isActive = isLast
+                  const isComplete = !isActive
+                  const displayStatus = normalizeOrderStatus(evt.status)
+                  const note = parseEventNote(evt.note)
+                  const isDispute = backendStatusKey(evt.status) === 'disputed'
+                  const timestamp = evt.occurredAt ? formatTimestamp(evt.occurredAt) : ''
 
                   return (
-                    <div key={step} className="flex items-start gap-4">
+                    <div key={`${evt.id}-${i}`} className="flex items-start gap-4">
                       <div className="flex flex-col items-center shrink-0">
                         <div
                           className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
@@ -182,10 +258,10 @@ function OrderStatusPage() {
                         >
                           {isComplete ? (
                             <CheckCircle size={15} className="text-white" />
-                          ) : isActive ? (
-                            <div className="w-3 h-3 rounded-full bg-white animate-pulse" />
+                          ) : isDispute ? (
+                            <ShieldAlert size={15} className="text-white" />
                           ) : (
-                            <Circle size={13} className="text-main/25" />
+                            <div className="w-3 h-3 rounded-full bg-white animate-pulse" />
                           )}
                         </div>
                         {!isLast && (
@@ -197,31 +273,42 @@ function OrderStatusPage() {
                         )}
                       </div>
 
-                      <div className="pb-5">
+                      <div className="pb-5 min-w-0">
                         <p
                           className={`text-sm font-semibold leading-snug ${
                             isComplete
                               ? 'text-main/50'
                               : isActive
-                              ? 'text-main'
+                              ? isDispute ? 'text-red-600' : 'text-main'
                               : 'text-main/25'
                           }`}
                         >
-                          {orderStatusLabel(step, order.fulfillmentType)}
+                          {orderStatusLabel(displayStatus, order.fulfillmentType)}
                         </p>
+                        {timestamp && (
+                          <p className={`text-xs mt-0.5 ${isComplete ? 'text-main/35' : 'text-main/45'}`}>
+                            {timestamp}
+                          </p>
+                        )}
                         {isActive && (
                           <p className="text-xs text-main/45 mt-0.5 leading-relaxed">
-                            {orderStatusDescription(step, order.fulfillmentType)}
+                            {orderStatusDescription(displayStatus, order.fulfillmentType)}
                           </p>
                         )}
                         {isComplete && (
                           <p className="text-xs text-green-600/70 mt-0.5">Completed</p>
                         )}
-                        {step === 'in_transit_to_hub' && (
-                          <WaybillFootnote waybillNumber={order.inboundWaybillNumber} label="Inbound Waybill" />
+                        {note?.waybillNumber && (
+                          <WaybillFootnote
+                            waybillNumber={note.waybillNumber}
+                            label={`${note.leg === 'Outbound' ? 'Outbound' : 'Inbound'} Waybill`}
+                          />
                         )}
-                        {step === 'dispatched' && (
-                          <WaybillFootnote waybillNumber={order.outboundWaybillNumber} label="Outbound Waybill" />
+                        {isDispute && note?.reason && (
+                          <p className="mt-2 text-xs text-red-600/80 leading-relaxed flex items-start gap-1.5">
+                            <ShieldAlert size={12} className="shrink-0 mt-0.5" />
+                            <span>{note.reason}</span>
+                          </p>
                         )}
                       </div>
                     </div>
