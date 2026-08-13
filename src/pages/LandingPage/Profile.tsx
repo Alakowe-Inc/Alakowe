@@ -255,6 +255,7 @@ export default function Profile() {
       storeName:
         store?.storeName ||
         `${profile.fullName || user!.email.split('@')[0]}'s Store`,
+      username: profile.username || null,
       description: profile.bio || null,
       city: profile.city || null,
       state: profile.state || null,

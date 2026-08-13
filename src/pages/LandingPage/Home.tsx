@@ -17,7 +17,7 @@ import { books as mockBooks } from '../../data/mockData'
 import BookCarousel from '../../components/BookCarousel'
 import BookCard from '../../components/BookCard'
 import { useLandingPage } from '../../lib/api/listings/listings.hooks'
-import { listingToBookDisplay } from '../../lib/api/adapters'
+import { getPublicSellerDisplayName, listingToBookDisplay } from '../../lib/api/adapters'
 import BookRequestsSection from '../../components/BookRequestsSection'
 import heroImageDesktop from '../../assets/media/images/image2.jpeg'
 import heroImageMobile from '../../assets/media/images/images3.jpeg'
@@ -135,7 +135,13 @@ function Home() {
             id: String(listing.id ?? Math.random()),
             quote: listing.loveNote.trim(),
             bookTitle: listing.title ?? 'Untitled Book',
-            sellerName: listing.createdBy ?? 'Seller',
+            sellerName: listing.sellerUserName || getPublicSellerDisplayName({
+              username: listing.username,
+              userName: listing.userName,
+              storeSlug: listing.storeSlug,
+              storeName: listing.storeName,
+              createdBy: listing.createdBy,
+            }),
           })
         }
       })

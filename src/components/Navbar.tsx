@@ -6,6 +6,7 @@ import logoWhite from '../assets/media/logos/logo white.png'
 import logoColor from '../assets/media/logos/logo.png'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import { useSellerStoreProfile } from '../lib/api/store/store.hooks'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +34,7 @@ function Navbar() {
   const focusOnOpenRef = useRef(false)
   const { count } = useCart()
   const { user, logout } = useAuth()
+  const { data: storeProfile } = useSellerStoreProfile(!!user)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -137,7 +139,7 @@ function Navbar() {
                         {user.email[0]}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-main truncate">{user.email.split('@')[0]}</p>
+                        <p className="text-sm font-bold text-main truncate">{storeProfile?.username || storeProfile?.userName || user.email.split('@')[0]}</p>
                         <p className="text-xs text-main/40 truncate">{user.email}</p>
                       </div>
                     </DropdownMenuLabel>

@@ -324,7 +324,11 @@ export default function ListBook() {
     if (!form.author.trim()) e.author = 'Author is required'
     if (!form.genre) e.genre = 'Please select a genre'
     if (!form.condition) e.condition = 'Please select a condition'
-    if (!form.conditionNotes.trim()) e.conditionNotes = 'Condition note is required'
+    if (!form.conditionNotes.trim()) {
+      e.conditionNotes = 'Condition note is required'
+    } else if (form.conditionNotes.trim().length < 20) {
+      e.conditionNotes = 'Condition note must be at least 20 characters'
+    }
     if (!form.description.trim() || form.description.length < 20)
       e.description = 'Description must be at least 20 characters'
     const price = parseFloat(form.price)
@@ -672,8 +676,8 @@ export default function ListBook() {
                   style={inputClass(!!errors.genre)}
                 />
               </Field>
-              <Field label="Genre">
-                <FormControl type="text" placeholder="e.g. Historical Fiction" value={form.subGenre}
+              <Field label="Genre / Tag">
+                <FormControl type="text" placeholder="e.g. Historical Fiction or Coming-of-age" value={form.subGenre}
                   onChange={set('subGenre')} style={inputClass()} />
               </Field>
               <Field label="No. of Pages">
@@ -745,7 +749,7 @@ export default function ListBook() {
 
             <Field label="Condition Notes / Defects" required error={errors.conditionNotes}>
               <TextareaControl placeholder="e.g. There's a small crease on the spine and a few pencil marks in chapter 3."
-                value={form.conditionNotes} onChange={set('conditionNotes')} rows={4}
+                value={form.conditionNotes} onChange={set('conditionNotes')} rows={4} minLength={20}
                 style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
             </Field>
           </div>
@@ -831,7 +835,7 @@ export default function ListBook() {
             <h2 className="font-heading font-bold text-main text-base mb-1">Book Synopsis</h2>
             <p className="text-xs text-main/45 mb-4">Provide a clear synopsis/description of the book so buyers know what to expect.</p>
             <Field label="Synopsis" required error={errors.description}>
-              <TextareaControl value={form.description} onChange={set('description')} rows={5} placeholder="Describe the storyline, theme, or summary of the book..."
+              <TextareaControl value={form.description} onChange={set('description')} rows={5} minLength={20} placeholder="Describe the storyline, theme, or summary of the book..."
                 style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors bg-white" />
             </Field>
           </div>

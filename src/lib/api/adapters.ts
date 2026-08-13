@@ -35,6 +35,33 @@ export interface BookDisplay {
   location?: string
 }
 
+export function getPublicSellerDisplayName(payload?: {
+  storeSlug?: string | null
+  storeName?: string | null
+  sellerName?: string | null
+  username?: string | null
+  userName?: string | null
+  createdBy?: string | null
+}): string {
+  const choices = [
+    payload?.username,
+    payload?.userName,
+    payload?.storeSlug,
+    payload?.storeName,
+    payload?.sellerName,
+  ]
+
+  for (const value of choices) {
+    const text = value?.trim()
+    if (text && !text.includes('@')) return text
+  }
+
+  const createdBy = payload?.createdBy?.trim()
+  if (createdBy) return createdBy.includes('@') ? createdBy.split('@')[0] : createdBy
+
+  return 'Seller'
+}
+
 export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
   const buyersPriceInNaira = Math.round((listing.buyerPrice || listing.price || 0) / 100)
   const discountPct = listing.discount ?? 0
@@ -61,7 +88,13 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     format: listing.format ?? undefined,
     description: listing.description ?? "",
     loveNote: listing.loveNote ?? undefined,
-    sellerName: listing.storeName || (listing.createdBy ? listing.createdBy.split('@')[0] : "Seller"),
+    sellerName: getPublicSellerDisplayName({
+      username: listing.username,
+      userName: listing.userName,
+      storeSlug: listing.storeSlug,
+      storeName: listing.storeName,
+      createdBy: listing.createdBy,
+    }),
     sellerSlug: listing.storeSlug ?? undefined,
     fulfillmentOption: listing.fulfillmentOption ?? "Courier",
     pickupAddressLine: listing.pickupAddressLine ?? undefined,
