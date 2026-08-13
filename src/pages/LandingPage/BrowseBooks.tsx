@@ -240,14 +240,16 @@ function BrowseBooks() {
                 )}
 
                 {/* Request a Book Link */}
-                <button
-                  type="button"
-                  onClick={handleRequestBook}
-                  className="text-xs sm:text-sm font-semibold text-secondary hover:underline transition-all text-left"
-                >
-                Looking for title but didn't find it? .
-                Make a request for it here. 
-                </button>
+                <div className="text-xs sm:text-sm font-semibold text-left">
+                  <span className="text-main/70">Looking for title but didn't find it? </span>
+                  <button
+                    type="button"
+                    onClick={handleRequestBook}
+                    className="text-secondary hover:underline transition-all"
+                  >
+                    Make a request for it here.
+                  </button>
+                </div>
               </div>
             </>
           ) : (

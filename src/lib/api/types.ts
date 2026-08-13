@@ -157,6 +157,8 @@ export interface ListingResponse {
   storeProfileId?: number | null
   storeName?: string | null
   storeSlug?: string | null
+  username?: string | null
+  userName?: string | null
   fulfillmentOption?: StoreFulfillmentOption
   pickupAddressLine?: string | null
   pickupCity?: string | null
@@ -578,6 +580,7 @@ export interface PublicStoreProfileResponse {
 
 export interface UpdateStoreProfileRequest {
   storeName: string
+  username?: string | null
   description?: string | null
   city?: string | null
   state?: string | null

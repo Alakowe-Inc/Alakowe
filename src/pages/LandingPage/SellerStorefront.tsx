@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { MapPin, ShoppingBag, User, Truck, Calendar } from 'lucide-react'
 import { useListings } from '../../lib/api/listings/listings.hooks'
 import { usePublicStoreBySlug } from '../../lib/api/store/store.hooks'
-import { listingToBookDisplay } from '../../lib/api/adapters'
+import { getPublicSellerDisplayName, listingToBookDisplay } from '../../lib/api/adapters'
 import BookCard from '../../components/BookCard'
 
 export default function SellerStorefront() {
@@ -23,7 +23,14 @@ export default function SellerStorefront() {
       .map(listingToBookDisplay)
   }, [pagedResult, sellerEmail])
 
-  const displayName = store?.sellerName || storeSlug
+  const displayName = getPublicSellerDisplayName({
+    storeSlug: store?.storeSlug,
+    username: store?.username,
+    userName: store?.userName,
+    storeName: store?.storeName,
+    sellerName: store?.sellerName,
+    createdBy: undefined,
+  })
   const location = [store?.city, store?.state].filter(Boolean).join(', ')
   const memberSince = store?.memberSince
     ? new Date(store.memberSince).toLocaleDateString('en-NG', { month: 'long', year: 'numeric' })
