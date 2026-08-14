@@ -64,6 +64,8 @@ export interface SubmitListingRequestDto {
   imageFileNames?: string[] | null
   author?: string | null
   categoryId?: number
+  tagIds?: number[] | null
+  tags?: string[] | null
   discount?: number
   stateId?: number
   areaId?: number
@@ -84,6 +86,8 @@ export interface UpdateListingRequestDto {
   imageFileNames?: string[] | null
   author?: string | null
   categoryId?: number
+  tagIds?: number[] | null
+  tags?: string[] | null
   discount?: number
   stateId?: number
   areaId?: number
@@ -163,6 +167,9 @@ export interface ListingResponse {
   pickupAddressLine?: string | null
   pickupCity?: string | null
   pickupState?: string | null
+  tags?: string[] | null
+  tagNames?: string[] | null
+  numberOfPages?: number | null
 }
 
 export interface SetListingDiscountRequest {
@@ -331,6 +338,15 @@ export interface WishlistResponse {
 export interface CategoryResponse {
   id?: number
   name?: string | null
+  slug?: string | null
+}
+
+export interface TagResponse {
+  id: number
+  name: string
+  slug?: string | null
+  categoryId?: number | null
+  categoryName?: string | null
 }
 
 export interface StateResponse {

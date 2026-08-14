@@ -42,7 +42,6 @@ export default function Sell() {
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-10">
-
         {/* ── Banner Card — replicated from RequestBook.tsx ── */}
         <div className="bg-gradient-to-br from-violet-50/70 to-indigo-50/40 border border-violet-100/80 rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
 
@@ -84,59 +83,9 @@ export default function Sell() {
               </div>
             </div>
           </div>
-
-          {/* Decorative illustration — mirrors RequestBook storefront */}
-          <div className="absolute right-6 bottom-0 hidden lg:block select-none opacity-40 pointer-events-none z-0">
-            <svg width="220" height="110" viewBox="0 0 220 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="80" cy="50" r="30" stroke="#6B6FFF" strokeWidth="3" fill="#E8E8FF" />
-              <circle cx="80" cy="50" r="18" stroke="#6B6FFF" strokeWidth="2" fill="#F3F3FF" />
-              <line x1="103" y1="73" x2="125" y2="95" stroke="#6B6FFF" strokeWidth="4" strokeLinecap="round" />
-              <rect x="145" y="60" width="14" height="40" rx="2" fill="#E8E8FF" stroke="#6B6FFF" strokeWidth="2" />
-              <rect x="161" y="50" width="12" height="50" rx="2" fill="#F3F3FF" stroke="#6B6FFF" strokeWidth="2" />
-              <rect x="175" y="55" width="16" height="45" rx="2" fill="#E8E8FF" stroke="#6B6FFF" strokeWidth="2" />
-              <line x1="130" y1="100" x2="210" y2="100" stroke="#6B6FFF" strokeWidth="3" strokeLinecap="round" />
-            </svg>
-          </div>
         </div>
 
-        {/* ── Top Feature Pillars — PangoBooks replicated style ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-          <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 border border-blue-100/80 rounded-2xl p-5 flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-blue-100/80 text-blue-600 flex items-center justify-center shrink-0">
-              <DollarSign size={20} />
-            </div>
-            <div>
-              <h3 className="font-heading font-bold text-main text-sm">Earn Real Cash</h3>
-              <p className="text-xs text-main/55 mt-1 leading-relaxed">
-                Turn pre-loved books into money in your bank account or store credit for new reads.
-              </p>
-            </div>
-          </div>
 
-          <div className="bg-gradient-to-br from-violet-50/50 to-purple-50/30 border border-violet-100/80 rounded-2xl p-5 flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-violet-100/80 text-violet-600 flex items-center justify-center shrink-0">
-              <Truck size={20} />
-            </div>
-            <div>
-              <h3 className="font-heading font-bold text-main text-sm">Simple Fulfillment</h3>
-              <p className="text-xs text-main/55 mt-1 leading-relaxed">
-                Choose drop-off at partner hubs, doorstep pickup, or direct buyer meetups.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-emerald-50/50 to-teal-50/30 border border-emerald-100/80 rounded-2xl p-5 flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-100/80 text-emerald-600 flex items-center justify-center shrink-0">
-              <ShieldCheck size={20} />
-            </div>
-            <div>
-              <h3 className="font-heading font-bold text-main text-sm">Real Support & Escrow</h3>
-              <p className="text-xs text-main/55 mt-1 leading-relaxed">
-                Guaranteed escrow payments protect every seller and build buyer trust.
-              </p>
-            </div>
-          </div>
-        </div>
 
         {/* ── Navigation Tabs — replicated from RequestBook.tsx ── */}
         <div className="flex border-b border-main/10 mb-8 overflow-x-auto">
@@ -297,15 +246,15 @@ export default function Sell() {
         {/* ── TAB 2: FULFILLMENT & SALES ── */}
         {activeTab === 'fulfillment' && (
           <div className="space-y-8">
-            <div className="bg-gradient-to-r from-violet-500 to-indigo-600 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden">
-              <div className="max-w-xl">
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full">
+            <div className="bg-gradient-to-br from-violet-50/80 via-slate-50 to-indigo-50/50 border border-violet-100/80 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
+              <div className="max-w-md">
+                <span className="text-[10px] font-bold uppercase tracking-widest bg-secondary/10 text-secondary px-3 py-1 rounded-full">
                   Fulfillment & Payouts
                 </span>
-                <h2 className="font-heading font-bold text-2xl md:text-3xl mt-3">
+                <h2 className="font-heading font-bold text-main text-xl sm:text-2xl mt-2.5">
                   After your book sells
                 </h2>
-                <p className="text-white/80 text-xs sm:text-sm mt-2 leading-relaxed">
+                <p className="text-main/60 text-xs sm:text-sm mt-1.5 leading-relaxed">
                   From sale notification to packaging, delivery, and bank payout — we guide you every step of the way.
                 </p>
               </div>
@@ -551,39 +500,27 @@ export default function Sell() {
         )}
 
         {/* ── CTA BANNER AT BOTTOM ── */}
-        <div className="mt-12 bg-gradient-to-br from-main to-main/95 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden shadow-md">
-          <div className="max-w-xl mx-auto z-10 relative">
-            <h2 className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl mb-3">
+        <div className="mt-8 bg-white border border-main/10 rounded-2xl p-6 sm:p-8 text-center shadow-sm relative overflow-hidden">
+          <div className="max-w-md mx-auto z-10 relative">
+            <h2 className="font-heading font-bold text-main text-xl sm:text-2xl mb-2">
               Ready to start selling?
             </h2>
-            <p className="text-white/80 text-sm md:text-base font-medium mb-2">
+            <p className="text-main/70 text-xs sm:text-sm font-medium mb-1">
               Your bookshelf could be worth more than you think.
             </p>
-            <p className="text-white/60 text-xs sm:text-sm mb-8">
+            <p className="text-main/45 text-xs mb-6">
               List your first book today and let it find its next reader.
             </p>
 
             <Link
               to={listBookUrl}
-              className="inline-flex items-center gap-2 bg-secondary text-white font-bold text-sm px-8 py-3.5 rounded-xl hover:bg-secondary/90 transition-transform active:scale-[0.98] shadow-sm uppercase tracking-wider"
+              className="inline-flex items-center gap-2 bg-secondary text-white font-bold text-xs px-6 py-3 rounded-xl hover:bg-secondary/90 transition-all active:scale-[0.98] shadow-xs uppercase tracking-wider"
             >
               <span>List a Book</span>
-              <ArrowRight size={16} />
+              <ArrowRight size={14} />
             </Link>
           </div>
         </div>
-
-        {/* Footer info line */}
-        <div className="mt-8 text-center">
-          <p className="text-[10px] text-main/35">
-            Powered by{' '}
-            <Link to="/" className="font-semibold text-main/50 hover:text-secondary transition-colors">
-              Alakowe
-            </Link>
-            {' '}— Nigeria's peer-to-peer book marketplace
-          </p>
-        </div>
-
       </div>
 
       {/* ── Learn More Popup Modal ── */}

@@ -261,17 +261,17 @@ function Home() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
               <Link
-                to="/browse"
+                to="/list"
                 className="bg-[#c3c6ff] hover:bg-[#b0b4ff] text-[#2c305c] font-bold px-6 py-3.5 rounded-xl text-sm transition-colors shadow-sm w-[200px] sm:w-auto flex items-center justify-between sm:justify-center gap-4"
               >
-                <span>Browse</span>
+                <span>List Books</span>
                 <span className="text-lg sm:hidden">&rarr;</span>
               </Link>
               <Link
-                to="/list"
+                to="/browse"
                 className="border border-white/70 hover:bg-white/10 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-colors w-[200px] sm:w-auto flex items-center justify-between sm:justify-center gap-4"
               >
-                <span>List Books</span>
+                <span>Browse</span>
                 <span className="text-lg sm:hidden">&rarr;</span>
               </Link>
             </div>

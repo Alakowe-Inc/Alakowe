@@ -33,6 +33,9 @@ export interface BookDisplay {
   isbn?: string
   categoryId?: number
   location?: string
+  tags?: string[]
+  tagNames?: string[]
+  numberOfPages?: number
 }
 
 export function getPublicSellerDisplayName(payload?: {
@@ -103,6 +106,9 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     isbn: listing.isbn ?? undefined,
     categoryId: listing.categoryId,
     location: listing.location || undefined,
+    tags: listing.tags?.filter(Boolean) as string[] | undefined,
+    tagNames: listing.tagNames?.filter(Boolean) as string[] | undefined,
+    numberOfPages: listing.numberOfPages ?? undefined,
   }
 }
 
