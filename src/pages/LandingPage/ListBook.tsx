@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Upload, Heart, BookOpen, Camera, DollarSign, CheckCircle, X, Loader2, Bell, Truck, Sparkles, HelpCircle } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
@@ -14,6 +14,7 @@ import {
   saveListingDraft,
 } from '../../lib/listingDraft'
 import { useCategories } from '../../lib/api/categories/categories.hooks'
+import { useTags } from '../../lib/api/tags/tags.hooks'
 import { useStates, useAreasByState } from '../../lib/api/location/location.hooks'
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -69,6 +70,7 @@ type FormState = {
   author: string
   genre: string
   subGenre: string
+  selectedTagIds: number[]
   pageCount: string
   condition: string
   quantity: string
@@ -87,6 +89,7 @@ const empty: FormState = {
   author: '',
   genre: '',
   subGenre: '',
+  selectedTagIds: [],
   pageCount: '',
   condition: '',
   quantity: '1',
@@ -122,6 +125,7 @@ export default function ListBook() {
   const submitListing = useSubmitListing()
   const { data: storeProfile } = useSellerStoreProfile(!!user)
   const { data: categories } = useCategories()
+  const { data: allTags } = useTags()
   const { data: states } = useStates()
   const [selectedStateId, setSelectedStateId] = useState<number>(0)
   const { data: areas } = useAreasByState(selectedStateId || undefined)
@@ -138,6 +142,14 @@ export default function ListBook() {
   const [savingDraft, setSavingDraft] = useState(false)
   const [draftPhotosNote, setDraftPhotosNote] = useState<string | null>(null)
   const previewUrls = useRef<string[]>([])
+
+  const selectedCategoryId = Number(form.genre) || 0
+  const availableTags = useMemo(() => {
+    if (!allTags || !selectedCategoryId) return []
+    return allTags.filter(
+      (t) => t.categoryId === selectedCategoryId || t.categoryId === null
+    )
+  }, [allTags, selectedCategoryId])
 
   const basePrice = parseFloat(form.price) || 0
   const discountPercent = parseFloat(form.discount) || 0
@@ -252,12 +264,42 @@ export default function ListBook() {
         if (field === 'stateId') {
           next.areaId = ''
         }
+        if (field === 'genre') {
+          const catId = Number(value)
+          const validTagIds = (allTags ?? [])
+            .filter(t => t.categoryId === catId || t.categoryId === null)
+            .map(t => t.id)
+          next.selectedTagIds = (p.selectedTagIds || []).filter(id => validTagIds.includes(id))
+          next.subGenre = (allTags ?? [])
+            .filter(t => next.selectedTagIds.includes(t.id))
+            .map(t => t.name)
+            .join(', ')
+        }
         return next
       })
       if (field === 'stateId') {
         setSelectedStateId(Number(value) || 0)
       }
     }
+  }
+
+  function toggleTag(tagId: number) {
+    setForm(p => {
+      const currentIds = p.selectedTagIds || []
+      const exists = currentIds.includes(tagId)
+      const updatedIds = exists
+        ? currentIds.filter(id => id !== tagId)
+        : [...currentIds, tagId]
+      const selectedNames = (allTags ?? [])
+        .filter(t => updatedIds.includes(t.id))
+        .map(t => t.name)
+        .join(', ')
+      return {
+        ...p,
+        selectedTagIds: updatedIds,
+        subGenre: selectedNames,
+      }
+    })
   }
 
   function handlePhotos(e: React.ChangeEvent<HTMLInputElement>) {
@@ -381,6 +423,7 @@ export default function ListBook() {
         title: form.title.trim(),
         author: form.author.trim(),
         categoryId: Number(form.genre),
+        tagIds: form.selectedTagIds && form.selectedTagIds.length > 0 ? form.selectedTagIds : undefined,
         bookCondition: form.condition as BookCondition,
         conditionDetail: form.conditionNotes.trim() || undefined,
         format: form.format || undefined,
@@ -420,10 +463,6 @@ export default function ListBook() {
               <X size={18} />
               <span className="sr-only">Close</span>
             </DialogClose>
-            <div className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider mb-2">
-              <Sparkles size={12} className="text-white" />
-              <span>Seller Guide</span>
-            </div>
             <h2 className="font-heading font-bold text-white text-xl leading-snug">
               List Your Book on Alákòwé
             </h2>
@@ -453,7 +492,7 @@ export default function ListBook() {
                 {guideStep === 0 && <BookOpen size={28} />}
                 {guideStep === 1 && <Bell size={28} />}
                 {guideStep === 2 && <Truck size={28} />}
-                {guideStep === 3 && <DollarSign size={28} />}
+                {guideStep === 3 && <span className="font-heading font-extrabold text-2xl select-none">₦</span>}
                 {guideStep === 4 && <Sparkles size={28} />}
               </div>
               <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#6B6FFF' }}>
@@ -666,20 +705,67 @@ export default function ListBook() {
                   onChange={set('author')} style={inputClass(!!errors.author)} />
               </Field>
 
-              {/* Category, Genre, No. of Pages placed together */}
-              <Field label="Category" required error={errors.genre}>
-                <SelectBoxControl
-                  placeholder="Select category"
-                  options={categories?.map(c => ({ label: c.name, value: c.id })) ?? []}
-                  value={categories?.map(c => ({ label: c.name, value: c.id })).find(o => String(o.value) === form.genre) ?? null}
-                  onChange={setSelect('genre')}
-                  style={inputClass(!!errors.genre)}
-                />
-              </Field>
-              <Field label="Genre / Tag">
-                <FormControl type="text" placeholder="e.g. Historical Fiction or Coming-of-age" value={form.subGenre}
-                  onChange={set('subGenre')} style={inputClass()} />
-              </Field>
+              {/* Category */}
+              <div className="sm:col-span-2 lg:col-span-3">
+                <Field label="Category" required error={errors.genre}>
+                  <SelectBoxControl
+                    placeholder="Select category"
+                    options={categories?.map(c => ({ label: c.name, value: c.id })) ?? []}
+                    value={categories?.map(c => ({ label: c.name, value: c.id })).find(o => String(o.value) === form.genre) ?? null}
+                    onChange={setSelect('genre')}
+                    style={inputClass(!!errors.genre)}
+                  />
+                </Field>
+              </div>
+
+              {/* Genre / Tags Checkboxes for selected Category */}
+              <div className="sm:col-span-2 lg:col-span-3 border-t border-main/10 pt-4 my-1">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-main/50 uppercase tracking-wider block">
+                    Genre / Tags
+                  </label>
+                  {form.selectedTagIds.length > 0 && (
+                    <span className="text-[11px] font-bold text-secondary bg-secondary/10 px-2.5 py-0.5 rounded-full">
+                      {form.selectedTagIds.length} selected
+                    </span>
+                  )}
+                </div>
+
+                {!form.genre ? (
+                  <div className="p-4 rounded-xl border border-dashed border-main/15 bg-main/5 text-xs text-main/50 text-center">
+                    Select a category above to view available genres/tags.
+                  </div>
+                ) : availableTags.length === 0 ? (
+                  <div className="p-4 rounded-xl border border-dashed border-main/15 bg-main/5 text-xs text-main/50 text-center">
+                    No specific tags available for this category.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mt-2">
+                    {availableTags.map((tag) => {
+                      const isChecked = form.selectedTagIds.includes(tag.id)
+                      return (
+                        <label
+                          key={tag.id}
+                          className={`flex items-center gap-2.5 p-3 rounded-xl border text-xs font-medium cursor-pointer transition-all select-none ${
+                            isChecked
+                              ? 'border-secondary bg-secondary/10 text-secondary font-semibold shadow-xs'
+                              : 'border-main/15 bg-white text-main/70 hover:border-secondary/40 hover:bg-main/5'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleTag(tag.id)}
+                            className="w-4 h-4 rounded text-secondary focus:ring-secondary cursor-pointer accent-secondary shrink-0"
+                          />
+                          <span className="truncate">{tag.name}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
               <Field label="No. of Pages">
                 <FormControl type="number" min="1" placeholder="e.g. 215" value={form.pageCount}
                   onChange={set('pageCount')} style={inputClass()} />

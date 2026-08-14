@@ -160,9 +160,20 @@ export default function HowItWorks() {
               <h2 className="font-heading font-bold text-main text-lg sm:text-xl md:text-2xl mb-2">
                 {welcomeText.title}
               </h2>
-              <p className="text-main/75 text-sm leading-relaxed max-w-3xl">
+              <p className="text-main/75 text-sm leading-relaxed max-w-3xl mb-4">
                 {welcomeText.body}
               </p>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  to="/sell"
+                  className="inline-flex items-center gap-2 bg-secondary text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-secondary/90 transition-all shadow-xs"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Pre-Listing Guide (/sell)</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -180,6 +191,13 @@ export default function HowItWorks() {
           >
             All 12 Topics
           </button>
+          <Link
+            to="/sell"
+            className="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap bg-violet-50 text-secondary border border-violet-200 hover:bg-secondary hover:text-white transition-all flex items-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Pre-Listing Guide</span>
+          </Link>
           {guideCategories.map((cat) => (
             <button
               key={cat.id}
@@ -301,6 +319,17 @@ export default function HowItWorks() {
                         </h3>
                       </div>
                     </div>
+
+                    {cat.id === 'selling-books' && (
+                      <Link
+                        to="/sell"
+                        className="inline-flex items-center gap-1.5 bg-secondary/10 hover:bg-secondary text-secondary hover:text-white text-xs font-bold px-3.5 py-1.5 rounded-full transition-all shrink-0 ml-auto"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Pre-Listing Page</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
+                    )}
 
                     {selectedCategory === cat.id && (
                       <button

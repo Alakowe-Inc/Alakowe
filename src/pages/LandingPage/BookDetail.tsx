@@ -11,7 +11,10 @@ import {
   FolderOpen,
   Barcode,
   Heart,
-  Search
+  Search,
+  Tag,
+  Star,
+  BookMarked,
 } from 'lucide-react'
 import { useListing, useListings } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
@@ -173,22 +176,75 @@ function BookDetail() {
               {/* Tab Contents */}
               {activeTab === 'details' && (
                 <div className="space-y-3">
-                  {[
-                    { icon: FolderOpen, label: 'Category', value: book.genre },
-                    { icon: BookOpen, label: 'Genre', value: book.genre }, // Fallback to genre for now
-                    { icon: BookOpen, label: 'Format', value: book.format },
-                    { icon: FileText, label: 'No of Pages', value: 'N/A' }, // Placeholder for pages
-                  ]
-                    .filter((item) => !!item.value)
-                    .map(({ icon: Icon, label, value }) => (
-                      <div key={label} className="flex items-center justify-between text-xs py-1">
-                        <div className="flex items-center gap-2.5 text-main/60">
-                          <Icon size={14} className="text-main/40 shrink-0" />
-                          <span className="font-medium">{label}</span>
-                        </div>
-                        <span className="font-semibold text-main text-right">{value}</span>
+                  {/* Condition */}
+                  {book.condition && (
+                    <div className="flex items-center justify-between text-xs py-1.5 border-b border-main/6">
+                      <div className="flex items-center gap-2.5 text-main/55">
+                        <Star size={13} className="text-main/40 shrink-0" />
+                        <span className="font-medium">Condition</span>
                       </div>
-                    ))}
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-main bg-secondary/10 text-secondary text-[11px] px-2.5 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0"></span>
+                        {book.condition}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Category */}
+                  {book.genre && (
+                    <div className="flex items-center justify-between text-xs py-1.5 border-b border-main/6">
+                      <div className="flex items-center gap-2.5 text-main/55">
+                        <FolderOpen size={13} className="text-main/40 shrink-0" />
+                        <span className="font-medium">Category</span>
+                      </div>
+                      <span className="font-semibold text-main">{book.genre}</span>
+                    </div>
+                  )}
+
+                  {/* Tags */}
+                  {((book.tagNames && book.tagNames.length > 0) || (book.tags && book.tags.length > 0)) && (
+                    <div className="flex items-start justify-between text-xs py-1.5 border-b border-main/6 gap-4">
+                      <div className="flex items-center gap-2.5 text-main/55 shrink-0">
+                        <Tag size={13} className="text-main/40 shrink-0" />
+                        <span className="font-medium">Tags</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 justify-end">
+                        {(book.tagNames ?? book.tags ?? []).map((tag) => (
+                          <span key={tag} className="text-[10px] font-semibold px-2 py-0.5 bg-main/8 text-main/70 rounded-full border border-main/10">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Number of Pages */}
+                  {book.numberOfPages && (
+                    <div className="flex items-center justify-between text-xs py-1.5 border-b border-main/6">
+                      <div className="flex items-center gap-2.5 text-main/55">
+                        <BookMarked size={13} className="text-main/40 shrink-0" />
+                        <span className="font-medium">No. of Pages</span>
+                      </div>
+                      <span className="font-semibold text-main">{book.numberOfPages.toLocaleString()} pages</span>
+                    </div>
+                  )}
+
+                  {/* Location */}
+                  {book.location && (
+                    <div className="flex items-center justify-between text-xs py-1.5">
+                      <div className="flex items-center gap-2.5 text-main/55">
+                        <MapPin size={13} className="text-main/40 shrink-0" />
+                        <span className="font-medium">Location</span>
+                      </div>
+                      <span className="font-semibold text-main">{book.location}</span>
+                    </div>
+                  )}
+
+                  {/* Fallback if none available */}
+                  {!book.condition && !book.genre && !book.location && !book.numberOfPages &&
+                    !(book.tagNames?.length) && !(book.tags?.length) && (
+                    <p className="text-xs text-main/40 text-center py-2">No details available.</p>
+                  )}
                 </div>
               )}
 

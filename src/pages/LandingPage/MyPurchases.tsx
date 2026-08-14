@@ -159,6 +159,20 @@ export default function MyPurchases() {
           </div>
         )}
 
+        {/* Help links */}
+        <div className="bg-white rounded-2xl border border-third p-5 mt-6">
+          <p className="text-xs text-main/45 leading-relaxed">
+            Need help?{' '}
+            <Link to="/contact" className="text-secondary font-semibold hover:underline">
+              Contact Us
+            </Link>
+            {' '}or visit our{' '}
+            <Link to="/faq" className="text-secondary font-semibold hover:underline">
+              FAQ
+            </Link>
+          </p>
+        </div>
+
       </div>
     </div>
   )

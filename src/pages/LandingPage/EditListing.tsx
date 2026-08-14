@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Heart, Upload, X, CheckCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useListing, useEditListing } from '../../lib/api/listings/listings.hooks'
 import { useSellerStoreProfile } from '../../lib/api/store/store.hooks'
+import { useCategories } from '../../lib/api/categories/categories.hooks'
+import { useTags } from '../../lib/api/tags/tags.hooks'
 import { GENRES, CONDITIONS } from '../../data/sellerData'
 import type { BookCondition } from '../../lib/api/types'
 import { useStates, useAreasByState } from '../../lib/api/location/location.hooks'
@@ -17,7 +19,7 @@ import {
 import { FormControl, SelectBoxControl, TextareaControl, FileUpload, type SelectOption } from '@/components/ui/form-controls'
 
 type FormState = {
-  title: string; author: string; genre: string; condition: string
+  title: string; author: string; genre: string; selectedTagIds: number[]; condition: string
   conditionDetail: string; description: string; price: string; discount: string; loveNote: string
   stateId: string; areaId: string
 }
@@ -51,6 +53,8 @@ export default function EditListing() {
   const { data: listing } = useListing(Number(id))
   const { data: storeProfile } = useSellerStoreProfile(!!user)
   const editListing = useEditListing()
+  const { data: categories } = useCategories()
+  const { data: allTags } = useTags()
   const { data: states } = useStates()
   const [selectedStateId, setSelectedStateId] = useState<number>(0)
   const { data: areas } = useAreasByState(selectedStateId || undefined)
@@ -66,6 +70,14 @@ export default function EditListing() {
   const [uploadProgress, setUploadProgress] = useState('')
   const [savingDraft, setSavingDraft] = useState(false)
   const hydratedForId = useRef<number | null>(null)
+
+  const selectedCategoryId = form ? Number(form.genre) || 0 : 0
+  const availableTags = useMemo(() => {
+    if (!allTags || !selectedCategoryId) return []
+    return allTags.filter(
+      (t) => t.categoryId === selectedCategoryId || t.categoryId === null
+    )
+  }, [allTags, selectedCategoryId])
 
   const fulfillmentOption = storeProfile?.fulfillmentOption ?? 'Courier'
   const fulfillmentCopy =
@@ -92,7 +104,7 @@ export default function EditListing() {
 
     const draft = loadListingDraft()
     if (draft?.kind === 'edit' && draft.listingId === listingId) {
-      setForm(draft.form)
+      setForm({ ...draft.form, selectedTagIds: (draft.form as unknown as FormState).selectedTagIds ?? [] })
       setExistingImages(draft.existingImages)
       setCoverIndex(draft.coverIndex)
       setSelectedStateId(Number(draft.form.stateId) || 0)
@@ -118,10 +130,14 @@ export default function EditListing() {
 
     const stateId = listing.stateId ? String(listing.stateId) : ''
     const areaId = listing.areaId ? String(listing.areaId) : ''
+    const categoryId = listing.categoryId ? String(listing.categoryId) : '1'
+    const selectedTagIds = (listing as unknown as { tags?: { id: number }[] }).tags?.map(t => t.id) ?? []
+
     setForm({
       title: listing.title ?? '',
       author: listing.author ?? '',
-      genre: listing.categoryName ?? '',
+      genre: categoryId,
+      selectedTagIds,
       condition: listing.bookCondition ?? '',
       conditionDetail: listing.conditionDetail ?? '',
       description: listing.description ?? '',
@@ -177,10 +193,32 @@ export default function EditListing() {
         if (!p) return p
         const next = { ...p, [field]: value }
         if (field === 'stateId') next.areaId = ''
+        if (field === 'genre') {
+          const catId = Number(value)
+          const validTagIds = (allTags ?? [])
+            .filter(t => t.categoryId === catId || t.categoryId === null)
+            .map(t => t.id)
+          next.selectedTagIds = (p.selectedTagIds || []).filter(id => validTagIds.includes(id))
+        }
         return next
       })
       if (field === 'stateId') setSelectedStateId(Number(value) || 0)
     }
+  }
+
+  function toggleTag(tagId: number) {
+    setForm(p => {
+      if (!p) return p
+      const currentIds = p.selectedTagIds || []
+      const exists = currentIds.includes(tagId)
+      const updatedIds = exists
+        ? currentIds.filter(id => id !== tagId)
+        : [...currentIds, tagId]
+      return {
+        ...p,
+        selectedTagIds: updatedIds,
+      }
+    })
   }
 
   function handlePhotos(e: React.ChangeEvent<HTMLInputElement>) {
@@ -291,7 +329,8 @@ export default function EditListing() {
         id: Number(id),
         title: form.title.trim(),
         author: form.author.trim(),
-        categoryId: GENRES.indexOf(form.genre) + 1 || 1,
+        categoryId: Number(form.genre),
+        tagIds: form.selectedTagIds && form.selectedTagIds.length > 0 ? form.selectedTagIds : undefined,
         bookCondition: form.condition as BookCondition,
         conditionDetail: form.conditionDetail.trim() || undefined,
         description: form.description.trim(),
@@ -352,15 +391,65 @@ export default function EditListing() {
               <Field label="Author" required error={errors.author}>
                 <FormControl type="text" value={form.author} onChange={set('author')} style={inputClass(!!errors.author)} />
               </Field>
-              <Field label="Genre" required error={errors.genre}>
-                <SelectBoxControl
-                  placeholder="Select genre"
-                  options={GENRES.map(g => ({ label: g, value: g }))}
-                  value={GENRES.map(g => ({ label: g, value: g })).find(o => o.value === form.genre) ?? null}
-                  onChange={setSelect('genre')}
-                  style={inputClass(!!errors.genre)}
-                />
-              </Field>
+              <div className="sm:col-span-2">
+                <Field label="Category" required error={errors.genre}>
+                  <SelectBoxControl
+                    placeholder="Select category"
+                    options={categories?.map(c => ({ label: c.name, value: c.id })) ?? []}
+                    value={categories?.map(c => ({ label: c.name, value: c.id })).find(o => String(o.value) === form.genre) ?? null}
+                    onChange={setSelect('genre')}
+                    style={inputClass(!!errors.genre)}
+                  />
+                </Field>
+              </div>
+
+              {/* Genre / Tags Checkboxes for selected Category */}
+              <div className="sm:col-span-2 border-t border-main/10 pt-4 my-1">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-main/50 uppercase tracking-wider block">
+                    Genre / Tags
+                  </label>
+                  {form.selectedTagIds.length > 0 && (
+                    <span className="text-[11px] font-bold text-secondary bg-secondary/10 px-2.5 py-0.5 rounded-full">
+                      {form.selectedTagIds.length} selected
+                    </span>
+                  )}
+                </div>
+
+                {!form.genre ? (
+                  <div className="p-4 rounded-xl border border-dashed border-main/15 bg-main/5 text-xs text-main/50 text-center">
+                    Select a category above to view available genres/tags.
+                  </div>
+                ) : availableTags.length === 0 ? (
+                  <div className="p-4 rounded-xl border border-dashed border-main/15 bg-main/5 text-xs text-main/50 text-center">
+                    No specific tags available for this category.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-2">
+                    {availableTags.map((tag) => {
+                      const isChecked = form.selectedTagIds.includes(tag.id)
+                      return (
+                        <label
+                          key={tag.id}
+                          className={`flex items-center gap-2.5 p-3 rounded-xl border text-xs font-medium cursor-pointer transition-all select-none ${
+                            isChecked
+                              ? 'border-secondary bg-secondary/10 text-secondary font-semibold shadow-xs'
+                              : 'border-main/15 bg-white text-main/70 hover:border-secondary/40 hover:bg-main/5'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleTag(tag.id)}
+                            className="w-4 h-4 rounded text-secondary focus:ring-secondary cursor-pointer accent-secondary shrink-0"
+                          />
+                          <span className="truncate">{tag.name}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
               <div className="sm:col-span-2">
                 <Field label="Condition" required error={errors.condition}>
                   <SelectBoxControl

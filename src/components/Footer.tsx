@@ -100,6 +100,8 @@ function Footer() {
                 {[
                   { label: 'How It Works', to: '/how-it-works' },
                   { label: 'FAQ', to: '/faq' },
+                  { label: 'Customer Service', to: '/customer-service' },
+                  { label: 'Shipping & Returns', to: '/shipping' },
                   { label: 'Contact Us', to: '/contact' },
                   { label: 'Terms & Conditions', to: '/terms' },
                   { label: 'Privacy Policy', to: '/privacy' },
