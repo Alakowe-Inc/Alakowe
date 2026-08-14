@@ -6,6 +6,26 @@ function pickColor(id?: number): string {
   return COVER_COLORS[(id ?? 1) % COVER_COLORS.length]
 }
 
+/**
+ * The API may return `tags` / `tagNames` as plain strings OR as objects
+ * (e.g. `{ id: 1, name: "Fiction" }`). This helper normalises both shapes
+ * into a simple `string[]` so the UI can safely render and key on them.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeTags(raw: any[] | null | undefined): string[] | undefined {
+  if (!raw || raw.length === 0) return undefined
+  const result: string[] = []
+  for (const item of raw) {
+    if (!item) continue
+    if (typeof item === 'string') {
+      result.push(item)
+    } else if (typeof item === 'object' && item.name) {
+      result.push(String(item.name))
+    }
+  }
+  return result.length > 0 ? result : undefined
+}
+
 export interface BookDisplay {
   id: string
   title: string
@@ -106,8 +126,8 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     isbn: listing.isbn ?? undefined,
     categoryId: listing.categoryId,
     location: listing.location || undefined,
-    tags: listing.tags?.filter(Boolean) as string[] | undefined,
-    tagNames: listing.tagNames?.filter(Boolean) as string[] | undefined,
+    tags: normalizeTags(listing.tags),
+    tagNames: normalizeTags(listing.tagNames),
     numberOfPages: listing.numberOfPages ?? undefined,
   }
 }

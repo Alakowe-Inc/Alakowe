@@ -209,11 +209,14 @@ function BookDetail() {
                         <span className="font-medium">Tags</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5 justify-end">
-                        {(book.tagNames ?? book.tags ?? []).map((tag) => (
-                          <span key={tag} className="text-[10px] font-semibold px-2 py-0.5 bg-main/8 text-main/70 rounded-full border border-main/10">
-                            {tag}
-                          </span>
-                        ))}
+                        {(book.tagNames ?? book.tags ?? []).map((tag, i) => {
+                          const label = typeof tag === 'string' ? tag : (tag as any)?.name ?? String(tag)
+                          return (
+                            <span key={`${label}-${i}`} className="text-[10px] font-semibold px-2 py-0.5 bg-main/8 text-main/70 rounded-full border border-main/10">
+                              {label}
+                            </span>
+                          )
+                        })}
                       </div>
                     </div>
                   )}
