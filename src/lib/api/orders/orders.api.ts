@@ -14,6 +14,7 @@ export async function getOrderByIdApi(orderId: number): Promise<OrderDto> {
 export interface ConfirmDeliveryRequest {
   confirm: boolean
   note?: string | null
+  imageFileNames?: string[] | null
 }
 
 export interface ConfirmDeliveryResponse {

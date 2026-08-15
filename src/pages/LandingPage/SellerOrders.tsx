@@ -185,9 +185,17 @@ export default function SellerOrders() {
                         </>
                       )}
                     </div>
-                    <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.class}`}>
-                      <Icon size={11} /> {cfg.label}
-                    </span>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.class}`}>
+                        <Icon size={11} /> {cfg.label}
+                      </span>
+                      <Link
+                        to={`/order/${sale.orderId}`}
+                        className="text-xs font-semibold text-secondary hover:underline"
+                      >
+                        Track Order
+                      </Link>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-6 text-sm border-t border-third pt-4">

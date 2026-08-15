@@ -482,6 +482,7 @@ export interface OrderItemDto {
   bookTitle: string
   sellerEmail: string
   sellerName?: string | null
+  sellerPhone?: string | null
   coverImageFileName?: string | null
   quantity: number
   unitPrice: number
@@ -519,6 +520,7 @@ export interface OrderDto {
   userId: string
   sellerEmail: string
   sellerName?: string | null
+  sellerPhone?: string | null
   baseAmount: number
   sellerPayout: number
   platformFee: number

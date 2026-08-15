@@ -41,10 +41,20 @@ export function useSellerSales(pageNumber = 1, pageSize = 20) {
 export function useConfirmOrderDelivery() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ orderId, confirm, note }: { orderId: number; confirm: boolean; note?: string | null }) =>
-      confirmOrderDeliveryApi(orderId, { confirm, note }),
+    mutationFn: ({
+      orderId,
+      confirm,
+      note,
+      imageFileNames,
+    }: {
+      orderId: number
+      confirm: boolean
+      note?: string | null
+      imageFileNames?: string[] | null
+    }) => confirmOrderDeliveryApi(orderId, { confirm, note, imageFileNames }),
     onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["orders", vars.orderId] })
+      queryClient.invalidateQueries({ queryKey: ["orders", "buyer"] })
     },
   })
 }

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Package, Truck, CheckCircle, Clock, AlertCircle, ShoppingBag } from 'lucide-react'
+import { Package, Truck, CheckCircle, Clock, AlertCircle, ShieldAlert, ShoppingBag } from 'lucide-react'
 import { useCart } from '../../lib/api/cart/cart.hooks'
-import { useOrdersByUser } from '../../lib/api/orders/orders.hooks'
+import { useConfirmOrderDelivery, useOrdersByUser } from '../../lib/api/orders/orders.hooks'
 import {
   formatOrderShippingAddress,
   isPickupOrder,
@@ -43,6 +43,7 @@ export default function MyPurchases() {
   const orders = [...(data ?? [])].sort(
     (a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
   )
+  const confirm = useConfirmOrderDelivery()
 
   return (
     <div className="bg-third min-h-screen">
@@ -145,12 +146,31 @@ export default function MyPurchases() {
                         <p className="font-semibold text-main text-xs">{formatOrderShippingAddress(order)}</p>
                       </div>
                     </div>
-                    <Link
-                      to={`/order/${order.id}`}
-                      className="text-xs font-semibold text-secondary hover:underline"
-                    >
-                      Track Order
-                    </Link>
+                    {status === 'delivered' ? (
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <button
+                          type="button"
+                          onClick={() => confirm.mutate({ orderId: order.id, confirm: true })}
+                          disabled={confirm.isPending}
+                          className="text-xs font-semibold text-white bg-secondary px-4 py-2.5 rounded-xl hover:bg-secondary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {confirm.isPending ? 'Confirming…' : 'Confirm Delivery'}
+                        </button>
+                        <Link
+                          to={`/order/${order.id}/dispute`}
+                          className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-red-600 border border-red-200 px-4 py-2.5 rounded-xl hover:bg-red-50 transition-colors"
+                        >
+                          <ShieldAlert size={13} /> Raise a Complaint
+                        </Link>
+                      </div>
+                    ) : (
+                      <Link
+                        to={`/order/${order.id}`}
+                        className="text-xs font-semibold text-secondary hover:underline"
+                      >
+                        Track Order
+                      </Link>
+                    )}
                   </div>
 
                 </div>

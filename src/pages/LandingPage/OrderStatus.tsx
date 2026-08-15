@@ -1,8 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { CheckCircle, Circle, ExternalLink, MapPin, Package, Copy, ClipboardCheck, ShieldAlert } from 'lucide-react'
+import { CheckCircle, Circle, ExternalLink, MapPin, Package, Copy, ClipboardCheck, ShieldAlert, Phone } from 'lucide-react'
 import { useState } from 'react'
 import {
-  backendStatusKey,
   formatPickupPreferredDates,
   getOrderDeliveryAddress,
   isPickupOrder,
@@ -14,6 +13,7 @@ import {
   pickupMapsUrl,
   sellerDisplayName,
 } from '../../lib/orders'
+import type { DisplayOrderStatus } from '../../lib/orders'
 import { useConfirmOrderDelivery, useOrder } from '../../lib/api/orders/orders.hooks'
 import { useAuth } from '../../context/AuthContext'
 import { formatPrice } from '../../lib/utils'
@@ -63,7 +63,7 @@ function WaybillFootnote({
   )
 }
 
-type EventNote = { waybillNumber?: string; courier?: string; leg?: string; reason?: string }
+type EventNote = { waybillNumber?: string; courier?: string; leg?: string; reason?: string; imageFileNames?: string[] }
 
 function parseEventNote(note?: string | null): EventNote | null {
   if (!note) return null
@@ -160,12 +160,47 @@ function OrderStatusPage() {
   const pickupDatesLabel = formatPickupPreferredDates(order.pickupPreferredDates)
   const pickupMaps = pickupMapsUrl(order.pickupAddress)
   const isBuyer = !!user?.userId && user.userId === String(order.userId)
+  const viewerEmail = user?.email?.toLowerCase() ?? ''
+  const isSeller = !!viewerEmail && (
+    viewerEmail === (order.sellerEmail ?? '').toLowerCase() ||
+    order.items.some(item => viewerEmail === (item.sellerEmail ?? '').toLowerCase())
+  )
 
   const events: OrderStatusEventResponse[] = order.statusEvents?.length ? order.statusEvents : []
-  const timeline: OrderStatusEventResponse[] =
-    events.length > 0
-      ? events
-      : [{ id: 0, status: order.status, occurredAt: order.orderDate }]
+  const disputed = status === 'disputed'
+
+  const pipeline: DisplayOrderStatus[] = pickup
+    ? ['payment_received', 'awaiting_seller', 'delivered', 'confirmed']
+    : [
+        'payment_received',
+        'awaiting_seller',
+        'dropoff_scheduled',
+        'in_transit_to_hub',
+        'received_by_alakowe',
+        'processing',
+        'dispatched',
+        'delivered',
+        'confirmed',
+      ]
+
+  const stepExtras = new Map<DisplayOrderStatus, EventNote | null>()
+  const stepTimestamps = new Map<DisplayOrderStatus, string>()
+  events.forEach(evt => {
+    const key = normalizeOrderStatus(evt.status)
+    const note = parseEventNote(evt.note)
+    if (note) stepExtras.set(key, note)
+    const ts = formatTimestamp(evt.occurredAt)
+    if (ts) stepTimestamps.set(key, ts)
+  })
+
+  const steps: DisplayOrderStatus[] = disputed ? [...pipeline, 'disputed'] : pipeline
+
+  let currentIndex = pipeline.indexOf(status)
+  if (disputed) {
+    currentIndex = pipeline.length
+  } else if (currentIndex < 0) {
+    currentIndex = pipeline.length - 1
+  }
 
   return (
     <div className="bg-third min-h-screen">
@@ -183,8 +218,6 @@ function OrderStatusPage() {
               month: 'long',
               year: 'numeric',
             })}
-            <span className="mx-2 text-main/20">·</span>
-            <span className="text-secondary/80 font-medium">Link expires in 3 days</span>
           </p>
         </div>
 
@@ -200,7 +233,7 @@ function OrderStatusPage() {
           </p>
           {pickup && order.pickupCode && status !== 'delivered' && status !== 'confirmed' && status !== 'disputed' && (
             <p className="mt-3 text-sm text-main">
-              Your pickup code:{' '}
+              Pickup code:{' '}
               <span className="font-mono font-bold tracking-widest text-lg">{order.pickupCode}</span>
             </p>
           )}
@@ -235,34 +268,38 @@ function OrderStatusPage() {
             <div className="bg-white rounded-2xl border border-third p-6">
               <h2 className="font-heading font-bold text-main text-base mb-6">Order Timeline</h2>
               <div>
-                {timeline.map((evt, i) => {
-                  const isLast = i === timeline.length - 1
-                  const isActive = isLast
-                  const isComplete = !isActive
-                  const displayStatus = normalizeOrderStatus(evt.status)
-                  const note = parseEventNote(evt.note)
-                  const isDispute = backendStatusKey(evt.status) === 'disputed'
-                  const timestamp = evt.occurredAt ? formatTimestamp(evt.occurredAt) : ''
+                {steps.map((stepKey, i) => {
+                  const isLast = i === steps.length - 1
+                  const isDisputeStep = disputed && i === steps.length - 1
+                  const isComplete = disputed ? i < steps.length - 1 : i < currentIndex
+                  const isActive = disputed ? i === steps.length - 1 : i === currentIndex
+                  const isUpcoming = !isComplete && !isActive
+                  const note = isDisputeStep
+                    ? stepExtras.get('disputed')
+                    : stepExtras.get(stepKey)
+                  const timestamp = isDisputeStep ? '' : stepTimestamps.get(stepKey) ?? ''
 
                   return (
-                    <div key={`${evt.id}-${i}`} className="flex items-start gap-4">
+                    <div key={`${stepKey}-${i}`} className="flex items-start gap-4">
                       <div className="flex flex-col items-center shrink-0">
                         <div
                           className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                             isComplete
                               ? 'bg-green-500'
                               : isActive
-                              ? 'bg-secondary'
-                              : 'bg-main/8 border border-main/15'
+                              ? isDisputeStep
+                                ? 'bg-red-500'
+                                : 'bg-secondary'
+                              : 'bg-main/5 border border-dashed border-main/25'
                           }`}
                         >
                           {isComplete ? (
                             <CheckCircle size={15} className="text-white" />
-                          ) : isDispute ? (
+                          ) : isDisputeStep ? (
                             <ShieldAlert size={15} className="text-white" />
-                          ) : (
+                          ) : isActive ? (
                             <div className="w-3 h-3 rounded-full bg-white animate-pulse" />
-                          )}
+                          ) : null}
                         </div>
                         {!isLast && (
                           <div
@@ -279,20 +316,26 @@ function OrderStatusPage() {
                             isComplete
                               ? 'text-main/50'
                               : isActive
-                              ? isDispute ? 'text-red-600' : 'text-main'
+                              ? isDisputeStep
+                                ? 'text-red-600'
+                                : 'text-main'
                               : 'text-main/25'
                           }`}
                         >
-                          {orderStatusLabel(displayStatus, order.fulfillmentType)}
+                          {orderStatusLabel(stepKey, order.fulfillmentType)}
                         </p>
                         {timestamp && (
                           <p className={`text-xs mt-0.5 ${isComplete ? 'text-main/35' : 'text-main/45'}`}>
                             {timestamp}
                           </p>
                         )}
-                        {isActive && (
-                          <p className="text-xs text-main/45 mt-0.5 leading-relaxed">
-                            {orderStatusDescription(displayStatus, order.fulfillmentType)}
+                        {(isActive || isUpcoming) && (
+                          <p
+                            className={`text-xs mt-0.5 leading-relaxed ${
+                              isActive ? 'text-main/45' : 'text-main/25'
+                            }`}
+                          >
+                            {orderStatusDescription(stepKey, order.fulfillmentType)}
                           </p>
                         )}
                         {isComplete && (
@@ -304,11 +347,24 @@ function OrderStatusPage() {
                             label={`${note.leg === 'Outbound' ? 'Outbound' : 'Inbound'} Waybill`}
                           />
                         )}
-                        {isDispute && note?.reason && (
+                        {isDisputeStep && note?.reason && (
                           <p className="mt-2 text-xs text-red-600/80 leading-relaxed flex items-start gap-1.5">
                             <ShieldAlert size={12} className="shrink-0 mt-0.5" />
                             <span>{note.reason}</span>
                           </p>
+                        )}
+                        {isDisputeStep && note?.imageFileNames && note.imageFileNames.length > 0 && (
+                          <div className="mt-2.5 flex flex-wrap gap-2">
+                            {note.imageFileNames.map(src => (
+                              <img
+                                key={src}
+                                src={src}
+                                alt="Dispute evidence"
+                                className="w-16 h-20 rounded-xl object-cover border border-main/10"
+                                loading="lazy"
+                              />
+                            ))}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -368,56 +424,70 @@ function OrderStatusPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-third p-5">
-              <h3 className="font-heading font-bold text-main text-sm mb-3 flex items-center gap-2">
-                <MapPin size={13} className="text-secondary" />
-                {pickup ? 'Pickup details' : 'Delivery Address'}
-              </h3>
-              {pickup ? (
-                <>
-                  {order.pickupAddress && (
-                    <p className="text-sm text-main leading-relaxed inline-flex items-start gap-1.5">
-                      <span>{order.pickupAddress}</span>
-                      {pickupMaps && (
+            {(pickup ? status !== 'confirmed' : !isSeller) && (
+              <div className="bg-white rounded-2xl border border-third p-5">
+                <h3 className="font-heading font-bold text-main text-sm mb-3 flex items-center gap-2">
+                  <MapPin size={13} className="text-secondary" />
+                  {pickup ? 'Pickup details' : 'Delivery Address'}
+                </h3>
+                {pickup ? (
+                  <>
+                    {order.pickupAddress && (
+                      <p className="text-sm text-main leading-relaxed inline-flex items-start gap-1.5">
+                        <span>{order.pickupAddress}</span>
+                        {pickupMaps && (
+                          <a
+                            href={pickupMaps}
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label="Open pickup address in Google Maps"
+                            className="shrink-0 mt-0.5 text-secondary hover:text-secondary/80 transition-colors"
+                          >
+                            <ExternalLink size={14} />
+                          </a>
+                        )}
+                      </p>
+                    )}
+                    {pickupDatesLabel && (
+                      <p className="text-xs text-main/55 mt-2">Preferred days: {pickupDatesLabel}</p>
+                    )}
+                    {order.sellerPhone && (
+                      <p className="text-xs text-main/55 mt-2 inline-flex items-center gap-1.5">
+                        <Phone size={13} className="text-secondary shrink-0" />
+                        {order.sellerName && <span>Seller: {order.sellerName} ·</span>}
                         <a
-                          href={pickupMaps}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label="Open pickup address in Google Maps"
-                          className="shrink-0 mt-0.5 text-secondary hover:text-secondary/80 transition-colors"
+                          href={`tel:${order.sellerPhone}`}
+                          className="text-secondary font-medium hover:underline"
                         >
-                          <ExternalLink size={14} />
+                          {order.sellerPhone}
                         </a>
-                      )}
+                      </p>
+                    )}
+                    {order.pickupCode && (
+                      <p className="text-xs text-main/55 mt-2">
+                        Code:{' '}
+                        <span className="font-mono font-semibold tracking-wider text-main">
+                          {order.pickupCode}
+                        </span>
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {delivery.fullName && (
+                      <p className="text-sm font-semibold text-main">{delivery.fullName}</p>
+                    )}
+                    <p className="text-xs text-main/55 mt-1 leading-relaxed">
+                      {delivery.street && <>{delivery.street}<br /></>}
+                      {cityState || 'Address saved with this order'}
                     </p>
-                  )}
-                  {pickupDatesLabel && (
-                    <p className="text-xs text-main/55 mt-2">Preferred days: {pickupDatesLabel}</p>
-                  )}
-                  {order.pickupCode && (
-                    <p className="text-xs text-main/55 mt-2">
-                      Code:{' '}
-                      <span className="font-mono font-semibold tracking-wider text-main">
-                        {order.pickupCode}
-                      </span>
-                    </p>
-                  )}
-                </>
-              ) : (
-                <>
-                  {delivery.fullName && (
-                    <p className="text-sm font-semibold text-main">{delivery.fullName}</p>
-                  )}
-                  <p className="text-xs text-main/55 mt-1 leading-relaxed">
-                    {delivery.street && <>{delivery.street}<br /></>}
-                    {cityState || 'Address saved with this order'}
-                  </p>
-                  {delivery.phone && (
-                    <p className="text-xs text-main/40 mt-1">{delivery.phone}</p>
-                  )}
-                </>
-              )}
-            </div>
+                    {delivery.phone && (
+                      <p className="text-xs text-main/40 mt-1">{delivery.phone}</p>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="bg-white rounded-2xl border border-third p-5">
               <p className="text-xs text-main/45 leading-relaxed">
