@@ -138,16 +138,16 @@ export default function ShippingReturns() {
           </Section>
 
           {/* Escrow note */}
-          <div className="bg-main rounded-2xl p-6 md:p-8 text-white">
-            <h2 className="font-heading font-bold text-white text-lg mb-2">Your money is protected</h2>
-            <p className="text-white/60 text-sm leading-relaxed mb-4">
+          <div className="bg-white rounded-2xl border border-third p-6 md:p-8 text-main">
+            <h2 className="font-heading font-bold text-main text-lg mb-2">Your money is protected</h2>
+            <p className="text-main/60 text-sm leading-relaxed mb-4">
               All payments are held in escrow. The seller is only paid after you confirm that your book has arrived in the described condition. If something goes wrong, your money stays safe with us.
             </p>
             <Link
-              to="/how-it-works"
+              to="/how-it-works#payments"
               className="inline-flex items-center gap-2 text-secondary text-sm font-semibold hover:text-secondary/80 transition-colors"
             >
-              Learn how our escrow works
+              Learn how our escrow works →
             </Link>
           </div>
 
