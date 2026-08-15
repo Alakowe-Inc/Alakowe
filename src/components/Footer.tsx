@@ -80,7 +80,7 @@ function Footer() {
                   { label: 'Browse Books', to: '/browse' },
                   { label: 'Sell Books', to: '/sell' },
                   { label: 'Request Books', to: '/requests' },
-                  { label: 'View our Drop-off Centers', to: '/dropoff-locations' },
+                  { label: 'View our Drop-off Centers', to: '/' },
                 ].map(({ label, to }, idx) => (
                   <li key={`${to}-${idx}`}>
                     <Link to={to} className="text-xs text-white/70 hover:text-white font-medium transition-colors">
