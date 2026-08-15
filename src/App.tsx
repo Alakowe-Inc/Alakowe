@@ -46,6 +46,7 @@ import RequestBook from "./pages/LandingPage/RequestBook";
 import MyRequests from "./pages/LandingPage/MyRequests";
 import AllRequests from "./pages/LandingPage/AllRequests";
 import NotFound from "./pages/NotFound";
+import DropOffLocations from "./pages/LandingPage/DropoffLocations";
 
 const queryClient = new QueryClient();
 
@@ -125,6 +126,7 @@ const App = () => (
                 <Route path="contact" element={<Contact />} />
                 <Route path="faq" element={<FAQ />} />
                 <Route path="how-it-works" element={<HowItWorks />} />
+                <Route path="dropoff-locations" element={<DropOffLocations />} />
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
