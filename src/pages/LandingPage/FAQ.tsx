@@ -268,29 +268,29 @@ function FAQ() {
       </section>
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section className="bg-main py-16">
+      <section className="bg-third py-16">
         <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-12 flex flex-col items-center text-center gap-8">
           <div>
             <p className="text-secondary text-xs font-semibold uppercase tracking-widest mb-4">
               Still need help?
             </p>
-            <h2 className="font-heading font-bold text-white text-4xl md:text-5xl leading-tight mb-5">
+            <h2 className="font-heading font-bold text-main text-4xl md:text-5xl leading-tight mb-5">
               We're happy to answer your questions.
             </h2>
-            <p className="text-white/55 text-sm leading-relaxed">
+            <p className="text-main/60 text-sm leading-relaxed">
               Reach out to our team and we'll get back to you as soon as possible — no question is too small.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center gap-2 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:bg-white/90 transition-colors rounded-xl"
+              className="inline-flex items-center justify-center gap-2 bg-secondary text-white font-semibold px-8 py-3.5 text-sm hover:bg-secondary/90 transition-colors rounded-xl shadow-xs"
             >
               Contact Us
             </Link>
             <Link
               to="/browse"
-              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-3.5 text-sm hover:border-white transition-colors rounded-xl"
+              className="inline-flex items-center justify-center gap-2 border border-main/20 bg-white text-main font-semibold px-8 py-3.5 text-sm hover:border-main/40 transition-colors rounded-xl"
             >
               Browse Books
             </Link>
