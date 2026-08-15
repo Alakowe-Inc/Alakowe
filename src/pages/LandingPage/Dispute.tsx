@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Upload, CheckCircle, Package } from 'lucide-react'
+import { ArrowLeft, Upload, CheckCircle, Package, X } from 'lucide-react'
 import { RadioInput, FileUpload, TextareaControl } from '@/components/ui/form-controls'
 import { useConfirmOrderDelivery, useOrder } from '../../lib/api/orders/orders.hooks'
 import { useAuth } from '../../context/AuthContext'
+import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
 
 const ISSUE_TYPES = [
   'Wrong book received',
@@ -12,6 +13,8 @@ const ISSUE_TYPES = [
   'Condition worse than described',
   'Other',
 ]
+
+const MAX_PHOTOS = 3
 
 function Dispute() {
   const { orderId } = useParams<{ orderId: string }>()
@@ -24,28 +27,101 @@ function Dispute() {
   const [issueType, setIssueType] = useState('')
   const [notes, setNotes] = useState('')
   const [photos, setPhotos] = useState<File[]>([])
+  const [photoError, setPhotoError] = useState('')
+  const [notesError, setNotesError] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [issueError, setIssueError] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadLabel, setUploadLabel] = useState('')
+
+  const previewUrls = useMemo(
+    () => photos.map(f => URL.createObjectURL(f)),
+    [photos],
+  )
+
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach(url => URL.revokeObjectURL(url))
+    }
+  }, [previewUrls])
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) setPhotos(Array.from(e.target.files).slice(0, 3))
+    setPhotoError('')
+    const files = e.target.files
+    if (!files) return
+    const newFiles = Array.from(files)
+    const totalCount = photos.length + newFiles.length
+    if (totalCount > MAX_PHOTOS) {
+      setPhotoError(`You can upload a maximum of ${MAX_PHOTOS} photos (${totalCount} selected)`)
+      e.target.value = ''
+      return
+    }
+    for (const f of newFiles) {
+      if (!isImageTypeAllowed(f)) {
+        setPhotoError(`"${f.name}" is not a supported format. Use JPG, JPEG or PNG only.`)
+        e.target.value = ''
+        return
+      }
+      if (f.size > 5 * 1024 * 1024) {
+        setPhotoError(`"${f.name}" exceeds the 5 MB limit`)
+        e.target.value = ''
+        return
+      }
+    }
+    setPhotos(prev => [...prev, ...newFiles])
+    e.target.value = ''
+  }
+
+  function removePhoto(index: number) {
+    setPhotos(prev => prev.filter((_, i) => i !== index))
+    setPhotoError('')
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!issueType) { setIssueError(true); return }
+    const hasIssue = !!issueType
+    const hasNotes = notes.trim().length > 0
+    const hasPhotos = photos.length > 0
+    if (!hasIssue) setIssueError(true)
+    if (!hasNotes) setNotesError(true)
+    if (!hasPhotos) setPhotoError('Please upload at least 1 photo')
+    if (!hasIssue || !hasNotes || !hasPhotos) return
+
     setIssueError(false)
+    setNotesError(false)
+    setPhotoError('')
     setSubmitError(null)
 
     const reason = [issueType, notes.trim()].filter(Boolean).join(' — ')
     try {
-      await confirm.mutateAsync({ orderId: numericOrderId, confirm: false, note: reason })
+      let imageFileNames: string[] = []
+      if (photos.length > 0) {
+        setIsUploading(true)
+        setUploadLabel('Compressing photos…')
+        const compressed = await Promise.all(photos.map(p => compressImage(p)))
+        setUploadLabel('Uploading photos…')
+        imageFileNames = await Promise.all(
+          compressed.map((blob, i) => uploadToCloudinary(blob, photos[i].name))
+        )
+      }
+
+      await confirm.mutateAsync({
+        orderId: numericOrderId,
+        confirm: false,
+        note: reason,
+        imageFileNames,
+      })
       setSubmitted(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+    } finally {
+      setIsUploading(false)
+      setUploadLabel('')
     }
   }
+
+  const isSubmitting = confirm.isPending || isUploading
 
   /* ── Success state ── */
   if (submitted) {
@@ -172,11 +248,10 @@ function Dispute() {
 
           {/* Photo upload */}
           <div className="bg-white rounded-2xl border border-third p-6">
-            <h2 className="font-heading font-bold text-main text-base mb-1">
-              Upload Photos{' '}
-              <span className="text-main/35 font-normal text-sm">(optional)</span>
-            </h2>
-            <p className="text-xs text-main/45 mb-4">Attach up to 3 photos showing the issue</p>
+            <h2 className="font-heading font-bold text-main text-base mb-1">Upload Photos</h2>
+            <p className="text-xs text-main/45 mb-4">
+              Attach up to 3 photos showing the issue <span className="text-red-500">*</span>
+            </p>
             <FileUpload
               id="dispute-photos"
               label="Click to upload photos"
@@ -188,33 +263,45 @@ function Dispute() {
               style="border-main/15 py-8 hover:border-secondary/40 bg-transparent hover:bg-transparent"
             />
             {photos.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {photos.map(f => (
-                  <span
-                    key={f.name}
-                    className="text-xs bg-secondary/10 text-secondary font-medium px-3 py-1 rounded-full"
-                  >
-                    {f.name}
-                  </span>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {photos.map((f, i) => (
+                  <div key={`${f.name}-${i}`} className="relative">
+                    <div className="w-16 h-20 rounded-xl overflow-hidden border border-main/10 bg-main/5">
+                      <img src={previewUrls[i]} alt={f.name} className="w-full h-full object-cover" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(i)}
+                      aria-label={`Remove ${f.name}`}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-main text-white flex items-center justify-center shadow-sm hover:bg-main/80 transition-colors"
+                    >
+                      <X size={11} />
+                    </button>
+                  </div>
                 ))}
               </div>
+            )}
+            {photoError && (
+              <p className="text-xs text-red-500 mt-3">{photoError}</p>
             )}
           </div>
 
           {/* Notes */}
           <div className="bg-white rounded-2xl border border-third p-6">
-            <h2 className="font-heading font-bold text-main text-base mb-1">
-              Additional Notes{' '}
-              <span className="text-main/35 font-normal text-sm">(optional)</span>
-            </h2>
-            <p className="text-xs text-main/45 mb-4">Tell us more about what happened</p>
+            <h2 className="font-heading font-bold text-main text-base mb-1">Additional Notes</h2>
+            <p className="text-xs text-main/45 mb-4">
+              Tell us more about what happened <span className="text-red-500">*</span>
+            </p>
             <TextareaControl
               value={notes}
-              onChange={e => setNotes(e.target.value)}
+              onChange={e => { setNotes(e.target.value); setNotesError(false) }}
               placeholder="Describe the issue in detail…"
               rows={4}
               style="border border-main/15 rounded-xl px-4 py-3 text-sm text-main placeholder:text-main/30 outline-none focus-visible:ring-0 focus:border-secondary transition-colors"
             />
+            {notesError && (
+              <p className="text-xs text-red-500 mt-3">Please tell us more about the issue</p>
+            )}
           </div>
 
           {submitError && (
@@ -223,10 +310,10 @@ function Dispute() {
 
           <button
             type="submit"
-            disabled={confirm.isPending || !isBuyer}
+            disabled={isSubmitting || !user}
             className="w-full bg-secondary text-white font-semibold py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {confirm.isPending ? 'Submitting…' : 'Submit Report'}
+            {isUploading ? uploadLabel : confirm.isPending ? 'Submitting…' : 'Submit Report'}
           </button>
 
           <p className="text-xs text-main/35 text-center leading-relaxed">
