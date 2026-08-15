@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Search,
   Sparkles,
@@ -45,23 +45,9 @@ const iconMap: Record<string, React.ElementType> = {
 }
 
 export default function HowItWorks() {
-  const location = useLocation()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [expandedArticles, setExpandedArticles] = useState<Record<string, boolean>>({})
-
-  useEffect(() => {
-    if (location.hash) {
-      const categoryId = location.hash.replace('#', '')
-      setSelectedCategory(categoryId)
-      setTimeout(() => {
-        const el = document.getElementById(categoryId)
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' })
-        }
-      }, 100)
-    }
-  }, [location.hash])
 
   // Toggle single article accordion expansion
   const toggleArticle = (id: string) => {
@@ -408,28 +394,28 @@ export default function HowItWorks() {
         </div>
 
         {/* ── 6. STILL HAVE QUESTIONS / CONTACT FOOTER BANNER ──────── */}
-        <div className="mt-16 bg-white border border-main/10 rounded-3xl p-8 sm:p-12 text-center text-main relative overflow-hidden shadow-sm">
+        <div className="mt-16 bg-main rounded-3xl p-8 sm:p-12 text-center text-white relative overflow-hidden shadow-xl">
           <div className="max-w-xl mx-auto relative z-10">
             <p className="text-secondary text-xs font-bold uppercase tracking-widest mb-3">
               Still Have Questions?
             </p>
-            <h3 className="font-heading font-bold text-2xl sm:text-4xl text-main mb-4">
+            <h3 className="font-heading font-bold text-2xl sm:text-4xl text-white mb-4">
               We're always here to help!
             </h3>
-            <p className="text-main/60 text-xs sm:text-sm leading-relaxed mb-8">
+            <p className="text-white/60 text-xs sm:text-sm leading-relaxed mb-8">
               If something isn't clear or you need assistance with your order, shipping, or bookstore, our friendly team is ready to assist you.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 to="/contact"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-secondary text-white font-bold px-8 py-3.5 text-xs sm:text-sm hover:bg-secondary/90 transition-all rounded-xl shadow-xs"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-main font-bold px-8 py-3.5 text-xs sm:text-sm hover:bg-white/90 transition-all rounded-xl shadow-md"
               >
                 Contact Support <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 to="/faq"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-main/15 bg-white text-main font-bold px-8 py-3.5 text-xs sm:text-sm hover:border-main/40 transition-all rounded-xl"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-white/30 text-white font-bold px-8 py-3.5 text-xs sm:text-sm hover:border-white transition-all rounded-xl"
               >
                 View General FAQ
               </Link>
