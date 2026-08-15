@@ -46,7 +46,7 @@ import RequestBook from "./pages/LandingPage/RequestBook";
 import MyRequests from "./pages/LandingPage/MyRequests";
 import AllRequests from "./pages/LandingPage/AllRequests";
 import NotFound from "./pages/NotFound";
-import DropOffLocations from "./pages/LandingPage/DropoffLocations";
+import DropOffLocations from "./pages/LandingPage/DropOffLocations";
 
 const queryClient = new QueryClient();
 
