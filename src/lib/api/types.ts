@@ -616,6 +616,57 @@ export interface UpdateStoreProfileRequest {
   hobbies?: string | null
 }
 
+/* ───────── User account ───────── */
+
+export interface UpdateUserRequestDto {
+  fullName?: string | null
+  nickname?: string | null
+  phoneNumber?: string | null
+}
+
+export interface UserProfileResponse {
+  userId?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  fullName?: string | null
+  userName?: string | null
+  email?: string | null
+  phoneNumber?: string | null
+  isActive?: boolean
+}
+
+/* ───────── User bank details ───────── */
+
+export interface BankResponse {
+  id: number
+  name: string
+  slug: string
+  code: string
+}
+
+export interface UserBankDetailsResponse {
+  id: number
+  bankId: number
+  bankName: string
+  accountNumber: string
+  accountName: string
+  isActive: boolean
+}
+
+export interface CreateUserBankDetailsRequest {
+  bankId: number
+  accountNumber: string
+  accountName: string
+  isActive: boolean
+}
+
+export interface UpdateUserBankDetailsRequest {
+  bankId: number
+  accountNumber: string
+  accountName: string
+  isActive: boolean
+}
+
 export interface PayoutSummaryResponse {
   sellerEmail: string
   totalEarned: number
