@@ -538,6 +538,33 @@ export interface OrderDto {
   statusEvents?: OrderStatusEventResponse[] | null
 }
 
+/* ───────── Dispute tracking ───────── */
+
+export interface OrderDisputeActivityResponse {
+  ts: string
+  text: string
+}
+
+export interface OrderDisputeResponse {
+  orderId: number
+  orderNumber: string
+  disputeNumber: string
+  status: string
+  decision?: string | null
+  reason: string
+  filedBy: string
+  bookTitle: string
+  amount: number
+  delivery: string
+  evidence: string[]
+  resolution?: string | null
+  filedAt: string
+  dueAt: string
+  reviewedAt?: string | null
+  decidedAt?: string | null
+  activity: OrderDisputeActivityResponse[]
+}
+
 /* ───────── Store profiles ───────── */
 
 export interface StoreProfileResponse {

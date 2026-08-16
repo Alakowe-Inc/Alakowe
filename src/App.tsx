@@ -24,6 +24,7 @@ import PaymentSuccess from "./pages/LandingPage/PaymentSuccess";
 import PaymentFailed from "./pages/LandingPage/PaymentFailed";
 import OrderStatus from "./pages/LandingPage/OrderStatus";
 import Dispute from "./pages/LandingPage/Dispute";
+import DisputeTracking from "./pages/LandingPage/DisputeTracking";
 import Profile from "./pages/LandingPage/Profile";
 import ShippingAddresses from "./pages/LandingPage/ShippingAddresses";
 
@@ -101,6 +102,7 @@ const App = () => (
                 <Route path="payment/failed" element={<PaymentFailed />} />
                 <Route path="order/:orderId" element={<OrderStatus />} />
                 <Route path="order/:orderId/dispute" element={<Dispute />} />
+                <Route path="order/:orderId/dispute/track" element={<DisputeTracking />} />
                 <Route path="account" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="account/shipping-addresses" element={<ProtectedRoute><ShippingAddresses /></ProtectedRoute>} />
 

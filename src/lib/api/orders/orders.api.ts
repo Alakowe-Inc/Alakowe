@@ -1,5 +1,5 @@
 import client from "../client"
-import type { OrderDto, PagedResult, PayoutRequestResponse, PayoutSummaryResponse, SellerSaleResponse } from "../types"
+import type { OrderDisputeResponse, OrderDto, PagedResult, PayoutRequestResponse, PayoutSummaryResponse, SellerSaleResponse } from "../types"
 
 export async function getOrdersByUserApi(userId: string): Promise<OrderDto[]> {
   const { data } = await client.get(`/api/v1/orders/user/${encodeURIComponent(userId)}`)
@@ -9,6 +9,11 @@ export async function getOrdersByUserApi(userId: string): Promise<OrderDto[]> {
 export async function getOrderByIdApi(orderId: number): Promise<OrderDto> {
   const { data } = await client.get(`/api/v1/orders/${orderId}`)
   return data as OrderDto
+}
+
+export async function getOrderDisputeApi(orderId: number): Promise<OrderDisputeResponse> {
+  const { data } = await client.get(`/api/v1/orders/${orderId}/dispute`)
+  return data as OrderDisputeResponse
 }
 
 export interface ConfirmDeliveryRequest {
