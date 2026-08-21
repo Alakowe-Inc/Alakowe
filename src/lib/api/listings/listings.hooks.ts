@@ -46,6 +46,7 @@ const mockListing: ListingResponse = {
   wishlistItemCount: 0,
   isDiscountApplied: false,
   location: "Yaba, Lagos",
+  numberOfPages: 320,
 }
 
 const mockPagedResult: ListingResponsePagedResult = {

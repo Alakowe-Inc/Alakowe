@@ -261,9 +261,8 @@ export default function RequestBook() {
               onChange={(e) => setActiveTab(e.target.value as typeof activeTab)}
               className="w-full bg-white border border-main/20 rounded-xl px-4 py-3 text-xs font-bold text-main appearance-none outline-none focus:border-secondary transition-colors shadow-sm pr-10"
             >
-              <option value="requests">📚 REQUESTED BOOKS ({allRequests.length})</option>
+              <option value="requests">📚 ALL REQUESTED BOOKS ({allRequests.length})</option>
               <option value="form">✍️ BOOK REQUEST FORM</option>
-              <option value="my-requests">👤 MY REQUESTS {user ? `(${myRequests.length})` : ''}</option>
             </select>
             <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-main/50 pointer-events-none" />
           </div>
@@ -272,9 +271,8 @@ export default function RequestBook() {
         {/* ── Desktop Horizontal Tabs ── */}
         <div className="hidden sm:flex border-b border-main/10 mb-8 overflow-x-auto">
           {[
-            { id: 'requests', label: `Requested Books${allRequests.length > 0 ? ` (${allRequests.length})` : ''}` },
+            { id: 'requests', label: `All Requested Books${allRequests.length > 0 ? ` (${allRequests.length})` : ''}` },
             { id: 'form', label: 'Book Request Form' },
-            { id: 'my-requests', label: `My Requests${user ? ` (${myRequests.length})` : ''}` },
           ].map((tab) => {
             const isActive = activeTab === tab.id
             return (
@@ -477,7 +475,14 @@ export default function RequestBook() {
                           Requested on {createdDate}
                         </p>
 
-                        <button
+                        <div className="flex items-center gap-2">
+                          <Link
+                            to={`/list?title=${encodeURIComponent(request.title)}&author=${encodeURIComponent(request.author || '')}&category=${encodeURIComponent(categoryName)}&condition=${encodeURIComponent(conditionName)}`}
+                            className="text-xs font-semibold px-4 py-2 rounded-lg transition-all border border-secondary text-secondary hover:bg-secondary/10"
+                          >
+                            List this Book
+                          </Link>
+                          <button
                           disabled={!!loadingRequestId}
                           onClick={() => {
                             if (isJoined) {
@@ -506,6 +511,7 @@ export default function RequestBook() {
                             'Join Waitlist'
                           )}
                         </button>
+                        </div>
                       </div>
                     </div>
                   )
@@ -515,178 +521,6 @@ export default function RequestBook() {
           </div>
         )}
 
-        {/* TAB 3: MY REQUESTS */}
-        {activeTab === 'my-requests' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-main/8">
-              <div>
-                <h2 className="font-heading font-bold text-main text-lg">My Activity & Waitlists</h2>
-                <p className="text-xs text-main/55">
-                  Book requests created by you and waitlists you've joined.
-                </p>
-              </div>
-              {user && (
-                <span className="text-[11px] font-semibold text-secondary bg-secondary/10 px-3 py-1 rounded-full w-fit">
-                  {myRequests.length} {myRequests.length === 1 ? 'item' : 'items'}
-                </span>
-              )}
-            </div>
-
-            {!user ? (
-              <div className="text-center py-16 border border-dashed border-main/15 rounded-2xl bg-slate-50/50 p-8">
-                <Clock size={36} className="text-secondary mx-auto mb-3" />
-                <h3 className="font-heading font-bold text-main text-lg mb-1">
-                  Log in to see your requests
-                </h3>
-                <p className="text-xs text-main/55 max-w-sm mx-auto mb-5">
-                  Track the books you've requested and waitlists you've joined all in one place.
-                </p>
-                <button
-                  onClick={() => navigate('/login?redirect=/request-book')}
-                  className="bg-secondary text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-secondary/90 transition-colors uppercase tracking-wider"
-                >
-                  Log In
-                </button>
-              </div>
-            ) : loadingMyRequests ? (
-              <div className="text-center py-20">
-                <div className="inline-block w-6 h-6 border-2 border-secondary/30 border-t-secondary rounded-full animate-spin mb-3" />
-                <p className="text-main/50 text-sm">Loading your activity...</p>
-              </div>
-            ) : myRequestsError ? (
-              <div className="text-center py-16 border border-dashed border-red-200 rounded-2xl bg-red-50/40 p-8">
-                <AlertCircle size={36} className="text-red-400 mx-auto mb-3" />
-                <h3 className="font-heading font-bold text-main text-base mb-1">
-                  Could not load your requests
-                </h3>
-                <p className="text-xs text-main/50 max-w-sm mx-auto mb-3">
-                  {(myRequestsError as Error)?.message || 'An error occurred while fetching your requests.'}
-                </p>
-                <p className="text-[11px] text-main/40">
-                  If you just logged in, try refreshing the page.
-                </p>
-              </div>
-            ) : myRequests.length === 0 ? (
-              <div className="text-center py-16 border border-dashed border-main/15 rounded-2xl bg-white p-8">
-                <BookOpen size={36} className="text-main/30 mx-auto mb-3" />
-                <h3 className="font-heading font-bold text-main text-base mb-1">
-                  No active requests found
-                </h3>
-                <p className="text-xs text-main/50 max-w-sm mx-auto mb-6">
-                  You haven't submitted any book requests or joined any waitlists yet.
-                </p>
-                <button
-                  onClick={() => setActiveTab('form')}
-                  className="bg-secondary text-white text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-secondary/90 transition-colors"
-                >
-                  Create a Request
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                {myRequests.map((req) => {
-                  const isOwner = req.buyerEmail?.toLowerCase() === user.email?.toLowerCase()
-                  const waitlistCount = req.waitlistCount ?? req.waitlist?.length ?? 0
-                  const statusLower = (req.status || '').toLowerCase()
-                  const isClosed = statusLower === 'closed'
-                  const isMatched = statusLower === 'matched'
-                  const isOnWaitlist = req.isWaitlisted != null ? Boolean(req.isWaitlisted) : (req.isUserOnWaitlist ?? true)
-
-                  const categoryName = req.genre || req.category || 'General'
-                  const conditionName = req.condition || req.bookCondition || 'Any Condition'
-
-                  const createdDate = formatDate(getDate(req))
-                  // API returns dateJoined — use it; fall back to joinedAt, then createdDate
-                  const joinedDate = formatDate(req.dateJoined || req.joinedAt) || createdDate
-
-                  return (
-                    <div key={req.id} className="border border-main/10 rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
-                      {/* Header: Status + Type Badge */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-main/8">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
-                              isClosed
-                                ? 'bg-gray-100 text-gray-600 border-gray-200'
-                                : isMatched
-                                ? 'bg-green-50 text-green-700 border-green-200'
-                                : 'bg-blue-50 text-blue-700 border-blue-200'
-                            }`}>
-                              {isClosed ? 'Closed' : isMatched ? 'Matched' : statusLower === 'pending' ? 'Pending' : 'Open Request'}
-                            </span>
-                            <span className="text-xs text-main/40">•</span>
-                            <span className={`text-xs font-semibold ${isOwner ? 'text-violet-600' : 'text-secondary'}`}>
-                              {isOwner ? '📝 Your Request' : '🔔 Joined Waitlist'}
-                            </span>
-                          </div>
-                          <h3 className="font-heading font-bold text-main text-lg truncate">{req.title}</h3>
-                          {req.author && (
-                            <p className="text-xs text-main/55 mt-0.5">by {req.author}</p>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Users size={14} className="text-main/40" />
-                          <span className="text-xs font-semibold text-main">
-                            {waitlistCount} {waitlistCount === 1 ? 'reader waiting' : 'readers waiting'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Details Grid: Category, Condition, First Requested, Joined Date */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4 bg-slate-50/70 border border-slate-100 rounded-xl p-3.5">
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">Category</p>
-                          <p className="text-xs text-main font-semibold">{categoryName}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">Condition</p>
-                          <p className="text-xs text-main font-semibold">{conditionName}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">First Requested</p>
-                          <p className="text-xs text-main font-medium">{createdDate}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-secondary mb-0.5">Date Joined</p>
-                          <p className="text-xs text-main font-medium">{joinedDate}</p>
-                        </div>
-                      </div>
-
-                      {/* Action footer */}
-                      <div className="flex items-center justify-between pt-3 border-t border-main/8">
-                        <p className="text-[11px] text-main/40">
-                          {isOwner ? `Created on ${createdDate}` : `Joined waitlist on ${joinedDate}`}
-                        </p>
-
-                        {!isClosed && isOnWaitlist && (
-                          <button
-                            disabled={!!loadingRequestId}
-                            onClick={() => handleLeaveWaitlist(req.id)}
-                            className="px-4 py-2 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 text-xs font-semibold transition-all flex items-center gap-1.5"
-                          >
-                            <XCircle size={13} />
-                            {loadingRequestId === req.id ? 'Leaving...' : 'Leave Waitlist'}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="mt-12 text-center">
-          <p className="text-[10px] text-main/35">
-            Powered by{' '}
-            <Link to="/" className="font-semibold text-main/50 hover:text-secondary transition-colors">
-              Alakowe
-            </Link>
-            {' '}— Nigeria's peer-to-peer book marketplace
-          </p>
-        </div>
       </div>
     </div>
   )

@@ -79,7 +79,8 @@ function Footer() {
                 {[
                   { label: 'Browse Books', to: '/browse' },
                   { label: 'Sell Books', to: '/sell' },
-                  { label: 'Request Books', to: '/requests' },
+                  { label: 'Sample Bookstore Preview', to: '/store/sample' },
+                  { label: 'Request Books', to: '/request-book' },
                   { label: 'View our Drop-off Centers', to: '/dropoff-locations' },
                 ].map(({ label, to }, idx) => (
                   <li key={`${to}-${idx}`}>

@@ -1,4 +1,4 @@
-import { Star, Heart, ShoppingBag, MapPin } from 'lucide-react'
+import { Star, Heart, ShoppingCart, MapPin } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { BookBadge } from '../data/mockData'
@@ -52,12 +52,12 @@ function BookCard({ book }: BookCardProps) {
   return (
     <Link
       to={`/books/${book.id}`}
-      className="group block w-full max-w-[190px] mx-auto transition-transform duration-300 hover:-translate-y-0.5"
+      className="group block w-full max-w-[190px] mx-auto transition-all duration-300 hover:-translate-y-1 bg-white p-2 rounded-2xl shadow-sm hover:shadow-md border border-main/5"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Image / Cover area */}
-      <div className="relative overflow-hidden bg-[#f5f5f3] rounded-[16px] aspect-[4/5] shadow-sm">
+      <div className="relative overflow-hidden bg-[#f5f5f3] rounded-xl aspect-[4/5]">
         {/* Favorite button */}
         <button
           className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
@@ -147,7 +147,7 @@ function BookCard({ book }: BookCardProps) {
               addToCart(book.id)
             }}
           >
-            <ShoppingBag size={13} />
+            <ShoppingCart size={13} />
           </button>
         </div>
       </div>

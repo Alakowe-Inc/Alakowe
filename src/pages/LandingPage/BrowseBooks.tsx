@@ -19,7 +19,7 @@ function BrowseBooks() {
   const [sortBy, setSortBy] = useState('default')
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
-  const PAGE_SIZE = 12
+  const PAGE_SIZE = 20
 
   const { data: pagedResult, isLoading } = useListings()
 

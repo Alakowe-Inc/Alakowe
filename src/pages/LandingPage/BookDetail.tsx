@@ -275,10 +275,10 @@ function BookDetail() {
                     </>
                   ) : book.fulfillmentOption === 'Both' ? (
                     <>
-                      <p>You choose at checkout:</p>
+                      <p>This seller offers two ways to get this book. Choose what works best for you at checkout:</p>
                       <p>
-                        <span className="font-semibold text-main">Pickup</span>
-                        {' '}at the seller&apos;s place (contact after payment)
+                        <span className="font-semibold text-main">Pickup:</span>
+                        {' '}  Collect it directly from the seller.(Contact seller after payment)
                         {(book.pickupAddressLine || book.pickupCity) && (
                           <>
                             {' · '}
@@ -296,8 +296,8 @@ function BookDetail() {
                         )}
                       </p>
                       <p>
-                        <span className="font-semibold text-main">Alákòwé delivery</span>
-                        {' '}with our protected logistics flow (delivery fee applies).
+                        <span className="font-semibold text-main">Alákòwé delivery:</span>
+                        {' '} We’ll get it to you through our trusted, trackable courier partner. Delivery fee applies.(Delivery fee applies).
                       </p>
                     </>
                   ) : (

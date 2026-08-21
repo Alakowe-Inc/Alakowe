@@ -209,8 +209,6 @@ const sections = landingPage?.sections ?? []
 
       // Pick an icon based on section type
       const iconMap: Record<string, React.ReactNode> = {
-        category: <span className="text-amber-400">✦</span>,
-        collection: <span className="text-red-400">🔥</span>,
         tag: <span className="text-amber-500">☆</span>,
       }
 
@@ -218,7 +216,6 @@ const sections = landingPage?.sections ?? []
         <div key={section.id} className="mb-14">
           <BookCarousel
             label={section.title ?? "Featured"}
-            icon={iconMap[section.sectionType ?? "category"]}
             seeAllLink={`/browse?${section.sectionType}=${section.filterParam?.[section.sectionType ?? "category"] ?? ""}`}
           >
             {listings.map((book) => (

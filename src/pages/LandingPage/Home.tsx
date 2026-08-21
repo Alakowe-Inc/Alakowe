@@ -28,7 +28,7 @@ const promoInserts = [
     id: 'what-does-alakowe-mean',
     accentColor: 'bg-emerald-50/70 border-emerald-100',
     question: 'What does Alákòwé mean?',
-    answer: `Alákòwé (pronounced ah-lah-koh-we) is a Yoruba word meaning "one who writes" or "a learned person." Around here, we believe readers deserve a marketplace built just for them, where books, independent booksellers, and readers come together to share knowledge.`,
+    answer: 'Alákòwé (pronounced ah-lah-koh-we) is a Yoruba word meaning "one who writes" or "a learned person." Around here, we believe booklovers deserve a marketplace built just for them, where they come together to share books and knowledge.',
     buttonLabel: 'Learn More',
     buttonTo: '/how-it-works',
   },
@@ -36,7 +36,7 @@ const promoInserts = [
     id: 'sell-why',
     accentColor: 'bg-emerald-50/70 border-emerald-100',
     question: 'Why do I need to sell my books?',
-    answer: `Because every 25 books successfully sold on Alákòwé helps save one tree, hence, giving books, and our planet, a longer life. Also, by passing on the books you've finished, you're helping someone else discover their next great read.`,
+    answer: `Every 25 books successfully sold on Alákòwé helps save one tree, hence, giving books, and our planet, a longer life. Also, by passing on the books you've finished to the next booklover, you're helping them else discover their next great read.`,
     buttonLabel: 'Learn More',
     buttonTo: '/how-it-works',
   },
@@ -44,7 +44,7 @@ const promoInserts = [
     id: 'sell-alakowe',
     accentColor: 'bg-violet-50/60 border-violet-100',
     question: 'Why do I need to sell them on Alákòwé?',
-    answer: 'Because Alákòwé was built by readers, for readers, so we understand the value of books. Every book you sell on Alákòwé helps grow a community where great books keep moving.',
+    answer: 'Alákòwé was built by booklovers, for booklovers, so we understand the value of books. Every book you sell on Alákòwé helps grow a community where great books keep moving among people who are passionate about them.',
     buttonLabel: 'List a Book',
     buttonTo: '/list',
   },
@@ -52,7 +52,7 @@ const promoInserts = [
     id: 'bookstore-dream',
     accentColor: 'bg-indigo-50/60 border-indigo-100',
     question: 'Want to start the bookstore of your dreams?',
-    answer: `You already have the books. We'll give you the bookstore. Once your first book is approved, you automatically get your own bookstore page where readers can browse everything you're selling. Consider it your own little corner of Alákòwé.`,
+    answer: `You already have the books, Alákòwé will give you the bookstore. Once your first book is approved, you automatically get your own bookstore page where other booklovers can browse everything you have on your page. You can consider it your own little corner of Alákòwé.`,
     buttonLabel: 'View Sample Bookstore',
     buttonTo: '/store/sample',
   },
@@ -60,7 +60,7 @@ const promoInserts = [
     id: 'who-buying-from',
     accentColor: 'bg-sky-50/60 border-sky-100',
     question: 'Who am I buying from on Alákòwé?',
-    answer: `From readers just like you. Every book on Alákòwé comes from someone's shelf: students, teachers, parents, collectors, and fellow book lovers who believe every great book deserves another reader.`,
+    answer: `Every book on Alákòwé comes from someone's book shelf: booklovers, collectors, parents, students, teachers, believe every great book deserves another reader.`,
     buttonLabel: 'Browse Books',
     buttonTo: '/browse',
   },
@@ -395,7 +395,6 @@ function Home() {
                 <div key={section.id} className="mb-10">
                   <BookCarousel
                     label={section.title ?? "Featured"}
-                    icon={iconMap[filterKey]}
                     seeAllLink={`/browse?${filterKey}=${filterValue}`}
                   >
                     {listings.map((book) => (

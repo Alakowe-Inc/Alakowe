@@ -135,6 +135,7 @@ export default function Profile() {
   const [pickupState, setPickupState] = useState('')
   const [pickupConsent, setPickupConsent] = useState(false)
   const [pickupErrors, setPickupErrors] = useState<PickupFieldErrors>({})
+  const [showFullConsent, setShowFullConsent] = useState(false)
 
   // When the user changes (login/logout/switch), reset form and load from their own localStorage slot
   useEffect(() => {
@@ -606,8 +607,32 @@ export default function Profile() {
                       )}
                       aria-invalid={!!pickupErrors.consent}
                     />
-                    <span className="text-xs text-main/65 leading-relaxed">
-                      I understand my pickup address will show on my listings, and my phone number will be shared with buyers after they pay.
+                    <span className="text-xs text-main/65 leading-relaxed block">
+                      I understand that if I choose Buyer Pickup, my pickup address will be visible on my listing and my phone number will be shared with the buyer after payment.<br />
+                      {!showFullConsent ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowFullConsent(true)}
+                          className="text-secondary font-semibold hover:underline mt-0.5"
+                        >
+                          See more
+                        </button>
+                      ) : (
+                        <span className="animate-in fade-in duration-300">
+                          For your safety, we recommend using a popular nearby landmark (e.g. a filling station, restaurant or shopping centre) instead of your exact home address.<br />
+                          Your phone number will be removed from the buyer’s view once the order is completed.{' '}
+                          <Link to="/how-it-works#how-buyer-pickup-works" className="text-secondary hover:underline font-semibold mr-2">
+                            Learn more
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => setShowFullConsent(false)}
+                            className="text-main/40 font-semibold hover:text-main mt-0.5"
+                          >
+                            See less
+                          </button>
+                        </span>
+                      )}
                     </span>
                   </label>
                   {pickupErrors.consent ? (

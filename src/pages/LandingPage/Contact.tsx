@@ -87,7 +87,7 @@ function inputClass(hasError?: boolean) {
 }
 
 function Contact() {
-  const [activeTab, setActiveTab] = useState<'form' | 'channels' | 'faq'>('form')
+  const [activeTab, setActiveTab] = useState<'form' | 'channels' | 'faq'>('channels')
   const [form, setForm] = useState({
     name: '',
     email: '',

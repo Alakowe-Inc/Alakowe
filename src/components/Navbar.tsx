@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Search, ShoppingBag, Menu, X } from 'lucide-react'
+import { Search, ShoppingCart, Menu, X } from 'lucide-react'
 import { UserIcon } from '@heroicons/react/24/outline'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import logoWhite from '../assets/media/logos/logo white.png'
@@ -149,6 +149,7 @@ function Navbar() {
                         { to: '/my-listings', label: 'Listings' },
                         { to: '/my-sales', label: 'Sales' },
                         { to: '/my-earnings', label: 'Earnings' },
+                        { to: '/my-requests', label: 'My Requests' },
                         { to: '/account', label: 'Profile' },
                       ].map(({ to, label }) => (
                         <DropdownMenuItem key={to} asChild className="px-4 py-2.5 text-sm text-main cursor-pointer rounded-none">
@@ -189,7 +190,7 @@ function Navbar() {
               aria-label="Cart"
               className="relative flex items-center gap-1 text-white hover:text-white/80 transition-colors"
             >
-              <ShoppingBag size={20} />
+              <ShoppingCart size={20} />
               {count > 0 && (
                 <span
                   className="absolute -top-2 -right-2 bg-white text-[#2c305c] text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
@@ -288,7 +289,9 @@ function Navbar() {
                     { to: '/account', label: 'My Profile' },
                     { to: '/my-purchases', label: 'My Purchases' },
                     { to: '/my-listings', label: 'My Listings' },
+                    { to: '/my-sales', label: 'My Sales' },
                     { to: '/my-earnings', label: 'My Earnings' },
+                    { to: '/my-requests', label: 'My Requests' },
                   ].map(({ to, label }) => (
                     <NavLink
                       key={to}

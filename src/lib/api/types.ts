@@ -69,6 +69,7 @@ export interface SubmitListingRequestDto {
   discount?: number
   stateId?: number
   areaId?: number
+  numberOfPages?: number | null
 }
 
 export interface UpdateListingRequestDto {
@@ -91,6 +92,7 @@ export interface UpdateListingRequestDto {
   discount?: number
   stateId?: number
   areaId?: number
+  numberOfPages?: number | null
 }
 
 export interface AddToCartRequestDto {

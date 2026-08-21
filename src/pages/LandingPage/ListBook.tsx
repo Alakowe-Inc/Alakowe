@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Upload, Heart, BookOpen, Camera, DollarSign, CheckCircle, X, Loader2, Bell, Truck, Sparkles, HelpCircle } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useSubmitListing } from '../../lib/api/listings/listings.hooks'
@@ -129,8 +129,17 @@ export default function ListBook() {
   const { data: states } = useStates()
   const [selectedStateId, setSelectedStateId] = useState<number>(0)
   const { data: areas } = useAreasByState(selectedStateId || undefined)
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const [form, setForm] = useState<FormState>(empty)
+  
+  const initialFormState: FormState = {
+    ...empty,
+    title: searchParams.get('title') ?? '',
+    author: searchParams.get('author') ?? '',
+    genre: searchParams.get('category') ?? searchParams.get('genre') ?? '',
+    condition: searchParams.get('condition') ?? '',
+  }
+  const [form, setForm] = useState<FormState>(initialFormState)
   const [errors, setErrors] = useState<Partial<FormState>>({})
   const [photos, setPhotos] = useState<PhotoEntry[]>([])
   const [photoError, setPhotoError] = useState('')
@@ -161,7 +170,8 @@ export default function ListBook() {
   useEffect(() => {
     const draft = loadListingDraft()
     if (!draft || draft.kind !== 'create') {
-      setShowGuide(true)
+      const hasPreFill = !!searchParams.get('title')
+      setShowGuide(!hasPreFill)
       return
     }
 
@@ -437,6 +447,7 @@ export default function ListBook() {
         discount: form.discount ? Number(form.discount) : undefined,
         stateId: Number(form.stateId),
         areaId: Number(form.areaId),
+        numberOfPages: form.pageCount ? Number(form.pageCount) : undefined,
       })
       clearListingDraft()
       navigate(`/listing-submitted?id=${result.id}`)
@@ -847,7 +858,26 @@ export default function ListBook() {
                 How buyers get this book
               </p>
               <p className="text-sm font-semibold text-main">{fulfillmentCopy.label}</p>
-              <p className="text-xs text-main/50 mt-1 leading-relaxed">{fulfillmentCopy.hint}</p>
+              <p className="text-xs text-main/50 mt-1 leading-relaxed">
+                {fulfillmentCopy.hint}{' '}
+                <Link
+                  to="/how-it-works#delivery-logistics"
+                  className="text-secondary font-semibold hover:underline inline-flex items-center gap-0.5"
+                >
+                  <span>Learn more</span>
+                  <ArrowRight size={11} />
+                </Link>
+              </p>
+              <p className="text-xs text-red-500 mt-2 leading-relaxed font-medium">
+                <span className="font-bold">Note:</span> Courier Fulfilment is currently available only to sellers in the 6 South-West states. We&apos;re working to expand soon. Pick-up fulfilment is available nationwide.{' '}
+                <Link
+                  to="/how-it-works#delivery-logistics"
+                  className="text-red-500 font-semibold hover:underline inline-flex items-center gap-0.5"
+                >
+                  <span>Read more</span>
+                  <ArrowRight size={11} />
+                </Link>
+              </p>
             </div>
             <button
               type="button"
