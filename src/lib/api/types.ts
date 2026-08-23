@@ -136,6 +136,7 @@ export interface ListingResponse {
   conditionDetail?: string | null
   loveNote?: string | null
   price?: number
+  priceOfNew?: number
   quantity?: number
   bookCondition?: BookCondition
   format?: string | null
