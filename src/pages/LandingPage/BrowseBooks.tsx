@@ -6,9 +6,16 @@ import { useListings } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import BookCard from '../../components/BookCard'
 import { FormControl, SelectBoxControl, type SelectOption } from '@/components/ui/form-controls'
+import type { ListingFilterParams } from '../../lib/api/listings/listings.api'
 
 const genres = ['All', 'African Fiction', 'Foreign Fiction', 'Romance', 'Thriller', 'Fantasy', 'Children', 'Academic', 'Self Help']
 const conditions = ['All', 'New', 'LikeNew', 'Excellent', 'Good', 'Fair', 'Poor']
+
+const sortValueToApiParam: Record<string, string | undefined> = {
+  'default': undefined,
+  'price-asc': 'price_asc',
+  'price-desc': 'price_desc',
+}
 
 function BrowseBooks() {
   const [searchParams] = useSearchParams()
@@ -21,7 +28,25 @@ function BrowseBooks() {
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 12
 
-  const { data: pagedResult, isLoading } = useListings()
+  const collectionSlug = searchParams.get('collection')
+  const tagSlug = searchParams.get('tag')
+  const categorySlug = searchParams.get('category')
+
+  const apiFilter = useMemo<ListingFilterParams>(() => {
+    const params: ListingFilterParams = {
+      PageNumber: page,
+      PageSize: 50,
+    }
+    if (collectionSlug) params.Collection = collectionSlug
+    if (tagSlug) params.Tag = tagSlug
+    if (categorySlug) params.Category = categorySlug
+    if (query) params.Title = query
+    const apiSort = sortValueToApiParam[sortBy]
+    if (apiSort) params.Sort = apiSort
+    return params
+  }, [collectionSlug, tagSlug, categorySlug, query, sortBy, page])
+
+  const { data: pagedResult, isLoading } = useListings(apiFilter)
 
   const books = useMemo(() => (pagedResult?.result ?? []).map(listingToBookDisplay), [pagedResult])
 
@@ -32,32 +57,22 @@ function BrowseBooks() {
 
   useEffect(() => {
     setPage(1)
-  }, [query, genre, condition, sortBy])
+  }, [query, genre, condition, sortBy, collectionSlug, tagSlug, categorySlug])
 
   const openFilters = () => setShowFilters(true)
   const closeFilters = () => setShowFilters(false)
 
   const filtered = useMemo(() => {
     let result = [...books]
-    if (query) {
-      const q = query.toLowerCase()
-      result = result.filter(
-        b =>
-          (b.title && b.title.toLowerCase().includes(q)) ||
-          (b.author && b.author.toLowerCase().includes(q)),
-      )
-    }
     if (genre !== 'All') result = result.filter(b => b.genre === genre)
     if (condition !== 'All') result = result.filter(b => b.condition === condition)
-    if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price)
-    if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price)
     return result
-  }, [query, genre, condition, sortBy, books])
+  }, [genre, condition, books])
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const hasFilters = genre !== 'All' || condition !== 'All'
+  const hasFilters = genre !== 'All' || condition !== 'All' || !!collectionSlug || !!tagSlug || !!categorySlug
 
   function clearFilters() {
     setGenre('All')
