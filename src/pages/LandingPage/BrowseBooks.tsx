@@ -2,26 +2,54 @@ import { useState, useMemo, useEffect } from 'react'
 import { Search, SlidersHorizontal, X, Plus, Sparkles } from 'lucide-react'
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom'
-import { useListings } from '../../lib/api/listings/listings.hooks'
+import { useListings, useCategories } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import BookCard from '../../components/BookCard'
 import { FormControl, SelectBoxControl, type SelectOption } from '@/components/ui/form-controls'
+import type { ListingFilterParams } from '../../lib/api/listings/listings.api'
 
-const genres = ['All', 'African Fiction', 'Foreign Fiction', 'Romance', 'Thriller', 'Fantasy', 'Children', 'Academic', 'Self Help']
-const conditions = ['All', 'New', 'LikeNew', 'Excellent', 'Good', 'Fair', 'Poor']
+const conditions = ['All', 'New', 'LikeNew', 'Excellent', 'Good', 'Fair', 'Poor'] as const
+
+const sortValueToApiParam: Record<string, string | undefined> = {
+  'default': undefined,
+  'price-asc': 'price_asc',
+  'price-desc': 'price_desc',
+}
 
 function BrowseBooks() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [query, setQuery] = useState(searchParams.get('q') ?? '')
-  const [genre, setGenre] = useState('All')
-  const [condition, setCondition] = useState('All')
+  const [selectedCategorySlug, setSelectedCategorySlug] = useState<string | null>(null)
+  const [condition, setCondition] = useState<string>('All')
   const [sortBy, setSortBy] = useState('default')
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
-  const PAGE_SIZE = 12
+  const PAGE_SIZE = 15
 
-  const { data: pagedResult, isLoading } = useListings()
+  const collectionSlug = searchParams.get('collection')
+  const tagSlug = searchParams.get('tag')
+  const categorySlugFromUrl = searchParams.get('category')
+
+  const effectiveCategorySlug = selectedCategorySlug ?? categorySlugFromUrl
+
+  const { data: categories = [] } = useCategories()
+
+  const apiFilter = useMemo<ListingFilterParams>(() => {
+    const params: ListingFilterParams = {
+      PageNumber: page,
+      PageSize: 50,
+    }
+    if (collectionSlug) params.Collection = collectionSlug
+    if (tagSlug) params.Tag = tagSlug
+    if (effectiveCategorySlug) params.Category = effectiveCategorySlug
+    if (query) params.Title = query
+    const apiSort = sortValueToApiParam[sortBy]
+    if (apiSort) params.Sort = apiSort
+    return params
+  }, [effectiveCategorySlug, tagSlug, collectionSlug, query, sortBy, page])
+
+  const { data: pagedResult, isLoading } = useListings(apiFilter)
 
   const books = useMemo(() => (pagedResult?.result ?? []).map(listingToBookDisplay), [pagedResult])
 
@@ -32,35 +60,29 @@ function BrowseBooks() {
 
   useEffect(() => {
     setPage(1)
-  }, [query, genre, condition, sortBy])
+  }, [query, effectiveCategorySlug, condition, sortBy, collectionSlug, tagSlug])
 
   const openFilters = () => setShowFilters(true)
   const closeFilters = () => setShowFilters(false)
 
   const filtered = useMemo(() => {
     let result = [...books]
-    if (query) {
-      const q = query.toLowerCase()
-      result = result.filter(
-        b =>
-          (b.title && b.title.toLowerCase().includes(q)) ||
-          (b.author && b.author.toLowerCase().includes(q)),
-      )
-    }
-    if (genre !== 'All') result = result.filter(b => b.genre === genre)
     if (condition !== 'All') result = result.filter(b => b.condition === condition)
-    if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price)
-    if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price)
     return result
-  }, [query, genre, condition, sortBy, books])
+  }, [condition, books])
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const hasFilters = genre !== 'All' || condition !== 'All'
+  const hasFilters = effectiveCategorySlug !== null || condition !== 'All' || !!collectionSlug || !!tagSlug
+
+  const selectedCategoryName = useMemo(() => {
+    if (!effectiveCategorySlug) return null
+    return categories.find(c => c.slug === effectiveCategorySlug)?.name ?? effectiveCategorySlug
+  }, [effectiveCategorySlug, categories])
 
   function clearFilters() {
-    setGenre('All')
+    setSelectedCategorySlug(null)
     setCondition('All')
   }
 
@@ -299,16 +321,26 @@ function BrowseBooks() {
             {/* Active filter chips */}
             {hasFilters && (
               <div className="px-8 pb-4 flex flex-wrap gap-2 shrink-0">
-                {genre !== 'All' && (
+                {selectedCategoryName && (
                   <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-secondary text-white px-3 py-1.5 rounded-full">
-                    {genre}
-                    <button onClick={() => setGenre('All')} className="hover:opacity-70 transition-opacity"><X size={10} /></button>
+                    {selectedCategoryName}
+                    <button onClick={() => setSelectedCategorySlug(null)} className="hover:opacity-70 transition-opacity"><X size={10} /></button>
                   </span>
                 )}
                 {condition !== 'All' && (
                   <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-secondary text-white px-3 py-1.5 rounded-full">
                     {condition}
                     <button onClick={() => setCondition('All')} className="hover:opacity-70 transition-opacity"><X size={10} /></button>
+                  </span>
+                )}
+                {collectionSlug && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-secondary/70 text-white px-3 py-1.5 rounded-full">
+                    Collection: {collectionSlug}
+                  </span>
+                )}
+                {tagSlug && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-secondary/70 text-white px-3 py-1.5 rounded-full">
+                    Tag: {tagSlug}
                   </span>
                 )}
               </div>
@@ -344,20 +376,31 @@ function BrowseBooks() {
                 </div>
               </div>
 
-              {/* Genre */}
+              {/* Category */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Genre</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Category</p>
                 <div className="flex flex-col">
-                  {genres.map(g => (
+                  <button
+                    onClick={() => setSelectedCategorySlug(null)}
+                    className="flex items-center justify-between py-3.5 border-b border-main/6 group"
+                  >
+                    <span className={`text-sm transition-colors ${selectedCategorySlug === null ? 'font-semibold text-main' : 'text-main/50 group-hover:text-main'}`}>
+                      All Categories
+                    </span>
+                    {selectedCategorySlug === null && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
+                    )}
+                  </button>
+                  {categories.map(cat => (
                     <button
-                      key={g}
-                      onClick={() => setGenre(g)}
+                      key={cat.id}
+                      onClick={() => setSelectedCategorySlug(cat.slug ?? null)}
                       className="flex items-center justify-between py-3.5 border-b border-main/6 group"
                     >
-                      <span className={`text-sm transition-colors ${genre === g ? 'font-semibold text-main' : 'text-main/50 group-hover:text-main'}`}>
-                        {g}
+                      <span className={`text-sm transition-colors ${selectedCategorySlug === cat.slug ? 'font-semibold text-main' : 'text-main/50 group-hover:text-main'}`}>
+                        {cat.name}
                       </span>
-                      {genre === g && (
+                      {selectedCategorySlug === cat.slug && (
                         <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
                       )}
                     </button>

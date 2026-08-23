@@ -128,6 +128,10 @@ export interface LoginResponse {
 export type StoreFulfillmentOption = "Courier" | "Pickup" | "Both"
 export type OrderFulfillmentType = "Courier" | "Pickup"
 
+export interface CourierCoverageResponse {
+  allowedStates: string[]
+}
+
 export interface ListingResponse {
   id?: number
   title?: string | null
@@ -136,6 +140,7 @@ export interface ListingResponse {
   conditionDetail?: string | null
   loveNote?: string | null
   price?: number
+  priceOfNew?: number
   quantity?: number
   bookCondition?: BookCondition
   format?: string | null
@@ -538,6 +543,33 @@ export interface OrderDto {
   statusEvents?: OrderStatusEventResponse[] | null
 }
 
+/* ───────── Dispute tracking ───────── */
+
+export interface OrderDisputeActivityResponse {
+  ts: string
+  text: string
+}
+
+export interface OrderDisputeResponse {
+  orderId: number
+  orderNumber: string
+  disputeNumber: string
+  status: string
+  decision?: string | null
+  reason: string
+  filedBy: string
+  bookTitle: string
+  amount: number
+  delivery: string
+  evidence: string[]
+  resolution?: string | null
+  filedAt: string
+  dueAt: string
+  reviewedAt?: string | null
+  decidedAt?: string | null
+  activity: OrderDisputeActivityResponse[]
+}
+
 /* ───────── Store profiles ───────── */
 
 export interface StoreProfileResponse {
@@ -614,6 +646,57 @@ export interface UpdateStoreProfileRequest {
   favouriteAuthor?: string | null
   readMostly?: string | null
   hobbies?: string | null
+}
+
+/* ───────── User account ───────── */
+
+export interface UpdateUserRequestDto {
+  fullName?: string | null
+  nickname?: string | null
+  phoneNumber?: string | null
+}
+
+export interface UserProfileResponse {
+  userId?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  fullName?: string | null
+  userName?: string | null
+  email?: string | null
+  phoneNumber?: string | null
+  isActive?: boolean
+}
+
+/* ───────── User bank details ───────── */
+
+export interface BankResponse {
+  id: number
+  name: string
+  slug: string
+  code: string
+}
+
+export interface UserBankDetailsResponse {
+  id: number
+  bankId: number
+  bankName: string
+  accountNumber: string
+  accountName: string
+  isActive: boolean
+}
+
+export interface CreateUserBankDetailsRequest {
+  bankId: number
+  accountNumber: string
+  accountName: string
+  isActive: boolean
+}
+
+export interface UpdateUserBankDetailsRequest {
+  bankId: number
+  accountNumber: string
+  accountName: string
+  isActive: boolean
 }
 
 export interface PayoutSummaryResponse {
