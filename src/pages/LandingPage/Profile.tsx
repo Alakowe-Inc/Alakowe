@@ -4,6 +4,7 @@ import { User, CreditCard, AlertTriangle, Check, KeyRound, Eye, EyeOff, MapPin, 
 import { useAuth } from '../../context/AuthContext'
 import { savePublicSellerProfile } from '../../data/sellerData'
 import { useSellerStoreProfile, useUpdateSellerStoreProfile } from '../../lib/api/store/store.hooks'
+import { useCourierCoverage } from '../../lib/api/config/config.hooks'
 import { useChangePassword } from '../../lib/api/auth/auth.hooks'
 import { useUpdateUser, useDeleteAccount } from '../../lib/api/user/user.hooks'
 import { useBanks, useBankDetails, useCreateBankDetail, useUpdateBankDetail } from '../../lib/api/bank/bank.hooks'
@@ -136,6 +137,15 @@ export default function Profile() {
   const { data: store } = useSellerStoreProfile(!!user)
   const updateStore = useUpdateSellerStoreProfile()
 
+  const { data: courierCoverage } = useCourierCoverage()
+  const isCourierAllowed = useMemo(() => {
+    if (!courierCoverage?.allowedStates?.length) return true
+    const sellerState = profile.state || store?.state || ''
+    return courierCoverage.allowedStates.some(
+      s => s.toLowerCase() === sellerState.toLowerCase(),
+    )
+  }, [courierCoverage, profile.state, store?.state])
+
   const { data: banks } = useBanks(!!user)
   const { data: bankDetails } = useBankDetails(!!user)
   const createBank = useCreateBankDetail()
@@ -213,6 +223,18 @@ export default function Profile() {
       document.getElementById('delivery')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [store])
+
+  // Auto-switch to Pickup if seller is outside courier coverage states.
+  useEffect(() => {
+    if (!courierCoverage?.allowedStates?.length) return
+    const sellerState = profile.state || store?.state || ''
+    const inCoverage = courierCoverage.allowedStates.some(
+      s => s.toLowerCase() === sellerState.toLowerCase(),
+    )
+    if (!inCoverage && (fulfillmentOption === 'Courier' || fulfillmentOption === 'Both')) {
+      setFulfillmentOption('Pickup')
+    }
+  }, [courierCoverage, profile.state, store?.state, fulfillmentOption])
 
   const [pwOpen, setPwOpen] = useState(false)
   const [currentPw, setCurrentPw] = useState('')
@@ -663,10 +685,12 @@ export default function Profile() {
                 },
               ]).map((opt) => {
                 const active = fulfillmentOption === opt.value
+                const disabled = !isCourierAllowed && (opt.value === 'Courier' || opt.value === 'Both')
                 return (
                   <button
                     key={opt.value}
                     type="button"
+                    disabled={disabled}
                     onClick={() => {
                       resetSavedFlags()
                       setFulfillmentOption(opt.value)
@@ -676,15 +700,28 @@ export default function Profile() {
                       'text-left rounded-xl border p-4 transition-colors',
                       active
                         ? 'border-secondary bg-secondary/5 ring-1 ring-secondary/30'
-                        : 'border-main/10 hover:border-main/25',
+                        : disabled
+                          ? 'border-main/5 bg-main/[0.02] opacity-50 cursor-not-allowed'
+                          : 'border-main/10 hover:border-main/25',
                     )}
                   >
                     <p className="text-sm font-semibold text-main mb-1">{opt.title}</p>
-                    <p className="text-[11px] text-main/50 leading-relaxed">{opt.desc}</p>
+                    <p className="text-[11px] text-main/50 leading-relaxed">
+                      {disabled ? 'Coming soon to your state' : opt.desc}
+                    </p>
                   </button>
                 )
               })}
             </div>
+
+            {!isCourierAllowed && (
+              <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5">
+                <AlertTriangle size={14} className="text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-800 leading-relaxed">
+                  Courier delivery is coming soon to your state. For now, select <strong>Buyer pickup</strong> to receive orders.
+                </p>
+              </div>
+            )}
 
             {(fulfillmentOption === 'Pickup' || fulfillmentOption === 'Both') && (
               <div className="space-y-4 rounded-xl border border-main/10 bg-main/[0.02] p-4">

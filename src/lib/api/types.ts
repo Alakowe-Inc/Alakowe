@@ -128,6 +128,10 @@ export interface LoginResponse {
 export type StoreFulfillmentOption = "Courier" | "Pickup" | "Both"
 export type OrderFulfillmentType = "Courier" | "Pickup"
 
+export interface CourierCoverageResponse {
+  allowedStates: string[]
+}
+
 export interface ListingResponse {
   id?: number
   title?: string | null
