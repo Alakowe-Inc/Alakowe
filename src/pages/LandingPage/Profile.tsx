@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { User, CreditCard, AlertTriangle, Check, KeyRound, Eye, EyeOff, MapPin, Truck, BookOpen } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { savePublicSellerProfile } from '../../data/sellerData'
 import { useSellerStoreProfile, useUpdateSellerStoreProfile } from '../../lib/api/store/store.hooks'
-import type { StoreFulfillmentOption } from '../../lib/api/types'
+import { useCourierCoverage } from '../../lib/api/config/config.hooks'
+import { useChangePassword } from '../../lib/api/auth/auth.hooks'
+import { useUpdateUser, useDeleteAccount } from '../../lib/api/user/user.hooks'
+import { useBanks, useBankDetails, useCreateBankDetail, useUpdateBankDetail } from '../../lib/api/bank/bank.hooks'
+import type { StoreFulfillmentOption, UserProfileResponse } from '../../lib/api/types'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -28,16 +32,6 @@ const NIGERIAN_STATES = [
   'FCT Abuja', 'Gombe', 'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina',
   'Kebbi', 'Kogi', 'Kwara', 'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo',
   'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba', 'Yobe', 'Zamfara',
-]
-
-const NIGERIAN_BANKS = [
-  'Access Bank', 'Citibank Nigeria', 'Ecobank Nigeria', 'Fidelity Bank',
-  'First Bank of Nigeria', 'First City Monument Bank (FCMB)', 'Globus Bank',
-  'Guaranty Trust Bank (GTBank)', 'Heritage Bank', 'Keystone Bank', 'Kuda Bank',
-  'Moniepoint', 'OPay', 'Palmpay', 'Polaris Bank', 'Providus Bank',
-  'Stanbic IBTC Bank', 'Standard Chartered Bank', 'Sterling Bank',
-  'Titan Trust Bank', 'Union Bank', 'United Bank for Africa (UBA)',
-  'Unity Bank', 'Wema Bank', 'Zenith Bank',
 ]
 
 
@@ -117,17 +111,55 @@ type PickupFieldErrors = {
   consent?: string
 }
 
+function SectionSaved({ show }: { show: boolean }) {
+  if (!show) return null
+  return (
+    <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mt-4">
+      <Check size={14} className="text-green-600 shrink-0" />
+      <p className="text-sm font-semibold text-green-800">Saved successfully.</p>
+    </div>
+  )
+}
+
 export default function Profile() {
-  const { user, logout } = useAuth()
+  const { user, logout, updateUser } = useAuth()
   const navigate = useNavigate()
 
   const profileKey = user ? `alakowe_profile_${user.userId ?? user.email}` : null
 
   const [profile, setProfile] = useState<ProfileData>(defaultProfile)
-  const [saved, setSaved] = useState(false)
+  const [savedPersonal, setSavedPersonal] = useState(false)
+  const [savedReading, setSavedReading] = useState(false)
+  const [savedDelivery, setSavedDelivery] = useState(false)
+  const [savedPayout, setSavedPayout] = useState(false)
+  const [payoutError, setPayoutError] = useState('')
 
   const { data: store } = useSellerStoreProfile(!!user)
   const updateStore = useUpdateSellerStoreProfile()
+
+  const { data: courierCoverage } = useCourierCoverage()
+  const isCourierAllowed = useMemo(() => {
+    if (!courierCoverage?.allowedStates?.length) return true
+    const sellerState = profile.state || store?.state || ''
+    return courierCoverage.allowedStates.some(
+      s => s.toLowerCase() === sellerState.toLowerCase(),
+    )
+  }, [courierCoverage, profile.state, store?.state])
+
+  const { data: banks } = useBanks(!!user)
+  const { data: bankDetails } = useBankDetails(!!user)
+  const createBank = useCreateBankDetail()
+  const updateBank = useUpdateBankDetail()
+  const updateUserMutation = useUpdateUser()
+  const deleteAccount = useDeleteAccount()
+  const changePassword = useChangePassword()
+
+  const [bankDetailId, setBankDetailId] = useState<number | null>(null)
+
+  const bankOptions = useMemo(
+    () => (banks ?? []).map(b => ({ id: b.id, name: b.name })),
+    [banks],
+  )
 
   const [fulfillmentOption, setFulfillmentOption] = useState<StoreFulfillmentOption>('Courier')
   const [pickupAddressLine, setPickupAddressLine] = useState('')
@@ -172,11 +204,38 @@ export default function Profile() {
     setPickupConsent(store.pickupConsentGiven ?? false)
   }, [store])
 
+  // Hydrate payout details from the API. The bank-details API is the source of
+  // truth for the saved bank record; localStorage only fills the gap before the
+  // first save.
+  useEffect(() => {
+    if (!bankDetails?.length) return
+    const active = bankDetails.find(d => d.isActive) ?? bankDetails[0]
+    setBankDetailId(active.id)
+    setProfile(p => ({
+      ...p,
+      bankName: active.bankName || p.bankName || '',
+      accountNumber: active.accountNumber || p.accountNumber || '',
+      accountName: active.accountName || p.accountName || '',
+    }))
+  }, [bankDetails])
+
   useEffect(() => {
     if (window.location.hash === '#delivery') {
       document.getElementById('delivery')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [store])
+
+  // Auto-switch to Pickup if seller is outside courier coverage states.
+  useEffect(() => {
+    if (!courierCoverage?.allowedStates?.length) return
+    const sellerState = profile.state || store?.state || ''
+    const inCoverage = courierCoverage.allowedStates.some(
+      s => s.toLowerCase() === sellerState.toLowerCase(),
+    )
+    if (!inCoverage && (fulfillmentOption === 'Courier' || fulfillmentOption === 'Both')) {
+      setFulfillmentOption('Pickup')
+    }
+  }, [courierCoverage, profile.state, store?.state, fulfillmentOption])
 
   const [pwOpen, setPwOpen] = useState(false)
   const [currentPw, setCurrentPw] = useState('')
@@ -190,16 +249,23 @@ export default function Profile() {
 
   function set(field: keyof ProfileData) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setSaved(false)
+      resetSavedFlags()
       setProfile(p => ({ ...p, [field]: e.target.value }))
     }
   }
 
   function setSelect(field: keyof ProfileData) {
     return (value: string) => {
-      setSaved(false)
+      resetSavedFlags()
       setProfile(p => ({ ...p, [field]: value }))
     }
+  }
+
+  function resetSavedFlags() {
+    setSavedPersonal(false)
+    setSavedReading(false)
+    setSavedDelivery(false)
+    setSavedPayout(false)
   }
 
   function scrollToDelivery() {
@@ -230,29 +296,26 @@ export default function Profile() {
     return Object.keys(next).length === 0
   }
 
-  function handleSave(e: React.FormEvent) {
-    e.preventDefault()
-
-    if (!validatePickupFields()) {
-      setSaved(false)
-      scrollToDelivery()
-      return
+  function buildBankPayload(): {
+    bankId: number
+    accountNumber: string
+    accountName: string
+    isActive: boolean
+  } | null {
+    const { bankName, accountNumber, accountName } = profile
+    if (!bankName || !accountNumber || !accountName) return null
+    const bank = bankOptions.find(b => b.name === bankName)
+    if (!bank) return null
+    return {
+      bankId: bank.id,
+      accountNumber,
+      accountName,
+      isActive: true,
     }
+  }
 
-    if (profileKey) {
-      localStorage.setItem(profileKey, JSON.stringify(profile))
-    }
-    savePublicSellerProfile({
-      email: user!.email,
-      fullName: profile.fullName,
-      username: profile.username,
-      city: profile.city,
-      state: profile.state,
-      bio: profile.bio,
-    })
-    // The bio doubles as the public storefront description; city/state
-    // become the seller's public storefront location.
-    updateStore.mutate({
+  function buildStorePayload() {
+    return {
       storeName:
         store?.storeName ||
         `${profile.fullName || user!.email.split('@')[0]}'s Store`,
@@ -272,17 +335,117 @@ export default function Profile() {
       favouriteAuthor: profile.favouriteAuthor || null,
       readMostly: profile.readMostly || null,
       hobbies: profile.hobbies || null,
+    }
+  }
+
+  function persistProfileLocally() {
+    if (profileKey) {
+      localStorage.setItem(profileKey, JSON.stringify(profile))
+    }
+    savePublicSellerProfile({
+      email: user!.email,
+      fullName: profile.fullName,
+      username: profile.username,
+      city: profile.city,
+      state: profile.state,
+      bio: profile.bio,
     })
-    setSaved(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Personal info → update-user endpoint (city/state live in this card but belong
+  // to the storefront, so they're persisted to the store endpoint too).
+  async function handleSavePersonalInfo(e: React.FormEvent) {
+    e.preventDefault()
+    setPayoutError('')
+    persistProfileLocally()
+
+    let userResult: UserProfileResponse | null = null
+    const fullName =
+      profile.fullName ||
+      `${user!.firstName} ${user!.lastName}`.trim() ||
+      user!.email.split('@')[0]
+
+    try {
+      const res = await updateUserMutation.mutateAsync({
+        fullName,
+        nickname: profile.username || null,
+        phoneNumber: profile.phone || null,
+      })
+      userResult = res
+      await updateStore.mutateAsync(buildStorePayload())
+      if (userResult) {
+        updateUser({
+          firstName: userResult.firstName ?? undefined,
+          lastName: userResult.lastName ?? undefined,
+        })
+      }
+      setSavedPersonal(true)
+    } catch {
+      setSavedPersonal(false)
+    }
+  }
+
+  // Reading info → store endpoint
+  async function handleSaveReadingInfo(e: React.FormEvent) {
+    e.preventDefault()
+    setPayoutError('')
+    try {
+      await updateStore.mutateAsync(buildStorePayload())
+      setSavedReading(true)
+    } catch {
+      setSavedReading(false)
+    }
+  }
+
+  // Delivery ("How buyers get your books") → store endpoint
+  async function handleSaveDelivery(e: React.FormEvent) {
+    e.preventDefault()
+    setPayoutError('')
+    if (!validatePickupFields()) {
+      setSavedDelivery(false)
+      scrollToDelivery()
+      return
+    }
+    try {
+      await updateStore.mutateAsync(buildStorePayload())
+      setSavedDelivery(true)
+    } catch {
+      setSavedDelivery(false)
+    }
+  }
+
+  // Payout details → user-bank endpoints
+  async function handleSavePayout(e: React.FormEvent) {
+    e.preventDefault()
+    setSavedPayout(false)
+    const bankPayload = buildBankPayload()
+    if (!bankPayload) {
+      setPayoutError('Fill in your bank name, account number and account name to save payout details.')
+      return
+    }
+    setPayoutError('')
+    try {
+      if (bankDetailId != null) {
+        await updateBank.mutateAsync({ id: bankDetailId, body: bankPayload })
+      } else {
+        await createBank.mutateAsync(bankPayload)
+      }
+      setSavedPayout(true)
+    } catch {
+      setSavedPayout(false)
+    }
   }
 
   function handleDeleteAccount() {
-    logout()
-    if (profileKey) {
-      localStorage.removeItem(profileKey)
-    }
-    navigate('/')
+    deleteAccount.mutate(undefined, {
+      onSuccess: () => {
+        logout()
+        if (profileKey) {
+          localStorage.removeItem(profileKey)
+        }
+        navigate('/')
+      },
+    })
   }
 
   function handleChangePassword(e: React.FormEvent) {
@@ -296,11 +459,24 @@ export default function Profile() {
       setPwError('Passwords do not match.')
       return
     }
-    // TODO: wire up change-password API call
-    setPwSaved(true)
-    setCurrentPw('')
-    setNewPw('')
-    setConfirmPw('')
+    changePassword.mutate(
+      {
+        oldPassword: currentPw,
+        newPassword: newPw,
+        confirmNewPassword: confirmPw,
+      },
+      {
+        onSuccess: () => {
+          setPwSaved(true)
+          setCurrentPw('')
+          setNewPw('')
+          setConfirmPw('')
+        },
+        onError: (err) => {
+          setPwError(err instanceof Error ? err.message : 'Unable to update password.')
+        },
+      },
+    )
   }
 
   return (
@@ -312,17 +488,10 @@ export default function Profile() {
           <p className="text-main/50 text-sm mt-1">Manage your personal details and seller payout information.</p>
         </div>
 
-        {saved && (
-          <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-5 py-3.5 mb-6">
-            <Check size={16} className="text-green-600 shrink-0" />
-            <p className="text-sm font-semibold text-green-800">Profile saved successfully.</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSave} className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6">
 
           {/* ── Personal Info ── */}
-          <div className="bg-white rounded-2xl border border-third p-6">
+          <form onSubmit={handleSavePersonalInfo} className="bg-white rounded-2xl border border-third p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
                 <User size={15} className="text-secondary" />
@@ -397,10 +566,18 @@ export default function Profile() {
                 </Field>
               </div>
             </div>
-          </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-secondary text-white font-semibold h-auto py-3.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm mt-5"
+            >
+              Save Personal Info
+            </Button>
+            <SectionSaved show={savedPersonal} />
+          </form>
 
           {/* ── Reading Info ── */}
-          <div className="bg-white rounded-2xl border border-third p-6">
+          <form onSubmit={handleSaveReadingInfo} className="bg-white rounded-2xl border border-third p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
                 <BookOpen size={15} className="text-secondary" />
@@ -468,10 +645,18 @@ export default function Profile() {
                 </Field>
               </div>
             </div>
-          </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-secondary text-white font-semibold h-auto py-3.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm mt-5"
+            >
+              Save Reading Info
+            </Button>
+            <SectionSaved show={savedReading} />
+          </form>
 
           {/* ── How buyers get your books ── */}
-          <div id="delivery" className="bg-white rounded-2xl border border-third p-6 scroll-mt-24">
+          <form id="delivery" onSubmit={handleSaveDelivery} className="bg-white rounded-2xl border border-third p-6 scroll-mt-24">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
                 <Truck size={15} className="text-secondary" />
@@ -501,12 +686,14 @@ export default function Profile() {
                 },
               ]).map((opt) => {
                 const active = fulfillmentOption === opt.value
+                const disabled = !isCourierAllowed && (opt.value === 'Courier' || opt.value === 'Both')
                 return (
                   <button
                     key={opt.value}
                     type="button"
+                    disabled={disabled}
                     onClick={() => {
-                      setSaved(false)
+                      resetSavedFlags()
                       setFulfillmentOption(opt.value)
                       if (opt.value === 'Courier') setPickupErrors({})
                     }}
@@ -514,15 +701,28 @@ export default function Profile() {
                       'text-left rounded-xl border p-4 transition-colors',
                       active
                         ? 'border-secondary bg-secondary/5 ring-1 ring-secondary/30'
-                        : 'border-main/10 hover:border-main/25',
+                        : disabled
+                          ? 'border-main/5 bg-main/[0.02] opacity-50 cursor-not-allowed'
+                          : 'border-main/10 hover:border-main/25',
                     )}
                   >
                     <p className="text-sm font-semibold text-main mb-1">{opt.title}</p>
-                    <p className="text-[11px] text-main/50 leading-relaxed">{opt.desc}</p>
+                    <p className="text-[11px] text-main/50 leading-relaxed">
+                      {disabled ? 'Coming soon to your state' : opt.desc}
+                    </p>
                   </button>
                 )
               })}
             </div>
+
+            {!isCourierAllowed && (
+              <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5">
+                <AlertTriangle size={14} className="text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-800 leading-relaxed">
+                  Courier delivery is coming soon to your state. For now, select <strong>Buyer pickup</strong> to receive orders.
+                </p>
+              </div>
+            )}
 
             {(fulfillmentOption === 'Pickup' || fulfillmentOption === 'Both') && (
               <div className="space-y-4 rounded-xl border border-main/10 bg-main/[0.02] p-4">
@@ -533,7 +733,7 @@ export default function Profile() {
                     placeholder="e.g. 12 Admiralty Way, Lekki Phase 1"
                     value={pickupAddressLine}
                     onChange={(e) => {
-                      setSaved(false)
+                      resetSavedFlags()
                       setPickupAddressLine(e.target.value)
                       if (pickupErrors.addressLine) {
                         setPickupErrors((prev) => ({ ...prev, addressLine: undefined }))
@@ -550,7 +750,7 @@ export default function Profile() {
                       placeholder="e.g. Lagos"
                       value={pickupCity}
                       onChange={(e) => {
-                        setSaved(false)
+                        resetSavedFlags()
                         setPickupCity(e.target.value)
                         if (pickupErrors.city) {
                           setPickupErrors((prev) => ({ ...prev, city: undefined }))
@@ -564,7 +764,7 @@ export default function Profile() {
                     <Select
                       value={pickupState}
                       onValueChange={(v) => {
-                        setSaved(false)
+                        resetSavedFlags()
                         setPickupState(v)
                         if (pickupErrors.state) {
                           setPickupErrors((prev) => ({ ...prev, state: undefined }))
@@ -595,7 +795,7 @@ export default function Profile() {
                       type="checkbox"
                       checked={pickupConsent}
                       onChange={(e) => {
-                        setSaved(false)
+                        resetSavedFlags()
                         setPickupConsent(e.target.checked)
                         if (pickupErrors.consent) {
                           setPickupErrors((prev) => ({ ...prev, consent: undefined }))
@@ -608,7 +808,7 @@ export default function Profile() {
                       aria-invalid={!!pickupErrors.consent}
                     />
                     <span className="text-xs text-main/65 leading-relaxed block">
-                      I understand that if I choose Buyer Pickup, my pickup address will be visible on my listing and my phone number will be shared with the buyer after payment.<br />
+                      I understand that my address will be visible on my listing and my phone number will be shared with the buyer after payment. I am responsible for handing over the book to the buyer at the pickup address I provide.<br />
                       {!showFullConsent ? (
                         <button
                           type="button"
@@ -634,6 +834,7 @@ export default function Profile() {
                         </span>
                       )}
                     </span>
+                    
                   </label>
                   {pickupErrors.consent ? (
                     <p className="text-xs text-red-500 mt-1.5 ml-6">{pickupErrors.consent}</p>
@@ -641,10 +842,18 @@ export default function Profile() {
                 </div>
               </div>
             )}
-          </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-secondary text-white font-semibold h-auto py-3.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm mt-5"
+            >
+              Save Delivery Settings
+            </Button>
+            <SectionSaved show={savedDelivery} />
+          </form>
 
           {/* ── Payout Info ── */}
-          <div className="bg-white rounded-2xl border border-third p-6">
+          <form onSubmit={handleSavePayout} className="bg-white rounded-2xl border border-third p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
                 <CreditCard size={15} className="text-secondary" />
@@ -663,8 +872,8 @@ export default function Profile() {
                       <SelectValue placeholder="Select your bank" />
                     </SelectTrigger>
                     <SelectContent>
-                      {NIGERIAN_BANKS.map(b => (
-                        <SelectItem key={b} value={b}>{b}</SelectItem>
+                      {bankOptions.map(b => (
+                        <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -695,14 +904,19 @@ export default function Profile() {
                 />
               </Field>
             </div>
-          </div>
 
-          <Button
-            type="submit"
-            className="w-full bg-secondary text-white font-semibold h-auto py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm"
-          >
-            Save Changes
-          </Button>
+            {payoutError && (
+              <p className="text-sm text-red-600 font-medium mt-4">{payoutError}</p>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-secondary text-white font-semibold h-auto py-3.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm mt-4"
+            >
+              Save Payout Details
+            </Button>
+            <SectionSaved show={savedPayout} />
+          </form>
 
           {/* Shipping addresses link */}
           <div className="mt-6">
@@ -714,7 +928,7 @@ export default function Profile() {
             </Link>
           </div>
 
-        </form>
+        </div>
 
         {/* ── Change Password ── */}
         <div className="bg-white rounded-2xl border border-third p-6 mt-6">
@@ -777,7 +991,7 @@ export default function Profile() {
 
               <Button
                 type="submit"
-                className="w-full bg-secondary text-white font-semibold h-auto py-3.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm"
+                className="w-full bg-secondary text-white font-semibold h-auto py-3.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm mt-5"
               >
                 Update Password
               </Button>

@@ -10,6 +10,7 @@ import {
   setDiscountApi,
   getMyListingSummaryApi,
   getLandingPageApi,
+  getCategoriesApi,
   type ListingFilterParams,
   type MyListingsFilterParams,
 } from "./listings.api"
@@ -21,6 +22,7 @@ import type {
   SetListingDiscountRequest,
   MyListingSummaryResponse,
   LandingPageResponse,
+  CategoryResponse,
 } from "../types"
 
 type SubmitListingBody = SubmitListingRequestDto
@@ -141,5 +143,15 @@ export function useLandingPage() {
   return useQuery({
     queryKey: ["landing-page"],
     queryFn: () => withMock({ sections: [] }, () => getLandingPageApi()),
+  })
+}
+
+const mockCategories: CategoryResponse[] = []
+
+export function useCategories() {
+  return useQuery({
+    queryKey: ["categories"],
+    queryFn: () => withMock(mockCategories, () => getCategoriesApi()),
+    staleTime: 30 * 60 * 1000,
   })
 }

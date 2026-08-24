@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   confirmOrderDeliveryApi,
   getOrderByIdApi,
+  getOrderDisputeApi,
   getOrdersByUserApi,
   getSellerPayoutSummaryApi,
   getSellerSalesApi,
@@ -21,6 +22,15 @@ export function useOrder(orderId: number) {
     queryKey: ["orders", orderId],
     queryFn: () => getOrderByIdApi(orderId),
     enabled: Number.isInteger(orderId) && orderId > 0,
+  })
+}
+
+export function useOrderDispute(orderId: number, enabled = true) {
+  return useQuery({
+    queryKey: ["orders", orderId, "dispute"],
+    queryFn: () => getOrderDisputeApi(orderId),
+    enabled: enabled && Number.isInteger(orderId) && orderId > 0,
+    retry: false,
   })
 }
 

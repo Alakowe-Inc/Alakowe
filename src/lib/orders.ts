@@ -11,6 +11,8 @@ export type DisplayOrderStatus =
   | "delivered"
   | "confirmed"
   | "disputed"
+  | "cancelled"
+  | "resolved"
 
 export const ORDER_STATUS_LABELS: Record<DisplayOrderStatus, string> = {
   payment_received: "Payment Received",
@@ -23,6 +25,8 @@ export const ORDER_STATUS_LABELS: Record<DisplayOrderStatus, string> = {
   delivered: "Delivered",
   confirmed: "Delivery Confirmed",
   disputed: "Dispute Open",
+  cancelled: "Cancelled",
+  resolved: "Dispute Resolved",
 }
 
 export const ORDER_STATUS_DESCRIPTIONS: Record<DisplayOrderStatus, string> = {
@@ -36,6 +40,8 @@ export const ORDER_STATUS_DESCRIPTIONS: Record<DisplayOrderStatus, string> = {
   delivered: "Your book has been delivered.",
   confirmed: "Delivery has been confirmed.",
   disputed: "A dispute has been opened for this order. Your payment stays in escrow until it's resolved.",
+  cancelled: "This order was cancelled. If it was cancelled after a dispute, the buyer's payment was refunded.",
+  resolved: "The dispute on this order has been resolved.",
 }
 
 export const ORDER_STATUSES: DisplayOrderStatus[] = [
@@ -49,6 +55,8 @@ export const ORDER_STATUSES: DisplayOrderStatus[] = [
   "delivered",
   "confirmed",
   "disputed",
+  "cancelled",
+  "resolved",
 ]
 
 /** Backend uses PascalCase (e.g. OutForDelivery); timeline keys use snake_case. */
@@ -115,7 +123,7 @@ export function normalizeOrderStatus(status?: string | null): DisplayOrderStatus
 
     case "cancelled":
     case "canceled":
-      return "awaiting_seller"
+      return "cancelled"
 
     default:
       break
@@ -135,6 +143,8 @@ export type SellerSaleDisplayStatus =
   | "dispatched"
   | "delivered"
   | "confirmed"
+  | "disputed"
+  | "cancelled"
 
 /** Seller-facing subset of the buyer timeline (same backend status strings). */
 export function normalizeSellerSaleStatus(sale: {
@@ -172,6 +182,10 @@ export function normalizeSellerSaleStatus(sale: {
       return "delivered"
     case "confirmed":
       return "confirmed"
+    case "disputed":
+      return "disputed"
+    case "cancelled":
+      return "cancelled"
     default:
       return "awaiting_seller"
   }
@@ -281,4 +295,45 @@ export function getOrderDeliveryAddress(order: OrderDto): {
     state: address?.state?.trim() || order.shippingStateName?.trim() || "",
     phone: address?.phone?.trim() || "",
   }
+}
+
+export type ResolutionTone = "good" | "bad" | "neutral"
+
+export function decisionLabel(decision: string): string {
+  switch (decision) {
+    case "RefundBuyer":
+      return "Refunded to buyer"
+    case "RuleForSeller":
+      return "Ruled for seller"
+    case "Close":
+      return "Dispute closed"
+    default:
+      return "Resolved"
+  }
+}
+
+export function resolutionSummary(decision: string, isBuyer: boolean): string {
+  switch (decision) {
+    case "RefundBuyer":
+      return isBuyer
+        ? "The dispute was resolved in your favour — your payment has been refunded and the order cancelled."
+        : "This dispute was resolved in the buyer’s favour — the payment was refunded, so this sale has no payout."
+    case "RuleForSeller":
+      return isBuyer
+        ? "Your dispute was reviewed and resolved in the seller’s favour — the order is complete."
+        : "The dispute was resolved in your favour — the payment has been released to you. You can request your payout."
+    case "Close":
+      return "The dispute was closed without a ruling and the order returned to normal."
+    default:
+      return "The dispute on this order has been resolved."
+  }
+}
+
+export function resolutionTone(
+  decision: string,
+  isBuyer: boolean,
+): ResolutionTone {
+  if (decision === "RefundBuyer") return isBuyer ? "good" : "bad"
+  if (decision === "RuleForSeller") return isBuyer ? "bad" : "good"
+  return "neutral"
 }

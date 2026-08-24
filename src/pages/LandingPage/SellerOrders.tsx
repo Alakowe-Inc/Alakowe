@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Clock, CheckCircle, Truck, Package, AlertCircle, Wallet } from 'lucide-react'
+import { ArrowLeft, Clock, CheckCircle, Truck, Package, AlertCircle, ShieldAlert, Wallet, XCircle } from 'lucide-react'
 import { useRequestSellerPayout, useSellerSales } from '../../lib/api/orders/orders.hooks'
 import { moneyInNaira, normalizeSellerSaleStatus, type SellerSaleDisplayStatus } from '../../lib/orders'
 import type { SellerSaleResponse } from '../../lib/api/types'
@@ -37,6 +37,16 @@ const STATUS_CONFIG: Record<SellerSaleDisplayStatus, { label: string; class: str
     label: 'Buyer Confirmed',
     class: 'bg-green-50 text-green-700 border border-green-200',
     icon: CheckCircle,
+  },
+  disputed: {
+    label: 'Dispute Open',
+    class: 'bg-red-50 text-red-700 border border-red-200',
+    icon: ShieldAlert,
+  },
+  cancelled: {
+    label: 'Order Cancelled',
+    class: 'bg-gray-50 text-gray-600 border border-gray-200',
+    icon: XCircle,
   },
 }
 
@@ -189,12 +199,21 @@ export default function SellerOrders() {
                       <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.class}`}>
                         <Icon size={11} /> {cfg.label}
                       </span>
-                      <Link
-                        to={`/order/${sale.orderId}`}
-                        className="text-xs font-semibold text-secondary hover:underline"
-                      >
-                        Track Order
-                      </Link>
+                      {status === 'disputed' ? (
+                        <Link
+                          to={`/order/${sale.orderId}/dispute/track`}
+                          className="text-xs font-semibold text-red-600 hover:underline"
+                        >
+                          View Dispute
+                        </Link>
+                      ) : (
+                        <Link
+                          to={`/order/${sale.orderId}`}
+                          className="text-xs font-semibold text-secondary hover:underline"
+                        >
+                          Track Order
+                        </Link>
+                      )}
                     </div>
                   </div>
 
@@ -207,10 +226,26 @@ export default function SellerOrders() {
                       <p className="text-xs text-main/40 mb-0.5">Platform Fee</p>
                       <p className="font-semibold text-main/55">−₦{moneyInNaira(sale.platformFee).toLocaleString()}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-main/40 mb-0.5">Your Payout</p>
-                      <p className="font-heading font-bold text-main">₦{moneyInNaira(sale.sellerPayout).toLocaleString()}</p>
-                    </div>
+                    {status === 'cancelled' ? (
+                      <div>
+                        <p className="text-xs text-main/40 mb-0.5">Payout</p>
+                        <p className="font-semibold text-red-600 flex items-center gap-1.5">
+                          <XCircle size={13} /> No payout
+                        </p>
+                      </div>
+                    ) : status === 'disputed' ? (
+                      <div>
+                        <p className="text-xs text-main/40 mb-0.5">Your Payout</p>
+                        <p className="font-semibold text-yellow-700 flex items-center gap-1.5">
+                          <Clock size={13} /> Held in escrow
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-xs text-main/40 mb-0.5">Your Payout</p>
+                        <p className="font-heading font-bold text-main">₦{moneyInNaira(sale.sellerPayout).toLocaleString()}</p>
+                      </div>
+                    )}
                     {status === 'awaiting_seller' && (
                       <div className="ml-auto">
                         {pickup ? (

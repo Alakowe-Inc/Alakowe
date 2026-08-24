@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Upload, CheckCircle, Package, X } from 'lucide-react'
+import { ArrowLeft, Upload, CheckCircle, Package, ShieldAlert, X } from 'lucide-react'
 import { RadioInput, FileUpload, TextareaControl } from '@/components/ui/form-controls'
 import { useConfirmOrderDelivery, useOrder } from '../../lib/api/orders/orders.hooks'
 import { useAuth } from '../../context/AuthContext'
 import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
+import { normalizeOrderStatus } from '../../lib/orders'
 
 const ISSUE_TYPES = [
   'Wrong book received',
@@ -147,8 +148,14 @@ function Dispute() {
             )}
           </div>
           <Link
-            to={`/order/${orderId}`}
+            to={`/order/${orderId}/dispute/track`}
             className="inline-block bg-secondary text-white font-semibold px-8 py-3.5 rounded-xl text-sm hover:bg-secondary/90 transition-colors"
+          >
+            Track Dispute
+          </Link>
+          <Link
+            to={`/order/${orderId}`}
+            className="inline-block border border-main/15 text-main font-semibold px-8 py-3.5 rounded-xl text-sm hover:border-secondary/40 hover:text-secondary transition-colors mt-3"
           >
             Back to Order
           </Link>
@@ -189,6 +196,38 @@ function Dispute() {
   }
 
   const isBuyer = !!user?.userId && user.userId === String(order.userId)
+
+  /* ── Already-open guard: route buyers to tracking instead of re-filing ── */
+  if (normalizeOrderStatus(order.status) === 'disputed') {
+    return (
+      <div className="bg-third min-h-screen">
+        <div className="max-w-2xl mx-auto px-4 md:px-6 py-10">
+          <Link
+            to={`/order/${orderId}`}
+            className="inline-flex items-center gap-2 text-sm text-main/55 hover:text-main mb-8 transition-colors font-medium"
+          >
+            <ArrowLeft size={15} /> Back to Order
+          </Link>
+          <div className="bg-red-50 border border-red-200 rounded-2xl px-6 py-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-5">
+              <ShieldAlert size={28} className="text-red-600" />
+            </div>
+            <h1 className="font-heading font-bold text-main text-xl mb-2">Dispute already open</h1>
+            <p className="text-main/55 text-sm mb-6 max-w-sm mx-auto leading-relaxed">
+              You already have an active dispute for this order. Your payment stays in escrow while
+              our support team reviews it.
+            </p>
+            <Link
+              to={`/order/${orderId}/dispute/track`}
+              className="inline-block bg-secondary text-white font-semibold px-8 py-3.5 rounded-xl text-sm hover:bg-secondary/90 transition-colors"
+            >
+              Track Dispute
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   /* ── Form ── */
   return (

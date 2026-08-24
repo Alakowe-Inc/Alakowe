@@ -15,6 +15,7 @@ interface AuthContextValue {
   user: User | null
   login: (email: string, password: string) => Promise<void>
   logout: () => void
+  updateUser: (updates: Partial<Pick<User, 'firstName' | 'lastName'>>) => void
   isLoading: boolean
 }
 
@@ -70,8 +71,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.clear()
   }
 
+  function updateUser(updates: Partial<Pick<User, 'firstName' | 'lastName'>>) {
+    setUser(prev => {
+      if (!prev) return prev
+      const next = { ...prev, ...updates }
+      localStorage.setItem(AUTH_KEY, JSON.stringify(next))
+      return next
+    })
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading: loginMutation.isPending }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, isLoading: loginMutation.isPending }}>
       {children}
     </AuthContext.Provider>
   )

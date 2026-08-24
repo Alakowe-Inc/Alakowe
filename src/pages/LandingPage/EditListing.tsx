@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Heart, Upload, X, CheckCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { useListing, useEditListing } from '../../lib/api/listings/listings.hooks'
+import { useMyListing, useEditListing } from '../../lib/api/listings/listings.hooks'
 import { useSellerStoreProfile } from '../../lib/api/store/store.hooks'
 import { useCategories } from '../../lib/api/categories/categories.hooks'
 import { useTags } from '../../lib/api/tags/tags.hooks'
@@ -50,7 +50,7 @@ export default function EditListing() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { data: listing } = useListing(Number(id))
+  const { data: listing } = useMyListing(Number(id))
   const { data: storeProfile } = useSellerStoreProfile(!!user)
   const editListing = useEditListing()
   const { data: categories } = useCategories()

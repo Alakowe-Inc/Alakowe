@@ -37,6 +37,7 @@ export interface BookDisplay {
   quantity: number
   price: number
   originalPrice: number
+  originalPriceOfNew?: number
   discount?: number
   isDiscountApplied?: boolean
   coverColor: string
@@ -92,6 +93,7 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
   const originalPrice = hasDiscount
     ? Math.round(buyersPriceInNaira / (1 - discountPct / 100))
     : buyersPriceInNaira
+  const originalPriceOfNew = listing.priceOfNew ? Math.round(listing.priceOfNew / 100) : undefined
 
   return {
     id: String(listing.id ?? ""),
@@ -102,6 +104,7 @@ export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
     quantity: listing.quantity ?? 1,
     price: buyersPriceInNaira,
     originalPrice,
+    originalPriceOfNew,
     discount: discountPct,
     isDiscountApplied: listing.isDiscountApplied ?? false,
     coverColor: pickColor(listing.id),

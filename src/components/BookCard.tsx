@@ -20,6 +20,8 @@ export interface BookCardData {
   discount?: number
   isDiscountApplied?: boolean
   sellerRating?: number
+  location?: string
+  originalPriceOfNew?: number
 }
 
 interface BookCardProps {
@@ -136,9 +138,16 @@ function BookCard({ book }: BookCardProps) {
 
         {/* Price and Cart Row */}
         <div className="flex items-center justify-between mt-2">
-          <span className="text-sm font-bold text-main">
-            {formatPrice(book.price)}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-bold text-main">
+              {formatPrice(book.price)}
+            </span>
+            {book.originalPriceOfNew != null && book.originalPriceOfNew > 0 && book.originalPriceOfNew !== book.price && (
+              <span className="text-[10px] text-main/40 line-through">
+                {formatPrice(book.originalPriceOfNew)}
+              </span>
+            )}
+          </div>
           <button
             className="w-8 h-8 rounded-full bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-colors duration-300 flex items-center justify-center"
             onClick={(e) => {

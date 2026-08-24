@@ -1,7 +1,8 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { CheckCircle, Circle, ExternalLink, MapPin, Package, Copy, ClipboardCheck, ShieldAlert, Phone } from 'lucide-react'
+import { CheckCircle, Circle, ExternalLink, Info, MapPin, Package, Copy, ClipboardCheck, ShieldAlert, Phone } from 'lucide-react'
 import { useState } from 'react'
 import {
+  decisionLabel,
   formatPickupPreferredDates,
   getOrderDeliveryAddress,
   isPickupOrder,
@@ -11,6 +12,8 @@ import {
   orderStatusLabel,
   orderTotalInNaira,
   pickupMapsUrl,
+  resolutionSummary,
+  resolutionTone,
   sellerDisplayName,
 } from '../../lib/orders'
 import type { DisplayOrderStatus } from '../../lib/orders'
@@ -63,7 +66,27 @@ function WaybillFootnote({
   )
 }
 
-type EventNote = { waybillNumber?: string; courier?: string; leg?: string; reason?: string; imageFileNames?: string[] }
+type EventNote = {
+  waybillNumber?: string
+  courier?: string
+  leg?: string
+  reason?: string
+  filedBy?: string
+  imageFileNames?: string[]
+  decision?: string
+  resolution?: string
+  decidedBy?: string
+  decidedAt?: string
+}
+
+type ResolutionInfo = {
+  decision: string
+  resolution?: string
+  decidedBy?: string
+  decidedAt?: string
+  status: string
+  occurredAt?: string | null
+}
 
 function parseEventNote(note?: string | null): EventNote | null {
   if (!note) return null
@@ -82,6 +105,54 @@ function formatTimestamp(iso: string): string {
   const day = date.toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })
   const time = date.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })
   return `${day}, ${time}`
+}
+
+function DisputeResolutionBanner({
+  info,
+  isBuyer,
+  orderId,
+}: {
+  info: ResolutionInfo
+  isBuyer: boolean
+  orderId: number
+}) {
+  const tone = resolutionTone(info.decision, isBuyer)
+  const cls =
+    tone === 'good'
+      ? 'bg-green-50 border-green-200'
+      : tone === 'bad'
+        ? 'bg-red-50 border-red-200'
+        : 'bg-white border-third'
+  const Icon =
+    tone === 'good' ? CheckCircle : tone === 'bad' ? ShieldAlert : Info
+  const iconColor =
+    tone === 'good' ? 'text-green-600' : tone === 'bad' ? 'text-red-600' : 'text-secondary'
+
+  return (
+    <div className={`rounded-2xl px-5 py-4 mb-8 flex items-start gap-3 border ${cls}`}>
+      <Icon size={16} className={`${iconColor} shrink-0 mt-0.5`} />
+      <div>
+        <p className="text-sm font-semibold text-main mb-0.5">
+          Dispute resolved — {decisionLabel(info.decision)}
+        </p>
+        <p className="text-sm text-main/70 leading-relaxed">
+          {resolutionSummary(info.decision, isBuyer)}
+        </p>
+        {info.resolution && (
+          <p className="text-xs text-main/55 mt-2 leading-relaxed">“{info.resolution}”</p>
+        )}
+        {info.decidedAt && (
+          <p className="text-xs text-main/40 mt-1">Decided {formatTimestamp(info.decidedAt)}</p>
+        )}
+        <Link
+          to={`/order/${orderId}/dispute/track`}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-secondary underline underline-offset-2 mt-2 hover:text-secondary/80 transition-colors"
+        >
+          View dispute record
+        </Link>
+      </div>
+    </div>
+  )
 }
 
 function ConfirmDeliveryCard({ order }: { order: OrderDto }) {
@@ -185,21 +256,41 @@ function OrderStatusPage() {
 
   const stepExtras = new Map<DisplayOrderStatus, EventNote | null>()
   const stepTimestamps = new Map<DisplayOrderStatus, string>()
+  let resolutionInfo: ResolutionInfo | null = null
   events.forEach(evt => {
     const key = normalizeOrderStatus(evt.status)
     const note = parseEventNote(evt.note)
-    if (note) stepExtras.set(key, note)
+    if (note?.decision) {
+      resolutionInfo = {
+        decision: note.decision,
+        resolution: note.resolution,
+        decidedBy: note.decidedBy,
+        decidedAt: note.decidedAt,
+        status: evt.status,
+        occurredAt: evt.occurredAt,
+      }
+    } else if (note) {
+      stepExtras.set(key, note)
+    }
     const ts = formatTimestamp(evt.occurredAt)
     if (ts) stepTimestamps.set(key, ts)
   })
 
-  const steps: DisplayOrderStatus[] = disputed ? [...pipeline, 'disputed'] : pipeline
+  const hadDispute =
+    disputed ||
+    resolutionInfo !== null ||
+    events.some(e => normalizeOrderStatus(e.status) === 'disputed')
 
-  let currentIndex = pipeline.indexOf(status)
-  if (disputed) {
-    currentIndex = pipeline.length
-  } else if (currentIndex < 0) {
-    currentIndex = pipeline.length - 1
+  const steps: DisplayOrderStatus[] = [
+    ...pipeline,
+    ...(hadDispute ? ['disputed'] : []),
+    ...(resolutionInfo ? ['resolved'] : []),
+  ]
+
+  let currentIndex = steps.length - 1
+  if (!resolutionInfo && !disputed) {
+    currentIndex = pipeline.indexOf(status)
+    if (currentIndex < 0) currentIndex = pipeline.length - 1
   }
 
   return (
@@ -231,7 +322,7 @@ function OrderStatusPage() {
           <p className="text-main/55 text-sm mt-0.5">
             {orderStatusDescription(status, order.fulfillmentType)}
           </p>
-          {pickup && order.pickupCode && status !== 'delivered' && status !== 'confirmed' && status !== 'disputed' && (
+          {pickup && order.pickupCode && status !== 'delivered' && status !== 'confirmed' && status !== 'disputed' && status !== 'cancelled' && (
             <p className="mt-3 text-sm text-main">
               Pickup code:{' '}
               <span className="font-mono font-bold tracking-widest text-lg">{order.pickupCode}</span>
@@ -255,12 +346,22 @@ function OrderStatusPage() {
         {status === 'disputed' && (
           <div className="bg-red-50 border border-red-200 rounded-2xl px-5 py-4 mb-8 flex items-start gap-3">
             <ShieldAlert size={16} className="text-red-600 shrink-0 mt-0.5" />
-            <p className="text-sm text-red-800 leading-relaxed">
-              A dispute has been opened for this order. Your payment is held in escrow while we
-              investigate — we'll get back to you within 24–48 hours.
-            </p>
+            <div className="flex-1">
+              <p className="text-sm text-red-800 leading-relaxed">
+                A dispute has been opened for this order. Your payment is held in escrow while we
+                investigate — we'll get back to you within 24–48 hours.
+              </p>
+              <Link
+                to={`/order/${order.id}/dispute/track`}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-700 underline underline-offset-2 mt-2 hover:text-red-800 transition-colors"
+              >
+                Track dispute
+              </Link>
+            </div>
           </div>
         )}
+
+        {resolutionInfo && <DisputeResolutionBanner info={resolutionInfo} isBuyer={isBuyer} orderId={order.id} />}
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
 
@@ -270,14 +371,21 @@ function OrderStatusPage() {
               <div>
                 {steps.map((stepKey, i) => {
                   const isLast = i === steps.length - 1
-                  const isDisputeStep = disputed && i === steps.length - 1
-                  const isComplete = disputed ? i < steps.length - 1 : i < currentIndex
-                  const isActive = disputed ? i === steps.length - 1 : i === currentIndex
+                  const isDisputeStep = stepKey === 'disputed'
+                  const isResolvedStep = stepKey === 'resolved'
+                  const isComplete = i < currentIndex
+                  const isActive = i === currentIndex
                   const isUpcoming = !isComplete && !isActive
                   const note = isDisputeStep
                     ? stepExtras.get('disputed')
                     : stepExtras.get(stepKey)
-                  const timestamp = isDisputeStep ? '' : stepTimestamps.get(stepKey) ?? ''
+                  const timestamp = isResolvedStep
+                    ? resolutionInfo?.decidedAt
+                      ? formatTimestamp(resolutionInfo.decidedAt)
+                      : stepTimestamps.get(stepKey) ?? ''
+                    : isDisputeStep
+                      ? ''
+                      : stepTimestamps.get(stepKey) ?? ''
 
                   return (
                     <div key={`${stepKey}-${i}`} className="flex items-start gap-4">
@@ -329,7 +437,7 @@ function OrderStatusPage() {
                             {timestamp}
                           </p>
                         )}
-                        {(isActive || isUpcoming) && (
+                        {(isActive || isUpcoming) && !isResolvedStep && (
                           <p
                             className={`text-xs mt-0.5 leading-relaxed ${
                               isActive ? 'text-main/45' : 'text-main/25'
@@ -340,6 +448,21 @@ function OrderStatusPage() {
                         )}
                         {isComplete && (
                           <p className="text-xs text-green-600/70 mt-0.5">Completed</p>
+                        )}
+                        {isResolvedStep && resolutionInfo && (
+                          <p className="text-xs font-semibold text-secondary mt-1">
+                            {decisionLabel(resolutionInfo.decision)}
+                          </p>
+                        )}
+                        {isResolvedStep && resolutionInfo && (
+                          <p className="text-xs text-main/55 mt-1 leading-relaxed">
+                            {resolutionSummary(resolutionInfo.decision, isBuyer)}
+                          </p>
+                        )}
+                        {isResolvedStep && resolutionInfo?.resolution && (
+                          <p className="text-xs text-main/45 mt-1 leading-relaxed">
+                            “{resolutionInfo.resolution}”
+                          </p>
                         )}
                         {note?.waybillNumber && (
                           <WaybillFootnote

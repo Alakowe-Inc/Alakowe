@@ -76,10 +76,11 @@ function BookDetail() {
     )
   }
 
-  // Calculate pricing comparison math to match new/used savings layout
-  const brandNewPrice = book.originalPrice > book.price ? book.originalPrice : Math.round(book.price * 2.4)
-  const savings = brandNewPrice - book.price
-  const savingsPercent = Math.round((savings / brandNewPrice) * 100)
+  // Calculate savings when a brand-new price is available
+  const brandNewPrice = book.originalPriceOfNew
+  const hasNewPrice = brandNewPrice != null && brandNewPrice > 0 && brandNewPrice !== book.price
+  const savings = hasNewPrice ? brandNewPrice - book.price : 0
+  const savingsPercent = hasNewPrice ? Math.round((savings / brandNewPrice) * 100) : 0
 
   return (
     <div className="bg-white min-h-screen">
@@ -365,12 +366,14 @@ function BookDetail() {
             <div className="border border-main/10 rounded-2xl p-5 bg-white shadow-sm mb-4">
               <div className="mb-4">
                 <div className="text-2xl font-extrabold text-main">{formatPrice(book.price)}</div>
-                <div className="flex items-center gap-2 mt-1 text-[11px] flex-wrap">
-                  <span className="text-main/45 line-through">New price: {formatPrice(brandNewPrice)}</span>
-                  <span className="text-secondary font-semibold">
-                    You save: {formatPrice(savings)} ({savingsPercent}%)
-                  </span>
-                </div>
+                {hasNewPrice && (
+                  <div className="flex items-center gap-2 mt-1 text-[11px] flex-wrap">
+                    <span className="text-main/45 line-through">New price: {formatPrice(brandNewPrice!)}</span>
+                    <span className="text-secondary font-semibold">
+                      You save: {formatPrice(savings)} ({savingsPercent}%)
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}

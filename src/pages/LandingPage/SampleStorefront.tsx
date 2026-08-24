@@ -23,36 +23,37 @@ export default function SampleStorefront() {
     hobbies: ["Journaling", "Coffee Tasting", "Podcasts", "Gardening"],
   }
 
-  const whatsappImages = [
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.09%20(1).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.09.jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.10%20(1).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.10%20(2).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.10.jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.11%20(1).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.11%20(2).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.11%20(3).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.11%20(4).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.11.jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.12%20(1).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.12%20(2).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.12%20(3).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.12.jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.13%20(1).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.13%20(2).jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.13.jpeg",
-    "/WhatsApp%20Image%202026-08-20%20at%2015.40.14.jpeg"
+  const localBooksData = [
+    { title: "1st Case", filename: "1st Case.jpeg" },
+    { title: "Dear Ijeawele", filename: "Dear Ijeawele.jpeg" },
+    { title: "Face Me", filename: "Face Me.jpeg" },
+    { title: "Formation", filename: "Formation.jpeg" },
+    { title: "Funny Men Cannot Be Trusted", filename: "Funny Men Cannot Be Trusted.jpeg" },
+    { title: "Gray Mountain", filename: "Gray Mountain.jpeg" },
+    { title: "Ikigai", filename: "Ikigai.jpeg" },
+    { title: "My Sister", filename: "My Sister.jpeg" },
+    { title: "Nearly all the men in lagos are mad", filename: "Nearly all the men in lagos are mad.jpeg" },
+    { title: "Rich Dad Poor Dad", filename: "Rich Dad Poor Dad.jpeg" },
+    { title: "Sparring Partners", filename: "Sparring Partners.jpeg" },
+    { title: "The Boys From Biloxi", filename: "The Boys From Biloxi.jpeg" },
+    { title: "The Light We Carry", filename: "The Light We Carry.jpeg" },
+    { title: "The Psychology of money", filename: "The Psychology of money.jpeg" },
+    { title: "The Righteous may fall seven times", filename: "The Righteous may fall seven times.jpeg" }
   ]
 
   // We want exactly 15 books (3 rows of 5 columns).
   const extendedBooks = [...books, ...books, ...books].slice(0, 15)
 
-  // Use mock books with images to create a 5-column grid
-  const sampleListings = extendedBooks.map((b, i) => ({
-    ...b,
-    id: `${b.id}-${i}`, // ensure unique keys
-    coverImageUrl: whatsappImages[i % whatsappImages.length]
-  }))
+  // Use mock books with images and titles matching the local files
+  const sampleListings = extendedBooks.map((b, i) => {
+    const localData = localBooksData[i % localBooksData.length]
+    return {
+      ...b,
+      id: `${b.id}-${i}`, // ensure unique keys
+      title: localData.title,
+      coverImageUrl: `/${encodeURIComponent(localData.filename)}`
+    }
+  })
 
   return (
     <div className="bg-white min-h-screen">

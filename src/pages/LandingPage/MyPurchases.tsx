@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Package, Truck, CheckCircle, Clock, AlertCircle, ShieldAlert, ShoppingBag } from 'lucide-react'
+import { Package, Truck, CheckCircle, Clock, AlertCircle, ShieldAlert, ShoppingBag, XCircle } from 'lucide-react'
 import { useCart } from '../../lib/api/cart/cart.hooks'
 import { useConfirmOrderDelivery, useOrdersByUser } from '../../lib/api/orders/orders.hooks'
 import {
@@ -23,6 +23,8 @@ const STATUS_CONFIG: Record<DisplayOrderStatus, { class: string; icon: React.Ele
   delivered:           { class: 'bg-orange-50 text-orange-700 border border-orange-200', icon: Package },
   confirmed:           { class: 'bg-green-50 text-green-700 border border-green-200',    icon: CheckCircle },
   disputed:            { class: 'bg-red-50 text-red-700 border border-red-200',          icon: AlertCircle },
+  cancelled:           { class: 'bg-gray-50 text-gray-600 border border-gray-200',        icon: XCircle },
+  resolved:            { class: 'bg-secondary/8 text-secondary border border-secondary/20', icon: CheckCircle },
 }
 
 function timeAgo(iso: string): string {
@@ -163,6 +165,13 @@ export default function MyPurchases() {
                           <ShieldAlert size={13} /> Raise a Complaint
                         </Link>
                       </div>
+                    ) : status === 'disputed' ? (
+                      <Link
+                        to={`/order/${order.id}/dispute/track`}
+                        className="text-xs font-semibold text-red-600 hover:underline"
+                      >
+                        View Dispute
+                      </Link>
                     ) : (
                       <Link
                         to={`/order/${order.id}`}
