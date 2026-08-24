@@ -156,10 +156,15 @@ export default function Profile() {
 
   const [bankDetailId, setBankDetailId] = useState<number | null>(null)
 
-  const bankOptions = useMemo(
-    () => (banks ?? []).map(b => ({ id: b.id, name: b.name })),
-    [banks],
-  )
+  const bankOptions = useMemo(() => {
+    const options = (banks ?? []).map(b => ({ id: b.id, name: b.name }));
+    const seen = new Set();
+    return options.filter(b => {
+      if (seen.has(b.name)) return false;
+      seen.add(b.name);
+      return true;
+    });
+  }, [banks]);
 
   const [fulfillmentOption, setFulfillmentOption] = useState<StoreFulfillmentOption>('Courier')
   const [pickupAddressLine, setPickupAddressLine] = useState('')
