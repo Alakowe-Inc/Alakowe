@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, MapPin, Phone, Building2, Navigation, Package } from 'lucide-react'
+import { Search, MapPin, Phone, Navigation, Package } from 'lucide-react'
 import { useSpeedafStations } from '../../lib/api/logistics/logistics.hooks'
 import type { SpeedafStationDto } from '../../lib/api/logistics/logistics.api'
 
@@ -11,15 +11,11 @@ function StationCard({ station }: { station: SpeedafStationDto }) {
 
   return (
     <div className="bg-white rounded-2xl border border-third p-5 hover:shadow-md hover:border-secondary/20 transition-all duration-300 group">
-      {/* Station name & mode badge */}
-      <div className="flex items-start justify-between gap-3 mb-3">
+      {/* Station name */}
+      <div className="mb-3">
         <h3 className="font-heading font-bold text-main text-sm leading-snug group-hover:text-secondary transition-colors">
           {station.siteName}
         </h3>
-        <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/15">
-          <Building2 size={10} />
-          {station.siteMode}
-        </span>
       </div>
 
       {/* Address */}

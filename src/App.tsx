@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { CartProvider } from "./context/CartContext";
@@ -46,10 +47,21 @@ import TermsConditions from "./pages/LandingPage/TermsConditions";
 import RequestBook from "./pages/LandingPage/RequestBook";
 import MyRequests from "./pages/LandingPage/MyRequests";
 import AllRequests from "./pages/LandingPage/AllRequests";
+import SampleStorefront from "./pages/LandingPage/SampleStorefront";
 import NotFound from "./pages/NotFound";
 import DropOffLocations from "./pages/LandingPage/DropOffLocations";
 
 const queryClient = new QueryClient();
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -89,6 +101,7 @@ const App = () => (
       <AuthProvider>
         <CartProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<RootLayout />}>
                 <Route index element={<Home />} />
@@ -111,7 +124,6 @@ const App = () => (
                 <Route path="request-book" element={<ProtectedRoute><RequestBook /></ProtectedRoute>} />
                 <Route path="request" element={<ProtectedRoute><RequestBook /></ProtectedRoute>} />
                 <Route path="my-requests" element={<ProtectedRoute><MyRequests /></ProtectedRoute>} />
-                <Route path="requests" element={<AllRequests />} />
                 <Route path="listing-submitted" element={<ListingSubmitted />} />
                 <Route path="my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
                 <Route path="my-listings/:id" element={<ProtectedRoute><MyListingDetail /></ProtectedRoute>} />
@@ -120,7 +132,9 @@ const App = () => (
                 <Route path="my-sales/:id/dropoff" element={<ProtectedRoute><SellerDropoff /></ProtectedRoute>} />
                 <Route path="my-earnings" element={<ProtectedRoute><SellerEarnings /></ProtectedRoute>} />
                 <Route path="my-purchases" element={<ProtectedRoute><MyPurchases /></ProtectedRoute>} />
+                <Route path="store/sample" element={<SampleStorefront />} />
                 <Route path="store/:slug" element={<SellerStorefront />} />
+                <Route path="sample-store" element={<SampleStorefront />} />
                 <Route path="customer-service" element={<CustomerService />} />
                 <Route path="shipping" element={<ShippingReturns />} />
                 <Route path="privacy" element={<PrivacyPolicy />} />

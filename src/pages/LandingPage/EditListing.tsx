@@ -506,7 +506,15 @@ export default function EditListing() {
                 How buyers get this book
               </p>
               <p className="text-sm font-semibold text-main">{fulfillmentCopy.label}</p>
-              <p className="text-xs text-main/50 mt-1 leading-relaxed">{fulfillmentCopy.hint}</p>
+              <p className="text-xs text-main/50 mt-1 leading-relaxed">
+                {fulfillmentCopy.hint}{' '}
+                <Link
+                  to="/how-it-works#delivery-logistics"
+                  className="text-secondary font-semibold hover:underline inline-flex items-center gap-0.5"
+                >
+                  <span>Learn more</span>
+                </Link>
+              </p>
             </div>
             <button
               type="button"

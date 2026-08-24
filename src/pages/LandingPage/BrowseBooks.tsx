@@ -25,7 +25,7 @@ function BrowseBooks() {
   const [sortBy, setSortBy] = useState('default')
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
-  const PAGE_SIZE = 15
+  const PAGE_SIZE = 20
 
   const collectionSlug = searchParams.get('collection')
   const tagSlug = searchParams.get('tag')

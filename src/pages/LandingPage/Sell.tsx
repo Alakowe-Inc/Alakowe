@@ -17,7 +17,8 @@ import {
   Layers,
   ChevronRight,
   Info,
-  DollarSign
+  DollarSign,
+  Store
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import {
@@ -74,6 +75,13 @@ export default function Sell() {
               >
                 <span>List a Book</span>
                 <ArrowRight size={14} />
+              </Link>
+              <Link
+                to="/store/sample"
+                className="bg-white hover:bg-main/5 text-main border border-violet-200 text-xs font-semibold px-5 py-3 rounded-xl transition-colors shadow-xs inline-flex items-center gap-1.5"
+              >
+                <Store size={14} className="text-secondary" />
+                <span>Preview Sample Storefront</span>
               </Link>
               <div className="inline-flex items-center gap-2 bg-white/70 border border-violet-100 rounded-full px-3.5 py-2">
                 <ShieldCheck size={13} className="text-secondary shrink-0" />
@@ -149,17 +157,13 @@ export default function Sell() {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => openLearnMore(
-                    "Snap your book — Photography Tips",
-                    "Take photos under good natural lighting. Include the front cover, back cover, spine, and a sample page. If there are highlight marks, owner names, or corner folds, snap a clear close-up. Buyers appreciate full transparency!"
-                  )}
+                <Link
+                  to="/how-it-works#selling-books"
                   className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
                 >
                   <span>Learn more</span>
                   <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
 
               {/* Step 2: Write a clear condition note */}
@@ -191,17 +195,13 @@ export default function Sell() {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => openLearnMore(
-                    "Write a clear condition note — Description Guide",
-                    "Clearly mention if the book contains pencil underlinings, ink inscriptions, or water stains. Accurate notes reduce return requests and earn you 5-star seller ratings."
-                  )}
+                <Link
+                  to="/how-it-works#selling-books"
                   className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
                 >
                   <span>Learn more</span>
                   <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
 
               {/* Step 3: Pricing your book */}
@@ -221,23 +221,13 @@ export default function Sell() {
                   </p>
                 </div>
 
-                {/* Mock price preview */}
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 mb-4 text-center">
-                  <span className="text-xs text-main/50">Suggested market price:</span>
-                  <p className="font-heading font-bold text-main text-base text-secondary">₦2,500 - ₦4,000</p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => openLearnMore(
-                    "Pricing your book — Smart Pricing Tips",
-                    "Compare your book against similar listings on Alákòwé. Price rare or clean books competitively. Offering reasonable prices attracts buyers quickly!"
-                  )}
+                <Link
+                  to="/how-it-works#selling-books"
                   className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
                 >
                   <span>Learn more</span>
                   <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -277,17 +267,13 @@ export default function Sell() {
                     We'll send you an email and show the order in your account with clear instructions.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => openLearnMore(
-                    "You'll receive a notification",
-                    "As soon as a buyer pays for your book, you'll receive an instant email notification and an order update in your Alákòwé account dashboard with complete buyer details and shipping label options."
-                  )}
+                <Link
+                  to="/how-it-works#selling-books"
                   className="text-xs font-semibold text-secondary hover:underline flex items-center gap-1 w-fit"
                 >
                   <span>Learn more</span>
                   <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
 
               {/* 2. Choose how to fulfil your order */}
@@ -306,17 +292,13 @@ export default function Sell() {
                     Depending on the delivery option you selected when listing, you'll either meet the buyer or drop the book off at one of our partner centres.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => openLearnMore(
-                    "Choose how to fulfil your order",
-                    "You can select drop-off at a designated partner hub, home pickup via doorstep courier, or direct buyer meetup. Flexible choices ensure maximum convenience for every seller!"
-                  )}
+                <Link
+                  to="/how-it-works#delivery-logistics"
                   className="text-xs font-semibold text-secondary hover:underline flex items-center gap-1 w-fit"
                 >
                   <span>Learn more</span>
                   <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
 
               {/* 3. Prepare your package */}
@@ -335,17 +317,13 @@ export default function Sell() {
                     A few minutes spent packaging your book properly helps protect it during delivery. Use a suitable envelope or box and keep the book secure inside.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => openLearnMore(
-                    "Prepare your package",
-                    "Wrap the book securely using bubble wrap or sturdy cardboard envelopes. Ensure corners are protected against bends during transit."
-                  )}
+                <Link
+                  to="/how-it-works#delivery-logistics"
                   className="text-xs font-semibold text-secondary hover:underline flex items-center gap-1 w-fit"
                 >
                   <span>Learn more</span>
                   <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
 
               {/* 4. Drop off or hand it over */}
@@ -364,17 +342,13 @@ export default function Sell() {
                     If you're dropping off, simply choose your preferred partner location, generate your waybill, and hand over the package. If it's buyer pickup or home pickup, we'll guide you through those steps too.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => openLearnMore(
-                    "Drop off or hand it over",
-                    "Generate your waybill code directly from your account, visit your chosen partner drop-off point, and hand over the package. Once confirmed, payment escrow releases automatically to your bank."
-                  )}
+                <Link
+                  to="/how-it-works#delivery-logistics"
                   className="text-xs font-semibold text-secondary hover:underline flex items-center gap-1 w-fit"
                 >
                   <span>Learn more</span>
                   <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -406,17 +380,13 @@ export default function Sell() {
                     From novels, non-fiction, primary school textbooks, secondary school textbooks, children’s to university textbooks, many books can find a second reader—as long as they meet our listing guidelines.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => openLearnMore(
-                    "What you can sell — Listing Guidelines",
-                    "You can sell novels, academic textbooks, fiction, non-fiction, children's storybooks, and exam preparation materials. Books must be complete without missing pages."
-                  )}
+                <Link
+                  to="/how-it-works#selling-books"
                   className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
                 >
                   <span>Learn more</span>
                   <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
 
               {/* Choosing the right condition */}
@@ -432,17 +402,13 @@ export default function Sell() {
                     Whether your book is Like New or Well Loved, we have broken down book conditions into categories. All you have to do is choose the condition that best matches the current state of your book.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => openLearnMore(
-                    "Choosing the right condition",
-                    "Condition categories range from New, Like New, Excellent, Good, to Fair. Selecting the accurate category manages buyer expectations and prevents disputes."
-                  )}
+                <Link
+                  to="/how-it-works#selling-books"
                   className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
                 >
                   <span>Learn more</span>
                   <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
 
               {/* Our quality standards */}
@@ -458,17 +424,13 @@ export default function Sell() {
                     We appreciate when every listing accurately represents the book being sold. Clear photos and honest descriptions help keep Alákòwé a trusted marketplace for everyone.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => openLearnMore(
-                    "Our quality standards",
-                    "We inspect books before final buyer delivery. Honest descriptions and clear photos ensure seamless verification and fast seller payouts."
-                  )}
+                <Link
+                  to="/how-it-works#selling-books"
                   className="w-full text-xs font-semibold py-2.5 px-4 rounded-xl border border-main/15 text-main hover:bg-main/5 transition-colors flex items-center justify-center gap-1"
                 >
                   <span>Learn more</span>
                   <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
             </div>
 

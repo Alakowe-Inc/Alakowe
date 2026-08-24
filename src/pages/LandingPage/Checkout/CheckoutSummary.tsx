@@ -1,27 +1,37 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Package, Shield, Clock, MapPin, Phone } from 'lucide-react'
+import { ArrowLeft, Package, Shield, Clock, MapPin, Phone, ShoppingBag, Truck, Home } from 'lucide-react'
 import { useCheckout } from '../../../context/CheckoutContext'
 import { usePayCheckout, useCancelCheckout } from '../../../lib/api/checkout/checkout.hooks'
 import { getCheckoutSessionApi } from '../../../lib/api/checkout/checkout.api'
 import { formatPrice } from '../../../lib/utils'
 import PaystackPop from '@paystack/inline-js'
 
-const COURIER_STEPS = [
+const ORDER_JOURNEY_STEPS = [
+  {
+    Icon: ShoppingBag,
+    label: 'Order placed',
+    desc: 'We confirm your order.',
+  },
   {
     Icon: Package,
-    label: 'Seller drops off',
-    desc: 'The seller brings your book to our nearest collection centre within 48 hours.',
+    label: 'Seller prepares',
+    desc: 'Seller prepares your book(s).',
   },
   {
-    Icon: Shield,
-    label: 'We inspect & process',
-    desc: 'Our team checks the book quality and prepares your order for dispatch.',
+    Icon: Package,
+    label: 'Book collected',
+    desc: 'We collect the book(s) from the seller.',
   },
   {
-    Icon: Clock,
-    label: 'We deliver to you',
-    desc: 'Your book is on its way. Estimated delivery: 3-7 business days.',
+    Icon: Truck,
+    label: 'On its way',
+    desc: 'Your order is on its way to you.',
+  },
+  {
+    Icon: Home,
+    label: 'Delivered',
+    desc: 'Enjoy your new read!',
   },
 ] as const
 
@@ -104,7 +114,7 @@ function CheckoutSummary() {
       ? { title: 'How Pickup Works', steps: PICKUP_STEPS }
       : fulfillmentMode === 'mixed'
         ? { title: 'How Fulfillment Works', steps: MIXED_STEPS }
-        : { title: 'How Delivery Works', steps: COURIER_STEPS }
+        : { title: 'YOUR ORDER JOURNEY', steps: ORDER_JOURNEY_STEPS }
 
   const allItems = sellerGroups.flatMap((g) => g.items ?? [])
 
@@ -220,24 +230,51 @@ function CheckoutSummary() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-third p-6">
-              <h2 className="font-heading font-bold text-main text-lg mb-5">
-                {howItWorks.title}
-              </h2>
-              <div className="flex flex-col gap-5">
-                {howItWorks.steps.map(({ Icon, label, desc }) => (
-                  <div key={label} className="flex items-start gap-4">
-                    <div className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
-                      <Icon size={16} className="text-secondary" />
-                    </div>
-                    <div>
-                      <p className="font-heading font-semibold text-main text-sm">{label}</p>
-                      <p className="text-main/50 text-xs mt-0.5 leading-relaxed">{desc}</p>
-                    </div>
+            {fulfillmentMode === 'courier' ? (
+              <div className="bg-[#F8FAFF] rounded-2xl border border-third p-6 pb-4 overflow-hidden">
+                <h2 className="font-heading font-bold text-[#0F172A] text-[13px] uppercase tracking-wider mb-8">
+                  {howItWorks.title}
+                </h2>
+                <div className="overflow-x-auto pb-4 -mx-2 px-2 md:overflow-visible md:pb-2 md:mx-0 md:px-0">
+                  <div className="flex flex-row items-start justify-between relative min-w-[650px] md:min-w-0">
+                    <div className="absolute top-6 left-12 right-12 h-[1px] border-t border-dashed border-[#D4D4FF] z-0" />
+                    {howItWorks.steps.map(({ Icon, label, desc }, idx) => (
+                      <div key={label} className="relative z-10 flex flex-col items-center text-center max-w-[120px] flex-1">
+                        <div className="relative mb-3">
+                          <div className="w-12 h-12 rounded-[14px] bg-white border border-[#D4D4FF] flex items-center justify-center shadow-sm">
+                            <Icon size={18} className="text-[#6B6FFF]" />
+                          </div>
+                          <div className="absolute -top-2 -right-2 w-[18px] h-[18px] rounded-full bg-white border border-[#D4D4FF] text-[#6B6FFF] text-[10px] font-bold flex items-center justify-center">
+                            {idx + 1}
+                          </div>
+                        </div>
+                        <h3 className="font-bold text-[#0F172A] text-[12px] leading-snug mb-1">{label}</h3>
+                        <p className="text-[#8C8F99] text-[11px] leading-snug px-1">{desc}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-third p-6">
+                <h2 className="font-heading font-bold text-main text-lg mb-5">
+                  {howItWorks.title}
+                </h2>
+                <div className="flex flex-col gap-5">
+                  {howItWorks.steps.map(({ Icon, label, desc }) => (
+                    <div key={label} className="flex items-start gap-4">
+                      <div className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                        <Icon size={16} className="text-secondary" />
+                      </div>
+                      <div>
+                        <p className="font-heading font-semibold text-main text-sm">{label}</p>
+                        <p className="text-main/50 text-xs mt-0.5 leading-relaxed">{desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="lg:col-span-1">
