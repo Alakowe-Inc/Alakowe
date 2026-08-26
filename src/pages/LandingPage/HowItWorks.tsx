@@ -195,10 +195,9 @@ export default function HowItWorks() {
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-[11px] font-bold uppercase tracking-wider mb-2">
-                <Sparkles className="w-3 h-3" />
-                <span>{welcomeText.greeting}</span>
-              </div>
+               <h2 className="font-heading font-bold text-main text-lg sm:text-xl md:text-2xl mb-2">
+                {welcomeText.greeting}
+              </h2>
               <h2 className="font-heading font-bold text-main text-lg sm:text-xl md:text-2xl mb-2">
                 {welcomeText.title}
               </h2>
