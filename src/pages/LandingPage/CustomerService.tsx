@@ -5,17 +5,17 @@ const channels = [
   {
     icon: Mail,
     title: 'Email Support',
-    value: 'support@alakowe.com',
+    value: 'hello@alakowe.com',
     desc: 'For general enquiries, account issues, and disputes.',
     responseTime: 'Reply within 24 hours',
-    href: 'mailto:support@alakowe.com',
+    href: 'mailto:hello@alakowe.com',
   },
   {
     icon: MessageCircle,
     title: 'WhatsApp',
     value: '+234 800 000 0000',
     desc: 'Quick help with active orders and urgent issues.',
-    responseTime: 'Mon–Sat, 9am–6pm',
+    responseTime: 'Mon–Fri, 9am–5pm',
     href: 'https://wa.me/2348000000000',
   },
 ]
@@ -86,7 +86,7 @@ function IconFacebook() {
 const socialLinks = [
   { Icon: IconInstagram, label: 'Instagram', href: 'https://www.instagram.com/the_alakowe?igsh=ODJkcjd6cXh1bWNs&utm_source=qr' },
   { Icon: IconFacebook, label: 'Facebook', href: 'https://www.facebook.com/share/1BhTzfqmYv/?mibextid=wwXIfr' },
-  { Icon: IconEmail, label: ' Email', href: 'igsh=ODJkcjd6cXh1bWNs&utm_source=qr' },
+  { Icon: IconEmail, label: ' Email', href: 'mailto:hello@alakowe.com' },
 ]
 
 export default function CustomerService() {
