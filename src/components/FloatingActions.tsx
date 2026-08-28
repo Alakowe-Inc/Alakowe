@@ -1,4 +1,4 @@
-﻿import { useState } from "react"
+import { useState } from "react"
 import { Instagram, MessageSquare, X, Send, CheckCircle } from "lucide-react"
 import { useSubmitFeedback } from "../lib/api/feedback/feedback.hooks"
 import { toast } from "react-toastify"
@@ -11,6 +11,33 @@ export function FloatingActions() {
   const [sent, setSent] = useState(false)
 
   const submitFeedback = useSubmitFeedback()
+
+  function playBuzzerSound() {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+      if (!AudioContext) return
+      const ctx = new AudioContext()
+      const osc = ctx.createOscillator()
+      const gainNode = ctx.createGain()
+
+      // Create a pleasant "pop/ding" notification sound
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(800, ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.05)
+
+      gainNode.gain.setValueAtTime(0, ctx.currentTime)
+      gainNode.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.02)
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2)
+
+      osc.connect(gainNode)
+      gainNode.connect(ctx.destination)
+
+      osc.start()
+      osc.stop(ctx.currentTime + 0.2)
+    } catch (err) {
+      // Ignore if browser blocks audio
+    }
+  }
 
   function handleClose() {
     setOpen(false)
@@ -34,6 +61,7 @@ export function FloatingActions() {
         message: message.trim(),
       })
       setSent(true)
+      playBuzzerSound()
     } catch {
       toast.error("Could not send feedback. Please try again.")
     }
