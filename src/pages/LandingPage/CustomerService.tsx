@@ -5,17 +5,17 @@ const channels = [
   {
     icon: Mail,
     title: 'Email Support',
-    value: 'support@alakowe.com',
+    value: 'hello@alakowe.com',
     desc: 'For general enquiries, account issues, and disputes.',
     responseTime: 'Reply within 24 hours',
-    href: 'mailto:support@alakowe.com',
+    href: 'mailto:hello@alakowe.com',
   },
   {
     icon: MessageCircle,
     title: 'WhatsApp',
     value: '+234 800 000 0000',
     desc: 'Quick help with active orders and urgent issues.',
-    responseTime: 'Mon–Sat, 9am–6pm',
+    responseTime: 'Mon–Fri, 9am–5pm',
     href: 'https://wa.me/2348000000000',
   },
 ]
@@ -57,6 +57,36 @@ const topics = [
       { q: 'How do I delete my account?', to: '/account' },
     ],
   },
+]
+
+function IconInstagram() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" width={18} height={18}>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <circle cx="12" cy="12" r="4" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  )
+}
+function IconEmail() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" width={18} height={18}>
+      <path d="M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5zm2 0v.01L12 12l8-6.99V5H4zm16 14V7.51l-7.4 6.48a1 1 0 0 1-1.2 0L4 7.51V19h16z" />
+    </svg>
+  );
+}
+function IconFacebook() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" width={18} height={18}>
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  )
+}
+
+const socialLinks = [
+  { Icon: IconInstagram, label: 'Instagram', href: 'https://www.instagram.com/the_alakowe?igsh=ODJkcjd6cXh1bWNs&utm_source=qr' },
+  { Icon: IconFacebook, label: 'Facebook', href: 'https://www.facebook.com/share/1BhTzfqmYv/?mibextid=wwXIfr' },
+  { Icon: IconEmail, label: ' Email', href: 'mailto:hello@alakowe.com' },
 ]
 
 export default function CustomerService() {
@@ -103,32 +133,25 @@ export default function CustomerService() {
           ))}
         </div>
 
-        {/* Topic quick links */}
-        <h2 className="font-heading font-bold text-main text-xl mb-5">Common topics</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
-          {topics.map(topic => (
-            <div key={topic.title} className="bg-white rounded-2xl border border-third p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center">
-                  <topic.icon size={15} className="text-secondary" />
+        {/* Social Media */}
+        <div className="mb-12">
+          <h2 className="font-heading font-bold text-main text-xl mb-4 text-center sm:text-left">Connect with us</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {socialLinks.map(link => (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white rounded-2xl border border-third p-4 flex items-center justify-center sm:justify-start gap-3 hover:border-secondary/40 transition-colors group"
+              >
+                <div className="text-secondary group-hover:scale-110 transition-transform">
+                  <link.Icon />
                 </div>
-                <h3 className="font-heading font-bold text-main text-sm">{topic.title}</h3>
-              </div>
-              <ul className="space-y-2">
-                {topic.questions.map(({ q, to }) => (
-                  <li key={q}>
-                    <Link
-                      to={to}
-                      className="flex items-center justify-between gap-2 text-sm text-main/60 hover:text-secondary transition-colors py-1"
-                    >
-                      <span>{q}</span>
-                      <ChevronRight size={13} className="shrink-0 text-main/30" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+                <span className="font-bold text-main text-sm group-hover:text-secondary transition-colors">{link.label}</span>
+              </a>
+            ))}
+          </div>
         </div>
 
         {/* FAQ CTA */}
@@ -138,8 +161,8 @@ export default function CustomerService() {
             <p className="text-sm text-main/50 mt-0.5">Browse our full FAQ for answers to common questions.</p>
           </div>
           <Link
-            to="/faq"
-            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-full hover:bg-main/90 transition-colors text-sm shrink-0"
+            to="/how-it-works#general-faq"
+            className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-6 py-3 rounded-xl hover:bg-secondary/90 transition-colors text-sm shrink-0"
           >
             View FAQ
           </Link>

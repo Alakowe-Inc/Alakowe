@@ -1,27 +1,72 @@
+import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
   ArrowLeft,
   MapPin,
-  Star,
-  ShoppingBag,
+  ShoppingCart,
+  CheckCircle2,
   BookOpen,
+  FileText,
+  Globe,
+  FolderOpen,
+  Barcode,
+  Heart,
+  Search,
   Tag,
-  Layers,
-  Package,
-  ShieldCheck,
+  Star,
+  BookMarked,
 } from 'lucide-react'
-import { books } from '../../data/mockData'
+import { useListing, useListings } from '../../lib/api/listings/listings.hooks'
+import { listingToBookDisplay } from '../../lib/api/adapters'
 import { useCart } from '../../context/CartContext'
+import { formatPrice } from '../../lib/utils'
+import BookCard from '../../components/BookCard'
 
 function BookDetail() {
   const { id } = useParams()
-  const book = books.find(b => b.id === id)
+  const { data: listing, isLoading } = useListing(Number(id))
+  const { data: pagedResult } = useListings()
   const { addToCart } = useCart()
 
-  if (!book) {
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [activeTab, setActiveTab] = useState<'details' | 'shipping'>('details')
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  const book = useMemo(() => (listing ? listingToBookDisplay(listing) : null), [listing])
+
+  const images = useMemo(() => {
+    if (!book?.coverImageUrl) return []
+    return [book.coverImageUrl, ...(book.imageUrls ?? [])].filter(Boolean)
+  }, [book])
+
+  // Mocking 4 detail angles/pages if only cover exists to replicate mockup thumbnails
+  const thumbnailImages = useMemo(() => {
+    if (images.length === 0) return []
+    if (images.length > 1) return images
+    return [images[0], images[0], images[0], images[0]]
+  }, [images])
+
+  const relatedBooks = useMemo(() => {
+    if (!pagedResult?.result) return []
+    return pagedResult.result
+      .filter((l) => String(l.id) !== id)
+      .slice(0, 5)
+      .map(listingToBookDisplay)
+  }, [pagedResult, id])
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-third">
-        <div className="text-center animate-[fadeIn_0.5s_ease-out]">
+        <p className="text-main/50 text-sm">Loading…</p>
+      </div>
+    )
+  }
+
+  if (!listing || !book) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-third">
+        <div className="text-center">
           <p className="font-heading font-bold text-main text-2xl mb-3">Book not found</p>
           <Link to="/browse" className="text-sm text-secondary hover:underline font-semibold">
             Back to Browse
@@ -31,222 +76,391 @@ function BookDetail() {
     )
   }
 
-  const finalPrice =
-    book.discount && (book.discount ?? 0) > 0
-      ? Math.round(book.price * (1 - book.discount / 100))
-      : book.price
-
-  const hasDiscount = (book.discount ?? 0) > 0
+  // Calculate savings when a brand-new price is available
+  const brandNewPrice = book.originalPriceOfNew
+  const hasNewPrice = brandNewPrice != null && brandNewPrice > 0 && brandNewPrice !== book.price
+  const savings = hasNewPrice ? brandNewPrice - book.price : 0
+  const savingsPercent = hasNewPrice ? Math.round((savings / brandNewPrice) * 100) : 0
 
   return (
-    <div className="bg-third min-h-screen animate-[fadeIn_0.6s_ease-out]">
-      <style>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: translateY(0);} }
-        @keyframes floatIn { from { opacity: 0; transform: translateY(16px);} to { opacity: 1; transform: translateY(0);} }
-        .reveal { animation: floatIn 0.6s ease-out both; }
-      `}</style>
-
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-12 py-8 md:py-12">
-        {/* Breadcrumb / Back */}
+    <div className="bg-white min-h-screen">
+      <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
+        {/* Back Link */}
         <Link
           to="/browse"
-          className="inline-flex items-center gap-2 text-sm text-main/55 hover:text-main mb-8 md:mb-10 transition-all duration-200 font-medium hover:-translate-x-0.5"
+          className="inline-flex items-center gap-1.5 text-xs text-secondary hover:underline mb-6 transition-colors font-semibold"
         >
-          <ArrowLeft size={15} /> Back to Browse
+          <ArrowLeft size={13} /> Back to browse
         </Link>
 
-        {/*
-          Grid is flattened so order-* can interleave on mobile.
-          Mobile order: 1) Image, 2) Summary panel, 3) Product details.
-          Desktop: image (col-span-7) + product details (col-span-7) on left,
-          summary panel (col-span-5, row-span-2, sticky) on right.
-        */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-start">
-          {/* COVER — order-1 on mobile, top-left on desktop */}
-          <div
-            className="order-1 lg:order-none lg:col-span-7 reveal group relative rounded-3xl h-80 md:h-[32rem] flex items-center justify-center border border-third/60 overflow-hidden transition-all duration-500 hover:shadow-2xl"
-            style={{
-              background: `radial-gradient(circle at 30% 20%, ${book.coverColor}28, ${book.coverColor}10 55%, transparent 80%), linear-gradient(135deg, #ffffff 0%, ${book.coverColor}10 100%)`,
-            }}
-          >
-            {/* soft glow */}
-            <div
-              className="absolute -inset-20 blur-3xl opacity-40 transition-opacity duration-700 group-hover:opacity-60"
-              style={{ background: `radial-gradient(circle, ${book.coverColor}55, transparent 60%)` }}
-            />
-            <div
-              className="relative w-40 h-60 md:w-52 md:h-[19rem] rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.45)] flex items-end justify-center pb-5 transition-transform duration-700 ease-out group-hover:scale-105 group-hover:-rotate-1"
-              style={{ backgroundColor: book.coverColor }}
-            >
-              <div className="w-28 h-px bg-white/40 rounded" />
+        {/* Main 2-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-8 lg:gap-12 items-start">
+          {/* LEFT COLUMN: Cover Image, Thumbnails, Details Tab Panel */}
+          <div className="flex flex-col max-w-[360px] w-full mx-auto lg:mx-0">
+            {/* Big image with overlay badges */}
+            <div className="relative aspect-[4/5] w-full overflow-hidden bg-third rounded-2xl shadow-sm border border-main/5">
+              {thumbnailImages.length > 0 ? (
+                <img
+                  key={activeIdx}
+                  src={thumbnailImages[activeIdx]}
+                  alt={book.title}
+                  className="w-full h-full object-cover transition-opacity duration-300"
+                />
+              ) : (
+                <div
+                  className="w-full h-full flex items-center justify-center"
+                  style={{ backgroundColor: book.coverColor }}
+                />
+              )}
+
+              {/* Heart Favorite Button */}
+              <button
+                onClick={() => setIsFavorite(!isFavorite)}
+                className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all border border-main/5"
+              >
+                <Heart
+                  size={14}
+                  className={isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-900'}
+                />
+              </button>
+
+              {/* Tap to Zoom Badge */}
+              <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 select-none">
+                <Search size={11} />
+                <span>Tap to zoom</span>
+              </div>
             </div>
 
-            {hasDiscount && (
-              <div className="absolute top-4 left-4 bg-secondary text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg tracking-wide">
-                {book.discount}% OFF
+            {/* Thumbnail selector row */}
+            {thumbnailImages.length > 1 && (
+              <div className="grid grid-cols-4 gap-2.5 mt-3">
+                {thumbnailImages.map((src, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveIdx(i)}
+                    className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                      i === activeIdx ? 'border-secondary' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Details tabs wrapper panel */}
+            <div className="border border-main/10 rounded-2xl overflow-hidden bg-white p-5 mt-5">
+              {/* Tab Navigation */}
+              <div className="flex border-b border-main/10 mb-4">
+                {(['details', 'shipping'] as const).map((tab) => {
+                  const labelMap = {
+                    details: 'Details',
+                    shipping: 'Shipping & Returns',
+                  }
+                  const isActive = activeTab === tab
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`flex-1 text-center pb-2.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider border-b-2 transition-all ${
+                        isActive
+                          ? 'border-secondary text-main font-bold'
+                          : 'border-transparent text-main/45 hover:text-main'
+                      }`}
+                    >
+                      {labelMap[tab]}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Tab Contents */}
+              {activeTab === 'details' && (
+                <div className="space-y-3">
+                  {/* Condition */}
+                  {book.condition && (
+                    <div className="flex items-center justify-between text-xs py-1.5 border-b border-main/6">
+                      <div className="flex items-center gap-2.5 text-main/55">
+                        <Star size={13} className="text-main/40 shrink-0" />
+                        <span className="font-medium">Condition</span>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-main bg-secondary/10 text-secondary text-[11px] px-2.5 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0"></span>
+                        {book.condition}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Category */}
+                  {book.genre && (
+                    <div className="flex items-center justify-between text-xs py-1.5 border-b border-main/6">
+                      <div className="flex items-center gap-2.5 text-main/55">
+                        <FolderOpen size={13} className="text-main/40 shrink-0" />
+                        <span className="font-medium">Category</span>
+                      </div>
+                      <span className="font-semibold text-main">{book.genre}</span>
+                    </div>
+                  )}
+
+                  {/* Tags */}
+                  {((book.tagNames && book.tagNames.length > 0) || (book.tags && book.tags.length > 0)) && (
+                    <div className="flex items-start justify-between text-xs py-1.5 border-b border-main/6 gap-4">
+                      <div className="flex items-center gap-2.5 text-main/55 shrink-0">
+                        <Tag size={13} className="text-main/40 shrink-0" />
+                        <span className="font-medium">Tags</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 justify-end">
+                        {(book.tagNames ?? book.tags ?? []).map((tag, i) => {
+                          const label = typeof tag === 'string' ? tag : (tag as any)?.name ?? String(tag)
+                          return (
+                            <span key={`${label}-${i}`} className="text-[10px] font-semibold px-2 py-0.5 bg-main/8 text-main/70 rounded-full border border-main/10">
+                              {label}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Number of Pages */}
+                  {book.numberOfPages && (
+                    <div className="flex items-center justify-between text-xs py-1.5 border-b border-main/6">
+                      <div className="flex items-center gap-2.5 text-main/55">
+                        <BookMarked size={13} className="text-main/40 shrink-0" />
+                        <span className="font-medium">No. of Pages</span>
+                      </div>
+                      <span className="font-semibold text-main">{book.numberOfPages.toLocaleString()} pages</span>
+                    </div>
+                  )}
+
+                  {/* Location */}
+                  {book.location && (
+                    <div className="flex items-center justify-between text-xs py-1.5">
+                      <div className="flex items-center gap-2.5 text-main/55">
+                        <MapPin size={13} className="text-main/40 shrink-0" />
+                        <span className="font-medium">Location</span>
+                      </div>
+                      <span className="font-semibold text-main">{book.location}</span>
+                    </div>
+                  )}
+
+                  {/* Fallback if none available */}
+                  {!book.condition && !book.genre && !book.location && !book.numberOfPages &&
+                    !(book.tagNames?.length) && !(book.tags?.length) && (
+                    <p className="text-xs text-main/40 text-center py-2">No details available.</p>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'shipping' && (
+                <div className="text-[11px] text-main/60 leading-relaxed space-y-2">
+                  {book.fulfillmentOption === 'Pickup' ? (
+                    <>
+                      <p className="font-semibold text-main">Pickup only</p>
+                      <p>
+                        Collect this book from the seller. Their contact details are sent after you pay.
+                      </p>
+                      {(book.pickupAddressLine || book.pickupCity) && (
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                            [book.pickupAddressLine, book.pickupCity, book.pickupState].filter(Boolean).join(', '),
+                          )}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 font-semibold text-secondary hover:underline"
+                        >
+                          <MapPin size={11} />
+                          View pickup location
+                        </a>
+                      )}
+                    </>
+                  ) : book.fulfillmentOption === 'Both' ? (
+                    <>
+                      <p>This seller offers two ways to get this book. Choose what works best for you at checkout:</p>
+                      <p>
+                        <span className="font-semibold text-main">Pickup:</span>
+                        {' '}  Collect it directly from the seller.(Contact seller after payment)
+                        {(book.pickupAddressLine || book.pickupCity) && (
+                          <>
+                            {' · '}
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                [book.pickupAddressLine, book.pickupCity, book.pickupState].filter(Boolean).join(', '),
+                              )}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="font-semibold text-secondary hover:underline"
+                            >
+                              see location
+                            </a>
+                          </>
+                        )}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-main">Alákòwé delivery:</span>
+                        {' '} We’ll get it to you through our trusted, trackable courier partner. Delivery fee applies.(Delivery fee applies).
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p>
+                        ALÁKÒWÉ manages the entire logistics process. From seller collection and quality inspection to doorstep delivery, we ensure a secure transaction.
+                      </p>
+                      <p>
+                        All purchases are covered under our Buyer Protection policy. If the book differs significantly from the description, report the issue within 12 hours of delivery for a full refund.
+                      </p>
+                      <Link to="/shipping" className="inline-block mt-2 text-xs font-semibold text-secondary hover:underline px-3 py-1.5 border border-secondary/20 rounded-lg hover:bg-secondary/5 transition-colors">
+                        Learn more
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* About this book section (not toggled, below details tabs card) */}
+            {book.description && (
+              <div className="border border-main/10 rounded-2xl bg-white p-5 mt-5">
+                <h3 className="text-[10px] font-bold uppercase tracking-wider text-secondary mb-2">
+                  About this book
+                </h3>
+                <p className={`text-xs text-main/70 leading-relaxed ${isExpanded ? '' : 'line-clamp-3'}`}>
+                  {book.description}
+                </p>
+                {book.description.length > 150 && (
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-xs font-semibold text-secondary hover:underline mt-2 block"
+                  >
+                    {isExpanded ? 'Read less' : 'Read more'}
+                  </button>
+                )}
               </div>
             )}
           </div>
 
-          {/* RIGHT COLUMN — STICKY PURCHASE PANEL.
-              order-2 on mobile (between image and details).
-              On desktop: col-span-5, spans both rows so it sits beside image + details. */}
-          <div className="order-2 lg:order-none lg:col-span-5 lg:row-span-2 reveal">
-            <div className="lg:sticky lg:top-[120px] flex flex-col">
-              {/* Genre */}
-              <p className="text-secondary text-[11px] font-bold uppercase tracking-[0.25em] mb-3">
-                {book.genre}
-              </p>
+          {/* RIGHT COLUMN: Book Details & Actions */}
+          <div className="flex flex-col">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-main/50 block mb-1.5">
+              {book.genre.toUpperCase()}
+            </span>
+            <h1 className="font-heading font-bold text-main text-2xl md:text-3xl leading-tight mb-1.5">
+              {book.title}
+            </h1>
+            <p className="text-sm text-main/60 mb-4">
+              by <span className="font-medium text-main">{book.author}</span>
+            </p>
 
-              <h1 className="font-heading font-bold text-main text-3xl md:text-4xl xl:text-5xl leading-[1.1] tracking-tight mb-3">
-                {book.title}
-              </h1>
-
-              <p className="text-main/55 text-base mb-5">
-                by <span className="text-main/80 font-medium">{book.author}</span>
-              </p>
-
-              {/* CONDITION NOTES */}
-              {book.conditionNotes && (
-                <div className="mb-6">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-main/40 mb-2">
-                    Condition notes
-                  </p>
-                  <p className="text-sm text-main/70 leading-relaxed">
-                    {book.conditionNotes}
-                  </p>
-                </div>
-              )}
-
-              {/* DESCRIPTION */}
-              <div className="mb-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-main/40 mb-2">
-                  Book Description
-                </p>
-                <p className="text-main/70 text-sm leading-relaxed mb-7">
-                  {book.description}
-                </p>
-              </div>
-
-              {/* SELLER */}
-              <div className="bg-white rounded-2xl border border-third/70 p-5 mb-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-secondary mb-3">
-                  Sold by
-                </p>
-
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-secondary/30 to-secondary/10 flex items-center justify-center font-heading font-bold text-main text-base shrink-0 ring-2 ring-white shadow">
-                    {(book.sellerUsername ?? book.sellerName)[0]}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-main text-sm truncate">
-                      {book.sellerUsername ?? book.sellerName}
-                    </p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <Star size={11} className="text-yellow-400 fill-yellow-400" />
-                      <span className="text-xs text-main/55">
-                        {book.sellerRating} rating
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1 text-main/50 shrink-0">
-                    <MapPin size={13} />
-                    <span className="text-xs">{book.location}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* LOVE NOTE */}
-              {book.loveNote && (
-                <div className="relative bg-secondary/10 border-l-4 border-secondary rounded-r-2xl rounded-l-md p-5 mb-7">
-                  <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-secondary mb-2">
-                    A note from the seller
-                  </p>
-                  <p className="text-main/75 text-sm italic leading-relaxed">
-                    “{book.loveNote}”
-                  </p>
-                </div>
-              )}
-
-              {/* PRICE + CTA */}
-              <div className="bg-white border border-third/70 rounded-2xl p-5 md:p-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-secondary mb-1.5">
-                      Price
-                    </p>
-
-                    <div className="flex items-baseline gap-2.5 flex-wrap">
-                      <p className="font-heading font-bold text-main text-4xl md:text-[2.5rem] leading-none">
-                        ₦{finalPrice.toLocaleString()}
-                      </p>
-                      {hasDiscount && (
-                        <p className="text-sm text-main/40 line-through">
-                          ₦{book.price.toLocaleString()}
-                        </p>
-                      )}
-                    </div>
-
-                    {hasDiscount && (
-                      <p className="mt-1.5 inline-block text-[11px] text-secondary font-bold bg-secondary/10 px-2 py-0.5 rounded-full">
-                        {book.discount}% OFF
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => addToCart(book.id)}
-                    className="group inline-flex items-center justify-center gap-2 bg-main text-white font-semibold px-7 py-4 rounded-full hover:bg-main/90 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] transition-all duration-200 text-sm w-full sm:w-auto"
-                  >
-                    <ShoppingBag size={17} className="transition-transform duration-300 group-hover:rotate-[-8deg]" />
-                    Add to Cart
-                  </button>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-third/70 flex items-center gap-2 text-xs text-main/55">
-                  <ShieldCheck size={14} className="text-secondary" />
-                  Secure checkout · Buyer protection included
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* PRODUCT DETAILS — order-3 on mobile, sits under image on desktop */}
-          <div className="order-3 lg:order-none lg:col-span-7 reveal bg-white border border-third/70 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-heading font-bold text-main text-lg">Product Details</h3>
-              <div className="hidden md:flex items-center gap-1.5 text-xs text-main/50">
-                <ShieldCheck size={14} className="text-secondary" />
-                Verified Listing
-              </div>
+            {/* Badges Row */}
+            <div className="flex items-center gap-2 mb-5">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-secondary/10 text-secondary">
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                {book.condition}
+              </span>
+              <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-main/5 text-main">
+                {book.quantity} copy available
+              </span>
             </div>
 
-            <div className="divide-y divide-third/70 text-sm">
-              {[
-                { icon: Tag, label: 'Category', value: book.genre },
-                { icon: BookOpen, label: 'Format', value: book.format },
-                { icon: Layers, label: 'Condition', value: book.condition },
-                { icon: Package, label: 'Available', value: book.quantity },
-                { icon: MapPin, label: 'Ships From', value: book.location },
-              ].map(({ icon: Icon, label, value }) => (
-                <div
-                  key={label}
-                  className="flex items-center justify-between py-3.5 px-1 rounded-lg hover:bg-third/40 transition-colors duration-200"
+            {/* Pricing Card */}
+            <div className="border border-main/10 rounded-2xl p-5 bg-white shadow-sm mb-4">
+              <div className="mb-4">
+                <div className="text-2xl font-extrabold text-main">{formatPrice(book.price)}</div>
+                {hasNewPrice && (
+                  <div className="flex items-center gap-2 mt-1 text-[11px] flex-wrap">
+                    <span className="text-main/45 line-through">New price: {formatPrice(brandNewPrice!)}</span>
+                    <span className="text-secondary font-semibold">
+                      You save: {formatPrice(savings)} ({savingsPercent}%)
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <button
+                onClick={() => addToCart(Number(id))}
+                className="w-full border border-main/20 hover:bg-main/5 text-main font-semibold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 bg-white"
+              >
+                <ShoppingCart size={14} />
+                Add to cart
+              </button>
+            </div>
+
+            {/* Condition Note Card */}
+            <div className="bg-secondary/5 rounded-2xl p-4 border border-secondary/5 mb-3.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-secondary mb-1.5">Condition note</p>
+              <p className="text-xs text-main/75 leading-relaxed">
+                {book.conditionDetail ||
+                  'The book has some creases on the front and back covers. Slight yellowing on the sides. But the pages are intact. Also, I highlighted some pages and my name is written on the first page.'}
+              </p>
+            </div>
+
+            {/* Seller profile Card */}
+            <div className="bg-secondary/5 rounded-2xl p-4 border border-secondary/5 mb-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
+                <div className="w-10 h-10 rounded-full bg-main/10 flex items-center justify-center font-heading font-bold text-main shrink-0 text-sm">
+                  {book.sellerName.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-bold text-main text-xs truncate max-w-[140px] sm:max-w-[200px] md:max-w-none">{book.sellerName}</span>
+                    <div className="flex items-center gap-1 text-[9px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full shrink-0">
+                      <span className="w-1 h-1 rounded-full bg-blue-600"></span>
+                      Verified
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] text-main/45 mt-1">
+                    <MapPin size={10} className="shrink-0" />
+                    <span className="truncate">{book.location || 'Lagos Island'}</span>
+                  </div>
+                </div>
+              </div>
+              {book.sellerSlug && (
+                <Link
+                  to={`/store/${encodeURIComponent(book.sellerSlug)}`}
+                  className="text-[10px] font-semibold text-secondary hover:underline shrink-0 flex items-center gap-0.5 self-end sm:self-auto"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-third/60 flex items-center justify-center">
-                      <Icon size={14} className="text-main/65" />
-                    </div>
-                    <span className="text-main/60">{label}</span>
-                  </div>
-                  <span className="font-semibold text-main">{value}</span>
-                </div>
-              ))}
+                  <span>View seller's profile</span>
+                  <span>&rarr;</span>
+                </Link>
+              )}
+            </div>
+
+            {/* Handwritten Seller Sticky Note */}
+            <div className="relative bg-[#F9F9F9] pt-8 pb-4 px-5 rounded-2xl shadow-sm border border-[#EEEEEE] flex flex-col min-h-[130px] overflow-hidden">
+              {/* Tape decoration */}
+              <div className="absolute -top-1 w-14 h-4 bg-slate-300/40 rounded-[3px] shadow-sm border border-white/40 left-1/2 -translate-x-1/2" />
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-main/40 mb-2">
+                A note from the seller
+              </p>
+              <p className="font-handwritten text-[16px] text-main/90 leading-relaxed font-medium mb-3 flex-1">
+                "{book.loveNote || 'This book changed how I see myself and my roots. I hope it does the same for you.'}"
+              </p>
+              <p className="font-handwritten text-sm text-main/75 text-right font-semibold">— {book.sellerName}</p>
             </div>
           </div>
         </div>
+
+        {/* RELATED BOOKS: You May Also Like */}
+        {relatedBooks.length > 0 && (
+          <div className="mt-12 border-t border-main/10 pt-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-heading font-bold text-main text-xl">You may also like</h2>
+              <Link
+                to="/browse"
+                className="text-xs font-semibold text-secondary hover:underline flex items-center gap-1"
+              >
+                <span>View more</span>
+                <span>&rarr;</span>
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {relatedBooks.map((b) => (
+                <BookCard key={b.id} book={b} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

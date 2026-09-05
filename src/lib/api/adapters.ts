@@ -1,0 +1,182 @@
+import type { ListingResponse, CartItemResponse, CartResponse, StoreFulfillmentOption } from "./types"
+
+const COVER_COLORS = ["#C8A97E", "#2E4057", "#6B4E3E", "#8B4513", "#4A6FA5", "#7C5C4D", "#9B6B43", "#5D7A5D"]
+
+function pickColor(id?: number): string {
+  return COVER_COLORS[(id ?? 1) % COVER_COLORS.length]
+}
+
+/**
+ * The API may return `tags` / `tagNames` as plain strings OR as objects
+ * (e.g. `{ id: 1, name: "Fiction" }`). This helper normalises both shapes
+ * into a simple `string[]` so the UI can safely render and key on them.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeTags(raw: any[] | null | undefined): string[] | undefined {
+  if (!raw || raw.length === 0) return undefined
+  const result: string[] = []
+  for (const item of raw) {
+    if (!item) continue
+    if (typeof item === 'string') {
+      result.push(item)
+    } else if (typeof item === 'object' && item.name) {
+      result.push(String(item.name))
+    }
+  }
+  return result.length > 0 ? result : undefined
+}
+
+export interface BookDisplay {
+  id: string
+  title: string
+  author: string
+  genre: string
+  condition: string
+  conditionDetail?: string
+  format?: string
+  quantity: number
+  price: number
+  originalPrice: number
+  originalPriceOfNew?: number
+  discount?: number
+  isDiscountApplied?: boolean
+  coverColor: string
+  coverImageUrl?: string
+  imageUrls?: string[]
+  description: string
+  loveNote?: string
+  sellerName: string
+  sellerSlug?: string
+  fulfillmentOption?: StoreFulfillmentOption
+  pickupAddressLine?: string
+  pickupCity?: string
+  pickupState?: string
+  isbn?: string
+  categoryId?: number
+  location?: string
+  tags?: string[]
+  tagNames?: string[]
+  numberOfPages?: number
+}
+
+export function getPublicSellerDisplayName(payload?: {
+  storeSlug?: string | null
+  storeName?: string | null
+  sellerName?: string | null
+  username?: string | null
+  userName?: string | null
+  createdBy?: string | null
+}): string {
+  const choices = [
+    payload?.username,
+    payload?.userName,
+    payload?.storeSlug,
+    payload?.storeName,
+    payload?.sellerName,
+  ]
+
+  for (const value of choices) {
+    const text = value?.trim()
+    if (text && !text.includes('@')) return text
+  }
+
+  const createdBy = payload?.createdBy?.trim()
+  if (createdBy) return createdBy.includes('@') ? createdBy.split('@')[0] : createdBy
+
+  return 'Seller'
+}
+
+export function listingToBookDisplay(listing: ListingResponse): BookDisplay {
+  const buyersPriceInNaira = Math.round((listing.buyerPrice || listing.price || 0) / 100)
+  const discountPct = listing.discount ?? 0
+  const hasDiscount = listing.isDiscountApplied && discountPct > 0
+  const originalPrice = hasDiscount
+    ? Math.round(buyersPriceInNaira / (1 - discountPct / 100))
+    : buyersPriceInNaira
+  const originalPriceOfNew = listing.priceOfNew ? Math.round(listing.priceOfNew / 100) : undefined
+
+  return {
+    id: String(listing.id ?? ""),
+    title: listing.title ?? "",
+    author: listing.author ?? "",
+    genre: listing.categoryName ?? "General",
+    condition: listing.bookCondition ?? "Good",
+    quantity: listing.quantity ?? 1,
+    price: buyersPriceInNaira,
+    originalPrice,
+    originalPriceOfNew,
+    discount: discountPct,
+    isDiscountApplied: listing.isDiscountApplied ?? false,
+    coverColor: pickColor(listing.id),
+    coverImageUrl: listing.coverImageFileName ?? undefined,
+    imageUrls: listing.imageFileNames ?? undefined,
+    conditionDetail: listing.conditionDetail ?? undefined,
+    format: listing.format ?? undefined,
+    description: listing.description ?? "",
+    loveNote: listing.loveNote ?? undefined,
+    sellerName: getPublicSellerDisplayName({
+      username: listing.username,
+      userName: listing.userName,
+      storeSlug: listing.storeSlug,
+      storeName: listing.storeName,
+      createdBy: listing.createdBy,
+    }),
+    sellerSlug: listing.storeSlug ?? undefined,
+    fulfillmentOption: listing.fulfillmentOption ?? "Courier",
+    pickupAddressLine: listing.pickupAddressLine ?? undefined,
+    pickupCity: listing.pickupCity ?? undefined,
+    pickupState: listing.pickupState ?? undefined,
+    isbn: listing.isbn ?? undefined,
+    categoryId: listing.categoryId,
+    location: listing.location || undefined,
+    tags: normalizeTags(listing.tags),
+    tagNames: normalizeTags(listing.tagNames),
+    numberOfPages: listing.numberOfPages ?? undefined,
+  }
+}
+
+export interface CartItemDisplay {
+  id: number
+  listingId: number
+  title: string
+  author: string
+  coverColor: string
+  coverImageUrl?: string
+  unitPrice: number
+  buyerPrice: number
+  quantity: number
+  isbn?: string
+  sellerEmail?: string
+  storeName?: string
+  storeSlug?: string
+  fulfillmentOption?: StoreFulfillmentOption
+  pickupAddressLine?: string
+  pickupCity?: string
+  pickupState?: string
+}
+
+export function cartItemToDisplay(item: CartItemResponse): CartItemDisplay {
+  return {
+    id: item.id ?? 0,
+    listingId: item.listingId ?? 0,
+    title: item.title ?? "",
+    author: item.author ?? "",
+    coverColor: pickColor(item.listingId),
+    coverImageUrl: item.coverImageFileName ?? undefined,
+    unitPrice: Math.round((item.unitPrice ?? 0) / 100),
+    buyerPrice: Math.round((item.buyerPrice ?? 0) / 100),
+    quantity: item.quantity ?? 1,
+    isbn: item.isbn ?? undefined,
+    sellerEmail: item.sellerEmail ?? undefined,
+    storeName: item.storeName ?? undefined,
+    storeSlug: item.storeSlug ?? undefined,
+    fulfillmentOption: item.fulfillmentOption ?? "Courier",
+    pickupAddressLine: item.pickupAddressLine ?? undefined,
+    pickupCity: item.pickupCity ?? undefined,
+    pickupState: item.pickupState ?? undefined,
+  }
+}
+
+export function cartToDisplay(cart: CartResponse): CartItemDisplay[] {
+  return (cart.items ?? []).map(cartItemToDisplay)
+}

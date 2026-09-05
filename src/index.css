@@ -140,6 +140,9 @@
 }
 
 @layer utilities {
+  .font-handwritten {
+    font-family: 'Caveat', cursive;
+  }
   .font-display {
     font-family: 'Poppins', system-ui, sans-serif;
   }
@@ -183,6 +186,13 @@
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: hsl(var(--border));
     border-radius: 999px;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 

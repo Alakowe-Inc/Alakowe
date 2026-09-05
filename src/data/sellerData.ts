@@ -1,8 +1,8 @@
 export type ListingStatus = 'pending_review' | 'live' | 'rejected' | 'sold'
-export type ConditionGrade = 'Like New' | 'Very Good' | 'Good' | 'Average' | 'Below Average'
+export type ConditionGrade = 'New' | 'LikeNew' | 'Excellent' | 'Good' | 'Fair' | 'Poor'
 
 export const CONDITIONS: ConditionGrade[] = [
-  'Like New', 'Very Good', 'Good', 'Average', 'Below Average',
+  'New', 'LikeNew', 'Excellent', 'Good', 'Fair', 'Poor',
 ]
 
 export const GENRES = [

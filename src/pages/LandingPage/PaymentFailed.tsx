@@ -1,7 +1,15 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { XCircle } from 'lucide-react'
 
 function PaymentFailed() {
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['cart'] })
+  }, [queryClient])
+
   return (
     <div className="bg-third min-h-screen flex items-center justify-center px-4 py-16">
       <div className="max-w-md w-full text-center">
@@ -22,7 +30,7 @@ function PaymentFailed() {
         <div className="flex flex-col gap-3">
           <Link
             to="/checkout"
-            className="w-full bg-main text-white font-semibold py-4 rounded-full hover:bg-main/90 transition-colors text-sm text-center"
+            className="w-full bg-secondary text-white font-semibold py-4 rounded-xl hover:bg-secondary/90 transition-colors text-sm text-center"
           >
             Retry Payment
           </Link>

@@ -1,19 +1,18 @@
 import { Link } from 'react-router-dom'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
-import { books } from '../../data/mockData'
+import { Button } from '@/components/ui/button'
+import { formatPrice } from '../../lib/utils'
 
 function Cart() {
-  const { items, removeFromCart, updateQuantity, clearCart } = useCart()
+  const { items, addToCart, removeFromCart, clearCart } = useCart()
 
-  const cartBooks = items.map(item => ({
-    ...item,
-    book: books.find(b => b.id === item.bookId)!,
-  })).filter(item => item.book)
+  const subtotal = items.reduce((sum, item) => sum + item.buyerPrice * item.quantity, 0)
+  const allPickupOnly =
+    items.length > 0 && items.every((item) => item.fulfillmentOption === 'Pickup')
+  const hasPickupOnly = items.some((item) => item.fulfillmentOption === 'Pickup')
 
-  const subtotal = cartBooks.reduce((sum, { book, quantity }) => sum + book.price * quantity, 0)
-
-  if (cartBooks.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="bg-third min-h-screen flex items-center justify-center px-4">
         <div className="text-center max-w-sm">
@@ -26,7 +25,7 @@ function Cart() {
           </p>
           <Link
             to="/browse"
-            className="inline-flex items-center gap-2 bg-main text-white font-semibold px-6 py-3 rounded-full hover:bg-main/90 transition-colors text-sm"
+            className="inline-flex items-center gap-2 bg-secondary text-white font-semibold px-6 py-3 rounded-xl hover:bg-secondary/90 transition-colors text-sm"
           >
             Browse Books
           </Link>
@@ -49,43 +48,52 @@ function Cart() {
 
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-heading font-bold text-main text-3xl">Your Cart</h1>
-          <button
+          <Button
+            variant="ghost"
             onClick={clearCart}
-            className="text-xs text-main/45 hover:text-main/70 transition-colors font-medium underline underline-offset-2"
+            className="h-auto p-0 text-xs text-main/45 hover:text-main/70 font-medium underline underline-offset-2 hover:bg-transparent"
           >
             Clear all
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Cart items */}
           <div className="lg:col-span-2 flex flex-col gap-4">
-            {cartBooks.map(({ book, quantity }) => (
+            {items.map((item) => (
               <div
-                key={book.id}
+                key={item.listingId}
                 className="bg-white rounded-lg border border-third p-5 flex gap-5"
               >
                 {/* Book cover */}
-                <Link to={`/books/${book.id}`} className="shrink-0">
+                <Link to={`/books/${item.listingId}`} className="shrink-0">
                   <div
-                    className="w-16 h-24 rounded-full shadow-md flex items-end justify-center pb-2"
-                    style={{ backgroundColor: book.coverColor }}
+                    className="w-16 h-24 rounded overflow-hidden shadow-md flex items-center justify-center"
+                    style={{ backgroundColor: item.coverColor }}
                   >
-                    <div className="w-10 h-px bg-white/40 rounded" />
+                    {item.coverImageUrl ? (
+                      <img
+                        src={item.coverImageUrl}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-px bg-white/40 rounded" />
+                    )}
                   </div>
                 </Link>
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-3 mb-1">
-                    <Link to={`/books/${book.id}`} className="hover:underline">
+                    <Link to={`/books/${item.listingId}`} className="hover:underline">
                       <p className="font-heading font-bold text-main text-base leading-snug">
-                        {book.title}
+                        {item.title}
                       </p>
                     </Link>
                     <button
-                      onClick={() => removeFromCart(book.id)}
+                      onClick={() => removeFromCart(item.listingId)}
                       aria-label="Remove"
                       className="text-main cursor-pointer hover:text-red-600 transition-colors shrink-0 mt-0.5"
                     >
@@ -93,25 +101,30 @@ function Cart() {
                     </button>
                   </div>
 
-                  <p className="text-main/50 text-sm mb-1">by {book.author}</p>
-
-                  <span className="text-xs font-medium text-main/50 bg-main/6 border border-main/10 px-2 py-0.5 rounded-full">
-                    {book.condition}
-                  </span>
+                  <p className="text-main/50 text-sm mb-1">by {item.author}</p>
+                  {item.fulfillmentOption === 'Pickup' && (
+                    <p className="text-xs font-semibold text-secondary mb-1">Pickup only</p>
+                  )}
 
                   <div className="flex items-center justify-between mt-4">
                     {/* Quantity control */}
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => updateQuantity(book.id, quantity - 1)}
-                        disabled={quantity <= 1}
+                        onClick={() => {
+                          if (item.quantity <= 1) {
+                            removeFromCart(item.listingId)
+                          } else {
+                            addToCart(item.listingId)
+                          }
+                        }}
+                        disabled={item.quantity <= 1}
                         className="w-7 h-7 rounded-full border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <Minus size={12} />
                       </button>
-                      <span className="text-sm font-semibold text-main w-4 text-center">{quantity}</span>
+                      <span className="text-sm font-semibold text-main w-4 text-center">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(book.id, quantity + 1)}
+                        onClick={() => addToCart(item.listingId)}
                         className="w-7 h-7 rounded-full border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors"
                       >
                         <Plus size={12} />
@@ -120,7 +133,7 @@ function Cart() {
 
                     {/* Line total */}
                     <p className="font-heading font-bold text-main text-lg">
-                      ₦{(book.price * quantity).toLocaleString()}
+                      {formatPrice(item.buyerPrice * item.quantity)}
                     </p>
                   </div>
                 </div>
@@ -134,13 +147,13 @@ function Cart() {
               <h2 className="font-heading font-bold text-main text-lg mb-6">Order Summary</h2>
 
               <div className="flex flex-col gap-3 mb-6">
-                {cartBooks.map(({ book, quantity }) => (
-                  <div key={book.id} className="flex items-center justify-between text-sm">
+                {items.map((item) => (
+                  <div key={item.listingId} className="flex items-center justify-between text-sm">
                     <span className="text-main/60 truncate pr-2">
-                      {book.title} {quantity > 1 && <span className="text-main/40">×{quantity}</span>}
+                      {item.title} {item.quantity > 1 && <span className="text-main/40">×{item.quantity}</span>}
                     </span>
                     <span className="text-main font-medium shrink-0">
-                      ₦{(book.price * quantity).toLocaleString()}
+                      {formatPrice(item.buyerPrice * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -150,17 +163,21 @@ function Cart() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-main/60 uppercase tracking-wider">Subtotal</span>
                   <span className="font-heading font-bold text-main text-xl">
-                    ₦{subtotal.toLocaleString()}
+                    {formatPrice(subtotal)}
                   </span>
                 </div>
                 <p className="text-xs text-main/40 mt-2">
-                  Delivery fee calculated at checkout
+                  {allPickupOnly
+                    ? 'No delivery fee. These books are pickup only.'
+                    : hasPickupOnly
+                      ? 'Some books are pickup only. Delivery fee is calculated at checkout for delivered items.'
+                      : 'Delivery fee calculated at checkout'}
                 </p>
               </div>
 
               <Link
                 to="/checkout"
-                className="block w-full bg-main text-white font-semibold py-3.5 rounded-full hover:bg-main/90 transition-colors text-sm mb-3 text-center"
+                className="block w-full bg-secondary text-white font-semibold py-3.5 rounded-xl hover:bg-secondary/90 transition-colors text-sm mb-3 text-center"
               >
                 Proceed to Checkout
               </Link>

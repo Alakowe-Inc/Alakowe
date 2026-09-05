@@ -3,9 +3,10 @@ export type BookBadge = 'Best Value' | 'Recently Added' | null
 
 export interface Book {
   id: string
+  slug: string
   title: string
   author: string
-  genre: string
+  category: string
 
   condition: string
   conditionNotes: string
@@ -14,11 +15,14 @@ export interface Book {
   format: string
 
   price: number
-  discount?: number   // ← ADD THIS
+  originalPrice: number
+  discount?: number
+  isDiscountApplied?: boolean
 
   location: string
   badge: BookBadge
   coverColor: string
+  coverImageUrl?: string
 
   description: string
   sellerName: string
@@ -31,9 +35,10 @@ export interface Book {
 export const books: Book[] = [
   {
     id: '1',
+    slug: 'things-fall-apart',
     title: 'Things Fall Apart',
     author: 'Chinua Achebe',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Good',
     conditionNotes: 'Minor cover scuff, pages slightly yellowed',
@@ -42,7 +47,8 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 2500,
-    location: 'Lagos Island',
+    originalPrice: 2500,
+    location: 'Lagos Island, Lagos',
     badge: 'Best Value',
     coverColor: '#C8A97E',
 
@@ -56,9 +62,10 @@ export const books: Book[] = [
   },
   {
     id: '2',
+    slug: 'purple-hibiscus',
     title: 'Purple Hibiscus',
     author: 'Chimamanda Ngozi Adichie',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Good',
     conditionNotes: 'Small crease on spine, light pencil marks inside',
@@ -67,7 +74,8 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 3000,
-    location: 'Ibadan',
+    originalPrice: 3000,
+    location: 'Bodija, Oyo',
     badge: 'Recently Added',
     coverColor: '#9B5DE5',
     description:
@@ -79,9 +87,10 @@ export const books: Book[] = [
   },
   {
     id: '3',
+    slug: 'half-of-a-yellow-sun',
     title: 'Half of a Yellow Sun',
     author: 'Chimamanda Ngozi Adichie',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Fair',
     conditionNotes: 'Faded spine, minor corner wear',
@@ -90,7 +99,8 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 3500,
-    location: 'Abuja',
+    originalPrice: 3500,
+    location: 'Garki, Abuja',
     badge: null,
     coverColor: '#F4A261',
     description:
@@ -101,9 +111,10 @@ export const books: Book[] = [
   },
   {
     id: '4',
+    slug: 'americanah',
     title: 'Americanah',
     author: 'Chimamanda Ngozi Adichie',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Good',
     conditionNotes: 'Clean pages, small sticker residue on back cover',
@@ -111,8 +122,10 @@ export const books: Book[] = [
     quantity: 1,
     format: 'Paperback',
 
-    price: 4000,
-    discount: 5, // ← add this
+    price: 3800,
+    originalPrice: 4000,
+    discount: 5,
+    isDiscountApplied: true,
     location: 'Victoria Island, Lagos',
     badge: 'Best Value',
     coverColor: '#2D6A4F',
@@ -124,9 +137,10 @@ export const books: Book[] = [
   },
   {
     id: '5',
+    slug: 'the-famished-road',
     title: 'The Famished Road',
     author: 'Ben Okri',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Fair',
     conditionNotes: 'Torn back cover corner, water stain on first 10 pages, heavy underlining',
@@ -135,7 +149,8 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 2000,
-    location: 'Port Harcourt',
+    originalPrice: 2000,
+    location: 'GRA, Rivers',
     badge: 'Best Value',
     coverColor: '#E63946',
     description:
@@ -146,9 +161,10 @@ export const books: Book[] = [
   },
   {
     id: '6',
+    slug: 'stay-with-me',
     title: 'Stay With Me',
     author: 'Ayobami Adeyemi',
-    genre: 'African Fiction',
+    category: 'African Fiction',
 
     condition: 'Like New',
     conditionNotes: 'Like new, no visible wear',
@@ -157,7 +173,8 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 3200,
-    location: 'Lagos',
+    originalPrice: 3200,
+    location: 'Yaba, Lagos',
     badge: 'Recently Added',
     coverColor: '#457B9D',
     description:
@@ -167,10 +184,11 @@ export const books: Book[] = [
     loveNote: 'I read this in two days. It will haunt you in the best way.',
   },
   {
-  id: '7',
+    id: '7',
+    slug: 'atomic-habits',
     title: 'Atomic Habits',
     author: 'James Clear',
-    genre: 'Self Help',
+    category: 'Self Help',
 
     condition: 'Good',
     conditionNotes: 'Slight yellowing on edges',
@@ -178,10 +196,12 @@ export const books: Book[] = [
     quantity: 1,
     format: 'Paperback',
 
-    price: 4500,
-    discount: 10, // ← add this
+    price: 4050,
+    originalPrice: 4500,
+    discount: 10,
+    isDiscountApplied: true,
 
-    location: 'Ikeja Lagos',
+    location: 'Ikeja, Lagos',
     badge: null,
     coverColor: '#1D3557',
     description:
@@ -192,9 +212,10 @@ export const books: Book[] = [
   },
   {
     id: '8',
+    slug: 'the-alchemist',
     title: 'The Alchemist',
     author: 'Paulo Coelho',
-    genre: 'Foreign Fiction',
+    category: 'Foreign Fiction',
 
     condition: 'Good',
     conditionNotes: 'Minor spine crease, small ink mark on page 34',
@@ -203,6 +224,7 @@ export const books: Book[] = [
     format: 'Paperback',
 
     price: 2800,
+    originalPrice: 2800,
     location: 'Lekki, Lagos',
     badge: 'Best Value',
     coverColor: '#E9C46A',
