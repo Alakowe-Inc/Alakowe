@@ -20,7 +20,7 @@ import { FormControl, SelectBoxControl, TextareaControl, FileUpload, type Select
 
 type FormState = {
   title: string; author: string; genre: string; selectedTagIds: number[]; condition: string
-  conditionDetail: string; description: string; price: string; discount: string; loveNote: string
+  conditionDetail: string; description: string; price: string; discount: string; quantity: string; loveNote: string
   stateId: string; areaId: string
 }
 
@@ -104,7 +104,7 @@ export default function EditListing() {
 
     const draft = loadListingDraft()
     if (draft?.kind === 'edit' && draft.listingId === listingId) {
-      setForm({ ...draft.form, selectedTagIds: (draft.form as unknown as FormState).selectedTagIds ?? [] })
+      setForm({ quantity: '1', ...draft.form, selectedTagIds: (draft.form as unknown as FormState).selectedTagIds ?? [] })
       setExistingImages(draft.existingImages)
       setCoverIndex(draft.coverIndex)
       setSelectedStateId(Number(draft.form.stateId) || 0)
@@ -143,6 +143,7 @@ export default function EditListing() {
       description: listing.description ?? '',
       price: String(Math.round((listing.price ?? 0) / 100)),
       discount: listing.discount != null ? String(listing.discount) : '0',
+      quantity: listing.quantity != null ? String(listing.quantity) : '1',
       loveNote: listing.loveNote ?? '',
       stateId,
       areaId,
@@ -294,6 +295,9 @@ export default function EditListing() {
     const price = parseFloat(form.price)
     if (!form.price || isNaN(price) || price < 100)
       e.price = 'Enter a valid price (min ₦100)'
+    const qty = Number(form.quantity)
+    if (!form.quantity || !Number.isInteger(qty) || qty < 1)
+      e.quantity = 'Enter a valid quantity (min 1)'
     if (!form.stateId) e.stateId = 'Please select a state'
     if (!form.areaId) e.areaId = 'Please select an area'
     return e
@@ -335,7 +339,7 @@ export default function EditListing() {
         conditionDetail: form.conditionDetail.trim() || undefined,
         description: form.description.trim(),
         price: Math.round(parseFloat(form.price) * 100),
-        quantity: 1,
+        quantity: Number(form.quantity) || 1,
         loveNote: form.loveNote.trim() || undefined,
         coverImageFileName,
         imageFileNames,
@@ -591,6 +595,9 @@ export default function EditListing() {
                   <FormControl type="number" min="0" max="50" value={form.discount} onChange={set('discount')} style={`${inputClass(!!errors.discount)} pr-8`} />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-main/40">%</span>
                 </div>
+              </Field>
+              <Field label="Quantity" required error={errors.quantity}>
+                <FormControl type="number" min="1" step="1" value={form.quantity} onChange={set('quantity')} style={inputClass(!!errors.quantity)} />
               </Field>
             </div>
           </div>
