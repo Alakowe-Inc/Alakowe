@@ -25,6 +25,7 @@ export type EditListingDraftForm = {
   description: string
   price: string
   discount: string
+  quantity: string
   loveNote: string
   stateId: string
   areaId: string
