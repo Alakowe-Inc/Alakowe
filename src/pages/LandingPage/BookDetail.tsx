@@ -434,7 +434,7 @@ function BookDetail() {
                 A note from the seller
               </p>
               <p className="font-handwritten text-[16px] text-main/90 leading-relaxed font-medium mb-3 flex-1">
-                "{book.loveNote || 'This book changed how I see myself and my roots. I hope it does the same for you.'}"
+                "{book.loveNote || 'I hope this finds whoever gets this at the perfect time.'}"
               </p>
               <p className="font-handwritten text-sm text-main/75 text-right font-semibold">— {book.sellerName}</p>
             </div>

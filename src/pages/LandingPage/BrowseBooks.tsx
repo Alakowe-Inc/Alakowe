@@ -56,6 +56,7 @@ function BrowseBooks() {
 
   const currentPage = pagedResult?.pageNumber ?? page
   const totalPages = pagedResult?.totalPages ?? 1
+  const totalCount = pagedResult?.totalCount ?? 0
   const hasPreviousPage = pagedResult?.hasPreviousPage ?? false
   const hasNextPage = pagedResult?.hasNextPage ?? false
 
@@ -181,7 +182,7 @@ function BrowseBooks() {
               />
             </div>
               <span className="hidden sm:block text-xs font-semibold uppercase tracking-[0.15em] text-main/40">
-                {books.length} {books.length === 1 ? 'Book' : 'Books'}
+                {totalCount} {totalCount === 1 ? 'Book' : 'Books'}
               </span>
           </div>
 
@@ -254,7 +255,7 @@ function BrowseBooks() {
                   </div>
                 ) : (
                   <div className="text-xs text-main/40 font-medium">
-                    Showing all {books.length} books
+                    Showing all {totalCount} books
                   </div>
                 )}
 
@@ -440,7 +441,7 @@ function BrowseBooks() {
                 onClick={closeFilters}
                 className="flex-1 bg-secondary text-white py-4 text-xs font-semibold uppercase tracking-[0.2em] hover:bg-secondary/90 transition-colors rounded-xl"
               >
-                Show {books.length} {books.length === 1 ? 'Result' : 'Results'}
+                Show {totalCount} {totalCount === 1 ? 'Result' : 'Results'}
               </button>
             </div>
           </div>
