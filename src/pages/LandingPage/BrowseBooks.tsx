@@ -25,7 +25,7 @@ function BrowseBooks() {
   const [sortBy, setSortBy] = useState('default')
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
-  const PAGE_SIZE = 20
+  const PAGE_SIZE = 25
 
   const collectionSlug = searchParams.get('collection')
   const tagSlug = searchParams.get('tag')
@@ -38,20 +38,27 @@ function BrowseBooks() {
   const apiFilter = useMemo<ListingFilterParams>(() => {
     const params: ListingFilterParams = {
       PageNumber: page,
-      PageSize: 50,
+      PageSize: PAGE_SIZE,
     }
     if (collectionSlug) params.Collection = collectionSlug
     if (tagSlug) params.Tag = tagSlug
     if (effectiveCategorySlug) params.Category = effectiveCategorySlug
     if (query) params.Title = query
+    if (condition !== 'All') params.Condition = condition
     const apiSort = sortValueToApiParam[sortBy]
     if (apiSort) params.Sort = apiSort
     return params
-  }, [effectiveCategorySlug, tagSlug, collectionSlug, query, sortBy, page])
+  }, [effectiveCategorySlug, tagSlug, collectionSlug, query, sortBy, page, condition])
 
   const { data: pagedResult, isLoading } = useListings(apiFilter)
 
   const books = useMemo(() => (pagedResult?.result ?? []).map(listingToBookDisplay), [pagedResult])
+
+  const currentPage = pagedResult?.pageNumber ?? page
+  const totalPages = pagedResult?.totalPages ?? 1
+  const totalCount = pagedResult?.totalCount ?? 0
+  const hasPreviousPage = pagedResult?.hasPreviousPage ?? false
+  const hasNextPage = pagedResult?.hasNextPage ?? false
 
   useEffect(() => {
     document.body.style.overflow = showFilters ? 'hidden' : ''
@@ -64,15 +71,6 @@ function BrowseBooks() {
 
   const openFilters = () => setShowFilters(true)
   const closeFilters = () => setShowFilters(false)
-
-  const filtered = useMemo(() => {
-    let result = [...books]
-    if (condition !== 'All') result = result.filter(b => b.condition === condition)
-    return result
-  }, [condition, books])
-
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const hasFilters = effectiveCategorySlug !== null || condition !== 'All' || !!collectionSlug || !!tagSlug
 
@@ -183,9 +181,9 @@ function BrowseBooks() {
                 style="min-h-0 px-0 py-0 border-0 rounded-none bg-transparent hover:bg-transparent text-xs font-semibold uppercase tracking-[0.15em] text-main truncate"
               />
             </div>
-            <span className="hidden sm:block text-xs font-semibold uppercase tracking-[0.15em] text-main/40">
-              {filtered.length} {filtered.length === 1 ? 'Book' : 'Books'}
-            </span>
+              <span className="hidden sm:block text-xs font-semibold uppercase tracking-[0.15em] text-main/40">
+                {totalCount} {totalCount === 1 ? 'Book' : 'Books'}
+              </span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -211,10 +209,10 @@ function BrowseBooks() {
             <div className="flex items-center justify-center py-32">
               <p className="text-main/50 text-sm">Loading…</p>
             </div>
-          ) : filtered.length > 0 ? (
+          ) : books.length > 0 ? (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8 mb-10">
-                {paginated.map(book => (
+                {books.map(book => (
                   <BookCard key={book.id} book={book} />
                 ))}
               </div>
@@ -226,7 +224,7 @@ function BrowseBooks() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                      disabled={page === 1}
+                      disabled={!hasPreviousPage}
                       className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                       aria-label="Previous page"
                     >
@@ -237,7 +235,7 @@ function BrowseBooks() {
                       <button
                         key={n}
                         onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                        className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${n === page
+                        className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${n === currentPage
                           ? 'bg-secondary text-white'
                           : 'border border-main/15 text-main/50 hover:border-main/40 hover:text-main'
                           }`}
@@ -248,7 +246,7 @@ function BrowseBooks() {
 
                     <button
                       onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                      disabled={page === totalPages}
+                      disabled={!hasNextPage}
                       className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                       aria-label="Next page"
                     >
@@ -257,7 +255,7 @@ function BrowseBooks() {
                   </div>
                 ) : (
                   <div className="text-xs text-main/40 font-medium">
-                    Showing all {filtered.length} books
+                    Showing all {totalCount} books
                   </div>
                 )}
 
@@ -443,7 +441,7 @@ function BrowseBooks() {
                 onClick={closeFilters}
                 className="flex-1 bg-secondary text-white py-4 text-xs font-semibold uppercase tracking-[0.2em] hover:bg-secondary/90 transition-colors rounded-xl"
               >
-                Show {filtered.length} {filtered.length === 1 ? 'Result' : 'Results'}
+                Show {totalCount} {totalCount === 1 ? 'Result' : 'Results'}
               </button>
             </div>
           </div>

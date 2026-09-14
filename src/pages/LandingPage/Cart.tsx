@@ -114,7 +114,7 @@ function Cart() {
                           if (item.quantity <= 1) {
                             removeFromCart(item.listingId)
                           } else {
-                            addToCart(item.listingId)
+                            addToCart(item.listingId, item.quantity - 1)
                           }
                         }}
                         disabled={item.quantity <= 1}
@@ -124,7 +124,7 @@ function Cart() {
                       </button>
                       <span className="text-sm font-semibold text-main w-4 text-center">{item.quantity}</span>
                       <button
-                        onClick={() => addToCart(item.listingId)}
+                        onClick={() => addToCart(item.listingId, item.quantity + 1)}
                         className="w-7 h-7 rounded-full border border-main/20 flex items-center justify-center text-main hover:border-main/50 transition-colors"
                       >
                         <Plus size={12} />
