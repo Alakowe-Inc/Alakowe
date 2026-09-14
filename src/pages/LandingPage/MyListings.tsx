@@ -219,43 +219,43 @@ export default function MyListings() {
                 </div>
               </div>
             ))}
-          </div>
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8 pt-6 border-t border-main/10">
-              <button
-                onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                disabled={!hasPreviousPage}
-                className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                aria-label="Previous page"
-              >
-                <CaretLeftIcon size={14} weight="bold" />
-              </button>
-
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8 pt-6 border-t border-main/10">
                 <button
-                  key={n}
-                  onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                  className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${n === currentPage
-                    ? 'bg-secondary text-white'
-                    : 'border border-main/15 text-main/50 hover:border-main/40 hover:text-main'
-                    }`}
+                  onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                  disabled={!hasPreviousPage}
+                  className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  aria-label="Previous page"
                 >
-                  {n}
+                  <CaretLeftIcon size={14} weight="bold" />
                 </button>
-              ))}
 
-              <button
-                onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                disabled={!hasNextPage}
-                className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                aria-label="Next page"
-              >
-                <CaretRightIcon size={14} weight="bold" />
-              </button>
-            </div>
-          )}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                  <button
+                    key={n}
+                    onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                    className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${n === currentPage
+                      ? 'bg-secondary text-white'
+                      : 'border border-main/15 text-main/50 hover:border-main/40 hover:text-main'
+                      }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                  disabled={!hasNextPage}
+                  className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  aria-label="Next page"
+                >
+                  <CaretRightIcon size={14} weight="bold" />
+                </button>
+              </div>
+            )}
+          </div>
         )}
 
       </div>
