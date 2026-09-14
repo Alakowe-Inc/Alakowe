@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
 import { PlusCircle, Pencil, BookOpen, TrendingUp, ShoppingBag, Wallet, Share2, Check, Tag, ThumbsDown, MapPin } from 'lucide-react'
-import { useState } from 'react'
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
+import { useState, useMemo } from 'react'
 import { useMyListings, useMyListingSummary, useSetDiscount } from '../../lib/api/listings/listings.hooks'
 import { useSellerStoreProfile } from '../../lib/api/store/store.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import { formatPrice } from '../../lib/utils'
+import type { MyListingsFilterParams } from '../../lib/api/listings/listings.api'
 
 function StatCard({ icon: Icon, label, value, sub }: {
   icon: React.ElementType; label: string; value: string | number; sub?: string
@@ -22,13 +24,26 @@ function StatCard({ icon: Icon, label, value, sub }: {
 }
 
 export default function MyListings() {
-  const { data: pagedResult } = useMyListings()
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 25
+
+  const filterParams = useMemo<MyListingsFilterParams>(() => ({
+    PageNumber: page,
+    PageSize: PAGE_SIZE,
+  }), [page])
+
+  const { data: pagedResult } = useMyListings(filterParams)
   const { data: summary } = useMyListingSummary()
   const { data: storeProfile } = useSellerStoreProfile()
   const listings = pagedResult?.result ?? []
   const [copied, setCopied] = useState(false)
   const [discountId, setDiscountId] = useState<number | null>(null)
   const setDiscount = useSetDiscount()
+
+  const currentPage = pagedResult?.pageNumber ?? page
+  const totalPages = pagedResult?.totalPages ?? 1
+  const hasPreviousPage = pagedResult?.hasPreviousPage ?? false
+  const hasNextPage = pagedResult?.hasNextPage ?? false
 
   const storeSlug = storeProfile?.storeSlug ?? ''
   const storeUrl = storeSlug
@@ -204,6 +219,42 @@ export default function MyListings() {
                 </div>
               </div>
             ))}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8 pt-6 border-t border-main/10">
+                <button
+                  onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                  disabled={!hasPreviousPage}
+                  className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  aria-label="Previous page"
+                >
+                  <CaretLeftIcon size={14} weight="bold" />
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                  <button
+                    key={n}
+                    onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                    className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${n === currentPage
+                      ? 'bg-secondary text-white'
+                      : 'border border-main/15 text-main/50 hover:border-main/40 hover:text-main'
+                      }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                  disabled={!hasNextPage}
+                  className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  aria-label="Next page"
+                >
+                  <CaretRightIcon size={14} weight="bold" />
+                </button>
+              </div>
+            )}
           </div>
         )}
 
