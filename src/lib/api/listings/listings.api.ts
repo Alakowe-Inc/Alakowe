@@ -23,6 +23,7 @@ export interface ListingFilterParams {
   Author?: string
   Sort?: string
   Status?: ListingStatus
+  Condition?: string
   PageNumber?: number
   PageSize?: number
 }
@@ -31,6 +32,7 @@ export interface MyListingsFilterParams {
   Title?: string
   Status?: ListingStatus
   IsPublished?: boolean
+  Condition?: string
   PageNumber?: number
   PageSize?: number
 }
