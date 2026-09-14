@@ -6,7 +6,7 @@ import { cartItemToDisplay, type CartItemDisplay } from "../lib/api/adapters"
 interface CartContextValue {
   items: CartItemDisplay[]
   count: number
-  addToCart: (bookId: string | number) => void
+  addToCart: (bookId: string | number, quantity?: number) => void
   removeFromCart: (listingId: number) => void
   clearCart: () => void
 }
@@ -21,9 +21,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const items: CartItemDisplay[] = cart ? (cart.items ?? []).map(cartItemToDisplay) : []
   const count = items.reduce((s, i) => s + i.quantity, 0)
 
-  function addToCart(bookId: string | number) {
+  function addToCart(bookId: string | number, quantity: number = 1) {
     const listingId = typeof bookId === "number" ? bookId : (parseInt(bookId.replace(/\D/g, ""), 10) || 1)
-    addMutation.mutate({ listingId, quantity: 1 })
+    addMutation.mutate({ listingId, quantity })
   }
 
   function removeFromCart(listingId: number) {
