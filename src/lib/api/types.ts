@@ -291,6 +291,9 @@ export interface CheckoutSessionResponse {
   deliveryEmail?: string | null
   expiresAt?: string
   isExpired?: boolean
+  voucherCode?: string | null
+  voucherDiscountPercent?: number | null
+  voucherDiscountAmount?: number
   sellerGroups?: SellerGroupResponse[] | null
 }
 
@@ -403,7 +406,20 @@ export interface CheckoutStartRequest {
   deliveryFullName?: string | null
   deliveryPhoneNumber?: string | null
   deliveryEmail?: string | null
+  voucherCode?: string | null
   sellerFulfillments: SellerFulfillmentChoice[]
+}
+
+export interface ApplyVoucherRequest {
+  voucherCode: string
+}
+
+export interface ApplyVoucherResponse {
+  voucherCode?: string | null
+  discountPercent?: number
+  discountAmount?: number
+  amountCap?: number | null
+  message?: string | null
 }
 
 export interface MyListingSummaryResponse {

@@ -97,7 +97,8 @@ function CheckoutSummary() {
   if (!session) return null
 
   const deliveryFee = (session.deliveryFee ?? 0) / 100
-  const subtotal = ((session.totalAmount ?? 0) / 100) - deliveryFee
+  const voucherDiscount = (session.voucherDiscountAmount ?? 0) / 100
+  const subtotal = ((session.totalAmount ?? 0) / 100) - deliveryFee + voucherDiscount
   const total = (session.totalAmount ?? 0) / 100
 
   const sellerGroups = session.sellerGroups ?? []
@@ -294,6 +295,16 @@ function CheckoutSummary() {
                     {formatPrice(subtotal)}
                   </span>
                 </div>
+                {voucherDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-600">
+                      Voucher {session.voucherCode ? `(${session.voucherCode})` : ''} discount
+                    </span>
+                    <span className="font-medium text-green-600">
+                      −{formatPrice(voucherDiscount)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-main/55">
                     {fulfillmentMode === 'pickup' ? 'Pickup' : 'Delivery'}

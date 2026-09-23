@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin } from 'lucide-react'
 import { useCart } from '../../../context/CartContext'
 import { useCheckout } from '../../../context/CheckoutContext'
 import { useStartCheckout } from '../../../lib/api/checkout/checkout.hooks'
+import { useValidateVoucher } from '../../../lib/api/voucher/voucher.hooks'
 import { useValidateCart } from '../../../lib/api/cart/cart.hooks'
 import {
   useCreateShippingAddress,
@@ -108,6 +109,7 @@ function ShippingDetails() {
 
   const { data: savedAddresses } = useShippingAddresses()
   const createShippingAddress = useCreateShippingAddress({ skipSuccessToast: true })
+  const validateVoucher = useValidateVoucher()
   const statesQuery = useStates()
   const areasQuery = useAreasByState(
     typeof checkout.newStateId === 'number' ? checkout.newStateId : undefined
@@ -123,6 +125,10 @@ function ShippingDetails() {
   const [validationDone, setValidationDone] = useState(false)
   const [validationAttempt, setValidationAttempt] = useState(0)
   const [sellerChoices, setSellerChoices] = useState<Record<string, SellerChoice>>({})
+  const [voucherCode, setVoucherCode] = useState('')
+  const [voucherMessage, setVoucherMessage] = useState<string | null>(null)
+  const [voucherError, setVoucherError] = useState<string | null>(null)
+  const [voucherDiscountNaira, setVoucherDiscountNaira] = useState(0)
 
   const itemSignature = useMemo(
     () => items.map((i) => `${i.listingId}:${i.quantity}`).sort().join('|'),
@@ -319,6 +325,29 @@ function ShippingDetails() {
     }
   }
 
+  async function handleApplyVoucher() {
+    const code = voucherCode.trim()
+    if (!code) {
+      setVoucherError('Enter a voucher code.')
+      setVoucherMessage(null)
+      setVoucherDiscountNaira(0)
+      return
+    }
+    setVoucherError(null)
+    setVoucherMessage(null)
+    try {
+      const result = await validateVoucher.mutateAsync({
+        voucherCode: code,
+        cartSubtotal: Math.round(subtotal * 100),
+      })
+      setVoucherDiscountNaira(Math.round((result?.discountAmount ?? 0) / 100))
+      setVoucherMessage(result?.message ?? 'Voucher applied.')
+    } catch {
+      setVoucherError('Invalid or expired voucher code.')
+      setVoucherDiscountNaira(0)
+    }
+  }
+
   async function handleProceed() {
     const errs = validate()
     if (Object.keys(errs).length > 0) {
@@ -404,6 +433,7 @@ function ShippingDetails() {
         deliveryFullName: checkout.contactForm.fullName || null,
         deliveryPhoneNumber: checkout.contactForm.phone || null,
         deliveryEmail: checkout.contactForm.email || null,
+        voucherCode: voucherCode.trim() ? voucherCode.trim().toUpperCase() : null,
         sellerFulfillments,
       })
 
@@ -755,12 +785,52 @@ function ShippingDetails() {
               </div>
 
               <div className="border-t border-third pt-4 flex flex-col gap-2.5 mb-6">
+                <div>
+                  <label className="text-xs font-semibold text-main/50 uppercase tracking-wider mb-1.5 block">
+                    Voucher code (optional)
+                  </label>
+                  <div className="flex gap-2">
+                    <FormControl
+                      type="text"
+                      placeholder="e.g. WELCOME10"
+                      value={voucherCode}
+                      onChange={(e) => {
+                        setVoucherCode(e.target.value.toUpperCase())
+                        setVoucherError(null)
+                      }}
+                      style={inputClass(false)}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyVoucher}
+                      disabled={validateVoucher.isPending}
+                      className="shrink-0 rounded-xl bg-main px-4 text-sm font-semibold text-white hover:bg-main/90 transition-colors disabled:opacity-60"
+                    >
+                      {validateVoucher.isPending ? 'Checking…' : 'Apply'}
+                    </button>
+                  </div>
+                  {voucherMessage && (
+                    <p className="text-xs text-green-600 mt-1.5">{voucherMessage}</p>
+                  )}
+                  {voucherError && (
+                    <p className="text-xs text-red-500 mt-1.5">{voucherError}</p>
+                  )}
+                </div>
+
                 <div className="flex justify-between text-sm">
                   <span className="text-main/55">Subtotal</span>
                   <span className="font-medium text-main">
                     ₦{subtotal.toLocaleString()}
                   </span>
                 </div>
+                {voucherDiscountNaira > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-600">Voucher discount</span>
+                    <span className="font-medium text-green-600">
+                      −₦{voucherDiscountNaira.toLocaleString()}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between text-base font-bold mt-1">
                   <span className="text-main">Estimated Total</span>
                   <span className="text-main">₦{subtotal.toLocaleString()}</span>
