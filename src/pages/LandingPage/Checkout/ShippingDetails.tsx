@@ -833,7 +833,7 @@ function ShippingDetails() {
                 )}
                 <div className="flex justify-between text-base font-bold mt-1">
                   <span className="text-main">Estimated Total</span>
-                  <span className="text-main">₦{subtotal.toLocaleString()}</span>
+                  <span className="text-main">₦{(subtotal - voucherDiscountNaira).toLocaleString()}</span>
                 </div>
               </div>
 
