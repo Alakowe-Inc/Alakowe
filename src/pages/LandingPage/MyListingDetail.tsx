@@ -16,7 +16,7 @@ import {
   ImageIcon,
   MapPin,
 } from 'lucide-react'
-import { useMyListing, useSetDiscount } from '../../lib/api/listings/listings.hooks'
+import { useMyListing, useSetDiscount, usePublishListing, useUnpublishListing } from '../../lib/api/listings/listings.hooks'
 import { listingToBookDisplay } from '../../lib/api/adapters'
 import { formatPrice } from '../../lib/utils'
 import { FormControl } from '@/components/ui/form-controls'
@@ -47,6 +47,8 @@ export default function MyListingDetail() {
   const { id } = useParams<{ id: string }>()
   const { data: listing, isLoading } = useMyListing(Number(id))
   const setDiscount = useSetDiscount()
+  const publish = usePublishListing()
+  const unpublish = useUnpublishListing()
   const [selectedImage, setSelectedImage] = useState(0)
   const [discountInput, setDiscountInput] = useState('')
   const [discountInitialized, setDiscountInitialized] = useState(false)
@@ -327,7 +329,7 @@ export default function MyListingDetail() {
               </div>
             )}
 
-            {/* Quick actions */}
+                {/* Quick actions */}
             <div className="bg-white rounded-2xl border border-third p-6">
               <h3 className="font-heading font-bold text-main text-sm mb-3">Actions</h3>
               <div className="flex flex-col gap-2">
@@ -337,7 +339,25 @@ export default function MyListingDetail() {
                 >
                   <Pencil size={15} /> Edit Listing
                 </Link>
-                {listing.isPublished && (
+                {listing.status === 'Published' && (
+                  <button
+                    onClick={() => unpublish.mutateAsync(listing.id!)}
+                    disabled={unpublish.isPending}
+                    className="flex items-center gap-2 border border-red-200 text-red-600 font-semibold text-sm px-4 py-3 rounded-xl hover:bg-red-50 transition-colors justify-center disabled:opacity-50"
+                  >
+                    <Package size={15} /> Unpublish
+                  </button>
+                )}
+                {listing.status === 'Unpublished' && (
+                  <button
+                    onClick={() => publish.mutateAsync(listing.id!)}
+                    disabled={publish.isPending}
+                    className="flex items-center gap-2 border border-green-200 text-green-600 font-semibold text-sm px-4 py-3 rounded-xl hover:bg-green-50 transition-colors justify-center disabled:opacity-50"
+                  >
+                    <CheckCircle size={15} /> Publish
+                  </button>
+                )}
+                {listing.isPublished && listing.status !== 'Unpublished' && (
                   <Link
                     to={`/books/${listing.id}`}
                     className="flex items-center gap-2 border border-main/15 text-main font-semibold text-sm px-4 py-3 rounded-xl hover:border-secondary hover:text-secondary transition-colors justify-center"

@@ -11,6 +11,8 @@ import {
   getMyListingSummaryApi,
   getLandingPageApi,
   getCategoriesApi,
+  publishListingApi,
+  unpublishListingApi,
   type ListingFilterParams,
   type MyListingsFilterParams,
 } from "./listings.api"
@@ -132,6 +134,30 @@ export function useSetDiscount() {
   return useMutation({
     mutationFn: ({ id, body }: { id: number; body: SetListingDiscountRequest }) =>
       withMock(mockListing, () => setDiscountApi(id, body)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-listings"] })
+      queryClient.invalidateQueries({ queryKey: ["my-listing"] })
+    },
+  })
+}
+
+export function usePublishListing() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) =>
+      withMock(true, () => publishListingApi(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-listings"] })
+      queryClient.invalidateQueries({ queryKey: ["my-listing"] })
+    },
+  })
+}
+
+export function useUnpublishListing() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) =>
+      withMock(true, () => unpublishListingApi(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-listings"] })
       queryClient.invalidateQueries({ queryKey: ["my-listing"] })
