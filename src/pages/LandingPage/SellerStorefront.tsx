@@ -1,27 +1,27 @@
 import { useState, useMemo } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { MapPin, ShoppingBag, User, Truck, Calendar } from 'lucide-react'
-import { useListings } from '../../lib/api/listings/listings.hooks'
-import { usePublicStoreBySlug } from '../../lib/api/store/store.hooks'
+import { useParams } from 'react-router-dom'
+import { MapPin, ShoppingBag, Truck, Calendar } from 'lucide-react'
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
+import { usePublicStoreBySlug, useStoreListings } from '../../lib/api/store/store.hooks'
 import { getPublicSellerDisplayName, listingToBookDisplay } from '../../lib/api/adapters'
 import BookCard from '../../components/BookCard'
+
+const PAGE_SIZE = 20
 
 export default function SellerStorefront() {
   const { slug } = useParams<{ slug: string }>()
   const storeSlug = slug ? decodeURIComponent(slug) : ''
 
   const [activeTab, setActiveTab] = useState<'bookstore' | 'about'>('bookstore')
+  const [page, setPage] = useState(1)
 
-  const { data: pagedResult, isLoading } = useListings()
   const { data: store, isLoading: isStoreLoading } = usePublicStoreBySlug(storeSlug)
+  const { data: pagedResult, isLoading } = useStoreListings(storeSlug, page, PAGE_SIZE)
 
-  const sellerEmail = store?.sellerEmail?.toLowerCase() ?? ''
   const listings = useMemo(() => {
-    if (!pagedResult?.result || !sellerEmail) return []
-    return pagedResult.result
-      .filter((l) => l.createdBy?.toLowerCase() === sellerEmail)
-      .map(listingToBookDisplay)
-  }, [pagedResult, sellerEmail])
+    if (!pagedResult?.result) return []
+    return pagedResult.result.map(listingToBookDisplay)
+  }, [pagedResult])
 
   const displayName = getPublicSellerDisplayName({
     storeSlug: store?.storeSlug,
@@ -35,6 +35,12 @@ export default function SellerStorefront() {
   const memberSince = store?.memberSince
     ? new Date(store.memberSince).toLocaleDateString('en-NG', { month: 'long', year: 'numeric' })
     : ''
+
+  const currentPage = pagedResult?.pageNumber ?? page
+  const totalPages = pagedResult?.totalPages ?? 1
+  const totalCount = pagedResult?.totalCount ?? 0
+  const hasPreviousPage = pagedResult?.hasPreviousPage ?? false
+  const hasNextPage = pagedResult?.hasNextPage ?? false
 
   if (!storeSlug) {
     return (
@@ -62,28 +68,22 @@ export default function SellerStorefront() {
               {displayName}'s Bookstore
             </h1>
             <p className="text-xs sm:text-sm text-main/55 mt-1">
-              {listings.length} active listings
+              {totalCount} active listing{totalCount !== 1 ? 's' : ''}
             </p>
           </div>
 
           {/* Decorative Shelf Vector Illustration */}
           <div className="absolute right-8 bottom-0 hidden lg:block select-none opacity-45 pointer-events-none z-0">
             <svg width="220" height="100" viewBox="0 0 240 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Shelf */}
               <line x1="0" y1="100" x2="240" y2="100" stroke="#6B6FFF" strokeWidth="3" strokeLinecap="round" />
-              
-              {/* Books */}
               <rect x="150" y="20" width="16" height="80" rx="2" fill="#E8E8FF" stroke="#6B6FFF" strokeWidth="2" />
               <line x1="158" y1="30" x2="158" y2="90" stroke="#6B6FFF" strokeWidth="2" strokeDasharray="3 3" />
               <rect x="168" y="30" width="14" height="70" rx="2" fill="#F3F3FF" stroke="#6B6FFF" strokeWidth="2" />
               <rect x="184" y="25" width="18" height="75" rx="2" fill="#E8E8FF" stroke="#6B6FFF" strokeWidth="2" />
               <line x1="193" y1="35" x2="193" y2="85" stroke="#6B6FFF" strokeWidth="2" strokeDasharray="2 2" />
-
               <rect x="50" y="85" width="60" height="15" rx="2" fill="#F3F3FF" stroke="#6B6FFF" strokeWidth="2" />
               <rect x="53" y="72" width="54" height="13" rx="2" fill="#E8E8FF" stroke="#6B6FFF" strokeWidth="2" />
               <rect x="56" y="61" width="48" height="11" rx="2" fill="#F3F3FF" stroke="#6B6FFF" strokeWidth="2" />
-
-              {/* Plant */}
               <path d="M210 70 L230 70 L225 90 L215 90 Z" fill="#E8E8FF" stroke="#6B6FFF" strokeWidth="2" />
               <path d="M220 70 C220 50 205 55 205 55 C205 55 215 65 220 70 Z" fill="#F3F3FF" stroke="#6B6FFF" strokeWidth="1.5" />
               <path d="M220 70 C220 45 228 48 228 48 C228 48 225 62 220 70 Z" fill="#E8E8FF" stroke="#6B6FFF" strokeWidth="1.5" />
@@ -134,11 +134,48 @@ export default function SellerStorefront() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8">
-                {listings.map((book) => (
-                  <BookCard key={book.id} book={book} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8">
+                  {listings.map((book) => (
+                    <BookCard key={book.id} book={book} />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-10 pt-6 border-t border-main/10">
+                    <button
+                      onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                      disabled={!hasPreviousPage}
+                      className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      aria-label="Previous page"
+                    >
+                      <CaretLeftIcon size={14} weight="bold" />
+                    </button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                      <button
+                        key={n}
+                        onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                        className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${n === currentPage
+                          ? 'bg-secondary text-white'
+                          : 'border border-main/15 text-main/50 hover:border-main/40 hover:text-main'
+                          }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+
+                    <button
+                      onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                      disabled={!hasNextPage}
+                      className="w-9 h-9 rounded-full border border-main/15 flex items-center justify-center text-main/40 hover:border-main/40 hover:text-main disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      aria-label="Next page"
+                    >
+                      <CaretRightIcon size={14} weight="bold" />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         ) : (
