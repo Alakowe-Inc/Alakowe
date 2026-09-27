@@ -292,7 +292,7 @@ function CheckoutSummary() {
                 <div className="flex justify-between text-sm">
                   <span className="text-main/55">Subtotal</span>
                   <span className="font-medium text-main">
-                    {formatPrice(subtotal)}
+                    {formatPrice(subtotal - voucherDiscount)}
                   </span>
                 </div>
                 {voucherDiscount > 0 && (
