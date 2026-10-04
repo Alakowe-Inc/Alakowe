@@ -93,3 +93,13 @@ export async function getCategoriesApi(): Promise<CategoryResponse[]> {
   const { data } = await client.get("/api/v1/Category/all")
   return data as CategoryResponse[]
 }
+
+export async function publishListingApi(id: number): Promise<boolean> {
+  const { data } = await client.post(`/api/v1/Listing/publish/${id}`)
+  return data as boolean
+}
+
+export async function unpublishListingApi(id: number): Promise<boolean> {
+  const { data } = await client.post(`/api/v1/Listing/unpublish/${id}`)
+  return data as boolean
+}
