@@ -1,3 +1,5 @@
+import { upload } from '@imagekit/react'
+
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
 const UPLOAD_FOLDER = import.meta.env.VITE_CLOUDINARY_UPLOAD_FOLDER || 'uat/listing'
@@ -20,7 +22,7 @@ function loadImage(file: File): Promise<HTMLImageElement> {
   })
 }
 
-export async function compressImage(file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> {
+export async function compressImage(file: File, maxWidth = 1000, quality = 0.75): Promise<Blob> {
   const img = await loadImage(file)
   let { width, height } = img
   if (width > maxWidth) {
@@ -38,6 +40,38 @@ export async function compressImage(file: File, maxWidth = 1200, quality = 0.8):
       else reject(new Error('Compression failed'))
     }, 'image/jpeg', quality)
   })
+}
+
+export async function uploadToImageKit(file: Blob, fileName: string): Promise<string> {
+  if (import.meta.env.VITE_USE_MOCK === 'true') {
+    return fileName
+  }
+  const token = localStorage.getItem('token')
+  const authRes = await fetch(`${import.meta.env.VITE_API_URL || 'https://localhost:7175/'}api/v1/Upload/imagekit-auth`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (!authRes.ok) {
+    throw new Error(`ImageKit auth failed: ${await authRes.text()}`)
+  }
+  const { signature, expire, token: uploadToken, publicKey, folder } = await authRes.json()
+  const data = await upload({
+    file,
+    fileName: fileName.replace(/\.[^.]+$/, '.jpg'),
+    signature,
+    expire,
+    token: uploadToken,
+    publicKey,
+    ...(folder ? { folder } : {}),
+  })
+  return data.name as string
+}
+export async function uploadImage(file: Blob, fileName: string): Promise<string> {
+  try {
+    // return await uploadToCloudinary(file, fileName)
+    return uploadToImageKit(file, fileName)
+  } catch (err) {
+    console.warn('Cloudinary upload failed, falling back to ImageKit', err)
+  }
 }
 
 export async function uploadToCloudinary(file: Blob, fileName: string): Promise<string> {

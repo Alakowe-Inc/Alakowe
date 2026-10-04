@@ -4,7 +4,7 @@ import { ArrowLeft, Upload, CheckCircle, Package, ShieldAlert, X } from 'lucide-
 import { RadioInput, FileUpload, TextareaControl } from '@/components/ui/form-controls'
 import { useConfirmOrderDelivery, useOrder } from '../../lib/api/orders/orders.hooks'
 import { useAuth } from '../../context/AuthContext'
-import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
+import { compressImage, uploadImage, isImageTypeAllowed } from '../../lib/upload'
 import { normalizeOrderStatus } from '../../lib/orders'
 
 const ISSUE_TYPES = [
@@ -103,7 +103,7 @@ function Dispute() {
         const compressed = await Promise.all(photos.map(p => compressImage(p)))
         setUploadLabel('Uploading photos…')
         imageFileNames = await Promise.all(
-          compressed.map((blob, i) => uploadToCloudinary(blob, photos[i].name))
+          compressed.map((blob, i) => uploadImage(blob, photos[i].name))
         )
       }
 
