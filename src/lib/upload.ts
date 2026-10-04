@@ -1,3 +1,5 @@
+import { upload } from '@imagekit/react'
+
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
 const UPLOAD_FOLDER = import.meta.env.VITE_CLOUDINARY_UPLOAD_FOLDER || 'uat/listing'
@@ -51,23 +53,18 @@ export async function uploadToImageKit(file: Blob, fileName: string): Promise<st
   if (!authRes.ok) {
     throw new Error(`ImageKit auth failed: ${await authRes.text()}`)
   }
-  const auth = await authRes.json()
-  const formData = new FormData()
-  formData.append('file', file, fileName.replace(/\.[^.]+$/, '.jpg'))
-  formData.append('publicKey', auth.publicKey)
-  formData.append('signature', auth.signature)
-  formData.append('expire', String(auth.expire))
-  formData.append('token', auth.token)
-  if (auth.folder) formData.append('folder', auth.folder)
-  const res = await fetch('https://upload.imagekit.io/api/v2/files/upload', { method: 'POST', body: formData })
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`ImageKit upload failed: ${text}`)
-  }
-  const data = await res.json()
-  return data.url as string
+  const { signature, expire, token: uploadToken, publicKey, folder } = await authRes.json()
+  const data = await upload({
+    file,
+    fileName: fileName.replace(/\.[^.]+$/, '.jpg'),
+    signature,
+    expire,
+    token: uploadToken,
+    publicKey,
+    ...(folder ? { folder } : {}),
+  })
+  return data.name as string
 }
-
 export async function uploadImage(file: Blob, fileName: string): Promise<string> {
   try {
     // return await uploadToCloudinary(file, fileName)
