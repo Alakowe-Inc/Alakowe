@@ -20,7 +20,7 @@ function loadImage(file: File): Promise<HTMLImageElement> {
   })
 }
 
-export async function compressImage(file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> {
+export async function compressImage(file: File, maxWidth = 1000, quality = 0.75): Promise<Blob> {
   const img = await loadImage(file)
   let { width, height } = img
   if (width > maxWidth) {
@@ -38,6 +38,43 @@ export async function compressImage(file: File, maxWidth = 1200, quality = 0.8):
       else reject(new Error('Compression failed'))
     }, 'image/jpeg', quality)
   })
+}
+
+export async function uploadToImageKit(file: Blob, fileName: string): Promise<string> {
+  if (import.meta.env.VITE_USE_MOCK === 'true') {
+    return fileName
+  }
+  const token = localStorage.getItem('token')
+  const authRes = await fetch(`${import.meta.env.VITE_API_URL || 'https://localhost:7175/'}api/v1/Upload/imagekit-auth`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (!authRes.ok) {
+    throw new Error(`ImageKit auth failed: ${await authRes.text()}`)
+  }
+  const auth = await authRes.json()
+  const formData = new FormData()
+  formData.append('file', file, fileName.replace(/\.[^.]+$/, '.jpg'))
+  formData.append('publicKey', auth.publicKey)
+  formData.append('signature', auth.signature)
+  formData.append('expire', String(auth.expire))
+  formData.append('token', auth.token)
+  if (auth.folder) formData.append('folder', auth.folder)
+  const res = await fetch('https://upload.imagekit.io/api/v2/files/upload', { method: 'POST', body: formData })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`ImageKit upload failed: ${text}`)
+  }
+  const data = await res.json()
+  return data.url as string
+}
+
+export async function uploadImage(file: Blob, fileName: string): Promise<string> {
+  try {
+    // return await uploadToCloudinary(file, fileName)
+    return uploadToImageKit(file, fileName)
+  } catch (err) {
+    console.warn('Cloudinary upload failed, falling back to ImageKit', err)
+  }
 }
 
 export async function uploadToCloudinary(file: Blob, fileName: string): Promise<string> {

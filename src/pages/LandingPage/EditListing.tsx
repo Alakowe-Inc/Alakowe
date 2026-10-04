@@ -9,7 +9,7 @@ import { useTags } from '../../lib/api/tags/tags.hooks'
 import { GENRES, CONDITIONS } from '../../data/sellerData'
 import type { BookCondition } from '../../lib/api/types'
 import { useStates, useAreasByState } from '../../lib/api/location/location.hooks'
-import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
+import { compressImage, uploadImage, isImageTypeAllowed } from '../../lib/upload'
 import {
   clearListingDraft,
   dataUrlToFile,
@@ -322,7 +322,7 @@ export default function EditListing() {
 
         setUploadProgress('Uploading images…')
         const uploadedFilenames = await Promise.all(
-          compressed.map((blob, i) => uploadToCloudinary(blob, newPhotos[i].file.name))
+          compressed.map((blob, i) => uploadImage(blob, newPhotos[i].file.name))
         )
 
         imageFileNames = [...existingImages.map(filenameFromUrl), ...uploadedFilenames]

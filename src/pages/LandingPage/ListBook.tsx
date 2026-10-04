@@ -6,7 +6,7 @@ import { useSubmitListing } from '../../lib/api/listings/listings.hooks'
 import { useSellerStoreProfile } from '../../lib/api/store/store.hooks'
 import { CONDITIONS } from '../../data/sellerData'
 import type { BookCondition } from '../../lib/api/types'
-import { compressImage, uploadToCloudinary, isImageTypeAllowed } from '../../lib/upload'
+import { compressImage, uploadImage, isImageTypeAllowed } from '../../lib/upload'
 import {
   clearListingDraft,
   dataUrlToFile,
@@ -423,7 +423,7 @@ export default function ListBook() {
       setUploadProgress('Uploading images…')
 
       const filenames = await Promise.all(
-        compressed.map((blob, i) => uploadToCloudinary(blob, photos[i].file.name))
+        compressed.map((blob, i) => uploadImage(blob, photos[i].file.name))
       )
 
       const cover = photos.findIndex(p => p.isCover)
